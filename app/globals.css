@@ -4,6 +4,15 @@
 @custom-variant dark (&:is(.dark *));
 
 :root {
+  /* Added dynamic theme variables that can be overridden by data-theme attributes */
+  --theme-primary-from: 147 51 234; /* purple-500 */
+  --theme-primary-to: 59 130 246; /* blue-500 */
+  --theme-bg-from: 15 23 42; /* slate-900 */
+  --theme-bg-via: 88 28 135; /* purple-900 */
+  --theme-bg-to: 15 23 42; /* slate-900 */
+  --theme-accent-1: 147 51 234; /* purple-500 */
+  --theme-accent-2: 59 130 246; /* blue-500 */
+
   /* Updated to ultra-modern color palette with deep purple and electric blue */
   --background: #f0f0f0; /* Light Gray */
   --foreground: #2e2e2e; /* Dark Gray */
@@ -38,6 +47,47 @@
   --sidebar-accent-foreground: #ffffff; /* White */
   --sidebar-border: #d1d5db; /* Gray */
   --sidebar-ring: rgba(0, 191, 255, 0.5); /* Electric Blue */
+}
+
+/* Added theme-specific CSS variable overrides for each color palette */
+[data-theme="emerald-teal"] {
+  --theme-primary-from: 16 185 129; /* emerald-500 */
+  --theme-primary-to: 20 184 166; /* teal-500 */
+  --theme-bg-from: 15 23 42; /* slate-900 */
+  --theme-bg-via: 6 78 59; /* emerald-900 */
+  --theme-bg-to: 15 23 42; /* slate-900 */
+  --theme-accent-1: 16 185 129; /* emerald-500 */
+  --theme-accent-2: 20 184 166; /* teal-500 */
+}
+
+[data-theme="orange-pink"] {
+  --theme-primary-from: 249 115 22; /* orange-500 */
+  --theme-primary-to: 236 72 153; /* pink-500 */
+  --theme-bg-from: 15 23 42; /* slate-900 */
+  --theme-bg-via: 154 52 18; /* orange-900 */
+  --theme-bg-to: 15 23 42; /* slate-900 */
+  --theme-accent-1: 249 115 22; /* orange-500 */
+  --theme-accent-2: 236 72 153; /* pink-500 */
+}
+
+[data-theme="cyan-violet"] {
+  --theme-primary-from: 34 211 238; /* cyan-400 */
+  --theme-primary-to: 139 92 246; /* violet-500 */
+  --theme-bg-from: 15 23 42; /* slate-900 */
+  --theme-bg-via: 30 41 59; /* slate-800 */
+  --theme-bg-to: 15 23 42; /* slate-900 */
+  --theme-accent-1: 34 211 238; /* cyan-400 */
+  --theme-accent-2: 139 92 246; /* violet-500 */
+}
+
+[data-theme="rose-indigo"] {
+  --theme-primary-from: 251 113 133; /* rose-400 */
+  --theme-primary-to: 99 102 241; /* indigo-500 */
+  --theme-bg-from: 15 23 42; /* slate-900 */
+  --theme-bg-via: 136 19 55; /* rose-900 */
+  --theme-bg-to: 15 23 42; /* slate-900 */
+  --theme-accent-1: 251 113 133; /* rose-400 */
+  --theme-accent-2: 99 102 241; /* indigo-500 */
 }
 
 .dark {
@@ -77,6 +127,15 @@
 }
 
 @theme inline {
+  /* Added dynamic theme color utilities using CSS variables */
+  --color-theme-primary: rgb(var(--theme-primary-from));
+  --color-theme-primary-to: rgb(var(--theme-primary-to));
+  --color-theme-bg-from: rgb(var(--theme-bg-from));
+  --color-theme-bg-via: rgb(var(--theme-bg-via));
+  --color-theme-bg-to: rgb(var(--theme-bg-to));
+  --color-theme-accent-1: rgb(var(--theme-accent-1));
+  --color-theme-accent-2: rgb(var(--theme-accent-2));
+
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-card: var(--card);
@@ -121,5 +180,40 @@
   }
   body {
     @apply bg-background text-foreground;
+  }
+}
+
+/* Added utility classes for dynamic theming */
+@layer utilities {
+  .theme-gradient-primary {
+    background: linear-gradient(to right, rgb(var(--theme-primary-from)), rgb(var(--theme-primary-to)));
+  }
+
+  .theme-gradient-bg {
+    background: linear-gradient(
+      to bottom right,
+      rgb(var(--theme-bg-from)),
+      rgb(var(--theme-bg-via)),
+      rgb(var(--theme-bg-to))
+    );
+  }
+
+  .theme-accent-1 {
+    background-color: rgb(var(--theme-accent-1) / 0.3);
+  }
+
+  .theme-accent-2 {
+    background-color: rgb(var(--theme-accent-2) / 0.3);
+  }
+
+  .theme-text-gradient {
+    background: linear-gradient(to right, rgb(var(--theme-primary-from)), rgb(var(--theme-primary-to)));
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+
+  .theme-border-gradient {
+    border-image: linear-gradient(to right, rgb(var(--theme-primary-from)), rgb(var(--theme-primary-to))) 1;
   }
 }

@@ -1,36 +1,59 @@
-"use client"
-import { useState } from "react"
-import { Card, CardContent } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
-import { CalendarIcon, Clock, User, Phone, Mail, Plus, Search, Sparkles, ChevronLeft, ChevronRight } from "lucide-react"
-import { Input } from "@/components/ui/input"
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
-import { Label } from "@/components/ui/label"
-import { Textarea } from "@/components/ui/textarea"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+"use client";
+import { useEffect, useState } from "react";
+import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import {
+  CalendarIcon,
+  Clock,
+  User,
+  Phone,
+  Mail,
+  Plus,
+  Search,
+  Sparkles,
+  ChevronLeft,
+  ChevronRight,
+} from "lucide-react";
+import { Input } from "@/components/ui/input";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { usePageTitle } from "@/context/PageTitleContext";
 
-type AppointmentStatus = "upcoming" | "completed" | "cancelled"
+type AppointmentStatus = "upcoming" | "completed" | "cancelled";
 
 interface Appointment {
-  id: string
-  clientName: string
-  clientEmail: string
-  clientPhone: string
-  date: string
-  time: string
-  service: string
-  status: AppointmentStatus
-  notes?: string
+  id: string;
+  clientName: string;
+  clientEmail: string;
+  clientPhone: string;
+  date: string;
+  time: string;
+  service: string;
+  status: AppointmentStatus;
+  notes?: string;
 }
 
 interface AppointmentType {
-  id: string
-  name: string
-  description: string
-  duration: number
-  price: number
-  color: string
+  id: string;
+  name: string;
+  description: string;
+  duration: number;
+  price: number;
+  color: string;
 }
 
 const mockAppointmentTypes: AppointmentType[] = [
@@ -74,7 +97,7 @@ const mockAppointmentTypes: AppointmentType[] = [
     price: 120,
     color: "from-cyan-500 to-blue-500",
   },
-]
+];
 
 const mockAppointments: Appointment[] = [
   {
@@ -138,17 +161,65 @@ const mockAppointments: Appointment[] = [
     service: "Project Planning",
     status: "upcoming",
   },
-]
+  {
+    id: "7",
+    clientName: "Jennifer White",
+    clientEmail: "jennifer@example.com",
+    clientPhone: "+1 (555) 555-5555",
+    date: "2024-01-15",
+    time: "4:00 PM",
+    service: "Follow-up Meeting",
+    status: "upcoming",
+  },
+  {
+    id: "8",
+    clientName: "Mark Taylor",
+    clientEmail: "mark@example.com",
+    clientPhone: "+1 (555) 666-7777",
+    date: "2024-01-15",
+    time: "5:30 PM",
+    service: "Business Consultation",
+    status: "upcoming",
+  },
+  {
+    id: "9",
+    clientName: "Amanda Green",
+    clientEmail: "amanda@example.com",
+    clientPhone: "+1 (555) 888-9999",
+    date: "2024-01-16",
+    time: "10:30 AM",
+    service: "Strategy Session",
+    status: "upcoming",
+  },
+  {
+    id: "10",
+    clientName: "Chris Miller",
+    clientEmail: "chris@example.com",
+    clientPhone: "+1 (555) 000-1111",
+    date: "2024-01-16",
+    time: "2:00 PM",
+    service: "Project Review",
+    status: "upcoming",
+  },
+];
 
 export default function DashboardPage() {
-  const [appointments, setAppointments] = useState<Appointment[]>(mockAppointments)
-  const [searchTerm, setSearchTerm] = useState("")
-  const [statusFilter, setStatusFilter] = useState<AppointmentStatus | "all">("all")
-  const [currentDate, setCurrentDate] = useState(new Date())
-  const [selectedAppointment, setSelectedAppointment] = useState<Appointment | null>(null)
-  const [isModalOpen, setIsModalOpen] = useState(false)
-  const [dateInput, setDateInput] = useState("")
-  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false)
+  const [appointments, setAppointments] =
+    useState<Appointment[]>(mockAppointments);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [statusFilter, setStatusFilter] = useState<AppointmentStatus | "all">(
+    "all"
+  );
+  const [currentDate, setCurrentDate] = useState(new Date());
+  const [selectedAppointment, setSelectedAppointment] =
+    useState<Appointment | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isViewModalOpen, setIsViewModalOpen] = useState(false);
+  const [isEditMode, setIsEditMode] = useState(false);
+  const [editingAppointment, setEditingAppointment] =
+    useState<Appointment | null>(null);
+  const [dateInput, setDateInput] = useState("");
+  const [calendarView, setCalendarView] = useState<"week" | "month">("week");
   const [newAppointment, setNewAppointment] = useState({
     clientName: "",
     clientEmail: "",
@@ -157,72 +228,113 @@ export default function DashboardPage() {
     time: "",
     appointmentTypeId: "",
     notes: "",
-  })
+  });
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
 
   const filteredAppointments = appointments.filter((appointment) => {
     const matchesSearch =
       appointment.clientName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      appointment.service.toLowerCase().includes(searchTerm.toLowerCase())
-    const matchesStatus = statusFilter === "all" || appointment.status === statusFilter
-    return matchesSearch && matchesStatus
-  })
+      appointment.service.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesStatus =
+      statusFilter === "all" || appointment.status === statusFilter;
+    return matchesSearch && matchesStatus;
+  });
+
+  const { setPageTitle } = usePageTitle();
+  useEffect(() => {
+    setPageTitle("Dashboard");
+  }, [setPageTitle]);
 
   const getStatusColor = (status: AppointmentStatus) => {
     switch (status) {
       case "upcoming":
-        return "bg-gradient-to-r from-primary to-accent text-white"
+        return "bg-gradient-to-r from-primary to-accent text-white";
       case "completed":
-        return "bg-gradient-to-r from-green-500 to-emerald-500 text-white"
+        return "bg-gradient-to-r from-green-500 to-emerald-500 text-white";
       case "cancelled":
-        return "bg-gradient-to-r from-red-500 to-rose-500 text-white"
+        return "bg-gradient-to-r from-red-500 to-rose-500 text-white";
       default:
-        return "bg-muted text-muted-foreground"
+        return "bg-muted text-muted-foreground";
     }
-  }
+  };
 
   const getWeekDates = (date: Date) => {
-    const week = []
-    const startOfWeek = new Date(date)
-    const day = startOfWeek.getDay()
-    startOfWeek.setDate(date.getDate() - day)
+    const week = [];
+    const startOfWeek = new Date(date);
+    const day = startOfWeek.getDay();
+    startOfWeek.setDate(date.getDate() - day);
 
     for (let i = 0; i < 7; i++) {
-      const weekDate = new Date(startOfWeek)
-      weekDate.setDate(startOfWeek.getDate() + i)
-      week.push(weekDate)
+      const weekDate = new Date(startOfWeek);
+      weekDate.setDate(startOfWeek.getDate() + i);
+      week.push(weekDate);
     }
-    return week
-  }
+    return week;
+  };
+
+  const getMonthDates = (date: Date) => {
+    const year = date.getFullYear();
+    const month = date.getMonth();
+    const firstDay = new Date(year, month, 1);
+    const lastDay = new Date(year, month + 1, 0);
+    const startDate = new Date(firstDay);
+    const endDate = new Date(lastDay);
+
+    startDate.setDate(firstDay.getDate() - firstDay.getDay());
+
+    endDate.setDate(lastDay.getDate() + (6 - lastDay.getDay()));
+
+    const dates = [];
+    const currentDate = new Date(startDate);
+
+    while (currentDate <= endDate) {
+      dates.push(new Date(currentDate));
+      currentDate.setDate(currentDate.getDate() + 1);
+    }
+
+    return dates;
+  };
 
   const getAppointmentsForDate = (date: Date) => {
-    const dateString = date.toISOString().split("T")[0]
-    return appointments.filter((apt) => apt.date === dateString)
-  }
+    const dateString = date.toISOString().split("T")[0];
+    return appointments.filter((apt) => apt.date === dateString);
+  };
 
   const navigateWeek = (direction: "prev" | "next") => {
     setCurrentDate((prev) => {
-      const newDate = new Date(prev)
+      const newDate = new Date(prev);
       if (direction === "prev") {
-        newDate.setDate(prev.getDate() - 7)
+        newDate.setDate(prev.getDate() - 7);
       } else {
-        newDate.setDate(prev.getDate() + 7)
+        newDate.setDate(prev.getDate() + 7);
       }
-      return newDate
-    })
-  }
+      return newDate;
+    });
+  };
+
+  const navigateMonth = (direction: "prev" | "next") => {
+    setCurrentDate((prev) => {
+      const newDate = new Date(prev);
+      if (direction === "prev") {
+        newDate.setMonth(prev.getMonth() - 1);
+      } else {
+        newDate.setMonth(prev.getMonth() + 1);
+      }
+      return newDate;
+    });
+  };
 
   const navigateToDate = () => {
     if (dateInput) {
-      const newDate = new Date(dateInput)
+      const newDate = new Date(dateInput);
       if (!isNaN(newDate.getTime())) {
-        setCurrentDate(newDate)
-        setDateInput("")
+        setCurrentDate(newDate);
+        setDateInput("");
       }
     }
-  }
+  };
 
   const renderCalendar = () => {
-    const weekDates = getWeekDates(currentDate)
     const monthNames = [
       "January",
       "February",
@@ -236,101 +348,321 @@ export default function DashboardPage() {
       "October",
       "November",
       "December",
-    ]
+    ];
 
-    return (
-      <Card className="border-2 shadow-2xl bg-card/70 backdrop-blur-lg border-primary/20 mb-8">
-        <CardContent className="p-6">
-          <div className="flex items-center justify-between mb-6">
-            <h2 className="text-2xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
-              Week of {monthNames[weekDates[0].getMonth()]} {weekDates[0].getDate()}, {weekDates[0].getFullYear()}
-            </h2>
-            <div className="flex gap-2 items-center">
-              <div className="flex gap-2">
-                <Input
-                  type="date"
-                  value={dateInput}
-                  onChange={(e) => setDateInput(e.target.value)}
-                  className="h-10 text-sm border-2 focus:border-primary transition-all duration-300 bg-input/80 backdrop-blur-sm rounded-xl"
-                  placeholder="YYYY-MM-DD"
-                />
-                <Button variant="outline" size="sm" onClick={navigateToDate} className="rounded-xl bg-transparent">
-                  Go
+    if (calendarView === "week") {
+      const weekDates = getWeekDates(currentDate);
+
+      return (
+        <Card className="border-2 shadow-2xl bg-card/70 backdrop-blur-lg border-primary/20 mb-8">
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-2xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
+                Week of {monthNames[weekDates[0].getMonth()]}{" "}
+                {weekDates[0].getDate()}, {weekDates[0].getFullYear()}
+              </h2>
+              <div className="flex gap-2 items-center">
+                <div className="flex gap-2">
+                  <Button
+                    variant={calendarView === "week" ? "default" : "outline"}
+                    size="sm"
+                    onClick={() => setCalendarView("week")}
+                    className="rounded-xl"
+                  >
+                    Week
+                  </Button>
+                  <Button
+                    variant={"default"}
+                    size="sm"
+                    onClick={() => setCalendarView("month")}
+                    className="rounded-xl"
+                  >
+                    Month
+                  </Button>
+                </div>
+                <div className="flex gap-2">
+                  <Input
+                    type="date"
+                    value={dateInput}
+                    onChange={(e) => setDateInput(e.target.value)}
+                    className="h-10 text-sm border-2 focus:border-primary transition-all duration-300 bg-input/80 backdrop-blur-sm rounded-xl"
+                    placeholder="YYYY-MM-DD"
+                  />
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={navigateToDate}
+                    className="rounded-xl bg-transparent"
+                  >
+                    Go
+                  </Button>
+                </div>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => navigateWeek("prev")}
+                  className="rounded-xl bg-transparent"
+                >
+                  <ChevronLeft className="h-4 w-4" />
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => navigateWeek("next")}
+                  className="rounded-xl bg-transparent"
+                >
+                  <ChevronRight className="h-4 w-4" />
                 </Button>
               </div>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => navigateWeek("prev")}
-                className="rounded-xl bg-transparent"
-              >
-                <ChevronLeft className="h-4 w-4" />
-              </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => navigateWeek("next")}
-                className="rounded-xl bg-transparent"
-              >
-                <ChevronRight className="h-4 w-4" />
-              </Button>
             </div>
-          </div>
 
-          <div className="grid grid-cols-7 gap-4">
-            {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map((dayName, index) => {
-              const date = weekDates[index]
-              const dayAppointments = getAppointmentsForDate(date)
-              const isToday = new Date().toDateString() === date.toDateString()
+            <div className="grid grid-cols-7 gap-4">
+              {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map(
+                (dayName, index) => {
+                  const date = weekDates[index];
+                  const dayAppointments = getAppointmentsForDate(date);
+                  const isToday =
+                    new Date().toDateString() === date.toDateString();
 
-              return (
-                <div key={dayName} className="space-y-2">
-                  <div className="text-center">
-                    <div className="text-sm font-semibold text-muted-foreground">{dayName}</div>
-                    <div className={`text-lg font-bold ${isToday ? "text-primary" : "text-foreground"}`}>
+                  return (
+                    <div key={dayName} className="space-y-2">
+                      <div className="text-center">
+                        <div className="text-sm font-semibold text-muted-foreground">
+                          {dayName}
+                        </div>
+                        <div
+                          className={`text-lg font-bold ${
+                            isToday ? "text-primary" : "text-foreground"
+                          }`}
+                        >
+                          {date.getDate()}
+                        </div>
+                      </div>
+
+                      <div
+                        className={`min-h-[200px] p-3 border-2 rounded-lg bg-card/30 backdrop-blur-sm hover:bg-card/50 transition-all duration-200 ${
+                          isToday
+                            ? "ring-2 ring-primary border-primary/30"
+                            : "border-primary/10"
+                        }`}
+                      >
+                        <div className="space-y-2">
+                          {dayAppointments.map((apt) => (
+                            <div
+                              key={apt.id}
+                              onClick={() => openAppointmentModal(apt)}
+                              className={`text-xs p-2 rounded cursor-pointer hover:scale-105 transition-transform ${getStatusColor(
+                                apt.status
+                              )}`}
+                            >
+                              <div className="font-medium">{apt.time}</div>
+                              <div className="truncate">{apt.clientName}</div>
+                              <div className="truncate opacity-80">
+                                {apt.service}
+                              </div>
+                            </div>
+                          ))}
+                          {dayAppointments.length === 0 && (
+                            <div className="text-xs text-muted-foreground text-center py-4">
+                              No appointments
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  );
+                }
+              )}
+            </div>
+          </CardContent>
+        </Card>
+      );
+    } else {
+      // Monthly view
+      const monthDates = getMonthDates(currentDate);
+      const currentMonth = currentDate.getMonth();
+      const currentYear = currentDate.getFullYear();
+
+      return (
+        <Card className="border-2 shadow-2xl bg-card/70 backdrop-blur-lg border-primary/20 mb-8">
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-2xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
+                {monthNames[currentMonth]} {currentYear}
+              </h2>
+              <div className="flex gap-2 items-center">
+                <div className="flex gap-2">
+                  <Button
+                    variant={"default"}
+                    size="sm"
+                    onClick={() => setCalendarView("week")}
+                    className="rounded-xl"
+                  >
+                    Week
+                  </Button>
+                  <Button
+                    variant={calendarView === "month" ? "default" : "outline"}
+                    size="sm"
+                    onClick={() => setCalendarView("month")}
+                    className="rounded-xl"
+                  >
+                    Month
+                  </Button>
+                </div>
+                <div className="flex gap-2">
+                  <Input
+                    type="date"
+                    value={dateInput}
+                    onChange={(e) => setDateInput(e.target.value)}
+                    className="h-10 text-sm border-2 focus:border-primary transition-all duration-300 bg-input/80 backdrop-blur-sm rounded-xl"
+                    placeholder="YYYY-MM-DD"
+                  />
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={navigateToDate}
+                    className="rounded-xl bg-transparent"
+                  >
+                    Go
+                  </Button>
+                </div>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => navigateMonth("prev")}
+                  className="rounded-xl bg-transparent"
+                >
+                  <ChevronLeft className="h-4 w-4" />
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => navigateMonth("next")}
+                  className="rounded-xl bg-transparent"
+                >
+                  <ChevronRight className="h-4 w-4" />
+                </Button>
+              </div>
+            </div>
+
+            {/* Month header */}
+            <div className="grid grid-cols-7 gap-2 mb-4">
+              {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map(
+                (dayName) => (
+                  <div
+                    key={dayName}
+                    className="text-center text-sm font-semibold text-muted-foreground py-2"
+                  >
+                    {dayName}
+                  </div>
+                )
+              )}
+            </div>
+
+            {/* Month grid */}
+            <div className="grid grid-cols-7 gap-2">
+              {monthDates.map((date, index) => {
+                const dayAppointments = getAppointmentsForDate(date);
+                const isToday =
+                  new Date().toDateString() === date.toDateString();
+                const isCurrentMonth = date.getMonth() === currentMonth;
+
+                return (
+                  <div
+                    key={index}
+                    className={`min-h-[140px] p-2 border rounded-lg bg-card/30 backdrop-blur-sm hover:bg-card/50 transition-all duration-200 ${
+                      isToday
+                        ? "ring-2 ring-primary border-primary/30"
+                        : "border-primary/10"
+                    } ${!isCurrentMonth ? "opacity-40" : ""}`}
+                  >
+                    <div
+                      className={`text-sm font-semibold mb-2 ${
+                        isToday
+                          ? "text-primary"
+                          : isCurrentMonth
+                          ? "text-foreground"
+                          : "text-muted-foreground"
+                      }`}
+                    >
                       {date.getDate()}
                     </div>
-                  </div>
 
-                  <div
-                    className={`min-h-[200px] p-3 border-2 rounded-lg bg-card/30 backdrop-blur-sm hover:bg-card/50 transition-all duration-200 ${
-                      isToday ? "ring-2 ring-primary border-primary/30" : "border-primary/10"
-                    }`}
-                  >
-                    <div className="space-y-2">
+                    <div className="space-y-1">
                       {dayAppointments.map((apt) => (
                         <div
                           key={apt.id}
                           onClick={() => openAppointmentModal(apt)}
-                          className={`text-xs p-2 rounded cursor-pointer hover:scale-105 transition-transform ${getStatusColor(apt.status)}`}
+                          className={`text-xs p-1 rounded cursor-pointer hover:scale-105 transition-transform ${getStatusColor(
+                            apt.status
+                          )}`}
                         >
-                          <div className="font-medium">{apt.time}</div>
+                          <div className="font-medium truncate">{apt.time}</div>
                           <div className="truncate">{apt.clientName}</div>
-                          <div className="truncate opacity-80">{apt.service}</div>
                         </div>
                       ))}
-                      {dayAppointments.length === 0 && (
-                        <div className="text-xs text-muted-foreground text-center py-4">No appointments</div>
+                      {dayAppointments.length === 0 && isCurrentMonth && (
+                        <div className="text-xs text-muted-foreground text-center py-2 opacity-50">
+                          No appointments
+                        </div>
                       )}
                     </div>
                   </div>
-                </div>
-              )
-            })}
-          </div>
-        </CardContent>
-      </Card>
-    )
-  }
+                );
+              })}
+            </div>
+          </CardContent>
+        </Card>
+      );
+    }
+  };
 
   const openAppointmentModal = (appointment: Appointment) => {
-    setSelectedAppointment(appointment)
-    setIsModalOpen(true)
-  }
+    setSelectedAppointment(appointment);
+    setIsModalOpen(true);
+  };
+
+  const openViewModal = (appointment: Appointment) => {
+    setSelectedAppointment(appointment);
+    setIsViewModalOpen(true);
+  };
+
+  const handleEditAppointment = () => {
+    if (selectedAppointment) {
+      setEditingAppointment({ ...selectedAppointment });
+      setIsEditMode(true);
+    }
+  };
+
+  const handleSaveEdit = () => {
+    if (editingAppointment) {
+      setAppointments((prev) =>
+        prev.map((apt) =>
+          apt.id === editingAppointment.id ? editingAppointment : apt
+        )
+      );
+      setIsEditMode(false);
+      setEditingAppointment(null);
+      setIsViewModalOpen(false);
+      setSelectedAppointment(null);
+    }
+  };
+
+  const handleDeleteAppointment = () => {
+    if (selectedAppointment) {
+      setAppointments((prev) =>
+        prev.filter((apt) => apt.id !== selectedAppointment.id)
+      );
+      setIsViewModalOpen(false);
+      setSelectedAppointment(null);
+    }
+  };
 
   const handleCreateAppointment = () => {
-    const selectedType = mockAppointmentTypes.find((type) => type.id === newAppointment.appointmentTypeId)
-    if (!selectedType) return
+    const selectedType = mockAppointmentTypes.find(
+      (type) => type.id === newAppointment.appointmentTypeId
+    );
+    if (!selectedType) return;
 
     const appointment: Appointment = {
       id: Date.now().toString(),
@@ -342,10 +674,10 @@ export default function DashboardPage() {
       service: selectedType.name,
       status: "upcoming",
       notes: newAppointment.notes,
-    }
+    };
 
-    setAppointments((prev) => [...prev, appointment])
-    setIsCreateModalOpen(false)
+    setAppointments((prev) => [...prev, appointment]);
+    setIsCreateModalOpen(false);
     setNewAppointment({
       clientName: "",
       clientEmail: "",
@@ -354,15 +686,15 @@ export default function DashboardPage() {
       time: "",
       appointmentTypeId: "",
       notes: "",
-    })
-  }
+    });
+  };
 
   const stats = {
     total: appointments.length,
     upcoming: appointments.filter((a) => a.status === "upcoming").length,
     completed: appointments.filter((a) => a.status === "completed").length,
     cancelled: appointments.filter((a) => a.status === "cancelled").length,
-  }
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-primary/20 via-background to-accent/20 p-6 relative overflow-hidden">
@@ -373,70 +705,6 @@ export default function DashboardPage() {
       </div>
 
       <div className="relative z-10 max-w-7xl mx-auto space-y-8">
-        <div className="text-center space-y-6">
-          <div className="flex justify-center">
-            <div className="p-4 bg-gradient-to-br from-primary to-accent rounded-3xl shadow-2xl">
-              <Sparkles className="h-10 w-10 text-white" />
-            </div>
-          </div>
-          <h1 className="text-5xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent tracking-tight">
-            Appointment Dashboard
-          </h1>
-          <p className="text-xl text-muted-foreground font-medium">Manage and track all your appointments</p>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-          <Card className="border-2 shadow-2xl bg-card/70 backdrop-blur-lg border-primary/20">
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-muted-foreground">Total</p>
-                  <p className="text-3xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
-                    {stats.total}
-                  </p>
-                </div>
-                <CalendarIcon className="h-8 w-8 text-primary" />
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="border-2 shadow-2xl bg-card/70 backdrop-blur-lg border-primary/20">
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-muted-foreground">Upcoming</p>
-                  <p className="text-3xl font-bold text-primary">{stats.upcoming}</p>
-                </div>
-                <Clock className="h-8 w-8 text-primary" />
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="border-2 shadow-2xl bg-card/70 backdrop-blur-lg border-primary/20">
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-muted-foreground">Completed</p>
-                  <p className="text-3xl font-bold text-green-500">{stats.completed}</p>
-                </div>
-                <User className="h-8 w-8 text-green-500" />
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="border-2 shadow-2xl bg-card/70 backdrop-blur-lg border-primary/20">
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-muted-foreground">Cancelled</p>
-                  <p className="text-3xl font-bold text-red-500">{stats.cancelled}</p>
-                </div>
-                <User className="h-8 w-8 text-red-500" />
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-
         {renderCalendar()}
 
         <Card className="border-2 shadow-2xl bg-card/70 backdrop-blur-lg border-primary/20">
@@ -461,21 +729,27 @@ export default function DashboardPage() {
                     All
                   </Button>
                   <Button
-                    variant={statusFilter === "upcoming" ? "default" : "outline"}
+                    variant={
+                      statusFilter === "upcoming" ? "default" : "outline"
+                    }
                     onClick={() => setStatusFilter("upcoming")}
                     className="rounded-xl"
                   >
                     Upcoming
                   </Button>
                   <Button
-                    variant={statusFilter === "completed" ? "default" : "outline"}
+                    variant={
+                      statusFilter === "completed" ? "default" : "outline"
+                    }
                     onClick={() => setStatusFilter("completed")}
                     className="rounded-xl"
                   >
                     Completed
                   </Button>
                   <Button
-                    variant={statusFilter === "cancelled" ? "default" : "outline"}
+                    variant={
+                      statusFilter === "cancelled" ? "default" : "outline"
+                    }
                     onClick={() => setStatusFilter("cancelled")}
                     className="rounded-xl"
                   >
@@ -498,49 +772,52 @@ export default function DashboardPage() {
           {filteredAppointments.map((appointment) => (
             <Card
               key={appointment.id}
-              className="border-2 shadow-2xl bg-card/70 backdrop-blur-lg border-primary/20 hover:shadow-3xl transition-all duration-300"
+              className="border shadow-lg bg-card/70 backdrop-blur-lg border-primary/20 hover:shadow-xl transition-all duration-200"
             >
-              <CardContent className="p-6">
-                <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                  <div className="flex-1 space-y-3">
-                    <div className="flex items-center gap-3">
-                      <h3 className="text-xl font-bold text-foreground">{appointment.clientName}</h3>
-                      <Badge className={`${getStatusColor(appointment.status)} px-3 py-1 rounded-full font-semibold`}>
-                        {appointment.status.charAt(0).toUpperCase() + appointment.status.slice(1)}
+              <CardContent className="p-4">
+                <div className="flex items-center justify-between gap-4">
+                  <div className="flex items-center gap-4 flex-1 min-w-0">
+                    <div className="flex items-center gap-2">
+                      <h3 className="font-semibold text-foreground truncate">
+                        {appointment.clientName}
+                      </h3>
+                      <Badge
+                        className={`${getStatusColor(
+                          appointment.status
+                        )} px-2 py-0.5 text-xs rounded-full`}
+                      >
+                        {appointment.status.charAt(0).toUpperCase() +
+                          appointment.status.slice(1)}
                       </Badge>
                     </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-                      <div className="flex items-center gap-2 text-muted-foreground">
-                        <Mail className="h-4 w-4" />
-                        {appointment.clientEmail}
-                      </div>
-                      <div className="flex items-center gap-2 text-muted-foreground">
-                        <Phone className="h-4 w-4" />
-                        {appointment.clientPhone}
-                      </div>
-                      <div className="flex items-center gap-2 text-muted-foreground">
-                        <CalendarIcon className="h-4 w-4" />
+                    <div className="hidden md:flex items-center gap-4 text-sm text-muted-foreground">
+                      <div className="flex items-center gap-1">
+                        <CalendarIcon className="h-3 w-3" />
                         {new Date(appointment.date).toLocaleDateString()}
                       </div>
-                      <div className="flex items-center gap-2 text-muted-foreground">
-                        <Clock className="h-4 w-4" />
+                      <div className="flex items-center gap-1">
+                        <Clock className="h-3 w-3" />
                         {appointment.time}
                       </div>
-                    </div>
-
-                    <div className="space-y-2">
-                      <p className="font-semibold text-primary">{appointment.service}</p>
-                      {appointment.notes && <p className="text-sm text-muted-foreground italic">{appointment.notes}</p>}
+                      <span className="font-medium text-primary">
+                        {appointment.service}
+                      </span>
                     </div>
                   </div>
 
-                  <div className="flex gap-2">
-                    <Button variant="outline" size="sm" className="rounded-xl bg-transparent">
-                      Edit
-                    </Button>
-                    <Button variant="outline" size="sm" className="rounded-xl bg-transparent">
-                      Contact
+                  <div className="flex items-center gap-2 flex-shrink-0">
+                    <div className="md:hidden text-xs text-muted-foreground">
+                      {new Date(appointment.date).toLocaleDateString()} •{" "}
+                      {appointment.time}
+                    </div>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="rounded-lg bg-transparent px-3 py-1 text-xs"
+                      onClick={() => openViewModal(appointment)}
+                    >
+                      View
                     </Button>
                   </div>
                 </div>
@@ -553,8 +830,12 @@ export default function DashboardPage() {
           <Card className="border-2 shadow-2xl bg-card/70 backdrop-blur-lg border-primary/20">
             <CardContent className="p-12 text-center">
               <CalendarIcon className="h-16 w-16 mx-auto text-muted-foreground mb-4" />
-              <h3 className="text-xl font-semibold text-muted-foreground mb-2">No appointments found</h3>
-              <p className="text-muted-foreground">Try adjusting your search or filter criteria</p>
+              <h3 className="text-xl font-semibold text-muted-foreground mb-2">
+                No appointments found
+              </h3>
+              <p className="text-muted-foreground">
+                Try adjusting your search or filter criteria
+              </p>
             </CardContent>
           </Card>
         )}
@@ -571,9 +852,16 @@ export default function DashboardPage() {
           {selectedAppointment && (
             <div className="space-y-6">
               <div className="flex items-center justify-between">
-                <h3 className="text-xl font-bold">{selectedAppointment.clientName}</h3>
-                <Badge className={`${getStatusColor(selectedAppointment.status)} px-3 py-1 rounded-full font-semibold`}>
-                  {selectedAppointment.status.charAt(0).toUpperCase() + selectedAppointment.status.slice(1)}
+                <h3 className="text-xl font-bold">
+                  {selectedAppointment.clientName}
+                </h3>
+                <Badge
+                  className={`${getStatusColor(
+                    selectedAppointment.status
+                  )} px-3 py-1 rounded-full font-semibold`}
+                >
+                  {selectedAppointment.status.charAt(0).toUpperCase() +
+                    selectedAppointment.status.slice(1)}
                 </Badge>
               </div>
 
@@ -590,7 +878,9 @@ export default function DashboardPage() {
 
                 <div className="flex items-center gap-3">
                   <CalendarIcon className="h-5 w-5 text-primary" />
-                  <span>{new Date(selectedAppointment.date).toLocaleDateString()}</span>
+                  <span>
+                    {new Date(selectedAppointment.date).toLocaleDateString()}
+                  </span>
                 </div>
 
                 <div className="flex items-center gap-3">
@@ -607,7 +897,9 @@ export default function DashboardPage() {
               {selectedAppointment.notes && (
                 <div className="space-y-2">
                   <h4 className="font-semibold text-primary">Notes</h4>
-                  <p className="text-muted-foreground italic">{selectedAppointment.notes}</p>
+                  <p className="text-muted-foreground italic">
+                    {selectedAppointment.notes}
+                  </p>
                 </div>
               )}
 
@@ -615,10 +907,303 @@ export default function DashboardPage() {
                 <Button className="flex-1 bg-gradient-to-r from-primary to-accent hover:from-primary/90 hover:to-accent/90 rounded-xl">
                   Edit Appointment
                 </Button>
-                <Button variant="outline" className="flex-1 rounded-xl bg-transparent">
+                <Button
+                  variant="outline"
+                  className="flex-1 rounded-xl bg-transparent"
+                >
                   Contact Client
                 </Button>
               </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={isViewModalOpen} onOpenChange={setIsViewModalOpen}>
+        <DialogContent className="max-w-2xl bg-card/95 backdrop-blur-lg border-2 border-primary/20">
+          <DialogHeader>
+            <DialogTitle className="text-2xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
+              {isEditMode ? "Edit Appointment" : "Appointment Details"}
+            </DialogTitle>
+          </DialogHeader>
+
+          {selectedAppointment && (
+            <div className="space-y-6">
+              {!isEditMode ? (
+                <>
+                  <div className="flex items-center justify-between">
+                    <h3 className="text-xl font-bold">
+                      {selectedAppointment.clientName}
+                    </h3>
+                    <Badge
+                      className={`${getStatusColor(
+                        selectedAppointment.status
+                      )} px-3 py-1 rounded-full font-semibold`}
+                    >
+                      {selectedAppointment.status.charAt(0).toUpperCase() +
+                        selectedAppointment.status.slice(1)}
+                    </Badge>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="space-y-4">
+                      <div className="flex items-center gap-3">
+                        <Mail className="h-5 w-5 text-primary" />
+                        <span>{selectedAppointment.clientEmail}</span>
+                      </div>
+
+                      <div className="flex items-center gap-3">
+                        <Phone className="h-5 w-5 text-primary" />
+                        <span>{selectedAppointment.clientPhone}</span>
+                      </div>
+                    </div>
+
+                    <div className="space-y-4">
+                      <div className="flex items-center gap-3">
+                        <CalendarIcon className="h-5 w-5 text-primary" />
+                        <span>
+                          {new Date(
+                            selectedAppointment.date
+                          ).toLocaleDateString()}
+                        </span>
+                      </div>
+
+                      <div className="flex items-center gap-3">
+                        <Clock className="h-5 w-5 text-primary" />
+                        <span>{selectedAppointment.time}</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="space-y-2">
+                    <h4 className="font-semibold text-primary">Service</h4>
+                    <p className="text-lg">{selectedAppointment.service}</p>
+                  </div>
+
+                  {selectedAppointment.notes && (
+                    <div className="space-y-2">
+                      <h4 className="font-semibold text-primary">Notes</h4>
+                      <p className="text-muted-foreground bg-muted/50 p-3 rounded-lg">
+                        {selectedAppointment.notes}
+                      </p>
+                    </div>
+                  )}
+
+                  <div className="flex gap-3 pt-4">
+                    <Button
+                      onClick={handleEditAppointment}
+                      className="flex-1 bg-gradient-to-r from-primary to-accent hover:from-primary/90 hover:to-accent/90 rounded-xl"
+                    >
+                      Edit Appointment
+                    </Button>
+                    <Button
+                      variant="destructive"
+                      onClick={handleDeleteAppointment}
+                      className="flex-1 rounded-xl"
+                    >
+                      Delete Appointment
+                    </Button>
+                  </div>
+                </>
+              ) : (
+                <>
+                  {editingAppointment && (
+                    <div className="space-y-6">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div className="space-y-2">
+                          <Label
+                            htmlFor="editClientName"
+                            className="text-sm font-medium"
+                          >
+                            Client Name
+                          </Label>
+                          <Input
+                            id="editClientName"
+                            value={editingAppointment.clientName}
+                            onChange={(e) =>
+                              setEditingAppointment((prev) =>
+                                prev
+                                  ? { ...prev, clientName: e.target.value }
+                                  : null
+                              )
+                            }
+                            className="h-12 border-2 focus:border-primary transition-all duration-300 bg-input/80 backdrop-blur-sm rounded-xl"
+                          />
+                        </div>
+
+                        <div className="space-y-2">
+                          <Label
+                            htmlFor="editClientEmail"
+                            className="text-sm font-medium"
+                          >
+                            Email
+                          </Label>
+                          <Input
+                            id="editClientEmail"
+                            type="email"
+                            value={editingAppointment.clientEmail}
+                            onChange={(e) =>
+                              setEditingAppointment((prev) =>
+                                prev
+                                  ? { ...prev, clientEmail: e.target.value }
+                                  : null
+                              )
+                            }
+                            className="h-12 border-2 focus:border-primary transition-all duration-300 bg-input/80 backdrop-blur-sm rounded-xl"
+                          />
+                        </div>
+
+                        <div className="space-y-2">
+                          <Label
+                            htmlFor="editClientPhone"
+                            className="text-sm font-medium"
+                          >
+                            Phone
+                          </Label>
+                          <Input
+                            id="editClientPhone"
+                            value={editingAppointment.clientPhone}
+                            onChange={(e) =>
+                              setEditingAppointment((prev) =>
+                                prev
+                                  ? { ...prev, clientPhone: e.target.value }
+                                  : null
+                              )
+                            }
+                            className="h-12 border-2 focus:border-primary transition-all duration-300 bg-input/80 backdrop-blur-sm rounded-xl"
+                          />
+                        </div>
+
+                        <div className="space-y-2">
+                          <Label
+                            htmlFor="editService"
+                            className="text-sm font-medium"
+                          >
+                            Service
+                          </Label>
+                          <Input
+                            id="editService"
+                            value={editingAppointment.service}
+                            onChange={(e) =>
+                              setEditingAppointment((prev) =>
+                                prev
+                                  ? { ...prev, service: e.target.value }
+                                  : null
+                              )
+                            }
+                            className="h-12 border-2 focus:border-primary transition-all duration-300 bg-input/80 backdrop-blur-sm rounded-xl"
+                          />
+                        </div>
+
+                        <div className="space-y-2">
+                          <Label
+                            htmlFor="editDate"
+                            className="text-sm font-medium"
+                          >
+                            Date
+                          </Label>
+                          <Input
+                            id="editDate"
+                            type="date"
+                            value={editingAppointment.date}
+                            onChange={(e) =>
+                              setEditingAppointment((prev) =>
+                                prev ? { ...prev, date: e.target.value } : null
+                              )
+                            }
+                            className="h-12 border-2 focus:border-primary transition-all duration-300 bg-input/80 backdrop-blur-sm rounded-xl"
+                          />
+                        </div>
+
+                        <div className="space-y-2">
+                          <Label
+                            htmlFor="editTime"
+                            className="text-sm font-medium"
+                          >
+                            Time
+                          </Label>
+                          <Input
+                            id="editTime"
+                            type="time"
+                            value={editingAppointment.time}
+                            onChange={(e) =>
+                              setEditingAppointment((prev) =>
+                                prev ? { ...prev, time: e.target.value } : null
+                              )
+                            }
+                            className="h-12 border-2 focus:border-primary transition-all duration-300 bg-input/80 backdrop-blur-sm rounded-xl"
+                          />
+                        </div>
+                      </div>
+
+                      <div className="space-y-2">
+                        <Label
+                          htmlFor="editStatus"
+                          className="text-sm font-medium"
+                        >
+                          Status
+                        </Label>
+                        <Select
+                          value={editingAppointment.status}
+                          onValueChange={(value: AppointmentStatus) =>
+                            setEditingAppointment((prev) =>
+                              prev ? { ...prev, status: value } : null
+                            )
+                          }
+                        >
+                          <SelectTrigger className="h-12 border-2 focus:border-primary transition-all duration-300 bg-input/80 backdrop-blur-sm rounded-xl">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent className="bg-card/95 backdrop-blur-lg border-2 border-primary/20">
+                            <SelectItem value="upcoming">Upcoming</SelectItem>
+                            <SelectItem value="completed">Completed</SelectItem>
+                            <SelectItem value="cancelled">Cancelled</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+
+                      <div className="space-y-2">
+                        <Label
+                          htmlFor="editNotes"
+                          className="text-sm font-medium"
+                        >
+                          Notes
+                        </Label>
+                        <Textarea
+                          id="editNotes"
+                          value={editingAppointment.notes || ""}
+                          onChange={(e) =>
+                            setEditingAppointment((prev) =>
+                              prev ? { ...prev, notes: e.target.value } : null
+                            )
+                          }
+                          className="min-h-[100px] border-2 focus:border-primary transition-all duration-300 bg-input/80 backdrop-blur-sm rounded-xl resize-none"
+                          placeholder="Add any additional notes..."
+                        />
+                      </div>
+
+                      <div className="flex gap-3 pt-4">
+                        <Button
+                          variant="outline"
+                          onClick={() => {
+                            setIsEditMode(false);
+                            setEditingAppointment(null);
+                          }}
+                          className="flex-1 rounded-xl bg-transparent"
+                        >
+                          Cancel
+                        </Button>
+                        <Button
+                          onClick={handleSaveEdit}
+                          className="flex-1 bg-gradient-to-r from-primary to-accent hover:from-primary/90 hover:to-accent/90 rounded-xl"
+                        >
+                          Save Changes
+                        </Button>
+                      </div>
+                    </div>
+                  )}
+                </>
+              )}
             </div>
           )}
         </DialogContent>
@@ -641,7 +1226,12 @@ export default function DashboardPage() {
                 <Input
                   id="clientName"
                   value={newAppointment.clientName}
-                  onChange={(e) => setNewAppointment((prev) => ({ ...prev, clientName: e.target.value }))}
+                  onChange={(e) =>
+                    setNewAppointment((prev) => ({
+                      ...prev,
+                      clientName: e.target.value,
+                    }))
+                  }
                   className="h-12 border-2 focus:border-primary transition-all duration-300 bg-input/80 backdrop-blur-sm rounded-xl"
                   placeholder="Enter client name"
                 />
@@ -655,7 +1245,12 @@ export default function DashboardPage() {
                   id="clientEmail"
                   type="email"
                   value={newAppointment.clientEmail}
-                  onChange={(e) => setNewAppointment((prev) => ({ ...prev, clientEmail: e.target.value }))}
+                  onChange={(e) =>
+                    setNewAppointment((prev) => ({
+                      ...prev,
+                      clientEmail: e.target.value,
+                    }))
+                  }
                   className="h-12 border-2 focus:border-primary transition-all duration-300 bg-input/80 backdrop-blur-sm rounded-xl"
                   placeholder="client@example.com"
                 />
@@ -668,26 +1263,43 @@ export default function DashboardPage() {
                 <Input
                   id="clientPhone"
                   value={newAppointment.clientPhone}
-                  onChange={(e) => setNewAppointment((prev) => ({ ...prev, clientPhone: e.target.value }))}
+                  onChange={(e) =>
+                    setNewAppointment((prev) => ({
+                      ...prev,
+                      clientPhone: e.target.value,
+                    }))
+                  }
                   className="h-12 border-2 focus:border-primary transition-all duration-300 bg-input/80 backdrop-blur-sm rounded-xl"
                   placeholder="+1 (555) 123-4567"
                 />
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="appointmentType" className="text-sm font-medium">
+                <Label
+                  htmlFor="appointmentType"
+                  className="text-sm font-medium"
+                >
                   Appointment Type
                 </Label>
                 <Select
                   value={newAppointment.appointmentTypeId}
-                  onValueChange={(value) => setNewAppointment((prev) => ({ ...prev, appointmentTypeId: value }))}
+                  onValueChange={(value) =>
+                    setNewAppointment((prev) => ({
+                      ...prev,
+                      appointmentTypeId: value,
+                    }))
+                  }
                 >
                   <SelectTrigger className="h-12 border-2 focus:border-primary transition-all duration-300 bg-input/80 backdrop-blur-sm rounded-xl">
                     <SelectValue placeholder="Select appointment type" />
                   </SelectTrigger>
                   <SelectContent className="bg-card/95 backdrop-blur-lg border-2 border-primary/20">
                     {mockAppointmentTypes.map((type) => (
-                      <SelectItem key={type.id} value={type.id} className="focus:bg-primary/10">
+                      <SelectItem
+                        key={type.id}
+                        value={type.id}
+                        className="focus:bg-primary/10"
+                      >
                         <div className="flex flex-col">
                           <span className="font-medium">{type.name}</span>
                           <span className="text-xs text-muted-foreground">
@@ -708,7 +1320,12 @@ export default function DashboardPage() {
                   id="date"
                   type="date"
                   value={newAppointment.date}
-                  onChange={(e) => setNewAppointment((prev) => ({ ...prev, date: e.target.value }))}
+                  onChange={(e) =>
+                    setNewAppointment((prev) => ({
+                      ...prev,
+                      date: e.target.value,
+                    }))
+                  }
                   className="h-12 border-2 focus:border-primary transition-all duration-300 bg-input/80 backdrop-blur-sm rounded-xl"
                 />
               </div>
@@ -721,7 +1338,12 @@ export default function DashboardPage() {
                   id="time"
                   type="time"
                   value={newAppointment.time}
-                  onChange={(e) => setNewAppointment((prev) => ({ ...prev, time: e.target.value }))}
+                  onChange={(e) =>
+                    setNewAppointment((prev) => ({
+                      ...prev,
+                      time: e.target.value,
+                    }))
+                  }
                   className="h-12 border-2 focus:border-primary transition-all duration-300 bg-input/80 backdrop-blur-sm rounded-xl"
                 />
               </div>
@@ -734,7 +1356,12 @@ export default function DashboardPage() {
               <Textarea
                 id="notes"
                 value={newAppointment.notes}
-                onChange={(e) => setNewAppointment((prev) => ({ ...prev, notes: e.target.value }))}
+                onChange={(e) =>
+                  setNewAppointment((prev) => ({
+                    ...prev,
+                    notes: e.target.value,
+                  }))
+                }
                 className="min-h-[100px] border-2 focus:border-primary transition-all duration-300 bg-input/80 backdrop-blur-sm rounded-xl resize-none"
                 placeholder="Add any additional notes or special requirements..."
               />
@@ -743,22 +1370,30 @@ export default function DashboardPage() {
             {newAppointment.appointmentTypeId && (
               <div className="p-4 bg-primary/10 rounded-xl border border-primary/20">
                 {(() => {
-                  const selectedType = mockAppointmentTypes.find((type) => type.id === newAppointment.appointmentTypeId)
+                  const selectedType = mockAppointmentTypes.find(
+                    (type) => type.id === newAppointment.appointmentTypeId
+                  );
                   return selectedType ? (
                     <div className="space-y-2">
-                      <h4 className="font-semibold text-primary">Selected Service</h4>
+                      <h4 className="font-semibold text-primary">
+                        Selected Service
+                      </h4>
                       <div className="flex justify-between items-center">
                         <div>
                           <p className="font-medium">{selectedType.name}</p>
-                          <p className="text-sm text-muted-foreground">{selectedType.description}</p>
+                          <p className="text-sm text-muted-foreground">
+                            {selectedType.description}
+                          </p>
                         </div>
                         <div className="text-right">
                           <p className="font-semibold">${selectedType.price}</p>
-                          <p className="text-sm text-muted-foreground">{selectedType.duration} minutes</p>
+                          <p className="text-sm text-muted-foreground">
+                            {selectedType.duration} minutes
+                          </p>
                         </div>
                       </div>
                     </div>
-                  ) : null
+                  ) : null;
                 })()}
               </div>
             )}
@@ -789,5 +1424,5 @@ export default function DashboardPage() {
         </DialogContent>
       </Dialog>
     </div>
-  )
+  );
 }
