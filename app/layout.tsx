@@ -3,9 +3,7 @@ import type { Metadata } from "next";
 import { GeistSans } from "geist/font/sans";
 import { GeistMono } from "geist/font/mono";
 import "./globals.css";
-import ClientLayout from "@/components/ClientLayout";
-import { PageTitleProvider } from "@/context/PageTitleContext";
-import { RightNavProvider } from "@/context/RightNavContext";
+import ClientLayoutWrapper from "@/components/ClientLayoutWrapper";
 
 export const metadata: Metadata = {
   title: "v0 App",
@@ -30,11 +28,7 @@ html {
         `}</style>
       </head>
       <body>
-        <PageTitleProvider>
-          <RightNavProvider>
-            <ClientLayout>{children}</ClientLayout>
-          </RightNavProvider>
-        </PageTitleProvider>
+        <ClientLayoutWrapper>{children}</ClientLayoutWrapper>
       </body>
     </html>
   );

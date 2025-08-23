@@ -1,18 +1,25 @@
-"use client"
+"use client";
 
-import type React from "react"
+import type React from "react";
+import { useTranslation } from "react-i18next";
+import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Building2, User, Sparkles } from "lucide-react";
 
-import { useState } from "react"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Building2, User, Sparkles } from "lucide-react"
-
-type AccountType = "personal" | "business" | null
+type AccountType = "personal" | "business" | null;
 
 export default function RegisterPage() {
-  const [accountType, setAccountType] = useState<AccountType>(null)
+  const { t } = useTranslation();
+  const [accountType, setAccountType] = useState<AccountType>(null);
   const [formData, setFormData] = useState({
     email: "",
     password: "",
@@ -27,17 +34,17 @@ export default function RegisterPage() {
     businessPhone: "",
     businessAddress: "",
     taxId: "",
-  })
+  });
 
   const handleInputChange = (field: string, value: string) => {
-    setFormData((prev) => ({ ...prev, [field]: value }))
-  }
+    setFormData((prev) => ({ ...prev, [field]: value }));
+  };
 
   const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
+    e.preventDefault();
     // Handle form submission
-    console.log("Form submitted:", { accountType, ...formData })
-  }
+    console.log(t("Form submitted:"), { accountType, ...formData });
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-primary/20 via-background to-accent/20 flex items-center justify-center p-4 relative overflow-hidden">
@@ -55,9 +62,11 @@ export default function RegisterPage() {
             </div>
           </div>
           <h1 className="text-5xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent tracking-tight">
-            Join the Future
+            {t("Join the Future")}
           </h1>
-          <p className="text-xl text-muted-foreground font-medium">Choose your path and unlock endless possibilities</p>
+          <p className="text-xl text-muted-foreground font-medium">
+            {t("Choose your path and unlock endless possibilities")}
+          </p>
         </div>
 
         <div className="grid grid-cols-2 gap-6">
@@ -79,9 +88,9 @@ export default function RegisterPage() {
               >
                 <User className="h-7 w-7" />
               </div>
-              <h3 className="font-bold text-xl">Personal</h3>
+              <h3 className="font-bold text-xl">{t("Personal")}</h3>
               <p className="text-sm text-muted-foreground text-center leading-relaxed">
-                Perfect for individuals and creative projects
+                {t("Perfect for individuals and creative projects")}
               </p>
             </CardContent>
           </Card>
@@ -104,9 +113,9 @@ export default function RegisterPage() {
               >
                 <Building2 className="h-7 w-7" />
               </div>
-              <h3 className="font-bold text-xl">Business</h3>
+              <h3 className="font-bold text-xl">{t("Business")}</h3>
               <p className="text-sm text-muted-foreground text-center leading-relaxed">
-                Ideal for teams and organizations
+                {t("Ideal for teams and organizations")}
               </p>
             </CardContent>
           </Card>
@@ -116,22 +125,29 @@ export default function RegisterPage() {
           <Card className="border-2 shadow-2xl bg-card/70 backdrop-blur-lg border-primary/20">
             <CardHeader className="pb-8">
               <CardTitle className="text-3xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
-                {accountType === "personal" ? "Personal Details" : "Business Information"}
+                {accountType === "personal"
+                  ? t("Personal Details")
+                  : t("Business Information")}
               </CardTitle>
               <CardDescription className="text-lg text-muted-foreground">
-                Complete your {accountType} registration below
+                {t("Complete your {{accountType}} registration below", {
+                  accountType,
+                })}
               </CardDescription>
             </CardHeader>
             <CardContent>
               <form onSubmit={handleSubmit} className="space-y-6">
                 <div className="space-y-3">
-                  <Label htmlFor="email" className="text-base font-semibold text-foreground">
-                    Email Address
+                  <Label
+                    htmlFor="email"
+                    className="text-base font-semibold text-foreground"
+                  >
+                    {t("Email Address")}
                   </Label>
                   <Input
                     id="email"
                     type="email"
-                    placeholder="Enter your email address"
+                    placeholder={t("Enter your email address")}
                     className="h-14 text-base border-2 focus:border-primary transition-all duration-300 bg-input/80 backdrop-blur-sm rounded-xl"
                     value={formData.email}
                     onChange={(e) => handleInputChange("email", e.target.value)}
@@ -140,31 +156,41 @@ export default function RegisterPage() {
                 </div>
 
                 <div className="space-y-3">
-                  <Label htmlFor="password" className="text-base font-semibold text-foreground">
-                    Password
+                  <Label
+                    htmlFor="password"
+                    className="text-base font-semibold text-foreground"
+                  >
+                    {t("Password")}
                   </Label>
                   <Input
                     id="password"
                     type="password"
-                    placeholder="Create a secure password"
+                    placeholder={t("Create a secure password")}
                     className="h-14 text-base border-2 focus:border-primary transition-all duration-300 bg-input/80 backdrop-blur-sm rounded-xl"
                     value={formData.password}
-                    onChange={(e) => handleInputChange("password", e.target.value)}
+                    onChange={(e) =>
+                      handleInputChange("password", e.target.value)
+                    }
                     required
                   />
                 </div>
 
                 <div className="space-y-3">
-                  <Label htmlFor="repassword" className="text-base font-semibold text-foreground">
-                    Confirm Password
+                  <Label
+                    htmlFor="repassword"
+                    className="text-base font-semibold text-foreground"
+                  >
+                    {t("Confirm Password")}
                   </Label>
                   <Input
                     id="repassword"
                     type="password"
-                    placeholder="Confirm your password"
+                    placeholder={t("Confirm your password")}
                     className="h-14 text-base border-2 focus:border-primary transition-all duration-300 bg-input/80 backdrop-blur-sm rounded-xl"
                     value={formData.repassword}
-                    onChange={(e) => handleInputChange("repassword", e.target.value)}
+                    onChange={(e) =>
+                      handleInputChange("repassword", e.target.value)
+                    }
                     required
                   />
                 </div>
@@ -174,44 +200,59 @@ export default function RegisterPage() {
                   <>
                     <div className="grid grid-cols-2 gap-4">
                       <div className="space-y-3">
-                        <Label htmlFor="firstName" className="text-base font-semibold text-foreground">
-                          First Name
+                        <Label
+                          htmlFor="firstName"
+                          className="text-base font-semibold text-foreground"
+                        >
+                          {t("First Name")}
                         </Label>
                         <Input
                           id="firstName"
-                          placeholder="First name"
+                          placeholder={t("First name")}
                           className="h-14 text-base border-2 focus:border-primary transition-all duration-300 bg-input/80 backdrop-blur-sm rounded-xl"
                           value={formData.firstName}
-                          onChange={(e) => handleInputChange("firstName", e.target.value)}
+                          onChange={(e) =>
+                            handleInputChange("firstName", e.target.value)
+                          }
                           required
                         />
                       </div>
                       <div className="space-y-3">
-                        <Label htmlFor="lastName" className="text-base font-semibold text-foreground">
-                          Last Name
+                        <Label
+                          htmlFor="lastName"
+                          className="text-base font-semibold text-foreground"
+                        >
+                          {t("Last Name")}
                         </Label>
                         <Input
                           id="lastName"
-                          placeholder="Last name"
+                          placeholder={t("Last name")}
                           className="h-14 text-base border-2 focus:border-primary transition-all duration-300 bg-input/80 backdrop-blur-sm rounded-xl"
                           value={formData.lastName}
-                          onChange={(e) => handleInputChange("lastName", e.target.value)}
+                          onChange={(e) =>
+                            handleInputChange("lastName", e.target.value)
+                          }
                           required
                         />
                       </div>
                     </div>
 
                     <div className="space-y-3">
-                      <Label htmlFor="phone" className="text-base font-semibold text-foreground">
-                        Phone Number
+                      <Label
+                        htmlFor="phone"
+                        className="text-base font-semibold text-foreground"
+                      >
+                        {t("Phone Number")}
                       </Label>
                       <Input
                         id="phone"
                         type="tel"
-                        placeholder="Your phone number"
+                        placeholder={t("Your phone number")}
                         className="h-14 text-base border-2 focus:border-primary transition-all duration-300 bg-input/80 backdrop-blur-sm rounded-xl"
                         value={formData.phone}
-                        onChange={(e) => handleInputChange("phone", e.target.value)}
+                        onChange={(e) =>
+                          handleInputChange("phone", e.target.value)
+                        }
                       />
                     </div>
                   </>
@@ -221,73 +262,98 @@ export default function RegisterPage() {
                 {accountType === "business" && (
                   <>
                     <div className="space-y-3">
-                      <Label htmlFor="businessName" className="text-base font-semibold text-foreground">
-                        Business Name
+                      <Label
+                        htmlFor="businessName"
+                        className="text-base font-semibold text-foreground"
+                      >
+                        {t("Business Name")}
                       </Label>
                       <Input
                         id="businessName"
-                        placeholder="Your business name"
+                        placeholder={t("Your business name")}
                         className="h-14 text-base border-2 focus:border-primary transition-all duration-300 bg-input/80 backdrop-blur-sm rounded-xl"
                         value={formData.businessName}
-                        onChange={(e) => handleInputChange("businessName", e.target.value)}
+                        onChange={(e) =>
+                          handleInputChange("businessName", e.target.value)
+                        }
                         required
                       />
                     </div>
 
                     <div className="space-y-3">
-                      <Label htmlFor="businessEmail" className="text-base font-semibold text-foreground">
-                        Business Email
+                      <Label
+                        htmlFor="businessEmail"
+                        className="text-base font-semibold text-foreground"
+                      >
+                        {t("Business Email")}
                       </Label>
                       <Input
                         id="businessEmail"
                         type="email"
-                        placeholder="Business email address"
+                        placeholder={t("Business email address")}
                         className="h-14 text-base border-2 focus:border-primary transition-all duration-300 bg-input/80 backdrop-blur-sm rounded-xl"
                         value={formData.businessEmail}
-                        onChange={(e) => handleInputChange("businessEmail", e.target.value)}
+                        onChange={(e) =>
+                          handleInputChange("businessEmail", e.target.value)
+                        }
                         required
                       />
                     </div>
 
                     <div className="space-y-3">
-                      <Label htmlFor="businessPhone" className="text-base font-semibold text-foreground">
-                        Business Phone
+                      <Label
+                        htmlFor="businessPhone"
+                        className="text-base font-semibold text-foreground"
+                      >
+                        {t("Business Phone")}
                       </Label>
                       <Input
                         id="businessPhone"
                         type="tel"
-                        placeholder="Business phone number"
+                        placeholder={t("Business phone number")}
                         className="h-14 text-base border-2 focus:border-primary transition-all duration-300 bg-input/80 backdrop-blur-sm rounded-xl"
                         value={formData.businessPhone}
-                        onChange={(e) => handleInputChange("businessPhone", e.target.value)}
+                        onChange={(e) =>
+                          handleInputChange("businessPhone", e.target.value)
+                        }
                         required
                       />
                     </div>
 
                     <div className="space-y-3">
-                      <Label htmlFor="businessAddress" className="text-base font-semibold text-foreground">
-                        Business Address
+                      <Label
+                        htmlFor="businessAddress"
+                        className="text-base font-semibold text-foreground"
+                      >
+                        {t("Business Address")}
                       </Label>
                       <Input
                         id="businessAddress"
-                        placeholder="Business address"
+                        placeholder={t("Business address")}
                         className="h-14 text-base border-2 focus:border-primary transition-all duration-300 bg-input/80 backdrop-blur-sm rounded-xl"
                         value={formData.businessAddress}
-                        onChange={(e) => handleInputChange("businessAddress", e.target.value)}
+                        onChange={(e) =>
+                          handleInputChange("businessAddress", e.target.value)
+                        }
                         required
                       />
                     </div>
 
                     <div className="space-y-3">
-                      <Label htmlFor="taxId" className="text-base font-semibold text-foreground">
-                        Tax ID
+                      <Label
+                        htmlFor="taxId"
+                        className="text-base font-semibold text-foreground"
+                      >
+                        {t("Tax ID")}
                       </Label>
                       <Input
                         id="taxId"
-                        placeholder="Tax identification number"
+                        placeholder={t("Tax identification number")}
                         className="h-14 text-base border-2 focus:border-primary transition-all duration-300 bg-input/80 backdrop-blur-sm rounded-xl"
                         value={formData.taxId}
-                        onChange={(e) => handleInputChange("taxId", e.target.value)}
+                        onChange={(e) =>
+                          handleInputChange("taxId", e.target.value)
+                        }
                         required
                       />
                     </div>
@@ -298,7 +364,7 @@ export default function RegisterPage() {
                   type="submit"
                   className="w-full h-14 text-lg font-bold bg-gradient-to-r from-primary to-accent hover:from-primary/90 hover:to-accent/90 transition-all duration-300 shadow-xl hover:shadow-2xl hover:scale-105 rounded-xl"
                 >
-                  Create Your Account
+                  {t("Create Your Account")}
                 </Button>
               </form>
             </CardContent>
@@ -306,15 +372,15 @@ export default function RegisterPage() {
         )}
 
         <div className="text-center text-lg text-muted-foreground">
-          Already have an account?{" "}
+          {t("Already have an account?")}{" "}
           <a
             href="/login"
             className="text-primary hover:text-accent font-bold hover:underline transition-all duration-300"
           >
-            Sign in here
+            {t("Sign in here")}
           </a>
         </div>
       </div>
     </div>
-  )
+  );
 }

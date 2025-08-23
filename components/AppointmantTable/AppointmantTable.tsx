@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import {
   ColumnDef,
   flexRender,
@@ -51,12 +52,13 @@ export const AppointmentsTable = ({
   data,
   onOpenViewModal,
 }: AppointmentsTableProps) => {
+  const { t } = useTranslation();
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
 
   const columns: ColumnDef<Appointment>[] = [
     {
       accessorKey: "clientName",
-      header: "Client Name",
+      header: t("Client Name"),
       cell: ({ row }) => {
         const appointment = row.original;
         return (
@@ -69,8 +71,10 @@ export const AppointmentsTable = ({
                 appointment.status
               )} px-2 py-0.5 text-xs rounded-full`}
             >
-              {appointment.status.charAt(0).toUpperCase() +
-                appointment.status.slice(1)}
+              {t(
+                appointment.status.charAt(0).toUpperCase() +
+                  appointment.status.slice(1)
+              )}
             </Badge>
           </div>
         );
@@ -78,7 +82,7 @@ export const AppointmentsTable = ({
     },
     {
       accessorKey: "date",
-      header: "Date",
+      header: t("Date"),
       cell: ({ row }) => (
         <div className="flex items-center gap-1 text-sm text-muted-foreground">
           <CalendarIcon className="h-3 w-3" />
@@ -88,7 +92,7 @@ export const AppointmentsTable = ({
     },
     {
       accessorKey: "time",
-      header: "Time",
+      header: t("Time"),
       cell: ({ row }) => (
         <div className="flex items-center gap-1 text-sm text-muted-foreground">
           <Clock className="h-3 w-3" />
@@ -98,14 +102,14 @@ export const AppointmentsTable = ({
     },
     {
       accessorKey: "service",
-      header: "Service",
+      header: t("Service"),
       cell: ({ row }) => (
         <span className="font-medium text-primary">{row.original.service}</span>
       ),
     },
     {
       id: "actions",
-      header: "Actions",
+      header: t("Actions"),
       cell: ({ row }) => (
         <div className="flex items-center gap-2">
           <TooltipProvider>
@@ -121,7 +125,7 @@ export const AppointmentsTable = ({
                 </Button>
               </TooltipTrigger>
               <TooltipContent>
-                <p>View Details</p>
+                <p>{t("View Details")}</p>
               </TooltipContent>
             </Tooltip>
 
@@ -133,7 +137,7 @@ export const AppointmentsTable = ({
                 </Button>
               </TooltipTrigger>
               <TooltipContent>
-                <p>Edit</p>
+                <p>{t("Edit")}</p>
               </TooltipContent>
             </Tooltip>
 
@@ -145,7 +149,7 @@ export const AppointmentsTable = ({
                 </Button>
               </TooltipTrigger>
               <TooltipContent>
-                <p>Delete</p>
+                <p>{t("Delete")}</p>
               </TooltipContent>
             </Tooltip>
           </TooltipProvider>
@@ -200,7 +204,7 @@ export const AppointmentsTable = ({
           ) : (
             <TableRow>
               <TableCell colSpan={columns.length} className="h-24 text-center">
-                No results.
+                {t("No results.")}
               </TableCell>
             </TableRow>
           )}

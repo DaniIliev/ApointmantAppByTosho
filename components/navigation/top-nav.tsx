@@ -2,6 +2,8 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { useTranslation } from "react-i18next";
+import { usePathname, useRouter } from "next/navigation";
 import { User, Menu, X, Info, Bell, Languages } from "lucide-react";
 import { usePageTitle } from "@/context/PageTitleContext";
 
@@ -14,14 +16,19 @@ export default function TopNav({
   onToggleLeftNav,
   isLeftNavOpen,
 }: TopNavProps) {
+  const { t, i18n } = useTranslation();
   const { pageTitle } = usePageTitle();
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [isHelpOpen, setIsHelpOpen] = useState(false);
   const [isAlertsOpen, setIsAlertsOpen] = useState(false);
   const [isLanguagesOpen, setIsLanguagesOpen] = useState(false);
 
+  // Добавени са router и pathname за смяна на езика
+  const router = useRouter();
+  const pathname = usePathname();
+
   const handleSignOut = () => {
-    console.log("User signed out.");
+    console.log(t("User signed out."));
     setIsProfileOpen(false);
   };
 
@@ -35,6 +42,17 @@ export default function TopNav({
 
   const handleLanguagesClick = () => {
     setIsLanguagesOpen(!isLanguagesOpen);
+  };
+
+  // Нова функция за смяна на езика
+  const changeLanguage = (lng: string) => {
+    i18n.changeLanguage(lng);
+
+    // Актуализиране на URL адреса
+    const newPathname = pathname.replace(`/${i18n.language}`, `/${lng}`);
+    router.push(newPathname);
+
+    setIsLanguagesOpen(false);
   };
 
   return (
@@ -52,44 +70,19 @@ export default function TopNav({
             )}
           </button>
           <h1 className="text-xl font-bold bg-gradient-to-r from-purple-400 to-blue-400 bg-clip-text text-transparent">
-            AppointmentPro
+            {t("AppointmentPro")}
           </h1>
         </div>
 
         <div className="hidden md:flex flex-grow justify-center">
           {pageTitle && (
             <h2 className="text-xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent tracking-tight">
-              {pageTitle}
+              {t(pageTitle)}
             </h2>
           )}
         </div>
 
         <div className="flex items-center space-x-6">
-          {/* <Link
-            href="/login"
-            className="text-white/80 hover:text-white transition-colors duration-200 hover:bg-white/10 px-3 py-2 rounded-lg"
-          >
-            Login
-          </Link>
-          <Link
-            href="/register"
-            className="text-white/80 hover:text-white transition-colors duration-200 hover:bg-white/10 px-3 py-2 rounded-lg"
-          >
-            Register
-          </Link>
-          <Link
-            href="/about"
-            className="text-white/80 hover:text-white transition-colors duration-200 hover:bg-white/10 px-3 py-2 rounded-lg"
-          >
-            About Us
-          </Link>
-          <Link
-            href="/blog"
-            className="text-white/80 hover:text-white transition-colors duration-200 hover:bg-white/10 px-3 py-2 rounded-lg"
-          >
-            Blog
-          </Link> */}
-
           <div className="relative">
             <button
               onClick={handleAlertsClick}
@@ -99,7 +92,9 @@ export default function TopNav({
             </button>
             {isAlertsOpen && (
               <div className="absolute right-0 mt-2 w-56 bg-slate-900/90 backdrop-blur-xl border border-white/20 rounded-xl shadow-2xl p-4">
-                <p className="text-white/80">Нямате нови известия.</p>
+                <p className="text-white/80">
+                  {t("You have no new notifications.")}
+                </p>
               </div>
             )}
           </div>
@@ -113,11 +108,23 @@ export default function TopNav({
             </button>
             {isLanguagesOpen && (
               <div className="absolute right-0 mt-2 w-48 bg-slate-900/90 backdrop-blur-xl border border-white/20 rounded-xl shadow-2xl">
-                <button className="block w-full text-left px-4 py-3 text-white/80 hover:text-white hover:bg-white/10 rounded-t-xl">
-                  Български
+                <button
+                  onClick={() => changeLanguage("bg")}
+                  className="block w-full text-left px-4 py-3 text-white/80 hover:text-white hover:bg-white/10 rounded-t-xl"
+                >
+                  {t("Bulgarian")}
                 </button>
-                <button className="block w-full text-left px-4 py-3 text-white/80 hover:text-white hover:bg-white/10 rounded-b-xl">
-                  English
+                <button
+                  onClick={() => changeLanguage("en")}
+                  className="block w-full text-left px-4 py-3 text-white/80 hover:text-white hover:bg-white/10"
+                >
+                  {t("English")}
+                </button>
+                <button
+                  onClick={() => changeLanguage("de")}
+                  className="block w-full text-left px-4 py-3 text-white/80 hover:text-white hover:bg-white/10 rounded-b-xl"
+                >
+                  {t("German")}
                 </button>
               </div>
             )}
@@ -137,14 +144,14 @@ export default function TopNav({
                   onClick={() => setIsHelpOpen(false)}
                   className="block px-4 py-3 text-white/80 hover:text-white hover:bg-white/10 rounded-t-xl"
                 >
-                  Често задавани въпроси
+                  {t("FAQ")}
                 </Link>
                 <Link
                   href="/help/contact"
                   onClick={() => setIsHelpOpen(false)}
                   className="block px-4 py-3 text-white/80 hover:text-white hover:bg-white/10 rounded-b-xl"
                 >
-                  Свържете се с нас
+                  {t("Contact Us")}
                 </Link>
               </div>
             )}
@@ -165,13 +172,13 @@ export default function TopNav({
                   onClick={() => setIsProfileOpen(false)}
                   className="block px-4 py-3 text-white/80 hover:text-white hover:bg-white/10 transition-colors duration-200 rounded-t-xl"
                 >
-                  Profile Settings
+                  {t("Profile Settings")}
                 </Link>
                 <button
                   onClick={handleSignOut}
                   className="block w-full text-left px-4 py-3 text-white/80 hover:text-white hover:bg-white/10 transition-colors duration-200 rounded-b-xl"
                 >
-                  Sign Out
+                  {t("Sign Out")}
                 </button>
               </div>
             )}

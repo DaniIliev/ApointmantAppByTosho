@@ -1,28 +1,36 @@
-"use client"
+"use client";
 
-import type React from "react"
-import { useState } from "react"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { LogIn } from "lucide-react"
+import type React from "react";
+import { useState } from "react";
+import { useTranslation } from "react-i18next"; // Import useTranslation
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { LogIn } from "lucide-react";
 
 export default function LoginPage() {
+  const { t } = useTranslation(); // Initialize useTranslation
   const [formData, setFormData] = useState({
     email: "",
     password: "",
-  })
+  });
 
   const handleInputChange = (field: string, value: string) => {
-    setFormData((prev) => ({ ...prev, [field]: value }))
-  }
+    setFormData((prev) => ({ ...prev, [field]: value }));
+  };
 
   const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
+    e.preventDefault();
     // Handle form submission
-    console.log("Login submitted:", formData)
-  }
+    console.log(t("Login submitted:"), formData); // Wrap text
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-primary/20 via-background to-accent/20 flex items-center justify-center p-4 relative overflow-hidden">
@@ -40,30 +48,36 @@ export default function LoginPage() {
             </div>
           </div>
           <h1 className="text-5xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent tracking-tight">
-            Welcome Back
+            {t("Welcome Back")} {/* Wrap text */}
           </h1>
-          <p className="text-xl text-muted-foreground font-medium">Sign in to continue your journey</p>
+          <p className="text-xl text-muted-foreground font-medium">
+            {t("Sign in to continue your journey")}
+          </p>
         </div>
 
         <Card className="border-2 shadow-2xl bg-card/70 backdrop-blur-lg border-primary/20">
           <CardHeader className="pb-8">
             <CardTitle className="text-3xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
-              Sign In
+              {t("Sign In")} {/* Wrap text */}
             </CardTitle>
             <CardDescription className="text-lg text-muted-foreground">
-              Enter your credentials to access your account
+              {t("Enter your credentials to access your account")}{" "}
+              {/* Wrap text */}
             </CardDescription>
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-6">
               <div className="space-y-3">
-                <Label htmlFor="email" className="text-base font-semibold text-foreground">
-                  Email Address
+                <Label
+                  htmlFor="email"
+                  className="text-base font-semibold text-foreground"
+                >
+                  {t("Email Address")} {/* Wrap text */}
                 </Label>
                 <Input
                   id="email"
                   type="email"
-                  placeholder="Enter your email address"
+                  placeholder={t("Enter your email address")}
                   className="h-14 text-base border-2 focus:border-primary transition-all duration-300 bg-input/80 backdrop-blur-sm rounded-xl"
                   value={formData.email}
                   onChange={(e) => handleInputChange("email", e.target.value)}
@@ -72,16 +86,21 @@ export default function LoginPage() {
               </div>
 
               <div className="space-y-3">
-                <Label htmlFor="password" className="text-base font-semibold text-foreground">
-                  Password
+                <Label
+                  htmlFor="password"
+                  className="text-base font-semibold text-foreground"
+                >
+                  {t("Password")} {/* Wrap text */}
                 </Label>
                 <Input
                   id="password"
                   type="password"
-                  placeholder="Enter your password"
+                  placeholder={t("Enter your password")}
                   className="h-14 text-base border-2 focus:border-primary transition-all duration-300 bg-input/80 backdrop-blur-sm rounded-xl"
                   value={formData.password}
-                  onChange={(e) => handleInputChange("password", e.target.value)}
+                  onChange={(e) =>
+                    handleInputChange("password", e.target.value)
+                  }
                   required
                 />
               </div>
@@ -91,7 +110,7 @@ export default function LoginPage() {
                   href="/forgot-password"
                   className="text-primary hover:text-accent font-medium hover:underline transition-all duration-300"
                 >
-                  Forgot your password?
+                  {t("Forgot your password?")} {/* Wrap text */}
                 </a>
               </div>
 
@@ -99,22 +118,22 @@ export default function LoginPage() {
                 type="submit"
                 className="w-full h-14 text-lg font-bold bg-gradient-to-r from-primary to-accent hover:from-primary/90 hover:to-accent/90 transition-all duration-300 shadow-xl hover:shadow-2xl hover:scale-105 rounded-xl"
               >
-                Sign In
+                {t("Sign In")} {/* Wrap text */}
               </Button>
             </form>
           </CardContent>
         </Card>
 
         <div className="text-center text-lg text-muted-foreground">
-          Don't have an account?{" "}
+          {t("Don't have an account?")} {/* Wrap text */}
           <a
             href="/register"
             className="text-primary hover:text-accent font-bold hover:underline transition-all duration-300"
           >
-            Create one here
+            {t("Create one here")} {/* Wrap text */}
           </a>
         </div>
       </div>
     </div>
-  )
+  );
 }

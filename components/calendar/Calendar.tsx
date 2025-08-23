@@ -1,5 +1,6 @@
-'use client"';
+"use client";
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { Card, CardContent } from "../ui/card";
 import { Button } from "../ui/button";
@@ -22,6 +23,7 @@ export default function Calendar({
   getStatusColor,
   onOpenAppointmentModal,
 }: CalendarProps) {
+  const { t } = useTranslation();
   const [currentDate, setCurrentDate] = useState(new Date());
   const [calendarView, setCalendarView] = useState<"week" | "month">("week");
   const [dateInput, setDateInput] = useState("");
@@ -54,19 +56,34 @@ export default function Calendar({
     }
   };
 
+  const dayNames = [
+    t("Sun"),
+    t("Mon"),
+    t("Tue"),
+    t("Wed"),
+    t("Thu"),
+    t("Fri"),
+    t("Sat"),
+  ];
+
+  const translatedMonthNames = monthNames.map((name) => t(name));
+
   return (
     <Card className="border-2 shadow-2xl bg-card/70 backdrop-blur-lg border-primary/20 mb-8">
       <CardContent className="p-6">
         <div className="flex items-center justify-between mb-6">
           <h2 className="text-2xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
             {calendarView === "week"
-              ? `Week of ${
-                  monthNames[getWeekDates(currentDate)[0].getMonth()]
-                } ${getWeekDates(currentDate)[0].getDate()}, ${getWeekDates(
-                  currentDate
-                )[0].getFullYear()}`
+              ? t("Week of {{month}} {{day}}, {{year}}", {
+                  month:
+                    translatedMonthNames[
+                      getWeekDates(currentDate)[0].getMonth()
+                    ],
+                  day: getWeekDates(currentDate)[0].getDate(),
+                  year: getWeekDates(currentDate)[0].getFullYear(),
+                })
               : `${
-                  monthNames[currentDate.getMonth()]
+                  translatedMonthNames[currentDate.getMonth()]
                 } ${currentDate.getFullYear()}`}
           </h2>
           <div className="flex gap-2 items-center">
@@ -76,14 +93,14 @@ export default function Calendar({
                 size="sm"
                 onClick={() => setCalendarView("week")}
               >
-                Week
+                {t("Week")}
               </Button>
               <Button
                 variant={calendarView === "month" ? "default" : "outline"}
                 size="sm"
                 onClick={() => setCalendarView("month")}
               >
-                Month
+                {t("Month")}
               </Button>
             </div>
             <div className="flex gap-2">
@@ -94,7 +111,7 @@ export default function Calendar({
                 className="h-10 text-sm border-2 focus:border-primary transition-all duration-300 bg-input/80 backdrop-blur-sm rounded-xl"
               />
               <Button variant="outline" size="sm" onClick={navigateToDate}>
-                Go
+                {t("Go")}
               </Button>
             </div>
             <Button
@@ -127,15 +144,6 @@ export default function Calendar({
             {getWeekDates(currentDate).map((date, index) => {
               const dayAppointments = getAppointmentsForDate(date);
               const isToday = new Date().toDateString() === date.toDateString();
-              const dayNames = [
-                "Sun",
-                "Mon",
-                "Tue",
-                "Wed",
-                "Thu",
-                "Fri",
-                "Sat",
-              ];
               return (
                 <div key={index} className="space-y-2">
                   <div className="text-center">
@@ -176,7 +184,7 @@ export default function Calendar({
                         ))
                       ) : (
                         <div className="text-xs text-muted-foreground text-center py-4">
-                          No appointments
+                          {t("No appointments")}
                         </div>
                       )}
                     </div>
@@ -229,7 +237,7 @@ export default function Calendar({
                         ))
                       : isCurrentMonth && (
                           <div className="text-xs text-muted-foreground text-center py-2 opacity-50">
-                            No appointments
+                            {t("No appointments")}
                           </div>
                         )}
                   </div>

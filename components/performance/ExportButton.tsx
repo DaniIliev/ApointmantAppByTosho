@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslation } from "react-i18next";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -13,6 +14,7 @@ interface ExportButtonProps {
 }
 
 export function ExportButton({ onExport }: ExportButtonProps) {
+  const { t } = useTranslation();
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -23,15 +25,15 @@ export function ExportButton({ onExport }: ExportButtonProps) {
       <DropdownMenuContent className="backdrop-blur-md bg-popover/90 border-white/20">
         <DropdownMenuItem onClick={() => onExport("csv")}>
           <Table className="h-4 w-4 mr-2" />
-          Export as CSV
+          {t("Export as CSV")}
         </DropdownMenuItem>
         <DropdownMenuItem onClick={() => onExport("pdf")}>
           <FileText className="h-4 w-4 mr-2" />
-          Export as PDF
+          {t("Export as PDF")}
         </DropdownMenuItem>
         <DropdownMenuItem onClick={() => onExport("png")}>
           <ImageIcon className="h-4 w-4 mr-2" />
-          Export as Image
+          {t("Export as Image")}
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>

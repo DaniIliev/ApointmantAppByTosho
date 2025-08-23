@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Appointment } from "@/Global/Types/types";
@@ -16,6 +17,7 @@ const ViewDetails = ({
   handleDeleteAppointment,
   selectedAppointment,
 }: ViewDetailsProps) => {
+  const { t } = useTranslation();
   return (
     <>
       <div className="flex items-center justify-between">
@@ -25,8 +27,10 @@ const ViewDetails = ({
             selectedAppointment.status
           )} px-3 py-1 rounded-full font-semibold`}
         >
-          {selectedAppointment.status.charAt(0).toUpperCase() +
-            selectedAppointment.status.slice(1)}
+          {t(
+            selectedAppointment.status.charAt(0).toUpperCase() +
+              selectedAppointment.status.slice(1)
+          )}
         </Badge>
       </div>
 
@@ -59,13 +63,13 @@ const ViewDetails = ({
       </div>
 
       <div className="space-y-2">
-        <h4 className="font-semibold text-primary">Service</h4>
+        <h4 className="font-semibold text-primary">{t("Service")}</h4>
         <p className="text-lg">{selectedAppointment.service}</p>
       </div>
 
       {selectedAppointment.notes && (
         <div className="space-y-2">
-          <h4 className="font-semibold text-primary">Notes</h4>
+          <h4 className="font-semibold text-primary">{t("Notes")}</h4>
           <p className="text-muted-foreground bg-muted/50 p-3 rounded-lg">
             {selectedAppointment.notes}
           </p>
@@ -77,14 +81,14 @@ const ViewDetails = ({
           onClick={handleEditAppointment}
           className="flex-1 bg-gradient-to-r from-primary to-accent hover:from-primary/90 hover:to-accent/90 rounded-xl"
         >
-          Edit Appointment
+          {t("Edit Appointment")}
         </Button>
         <Button
           variant="destructive"
           onClick={handleDeleteAppointment}
           className="flex-1 rounded-xl"
         >
-          Delete Appointment
+          {t("Delete Appointment")}
         </Button>
       </div>
     </>

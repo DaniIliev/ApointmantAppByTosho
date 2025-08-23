@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useTranslation } from "react-i18next";
 import {
   LayoutDashboard,
   UserPlus,
@@ -10,24 +11,25 @@ import {
   TrendingUp,
 } from "lucide-react";
 
-const navItems = [
-  { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
-  { href: "/performance", label: "Performance", icon: TrendingUp },
-  {
-    href: "/appointment-types",
-    label: "Appointment Types",
-    icon: ClipboardList,
-  },
-  { href: "/register", label: "Register", icon: UserPlus },
-  { href: "/login", label: "Login", icon: LogIn },
-];
-
 interface LeftNavProps {
   isOpen: boolean;
 }
 
 export default function LeftNav({ isOpen }: LeftNavProps) {
+  const { t } = useTranslation();
   const pathname = usePathname();
+
+  const navItems = [
+    { href: "/dashboard", label: t("Dashboard"), icon: LayoutDashboard },
+    { href: "/performance", label: t("Performance"), icon: TrendingUp },
+    {
+      href: "/appointment-types",
+      label: t("Appointment Types"),
+      icon: ClipboardList,
+    },
+    { href: "/register", label: t("Register"), icon: UserPlus },
+    { href: "/login", label: t("Login"), icon: LogIn },
+  ];
 
   return (
     <nav

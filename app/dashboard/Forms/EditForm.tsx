@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -27,13 +28,14 @@ const EditForm = ({
   setEditingAppointment,
   setIsEditMode,
 }: ViewDetailsProps) => {
+  const { t } = useTranslation();
   return (
     <>
       <div className="space-y-6">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="space-y-2">
             <Label htmlFor="editClientName" className="text-sm font-medium">
-              Client Name
+              {t("Client Name")}
             </Label>
             <Input
               id="editClientName"
@@ -49,7 +51,7 @@ const EditForm = ({
 
           <div className="space-y-2">
             <Label htmlFor="editClientEmail" className="text-sm font-medium">
-              Email
+              {t("Email")}
             </Label>
             <Input
               id="editClientEmail"
@@ -66,7 +68,7 @@ const EditForm = ({
 
           <div className="space-y-2">
             <Label htmlFor="editClientPhone" className="text-sm font-medium">
-              Phone
+              {t("Phone")}
             </Label>
             <Input
               id="editClientPhone"
@@ -82,7 +84,7 @@ const EditForm = ({
 
           <div className="space-y-2">
             <Label htmlFor="editService" className="text-sm font-medium">
-              Service
+              {t("Service")}
             </Label>
             <Input
               id="editService"
@@ -98,7 +100,7 @@ const EditForm = ({
 
           <div className="space-y-2">
             <Label htmlFor="editDate" className="text-sm font-medium">
-              Date
+              {t("Date")}
             </Label>
             <Input
               id="editDate"
@@ -115,7 +117,7 @@ const EditForm = ({
 
           <div className="space-y-2">
             <Label htmlFor="editTime" className="text-sm font-medium">
-              Time
+              {t("Time")}
             </Label>
             <Input
               id="editTime"
@@ -133,7 +135,7 @@ const EditForm = ({
 
         <div className="space-y-2">
           <Label htmlFor="editStatus" className="text-sm font-medium">
-            Status
+            {t("Status")}
           </Label>
           <Select
             value={editingAppointment.status}
@@ -147,16 +149,16 @@ const EditForm = ({
               <SelectValue />
             </SelectTrigger>
             <SelectContent className="bg-card/95 backdrop-blur-lg border-2 border-primary/20">
-              <SelectItem value="upcoming">Upcoming</SelectItem>
-              <SelectItem value="completed">Completed</SelectItem>
-              <SelectItem value="cancelled">Cancelled</SelectItem>
+              <SelectItem value="upcoming">{t("Upcoming")}</SelectItem>
+              <SelectItem value="completed">{t("Completed")}</SelectItem>
+              <SelectItem value="cancelled">{t("Cancelled")}</SelectItem>
             </SelectContent>
           </Select>
         </div>
 
         <div className="space-y-2">
           <Label htmlFor="editNotes" className="text-sm font-medium">
-            Notes
+            {t("Notes")}
           </Label>
           <Textarea
             id="editNotes"
@@ -167,7 +169,7 @@ const EditForm = ({
               )
             }
             className="min-h-[100px] border-2 focus:border-primary transition-all duration-300 bg-input/80 backdrop-blur-sm rounded-xl resize-none"
-            placeholder="Add any additional notes..."
+            placeholder={t("Add any additional notes...")}
           />
         </div>
 
@@ -180,13 +182,13 @@ const EditForm = ({
             }}
             className="flex-1 rounded-xl bg-transparent"
           >
-            Cancel
+            {t("Cancel")}
           </Button>
           <Button
             onClick={handleSaveEdit}
             className="flex-1 bg-gradient-to-r from-primary to-accent hover:from-primary/90 hover:to-accent/90 rounded-xl"
           >
-            Save Changes
+            {t("Save Changes")}
           </Button>
         </div>
       </div>

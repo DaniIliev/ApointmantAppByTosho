@@ -30,6 +30,7 @@ import EditForm from "./Forms/EditForm";
 import CreateAppointmant from "./Forms/CreateAppointmant";
 import { AppointmentsTable } from "@/components/AppointmantTable/AppointmantTable";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useTranslation } from "react-i18next";
 
 const mockAppointmentTypes: AppointmentType[] = [
   {
@@ -206,6 +207,7 @@ const CreateNewDashboardMenu = ({
 };
 
 export default function DashboardPage() {
+  const { t } = useTranslation();
   const [appointments, setAppointments] =
     useState<Appointment[]>(mockAppointments);
   const [searchTerm, setSearchTerm] = useState("");
@@ -245,7 +247,7 @@ export default function DashboardPage() {
   const { setExtraRightNavMenu, setIsRightNavVisible } = useRightNav();
 
   useEffect(() => {
-    setPageTitle("Dashboard");
+    setPageTitle(t("Dashboard"));
     setExtraRightNavMenu(
       <CreateNewDashboardMenu onOpenModal={() => setIsCreateModalOpen(true)} />
     );
@@ -255,7 +257,7 @@ export default function DashboardPage() {
       setExtraRightNavMenu(null);
       setIsRightNavVisible(false);
     };
-  }, [setPageTitle, setExtraRightNavMenu, setIsRightNavVisible]);
+  }, [setPageTitle, setExtraRightNavMenu, setIsRightNavVisible, t]);
 
   const openAppointmentModal = (appointment: Appointment) => {
     setSelectedAppointment(appointment);
@@ -337,13 +339,13 @@ export default function DashboardPage() {
             value="calendar"
             className="data-[state=active]:bg-transparent data-[state=active]:text-primary data-[state=active]:shadow-none transition-colors px-6 py-3 border-b-2 data-[state=active]:border-primary border-transparent"
           >
-            Calendar View
+            {t("Calendar View")}
           </TabsTrigger>
           <TabsTrigger
             value="table"
             className="data-[state=active]:bg-transparent data-[state=active]:text-primary data-[state=active]:shadow-none transition-colors px-6 py-3 border-b-2 data-[state=active]:border-primary border-transparent"
           >
-            Table View
+            {t("Table View")}
           </TabsTrigger>
         </TabsList>
 
@@ -363,7 +365,7 @@ export default function DashboardPage() {
                   <div className="relative flex-1 max-w-md">
                     <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                     <Input
-                      placeholder="Search appointments..."
+                      placeholder={t("Search appointments...")}
                       className="pl-10 h-12 text-base border-2 focus:border-primary transition-all duration-300 bg-input/80 backdrop-blur-sm rounded-xl"
                       value={searchTerm}
                       onChange={(e) => setSearchTerm(e.target.value)}
@@ -375,7 +377,7 @@ export default function DashboardPage() {
                       onClick={() => setStatusFilter("all")}
                       className="rounded-xl"
                     >
-                      All
+                      {t("All")}
                     </Button>
                     <Button
                       variant={
@@ -384,7 +386,7 @@ export default function DashboardPage() {
                       onClick={() => setStatusFilter("upcoming")}
                       className="rounded-xl"
                     >
-                      Upcoming
+                      {t("Upcoming")}
                     </Button>
                     <Button
                       variant={
@@ -393,7 +395,7 @@ export default function DashboardPage() {
                       onClick={() => setStatusFilter("completed")}
                       className="rounded-xl"
                     >
-                      Completed
+                      {t("Completed")}
                     </Button>
                     <Button
                       variant={
@@ -402,7 +404,7 @@ export default function DashboardPage() {
                       onClick={() => setStatusFilter("cancelled")}
                       className="rounded-xl"
                     >
-                      Cancelled
+                      {t("Cancelled")}
                     </Button>
                   </div>
                 </div>
@@ -411,7 +413,7 @@ export default function DashboardPage() {
                   className="bg-gradient-to-r from-primary to-accent hover:from-primary/90 hover:to-accent/90 transition-all duration-300 shadow-xl hover:shadow-2xl hover:scale-105 rounded-xl"
                 >
                   <Plus className="h-4 w-4 mr-2" />
-                  New Appointment
+                  {t("New Appointment")}
                 </Button>
               </div>
             </CardContent>
@@ -427,10 +429,10 @@ export default function DashboardPage() {
               <CardContent className="p-12 text-center">
                 <CalendarIcon className="h-16 w-16 mx-auto text-muted-foreground mb-4" />
                 <h3 className="text-xl font-semibold text-muted-foreground mb-2">
-                  No appointments found
+                  {t("No appointments found")}
                 </h3>
                 <p className="text-muted-foreground">
-                  Try adjusting your search or filter criteria
+                  {t("Try adjusting your search or filter criteria")}
                 </p>
               </CardContent>
             </Card>
@@ -442,7 +444,7 @@ export default function DashboardPage() {
         <DialogContent className="max-w-2xl bg-card/95 backdrop-blur-lg border-2 border-primary/20">
           <DialogHeader>
             <DialogTitle className="text-2xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
-              {isEditMode ? "Edit Appointment" : "Appointment Details"}
+              {t(isEditMode ? "Edit Appointment" : "Appointment Details")}
             </DialogTitle>
           </DialogHeader>
 
@@ -477,7 +479,7 @@ export default function DashboardPage() {
         <DialogContent className="max-w-2xl bg-card/95 backdrop-blur-lg border-2 border-primary/20">
           <DialogHeader>
             <DialogTitle className="text-2xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
-              Create New Appointment
+              {t("Create New Appointment")}
             </DialogTitle>
           </DialogHeader>
           <CreateAppointmant

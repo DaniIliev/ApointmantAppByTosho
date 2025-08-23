@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { KPICard } from "@/components/performance/KPICard";
 import { TimeFilter } from "@/components/performance/TimeFilter";
 import { PerformanceChart } from "@/components/performance/PerformanceChart";
@@ -13,8 +14,6 @@ import {
   XCircle,
   TrendingUp,
   UserPlus,
-  BarChart3,
-  Plus,
 } from "lucide-react";
 import { usePageTitle } from "@/context/PageTitleContext";
 import {
@@ -82,6 +81,7 @@ type PerformanceRightNavProps = {
   handleExport: (format: "csv" | "pdf" | "png") => void;
 };
 const PerformanceRightNav = ({ handleExport }: PerformanceRightNavProps) => {
+  const { t } = useTranslation();
   return (
     <TooltipProvider>
       <div className="flex flex-col items-center space-y-2">
@@ -90,14 +90,16 @@ const PerformanceRightNav = ({ handleExport }: PerformanceRightNavProps) => {
             <ExportButton onExport={handleExport} />
           </TooltipTrigger>
           <TooltipContent>
-            <p>Export</p>
+            <p>{t("Export")}</p>
           </TooltipContent>
         </Tooltip>
       </div>
     </TooltipProvider>
   );
 };
+
 export default function PerformancePage() {
+  const { t } = useTranslation();
   const [selectedPeriod, setSelectedPeriod] = useState("last30days");
   const [customDateRange, setCustomDateRange] = useState<{
     from: Date | undefined;
@@ -108,7 +110,7 @@ export default function PerformancePage() {
   const { setExtraRightNavMenu, setIsRightNavVisible } = useRightNav();
 
   useEffect(() => {
-    setPageTitle("Performance Tracking");
+    setPageTitle(t("Performance Tracking"));
     setExtraRightNavMenu(<PerformanceRightNav handleExport={handleExport} />);
     setIsRightNavVisible(true);
     return () => {
@@ -116,10 +118,10 @@ export default function PerformancePage() {
       setExtraRightNavMenu(null);
       setIsRightNavVisible(false);
     };
-  }, [setPageTitle, setExtraRightNavMenu, setIsRightNavVisible]);
+  }, [setPageTitle, setExtraRightNavMenu, setIsRightNavVisible, t]);
 
   const handleExport = (format: "csv" | "pdf" | "png") => {
-    console.log(`Exporting as ${format}`);
+    console.log(t(`Exporting as ${format}`));
   };
 
   return (
@@ -128,7 +130,7 @@ export default function PerformancePage() {
         {/* Header */}
         <div className="text-center space-y-6">
           <p className="text-xl text-muted-foreground font-medium">
-            Monitor your salon's key performance indicators and trends
+            {t("Monitor your salon's key performance indicators and trends")}
           </p>
         </div>
 
@@ -143,25 +145,25 @@ export default function PerformancePage() {
         {/* KPI Cards */}
         <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-6">
           <KPICard
-            title="Total Appointments"
+            title={t("Total Appointments")}
             value={mockKPIData.totalAppointments}
             change={{ value: 12.5, type: "increase" }}
             icon={<Calendar />}
           />
           <KPICard
-            title="Total Revenue"
+            title={t("Total Revenue")}
             value={`$${mockKPIData.totalRevenue.toLocaleString()}`}
             change={{ value: 8.3, type: "increase" }}
             icon={<DollarSign />}
           />
           <KPICard
-            title="Completed Appointments"
+            title={t("Completed Appointments")}
             value={mockKPIData.completedAppointments}
             change={{ value: 5.2, type: "increase" }}
             icon={<CheckCircle />}
           />
           <KPICard
-            title="Cancelled/No-Show"
+            title={t("Cancelled/No-Show")}
             value={mockKPIData.cancelledAppointments}
             change={{ value: 2.1, type: "decrease" }}
             icon={<XCircle />}
@@ -170,19 +172,19 @@ export default function PerformancePage() {
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
           <KPICard
-            title="Average Service Price"
+            title={t("Average Service Price")}
             value={`$${mockKPIData.averageServicePrice}`}
             change={{ value: 3.7, type: "increase" }}
             icon={<TrendingUp />}
           />
           <KPICard
-            title="Client Retention Rate"
+            title={t("Client Retention Rate")}
             value={`${mockKPIData.clientRetentionRate}%`}
             change={{ value: 1.8, type: "increase" }}
             icon={<Users />}
           />
           <KPICard
-            title="New Clients Acquired"
+            title={t("New Clients Acquired")}
             value={mockKPIData.newClientsAcquired}
             change={{ value: 15.2, type: "increase" }}
             icon={<UserPlus />}
@@ -192,14 +194,14 @@ export default function PerformancePage() {
         {/* Charts */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <PerformanceChart
-            title="Appointments Over Time"
+            title={t("Appointments Over Time")}
             data={mockAppointmentsOverTime}
             type="bar"
             dataKey="total"
             xAxisKey="name"
           />
           <PerformanceChart
-            title="Revenue Over Time"
+            title={t("Revenue Over Time")}
             data={mockRevenueOverTime}
             type="line"
             dataKey="value"
@@ -209,14 +211,14 @@ export default function PerformancePage() {
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <PerformanceChart
-            title="Service Popularity"
+            title={t("Service Popularity")}
             data={mockServicePopularity}
             type="bar"
             dataKey="value"
             xAxisKey="name"
           />
           <PerformanceChart
-            title="Client Types Distribution"
+            title={t("Client Types Distribution")}
             data={mockClientTypes}
             type="pie"
             dataKey="value"
@@ -225,13 +227,13 @@ export default function PerformancePage() {
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <PerformanceChart
-            title="Appointment Status Distribution"
+            title={t("Appointment Status Distribution")}
             data={mockAppointmentStatus}
             type="pie"
             dataKey="value"
           />
           <PerformanceChart
-            title="Revenue by Service Category"
+            title={t("Revenue by Service Category")}
             data={mockRevenueByService}
             type="bar"
             dataKey="value"
