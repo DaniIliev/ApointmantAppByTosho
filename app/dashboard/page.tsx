@@ -2,19 +2,7 @@
 import { useEffect, useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import {
-  CalendarIcon,
-  Clock,
-  User,
-  Phone,
-  Mail,
-  Plus,
-  Search,
-  Sparkles,
-  ChevronLeft,
-  ChevronRight,
-} from "lucide-react";
+import { CalendarIcon, Plus, Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import {
   Dialog,
@@ -22,39 +10,26 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { usePageTitle } from "@/context/PageTitleContext";
-
-type AppointmentStatus = "upcoming" | "completed" | "cancelled";
-
-interface Appointment {
-  id: string;
-  clientName: string;
-  clientEmail: string;
-  clientPhone: string;
-  date: string;
-  time: string;
-  service: string;
-  status: AppointmentStatus;
-  notes?: string;
-}
-
-interface AppointmentType {
-  id: string;
-  name: string;
-  description: string;
-  duration: number;
-  price: number;
-  color: string;
-}
+import { useRightNav } from "@/context/RightNavContext";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import {
+  Appointment,
+  AppointmentStatus,
+  AppointmentType,
+} from "@/Global/Types/types";
+import { getStatusColor } from "@/Global/Utils/statusIndicator";
+import Calendar from "@/components/calendar/Calendar";
+import ViewDetails from "./Forms/ViewDetails";
+import EditForm from "./Forms/EditForm";
+import CreateAppointmant from "./Forms/CreateAppointmant";
+import { AppointmentsTable } from "@/components/AppointmantTable/AppointmantTable";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 const mockAppointmentTypes: AppointmentType[] = [
   {
@@ -202,6 +177,33 @@ const mockAppointments: Appointment[] = [
     status: "upcoming",
   },
 ];
+type CreateNewDashboardMenuProps = {
+  onOpenModal: () => void;
+};
+
+const CreateNewDashboardMenu = ({
+  onOpenModal,
+}: CreateNewDashboardMenuProps) => {
+  return (
+    <TooltipProvider>
+      <div className="flex flex-col items-center space-y-2">
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <button
+              onClick={onOpenModal}
+              className="p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors cursor-pointer"
+            >
+              <Plus className="h-5 w-5" />
+            </button>
+          </TooltipTrigger>
+          <TooltipContent>
+            <p>Add new Appointment</p>
+          </TooltipContent>
+        </Tooltip>
+      </div>
+    </TooltipProvider>
+  );
+};
 
 export default function DashboardPage() {
   const [appointments, setAppointments] =
@@ -210,7 +212,6 @@ export default function DashboardPage() {
   const [statusFilter, setStatusFilter] = useState<AppointmentStatus | "all">(
     "all"
   );
-  const [currentDate, setCurrentDate] = useState(new Date());
   const [selectedAppointment, setSelectedAppointment] =
     useState<Appointment | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -218,8 +219,6 @@ export default function DashboardPage() {
   const [isEditMode, setIsEditMode] = useState(false);
   const [editingAppointment, setEditingAppointment] =
     useState<Appointment | null>(null);
-  const [dateInput, setDateInput] = useState("");
-  const [calendarView, setCalendarView] = useState<"week" | "month">("week");
   const [newAppointment, setNewAppointment] = useState({
     clientName: "",
     clientEmail: "",
@@ -240,382 +239,23 @@ export default function DashboardPage() {
     return matchesSearch && matchesStatus;
   });
 
+  const [activeTab, setActiveTab] = useState("calendar");
+
   const { setPageTitle } = usePageTitle();
+  const { setExtraRightNavMenu, setIsRightNavVisible } = useRightNav();
+
   useEffect(() => {
     setPageTitle("Dashboard");
-  }, [setPageTitle]);
-
-  const getStatusColor = (status: AppointmentStatus) => {
-    switch (status) {
-      case "upcoming":
-        return "bg-gradient-to-r from-primary to-accent text-white";
-      case "completed":
-        return "bg-gradient-to-r from-green-500 to-emerald-500 text-white";
-      case "cancelled":
-        return "bg-gradient-to-r from-red-500 to-rose-500 text-white";
-      default:
-        return "bg-muted text-muted-foreground";
-    }
-  };
-
-  const getWeekDates = (date: Date) => {
-    const week = [];
-    const startOfWeek = new Date(date);
-    const day = startOfWeek.getDay();
-    startOfWeek.setDate(date.getDate() - day);
-
-    for (let i = 0; i < 7; i++) {
-      const weekDate = new Date(startOfWeek);
-      weekDate.setDate(startOfWeek.getDate() + i);
-      week.push(weekDate);
-    }
-    return week;
-  };
-
-  const getMonthDates = (date: Date) => {
-    const year = date.getFullYear();
-    const month = date.getMonth();
-    const firstDay = new Date(year, month, 1);
-    const lastDay = new Date(year, month + 1, 0);
-    const startDate = new Date(firstDay);
-    const endDate = new Date(lastDay);
-
-    startDate.setDate(firstDay.getDate() - firstDay.getDay());
-
-    endDate.setDate(lastDay.getDate() + (6 - lastDay.getDay()));
-
-    const dates = [];
-    const currentDate = new Date(startDate);
-
-    while (currentDate <= endDate) {
-      dates.push(new Date(currentDate));
-      currentDate.setDate(currentDate.getDate() + 1);
-    }
-
-    return dates;
-  };
-
-  const getAppointmentsForDate = (date: Date) => {
-    const dateString = date.toISOString().split("T")[0];
-    return appointments.filter((apt) => apt.date === dateString);
-  };
-
-  const navigateWeek = (direction: "prev" | "next") => {
-    setCurrentDate((prev) => {
-      const newDate = new Date(prev);
-      if (direction === "prev") {
-        newDate.setDate(prev.getDate() - 7);
-      } else {
-        newDate.setDate(prev.getDate() + 7);
-      }
-      return newDate;
-    });
-  };
-
-  const navigateMonth = (direction: "prev" | "next") => {
-    setCurrentDate((prev) => {
-      const newDate = new Date(prev);
-      if (direction === "prev") {
-        newDate.setMonth(prev.getMonth() - 1);
-      } else {
-        newDate.setMonth(prev.getMonth() + 1);
-      }
-      return newDate;
-    });
-  };
-
-  const navigateToDate = () => {
-    if (dateInput) {
-      const newDate = new Date(dateInput);
-      if (!isNaN(newDate.getTime())) {
-        setCurrentDate(newDate);
-        setDateInput("");
-      }
-    }
-  };
-
-  const renderCalendar = () => {
-    const monthNames = [
-      "January",
-      "February",
-      "March",
-      "April",
-      "May",
-      "June",
-      "July",
-      "August",
-      "September",
-      "October",
-      "November",
-      "December",
-    ];
-
-    if (calendarView === "week") {
-      const weekDates = getWeekDates(currentDate);
-
-      return (
-        <Card className="border-2 shadow-2xl bg-card/70 backdrop-blur-lg border-primary/20 mb-8">
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between mb-6">
-              <h2 className="text-2xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
-                Week of {monthNames[weekDates[0].getMonth()]}{" "}
-                {weekDates[0].getDate()}, {weekDates[0].getFullYear()}
-              </h2>
-              <div className="flex gap-2 items-center">
-                <div className="flex gap-2">
-                  <Button
-                    variant={calendarView === "week" ? "default" : "outline"}
-                    size="sm"
-                    onClick={() => setCalendarView("week")}
-                    className="rounded-xl"
-                  >
-                    Week
-                  </Button>
-                  <Button
-                    variant={"default"}
-                    size="sm"
-                    onClick={() => setCalendarView("month")}
-                    className="rounded-xl"
-                  >
-                    Month
-                  </Button>
-                </div>
-                <div className="flex gap-2">
-                  <Input
-                    type="date"
-                    value={dateInput}
-                    onChange={(e) => setDateInput(e.target.value)}
-                    className="h-10 text-sm border-2 focus:border-primary transition-all duration-300 bg-input/80 backdrop-blur-sm rounded-xl"
-                    placeholder="YYYY-MM-DD"
-                  />
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={navigateToDate}
-                    className="rounded-xl bg-transparent"
-                  >
-                    Go
-                  </Button>
-                </div>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => navigateWeek("prev")}
-                  className="rounded-xl bg-transparent"
-                >
-                  <ChevronLeft className="h-4 w-4" />
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => navigateWeek("next")}
-                  className="rounded-xl bg-transparent"
-                >
-                  <ChevronRight className="h-4 w-4" />
-                </Button>
-              </div>
-            </div>
-
-            <div className="grid grid-cols-7 gap-4">
-              {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map(
-                (dayName, index) => {
-                  const date = weekDates[index];
-                  const dayAppointments = getAppointmentsForDate(date);
-                  const isToday =
-                    new Date().toDateString() === date.toDateString();
-
-                  return (
-                    <div key={dayName} className="space-y-2">
-                      <div className="text-center">
-                        <div className="text-sm font-semibold text-muted-foreground">
-                          {dayName}
-                        </div>
-                        <div
-                          className={`text-lg font-bold ${
-                            isToday ? "text-primary" : "text-foreground"
-                          }`}
-                        >
-                          {date.getDate()}
-                        </div>
-                      </div>
-
-                      <div
-                        className={`min-h-[200px] p-3 border-2 rounded-lg bg-card/30 backdrop-blur-sm hover:bg-card/50 transition-all duration-200 ${
-                          isToday
-                            ? "ring-2 ring-primary border-primary/30"
-                            : "border-primary/10"
-                        }`}
-                      >
-                        <div className="space-y-2">
-                          {dayAppointments.map((apt) => (
-                            <div
-                              key={apt.id}
-                              onClick={() => openAppointmentModal(apt)}
-                              className={`text-xs p-2 rounded cursor-pointer hover:scale-105 transition-transform ${getStatusColor(
-                                apt.status
-                              )}`}
-                            >
-                              <div className="font-medium">{apt.time}</div>
-                              <div className="truncate">{apt.clientName}</div>
-                              <div className="truncate opacity-80">
-                                {apt.service}
-                              </div>
-                            </div>
-                          ))}
-                          {dayAppointments.length === 0 && (
-                            <div className="text-xs text-muted-foreground text-center py-4">
-                              No appointments
-                            </div>
-                          )}
-                        </div>
-                      </div>
-                    </div>
-                  );
-                }
-              )}
-            </div>
-          </CardContent>
-        </Card>
-      );
-    } else {
-      // Monthly view
-      const monthDates = getMonthDates(currentDate);
-      const currentMonth = currentDate.getMonth();
-      const currentYear = currentDate.getFullYear();
-
-      return (
-        <Card className="border-2 shadow-2xl bg-card/70 backdrop-blur-lg border-primary/20 mb-8">
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between mb-6">
-              <h2 className="text-2xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
-                {monthNames[currentMonth]} {currentYear}
-              </h2>
-              <div className="flex gap-2 items-center">
-                <div className="flex gap-2">
-                  <Button
-                    variant={"default"}
-                    size="sm"
-                    onClick={() => setCalendarView("week")}
-                    className="rounded-xl"
-                  >
-                    Week
-                  </Button>
-                  <Button
-                    variant={calendarView === "month" ? "default" : "outline"}
-                    size="sm"
-                    onClick={() => setCalendarView("month")}
-                    className="rounded-xl"
-                  >
-                    Month
-                  </Button>
-                </div>
-                <div className="flex gap-2">
-                  <Input
-                    type="date"
-                    value={dateInput}
-                    onChange={(e) => setDateInput(e.target.value)}
-                    className="h-10 text-sm border-2 focus:border-primary transition-all duration-300 bg-input/80 backdrop-blur-sm rounded-xl"
-                    placeholder="YYYY-MM-DD"
-                  />
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={navigateToDate}
-                    className="rounded-xl bg-transparent"
-                  >
-                    Go
-                  </Button>
-                </div>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => navigateMonth("prev")}
-                  className="rounded-xl bg-transparent"
-                >
-                  <ChevronLeft className="h-4 w-4" />
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => navigateMonth("next")}
-                  className="rounded-xl bg-transparent"
-                >
-                  <ChevronRight className="h-4 w-4" />
-                </Button>
-              </div>
-            </div>
-
-            {/* Month header */}
-            <div className="grid grid-cols-7 gap-2 mb-4">
-              {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map(
-                (dayName) => (
-                  <div
-                    key={dayName}
-                    className="text-center text-sm font-semibold text-muted-foreground py-2"
-                  >
-                    {dayName}
-                  </div>
-                )
-              )}
-            </div>
-
-            {/* Month grid */}
-            <div className="grid grid-cols-7 gap-2">
-              {monthDates.map((date, index) => {
-                const dayAppointments = getAppointmentsForDate(date);
-                const isToday =
-                  new Date().toDateString() === date.toDateString();
-                const isCurrentMonth = date.getMonth() === currentMonth;
-
-                return (
-                  <div
-                    key={index}
-                    className={`min-h-[140px] p-2 border rounded-lg bg-card/30 backdrop-blur-sm hover:bg-card/50 transition-all duration-200 ${
-                      isToday
-                        ? "ring-2 ring-primary border-primary/30"
-                        : "border-primary/10"
-                    } ${!isCurrentMonth ? "opacity-40" : ""}`}
-                  >
-                    <div
-                      className={`text-sm font-semibold mb-2 ${
-                        isToday
-                          ? "text-primary"
-                          : isCurrentMonth
-                          ? "text-foreground"
-                          : "text-muted-foreground"
-                      }`}
-                    >
-                      {date.getDate()}
-                    </div>
-
-                    <div className="space-y-1">
-                      {dayAppointments.map((apt) => (
-                        <div
-                          key={apt.id}
-                          onClick={() => openAppointmentModal(apt)}
-                          className={`text-xs p-1 rounded cursor-pointer hover:scale-105 transition-transform ${getStatusColor(
-                            apt.status
-                          )}`}
-                        >
-                          <div className="font-medium truncate">{apt.time}</div>
-                          <div className="truncate">{apt.clientName}</div>
-                        </div>
-                      ))}
-                      {dayAppointments.length === 0 && isCurrentMonth && (
-                        <div className="text-xs text-muted-foreground text-center py-2 opacity-50">
-                          No appointments
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          </CardContent>
-        </Card>
-      );
-    }
-  };
+    setExtraRightNavMenu(
+      <CreateNewDashboardMenu onOpenModal={() => setIsCreateModalOpen(true)} />
+    );
+    setIsRightNavVisible(true);
+    return () => {
+      setPageTitle(null);
+      setExtraRightNavMenu(null);
+      setIsRightNavVisible(false);
+    };
+  }, [setPageTitle, setExtraRightNavMenu, setIsRightNavVisible]);
 
   const openAppointmentModal = (appointment: Appointment) => {
     setSelectedAppointment(appointment);
@@ -689,236 +329,115 @@ export default function DashboardPage() {
     });
   };
 
-  const stats = {
-    total: appointments.length,
-    upcoming: appointments.filter((a) => a.status === "upcoming").length,
-    completed: appointments.filter((a) => a.status === "completed").length,
-    cancelled: appointments.filter((a) => a.status === "cancelled").length,
-  };
-
   return (
-    <div className="min-h-screen bg-gradient-to-br from-primary/20 via-background to-accent/20 p-6 relative overflow-hidden">
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-gradient-to-r from-primary/30 to-accent/30 rounded-full blur-3xl animate-pulse"></div>
-        <div className="absolute bottom-1/4 right-1/4 w-80 h-80 bg-gradient-to-l from-accent/40 to-primary/40 rounded-full blur-3xl animate-pulse delay-1000"></div>
-        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-gradient-to-br from-primary/20 to-accent/20 rounded-full blur-2xl animate-pulse delay-500"></div>
-      </div>
+    <div className="min-h-screen">
+      <Tabs defaultValue="calendar" className="w-full">
+        <TabsList className="mb-4 bg-transparent p-0 mx-auto w-fit">
+          <TabsTrigger
+            value="calendar"
+            className="data-[state=active]:bg-transparent data-[state=active]:text-primary data-[state=active]:shadow-none transition-colors px-6 py-3 border-b-2 data-[state=active]:border-primary border-transparent"
+          >
+            Calendar View
+          </TabsTrigger>
+          <TabsTrigger
+            value="table"
+            className="data-[state=active]:bg-transparent data-[state=active]:text-primary data-[state=active]:shadow-none transition-colors px-6 py-3 border-b-2 data-[state=active]:border-primary border-transparent"
+          >
+            Table View
+          </TabsTrigger>
+        </TabsList>
 
-      <div className="relative z-10 max-w-7xl mx-auto space-y-8">
-        {renderCalendar()}
+        <TabsContent value="calendar">
+          <Calendar
+            appointments={appointments}
+            getStatusColor={getStatusColor}
+            onOpenAppointmentModal={openAppointmentModal}
+          />
+        </TabsContent>
 
-        <Card className="border-2 shadow-2xl bg-card/70 backdrop-blur-lg border-primary/20">
-          <CardContent className="p-6">
-            <div className="flex flex-col md:flex-row gap-4 items-center justify-between">
-              <div className="flex items-center gap-4 flex-1">
-                <div className="relative flex-1 max-w-md">
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                  <Input
-                    placeholder="Search appointments..."
-                    className="pl-10 h-12 text-base border-2 focus:border-primary transition-all duration-300 bg-input/80 backdrop-blur-sm rounded-xl"
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                  />
-                </div>
-                <div className="flex gap-2">
-                  <Button
-                    variant={statusFilter === "all" ? "default" : "outline"}
-                    onClick={() => setStatusFilter("all")}
-                    className="rounded-xl"
-                  >
-                    All
-                  </Button>
-                  <Button
-                    variant={
-                      statusFilter === "upcoming" ? "default" : "outline"
-                    }
-                    onClick={() => setStatusFilter("upcoming")}
-                    className="rounded-xl"
-                  >
-                    Upcoming
-                  </Button>
-                  <Button
-                    variant={
-                      statusFilter === "completed" ? "default" : "outline"
-                    }
-                    onClick={() => setStatusFilter("completed")}
-                    className="rounded-xl"
-                  >
-                    Completed
-                  </Button>
-                  <Button
-                    variant={
-                      statusFilter === "cancelled" ? "default" : "outline"
-                    }
-                    onClick={() => setStatusFilter("cancelled")}
-                    className="rounded-xl"
-                  >
-                    Cancelled
-                  </Button>
-                </div>
-              </div>
-              <Button
-                onClick={() => setIsCreateModalOpen(true)}
-                className="bg-gradient-to-r from-primary to-accent hover:from-primary/90 hover:to-accent/90 transition-all duration-300 shadow-xl hover:shadow-2xl hover:scale-105 rounded-xl"
-              >
-                <Plus className="h-4 w-4 mr-2" />
-                New Appointment
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
-
-        <div className="space-y-4">
-          {filteredAppointments.map((appointment) => (
-            <Card
-              key={appointment.id}
-              className="border shadow-lg bg-card/70 backdrop-blur-lg border-primary/20 hover:shadow-xl transition-all duration-200"
-            >
-              <CardContent className="p-4">
-                <div className="flex items-center justify-between gap-4">
-                  <div className="flex items-center gap-4 flex-1 min-w-0">
-                    <div className="flex items-center gap-2">
-                      <h3 className="font-semibold text-foreground truncate">
-                        {appointment.clientName}
-                      </h3>
-                      <Badge
-                        className={`${getStatusColor(
-                          appointment.status
-                        )} px-2 py-0.5 text-xs rounded-full`}
-                      >
-                        {appointment.status.charAt(0).toUpperCase() +
-                          appointment.status.slice(1)}
-                      </Badge>
-                    </div>
-
-                    <div className="hidden md:flex items-center gap-4 text-sm text-muted-foreground">
-                      <div className="flex items-center gap-1">
-                        <CalendarIcon className="h-3 w-3" />
-                        {new Date(appointment.date).toLocaleDateString()}
-                      </div>
-                      <div className="flex items-center gap-1">
-                        <Clock className="h-3 w-3" />
-                        {appointment.time}
-                      </div>
-                      <span className="font-medium text-primary">
-                        {appointment.service}
-                      </span>
-                    </div>
+        <TabsContent value="table" className="space-y-4">
+          <Card className="border-2 shadow-2xl bg-card/70 backdrop-blur-lg border-primary/20">
+            <CardContent className="p-6">
+              <div className="flex flex-col md:flex-row gap-4 items-center justify-between">
+                <div className="flex items-center gap-4 flex-1">
+                  <div className="relative flex-1 max-w-md">
+                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                    <Input
+                      placeholder="Search appointments..."
+                      className="pl-10 h-12 text-base border-2 focus:border-primary transition-all duration-300 bg-input/80 backdrop-blur-sm rounded-xl"
+                      value={searchTerm}
+                      onChange={(e) => setSearchTerm(e.target.value)}
+                    />
                   </div>
-
-                  <div className="flex items-center gap-2 flex-shrink-0">
-                    <div className="md:hidden text-xs text-muted-foreground">
-                      {new Date(appointment.date).toLocaleDateString()} •{" "}
-                      {appointment.time}
-                    </div>
+                  <div className="flex gap-2">
                     <Button
-                      variant="outline"
-                      size="sm"
-                      className="rounded-lg bg-transparent px-3 py-1 text-xs"
-                      onClick={() => openViewModal(appointment)}
+                      variant={statusFilter === "all" ? "default" : "outline"}
+                      onClick={() => setStatusFilter("all")}
+                      className="rounded-xl"
                     >
-                      View
+                      All
+                    </Button>
+                    <Button
+                      variant={
+                        statusFilter === "upcoming" ? "default" : "outline"
+                      }
+                      onClick={() => setStatusFilter("upcoming")}
+                      className="rounded-xl"
+                    >
+                      Upcoming
+                    </Button>
+                    <Button
+                      variant={
+                        statusFilter === "completed" ? "default" : "outline"
+                      }
+                      onClick={() => setStatusFilter("completed")}
+                      className="rounded-xl"
+                    >
+                      Completed
+                    </Button>
+                    <Button
+                      variant={
+                        statusFilter === "cancelled" ? "default" : "outline"
+                      }
+                      onClick={() => setStatusFilter("cancelled")}
+                      className="rounded-xl"
+                    >
+                      Cancelled
                     </Button>
                   </div>
                 </div>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-
-        {filteredAppointments.length === 0 && (
-          <Card className="border-2 shadow-2xl bg-card/70 backdrop-blur-lg border-primary/20">
-            <CardContent className="p-12 text-center">
-              <CalendarIcon className="h-16 w-16 mx-auto text-muted-foreground mb-4" />
-              <h3 className="text-xl font-semibold text-muted-foreground mb-2">
-                No appointments found
-              </h3>
-              <p className="text-muted-foreground">
-                Try adjusting your search or filter criteria
-              </p>
+                <Button
+                  onClick={() => setIsCreateModalOpen(true)}
+                  className="bg-gradient-to-r from-primary to-accent hover:from-primary/90 hover:to-accent/90 transition-all duration-300 shadow-xl hover:shadow-2xl hover:scale-105 rounded-xl"
+                >
+                  <Plus className="h-4 w-4 mr-2" />
+                  New Appointment
+                </Button>
+              </div>
             </CardContent>
           </Card>
-        )}
-      </div>
 
-      <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
-        <DialogContent className="max-w-md bg-card/95 backdrop-blur-lg border-2 border-primary/20">
-          <DialogHeader>
-            <DialogTitle className="text-2xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
-              Appointment Details
-            </DialogTitle>
-          </DialogHeader>
+          <AppointmentsTable
+            data={filteredAppointments}
+            onOpenViewModal={openViewModal}
+          />
 
-          {selectedAppointment && (
-            <div className="space-y-6">
-              <div className="flex items-center justify-between">
-                <h3 className="text-xl font-bold">
-                  {selectedAppointment.clientName}
+          {filteredAppointments.length === 0 && (
+            <Card className="border-2 shadow-2xl bg-card/70 backdrop-blur-lg border-primary/20">
+              <CardContent className="p-12 text-center">
+                <CalendarIcon className="h-16 w-16 mx-auto text-muted-foreground mb-4" />
+                <h3 className="text-xl font-semibold text-muted-foreground mb-2">
+                  No appointments found
                 </h3>
-                <Badge
-                  className={`${getStatusColor(
-                    selectedAppointment.status
-                  )} px-3 py-1 rounded-full font-semibold`}
-                >
-                  {selectedAppointment.status.charAt(0).toUpperCase() +
-                    selectedAppointment.status.slice(1)}
-                </Badge>
-              </div>
-
-              <div className="space-y-4">
-                <div className="flex items-center gap-3">
-                  <Mail className="h-5 w-5 text-primary" />
-                  <span>{selectedAppointment.clientEmail}</span>
-                </div>
-
-                <div className="flex items-center gap-3">
-                  <Phone className="h-5 w-5 text-primary" />
-                  <span>{selectedAppointment.clientPhone}</span>
-                </div>
-
-                <div className="flex items-center gap-3">
-                  <CalendarIcon className="h-5 w-5 text-primary" />
-                  <span>
-                    {new Date(selectedAppointment.date).toLocaleDateString()}
-                  </span>
-                </div>
-
-                <div className="flex items-center gap-3">
-                  <Clock className="h-5 w-5 text-primary" />
-                  <span>{selectedAppointment.time}</span>
-                </div>
-              </div>
-
-              <div className="space-y-2">
-                <h4 className="font-semibold text-primary">Service</h4>
-                <p>{selectedAppointment.service}</p>
-              </div>
-
-              {selectedAppointment.notes && (
-                <div className="space-y-2">
-                  <h4 className="font-semibold text-primary">Notes</h4>
-                  <p className="text-muted-foreground italic">
-                    {selectedAppointment.notes}
-                  </p>
-                </div>
-              )}
-
-              <div className="flex gap-2 pt-4">
-                <Button className="flex-1 bg-gradient-to-r from-primary to-accent hover:from-primary/90 hover:to-accent/90 rounded-xl">
-                  Edit Appointment
-                </Button>
-                <Button
-                  variant="outline"
-                  className="flex-1 rounded-xl bg-transparent"
-                >
-                  Contact Client
-                </Button>
-              </div>
-            </div>
+                <p className="text-muted-foreground">
+                  Try adjusting your search or filter criteria
+                </p>
+              </CardContent>
+            </Card>
           )}
-        </DialogContent>
-      </Dialog>
-
+        </TabsContent>
+      </Tabs>
+      {/* </div> */}
       <Dialog open={isViewModalOpen} onOpenChange={setIsViewModalOpen}>
         <DialogContent className="max-w-2xl bg-card/95 backdrop-blur-lg border-2 border-primary/20">
           <DialogHeader>
@@ -931,276 +450,21 @@ export default function DashboardPage() {
             <div className="space-y-6">
               {!isEditMode ? (
                 <>
-                  <div className="flex items-center justify-between">
-                    <h3 className="text-xl font-bold">
-                      {selectedAppointment.clientName}
-                    </h3>
-                    <Badge
-                      className={`${getStatusColor(
-                        selectedAppointment.status
-                      )} px-3 py-1 rounded-full font-semibold`}
-                    >
-                      {selectedAppointment.status.charAt(0).toUpperCase() +
-                        selectedAppointment.status.slice(1)}
-                    </Badge>
-                  </div>
-
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div className="space-y-4">
-                      <div className="flex items-center gap-3">
-                        <Mail className="h-5 w-5 text-primary" />
-                        <span>{selectedAppointment.clientEmail}</span>
-                      </div>
-
-                      <div className="flex items-center gap-3">
-                        <Phone className="h-5 w-5 text-primary" />
-                        <span>{selectedAppointment.clientPhone}</span>
-                      </div>
-                    </div>
-
-                    <div className="space-y-4">
-                      <div className="flex items-center gap-3">
-                        <CalendarIcon className="h-5 w-5 text-primary" />
-                        <span>
-                          {new Date(
-                            selectedAppointment.date
-                          ).toLocaleDateString()}
-                        </span>
-                      </div>
-
-                      <div className="flex items-center gap-3">
-                        <Clock className="h-5 w-5 text-primary" />
-                        <span>{selectedAppointment.time}</span>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="space-y-2">
-                    <h4 className="font-semibold text-primary">Service</h4>
-                    <p className="text-lg">{selectedAppointment.service}</p>
-                  </div>
-
-                  {selectedAppointment.notes && (
-                    <div className="space-y-2">
-                      <h4 className="font-semibold text-primary">Notes</h4>
-                      <p className="text-muted-foreground bg-muted/50 p-3 rounded-lg">
-                        {selectedAppointment.notes}
-                      </p>
-                    </div>
-                  )}
-
-                  <div className="flex gap-3 pt-4">
-                    <Button
-                      onClick={handleEditAppointment}
-                      className="flex-1 bg-gradient-to-r from-primary to-accent hover:from-primary/90 hover:to-accent/90 rounded-xl"
-                    >
-                      Edit Appointment
-                    </Button>
-                    <Button
-                      variant="destructive"
-                      onClick={handleDeleteAppointment}
-                      className="flex-1 rounded-xl"
-                    >
-                      Delete Appointment
-                    </Button>
-                  </div>
+                  <ViewDetails
+                    handleEditAppointment={handleEditAppointment}
+                    handleDeleteAppointment={handleDeleteAppointment}
+                    selectedAppointment={selectedAppointment}
+                  />
                 </>
               ) : (
                 <>
                   {editingAppointment && (
-                    <div className="space-y-6">
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div className="space-y-2">
-                          <Label
-                            htmlFor="editClientName"
-                            className="text-sm font-medium"
-                          >
-                            Client Name
-                          </Label>
-                          <Input
-                            id="editClientName"
-                            value={editingAppointment.clientName}
-                            onChange={(e) =>
-                              setEditingAppointment((prev) =>
-                                prev
-                                  ? { ...prev, clientName: e.target.value }
-                                  : null
-                              )
-                            }
-                            className="h-12 border-2 focus:border-primary transition-all duration-300 bg-input/80 backdrop-blur-sm rounded-xl"
-                          />
-                        </div>
-
-                        <div className="space-y-2">
-                          <Label
-                            htmlFor="editClientEmail"
-                            className="text-sm font-medium"
-                          >
-                            Email
-                          </Label>
-                          <Input
-                            id="editClientEmail"
-                            type="email"
-                            value={editingAppointment.clientEmail}
-                            onChange={(e) =>
-                              setEditingAppointment((prev) =>
-                                prev
-                                  ? { ...prev, clientEmail: e.target.value }
-                                  : null
-                              )
-                            }
-                            className="h-12 border-2 focus:border-primary transition-all duration-300 bg-input/80 backdrop-blur-sm rounded-xl"
-                          />
-                        </div>
-
-                        <div className="space-y-2">
-                          <Label
-                            htmlFor="editClientPhone"
-                            className="text-sm font-medium"
-                          >
-                            Phone
-                          </Label>
-                          <Input
-                            id="editClientPhone"
-                            value={editingAppointment.clientPhone}
-                            onChange={(e) =>
-                              setEditingAppointment((prev) =>
-                                prev
-                                  ? { ...prev, clientPhone: e.target.value }
-                                  : null
-                              )
-                            }
-                            className="h-12 border-2 focus:border-primary transition-all duration-300 bg-input/80 backdrop-blur-sm rounded-xl"
-                          />
-                        </div>
-
-                        <div className="space-y-2">
-                          <Label
-                            htmlFor="editService"
-                            className="text-sm font-medium"
-                          >
-                            Service
-                          </Label>
-                          <Input
-                            id="editService"
-                            value={editingAppointment.service}
-                            onChange={(e) =>
-                              setEditingAppointment((prev) =>
-                                prev
-                                  ? { ...prev, service: e.target.value }
-                                  : null
-                              )
-                            }
-                            className="h-12 border-2 focus:border-primary transition-all duration-300 bg-input/80 backdrop-blur-sm rounded-xl"
-                          />
-                        </div>
-
-                        <div className="space-y-2">
-                          <Label
-                            htmlFor="editDate"
-                            className="text-sm font-medium"
-                          >
-                            Date
-                          </Label>
-                          <Input
-                            id="editDate"
-                            type="date"
-                            value={editingAppointment.date}
-                            onChange={(e) =>
-                              setEditingAppointment((prev) =>
-                                prev ? { ...prev, date: e.target.value } : null
-                              )
-                            }
-                            className="h-12 border-2 focus:border-primary transition-all duration-300 bg-input/80 backdrop-blur-sm rounded-xl"
-                          />
-                        </div>
-
-                        <div className="space-y-2">
-                          <Label
-                            htmlFor="editTime"
-                            className="text-sm font-medium"
-                          >
-                            Time
-                          </Label>
-                          <Input
-                            id="editTime"
-                            type="time"
-                            value={editingAppointment.time}
-                            onChange={(e) =>
-                              setEditingAppointment((prev) =>
-                                prev ? { ...prev, time: e.target.value } : null
-                              )
-                            }
-                            className="h-12 border-2 focus:border-primary transition-all duration-300 bg-input/80 backdrop-blur-sm rounded-xl"
-                          />
-                        </div>
-                      </div>
-
-                      <div className="space-y-2">
-                        <Label
-                          htmlFor="editStatus"
-                          className="text-sm font-medium"
-                        >
-                          Status
-                        </Label>
-                        <Select
-                          value={editingAppointment.status}
-                          onValueChange={(value: AppointmentStatus) =>
-                            setEditingAppointment((prev) =>
-                              prev ? { ...prev, status: value } : null
-                            )
-                          }
-                        >
-                          <SelectTrigger className="h-12 border-2 focus:border-primary transition-all duration-300 bg-input/80 backdrop-blur-sm rounded-xl">
-                            <SelectValue />
-                          </SelectTrigger>
-                          <SelectContent className="bg-card/95 backdrop-blur-lg border-2 border-primary/20">
-                            <SelectItem value="upcoming">Upcoming</SelectItem>
-                            <SelectItem value="completed">Completed</SelectItem>
-                            <SelectItem value="cancelled">Cancelled</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </div>
-
-                      <div className="space-y-2">
-                        <Label
-                          htmlFor="editNotes"
-                          className="text-sm font-medium"
-                        >
-                          Notes
-                        </Label>
-                        <Textarea
-                          id="editNotes"
-                          value={editingAppointment.notes || ""}
-                          onChange={(e) =>
-                            setEditingAppointment((prev) =>
-                              prev ? { ...prev, notes: e.target.value } : null
-                            )
-                          }
-                          className="min-h-[100px] border-2 focus:border-primary transition-all duration-300 bg-input/80 backdrop-blur-sm rounded-xl resize-none"
-                          placeholder="Add any additional notes..."
-                        />
-                      </div>
-
-                      <div className="flex gap-3 pt-4">
-                        <Button
-                          variant="outline"
-                          onClick={() => {
-                            setIsEditMode(false);
-                            setEditingAppointment(null);
-                          }}
-                          className="flex-1 rounded-xl bg-transparent"
-                        >
-                          Cancel
-                        </Button>
-                        <Button
-                          onClick={handleSaveEdit}
-                          className="flex-1 bg-gradient-to-r from-primary to-accent hover:from-primary/90 hover:to-accent/90 rounded-xl"
-                        >
-                          Save Changes
-                        </Button>
-                      </div>
-                    </div>
+                    <EditForm
+                      handleSaveEdit={handleSaveEdit}
+                      editingAppointment={editingAppointment}
+                      setEditingAppointment={setEditingAppointment}
+                      setIsEditMode={setIsEditMode}
+                    />
                   )}
                 </>
               )}
@@ -1216,211 +480,13 @@ export default function DashboardPage() {
               Create New Appointment
             </DialogTitle>
           </DialogHeader>
-
-          <div className="space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="clientName" className="text-sm font-medium">
-                  Client Name
-                </Label>
-                <Input
-                  id="clientName"
-                  value={newAppointment.clientName}
-                  onChange={(e) =>
-                    setNewAppointment((prev) => ({
-                      ...prev,
-                      clientName: e.target.value,
-                    }))
-                  }
-                  className="h-12 border-2 focus:border-primary transition-all duration-300 bg-input/80 backdrop-blur-sm rounded-xl"
-                  placeholder="Enter client name"
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="clientEmail" className="text-sm font-medium">
-                  Email
-                </Label>
-                <Input
-                  id="clientEmail"
-                  type="email"
-                  value={newAppointment.clientEmail}
-                  onChange={(e) =>
-                    setNewAppointment((prev) => ({
-                      ...prev,
-                      clientEmail: e.target.value,
-                    }))
-                  }
-                  className="h-12 border-2 focus:border-primary transition-all duration-300 bg-input/80 backdrop-blur-sm rounded-xl"
-                  placeholder="client@example.com"
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="clientPhone" className="text-sm font-medium">
-                  Phone
-                </Label>
-                <Input
-                  id="clientPhone"
-                  value={newAppointment.clientPhone}
-                  onChange={(e) =>
-                    setNewAppointment((prev) => ({
-                      ...prev,
-                      clientPhone: e.target.value,
-                    }))
-                  }
-                  className="h-12 border-2 focus:border-primary transition-all duration-300 bg-input/80 backdrop-blur-sm rounded-xl"
-                  placeholder="+1 (555) 123-4567"
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label
-                  htmlFor="appointmentType"
-                  className="text-sm font-medium"
-                >
-                  Appointment Type
-                </Label>
-                <Select
-                  value={newAppointment.appointmentTypeId}
-                  onValueChange={(value) =>
-                    setNewAppointment((prev) => ({
-                      ...prev,
-                      appointmentTypeId: value,
-                    }))
-                  }
-                >
-                  <SelectTrigger className="h-12 border-2 focus:border-primary transition-all duration-300 bg-input/80 backdrop-blur-sm rounded-xl">
-                    <SelectValue placeholder="Select appointment type" />
-                  </SelectTrigger>
-                  <SelectContent className="bg-card/95 backdrop-blur-lg border-2 border-primary/20">
-                    {mockAppointmentTypes.map((type) => (
-                      <SelectItem
-                        key={type.id}
-                        value={type.id}
-                        className="focus:bg-primary/10"
-                      >
-                        <div className="flex flex-col">
-                          <span className="font-medium">{type.name}</span>
-                          <span className="text-xs text-muted-foreground">
-                            {type.duration}min - ${type.price}
-                          </span>
-                        </div>
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="date" className="text-sm font-medium">
-                  Date
-                </Label>
-                <Input
-                  id="date"
-                  type="date"
-                  value={newAppointment.date}
-                  onChange={(e) =>
-                    setNewAppointment((prev) => ({
-                      ...prev,
-                      date: e.target.value,
-                    }))
-                  }
-                  className="h-12 border-2 focus:border-primary transition-all duration-300 bg-input/80 backdrop-blur-sm rounded-xl"
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="time" className="text-sm font-medium">
-                  Time
-                </Label>
-                <Input
-                  id="time"
-                  type="time"
-                  value={newAppointment.time}
-                  onChange={(e) =>
-                    setNewAppointment((prev) => ({
-                      ...prev,
-                      time: e.target.value,
-                    }))
-                  }
-                  className="h-12 border-2 focus:border-primary transition-all duration-300 bg-input/80 backdrop-blur-sm rounded-xl"
-                />
-              </div>
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="notes" className="text-sm font-medium">
-                Notes (Optional)
-              </Label>
-              <Textarea
-                id="notes"
-                value={newAppointment.notes}
-                onChange={(e) =>
-                  setNewAppointment((prev) => ({
-                    ...prev,
-                    notes: e.target.value,
-                  }))
-                }
-                className="min-h-[100px] border-2 focus:border-primary transition-all duration-300 bg-input/80 backdrop-blur-sm rounded-xl resize-none"
-                placeholder="Add any additional notes or special requirements..."
-              />
-            </div>
-
-            {newAppointment.appointmentTypeId && (
-              <div className="p-4 bg-primary/10 rounded-xl border border-primary/20">
-                {(() => {
-                  const selectedType = mockAppointmentTypes.find(
-                    (type) => type.id === newAppointment.appointmentTypeId
-                  );
-                  return selectedType ? (
-                    <div className="space-y-2">
-                      <h4 className="font-semibold text-primary">
-                        Selected Service
-                      </h4>
-                      <div className="flex justify-between items-center">
-                        <div>
-                          <p className="font-medium">{selectedType.name}</p>
-                          <p className="text-sm text-muted-foreground">
-                            {selectedType.description}
-                          </p>
-                        </div>
-                        <div className="text-right">
-                          <p className="font-semibold">${selectedType.price}</p>
-                          <p className="text-sm text-muted-foreground">
-                            {selectedType.duration} minutes
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-                  ) : null;
-                })()}
-              </div>
-            )}
-
-            <div className="flex gap-3 pt-4">
-              <Button
-                variant="outline"
-                onClick={() => setIsCreateModalOpen(false)}
-                className="flex-1 rounded-xl bg-transparent"
-              >
-                Cancel
-              </Button>
-              <Button
-                onClick={handleCreateAppointment}
-                disabled={
-                  !newAppointment.clientName ||
-                  !newAppointment.clientEmail ||
-                  !newAppointment.date ||
-                  !newAppointment.time ||
-                  !newAppointment.appointmentTypeId
-                }
-                className="flex-1 bg-gradient-to-r from-primary to-accent hover:from-primary/90 hover:to-accent/90 rounded-xl"
-              >
-                Create Appointment
-              </Button>
-            </div>
-          </div>
+          <CreateAppointmant
+            handleCreateAppointment={handleCreateAppointment}
+            newAppointment={newAppointment}
+            setNewAppointment={setNewAppointment}
+            setIsCreateModalOpen={setIsCreateModalOpen}
+            mockAppointmentTypes={mockAppointmentTypes}
+          />
         </DialogContent>
       </Dialog>
     </div>

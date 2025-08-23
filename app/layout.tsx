@@ -5,6 +5,7 @@ import { GeistMono } from "geist/font/mono";
 import "./globals.css";
 import ClientLayout from "@/components/ClientLayout";
 import { PageTitleProvider } from "@/context/PageTitleContext";
+import { RightNavProvider } from "@/context/RightNavContext";
 
 export const metadata: Metadata = {
   title: "v0 App",
@@ -30,7 +31,9 @@ html {
       </head>
       <body>
         <PageTitleProvider>
-          <ClientLayout>{children}</ClientLayout>
+          <RightNavProvider>
+            <ClientLayout>{children}</ClientLayout>
+          </RightNavProvider>
         </PageTitleProvider>
       </body>
     </html>

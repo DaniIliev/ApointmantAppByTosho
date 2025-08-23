@@ -14,8 +14,16 @@ import {
   TrendingUp,
   UserPlus,
   BarChart3,
+  Plus,
 } from "lucide-react";
 import { usePageTitle } from "@/context/PageTitleContext";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import { useRightNav } from "@/context/RightNavContext";
 
 // Mock data - replace with real data from your backend
 const mockKPIData = {
@@ -70,6 +78,25 @@ const mockRevenueByService = [
   { name: "Massage Therapy", value: 1400 },
 ];
 
+type PerformanceRightNavProps = {
+  handleExport: (format: "csv" | "pdf" | "png") => void;
+};
+const PerformanceRightNav = ({ handleExport }: PerformanceRightNavProps) => {
+  return (
+    <TooltipProvider>
+      <div className="flex flex-col items-center space-y-2">
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <ExportButton onExport={handleExport} />
+          </TooltipTrigger>
+          <TooltipContent>
+            <p>Export</p>
+          </TooltipContent>
+        </Tooltip>
+      </div>
+    </TooltipProvider>
+  );
+};
 export default function PerformancePage() {
   const [selectedPeriod, setSelectedPeriod] = useState("last30days");
   const [customDateRange, setCustomDateRange] = useState<{
@@ -78,32 +105,31 @@ export default function PerformancePage() {
   }>({ from: undefined, to: undefined });
 
   const { setPageTitle } = usePageTitle();
+  const { setExtraRightNavMenu, setIsRightNavVisible } = useRightNav();
 
   useEffect(() => {
     setPageTitle("Performance Tracking");
-  }, [setPageTitle]);
+    setExtraRightNavMenu(<PerformanceRightNav handleExport={handleExport} />);
+    setIsRightNavVisible(true);
+    return () => {
+      setPageTitle(null);
+      setExtraRightNavMenu(null);
+      setIsRightNavVisible(false);
+    };
+  }, [setPageTitle, setExtraRightNavMenu, setIsRightNavVisible]);
 
   const handleExport = (format: "csv" | "pdf" | "png") => {
-    // Implement export functionality
     console.log(`Exporting as ${format}`);
-    // You would implement actual export logic here
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-primary/20 via-background to-accent/20 p-6 relative overflow-hidden">
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-gradient-to-r from-primary/30 to-accent/30 rounded-full blur-3xl animate-pulse"></div>
-        <div className="absolute bottom-1/4 right-1/4 w-80 h-80 bg-gradient-to-l from-accent/40 to-primary/40 rounded-full blur-3xl animate-pulse delay-1000"></div>
-        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-gradient-to-br from-primary/20 to-accent/20 rounded-full blur-2xl animate-pulse delay-500"></div>
-      </div>
-
+    <div className="min-h-screen">
       <div className="relative z-10 max-w-7xl mx-auto space-y-8">
         {/* Header */}
         <div className="text-center space-y-6">
           <p className="text-xl text-muted-foreground font-medium">
             Monitor your salon's key performance indicators and trends
           </p>
-          <ExportButton onExport={handleExport} />
         </div>
 
         {/* Time Filter */}

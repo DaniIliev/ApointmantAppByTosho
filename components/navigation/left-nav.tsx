@@ -31,7 +31,7 @@ export default function LeftNav({ isOpen }: LeftNavProps) {
 
   return (
     <nav
-      className={`fixed left-0 top-18 bottom-0 bg-slate-900/20 backdrop-blur-xl border-r border-white/10 z-40 transition-all duration-300 ${
+      className={`fixed left-0 top-17.5 bottom-0 bg-slate-900/20 backdrop-blur-xl border-r border-white/10 z-40 transition-all duration-300 ${
         isOpen ? "w-64 translate-x-0" : "w-0 -translate-x-full"
       }`}
     >
