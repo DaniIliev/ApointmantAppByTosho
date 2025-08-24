@@ -98,6 +98,76 @@ const mockAppointments: Appointment[] = [
     status: "upcoming",
   },
   {
+    id: "21",
+    clientName: "Michael Chen",
+    clientEmail: "michael@example.com",
+    clientPhone: "+1 (555) 987-6543",
+    date: "2024-01-15",
+    time: "2:30 PM",
+    service: "Strategy Session",
+    status: "upcoming",
+  },
+  {
+    id: "22",
+    clientName: "Michael Chen",
+    clientEmail: "michael@example.com",
+    clientPhone: "+1 (555) 987-6543",
+    date: "2024-01-15",
+    time: "2:30 PM",
+    service: "Strategy Session",
+    status: "upcoming",
+  },
+  {
+    id: "23",
+    clientName: "Michael Chen",
+    clientEmail: "michael@example.com",
+    clientPhone: "+1 (555) 987-6543",
+    date: "2024-01-15",
+    time: "2:30 PM",
+    service: "Strategy Session",
+    status: "upcoming",
+  },
+  {
+    id: "234",
+    clientName: "Michael Chen",
+    clientEmail: "michael@example.com",
+    clientPhone: "+1 (555) 987-6543",
+    date: "2024-01-15",
+    time: "2:30 PM",
+    service: "Strategy Session",
+    status: "upcoming",
+  },
+  {
+    id: "235",
+    clientName: "Michael Chen",
+    clientEmail: "michael@example.com",
+    clientPhone: "+1 (555) 987-6543",
+    date: "2024-01-15",
+    time: "2:30 PM",
+    service: "Strategy Session",
+    status: "upcoming",
+  },
+  {
+    id: "236",
+    clientName: "Michael Chen",
+    clientEmail: "michael@example.com",
+    clientPhone: "+1 (555) 987-6543",
+    date: "2024-01-15",
+    time: "2:30 PM",
+    service: "Strategy Session",
+    status: "upcoming",
+  },
+  {
+    id: "23",
+    clientName: "Michael Chen",
+    clientEmail: "michael@example.com",
+    clientPhone: "+1 (555) 987-6543",
+    date: "2024-01-15",
+    time: "2:30 PM",
+    service: "Strategy Session",
+    status: "upcoming",
+  },
+  {
     id: "3",
     clientName: "Emily Davis",
     clientEmail: "emily@example.com",
@@ -332,7 +402,7 @@ export default function DashboardPage() {
   };
 
   return (
-    <div className="min-h-screen">
+    <div>
       <Tabs defaultValue="calendar" className="w-full">
         <TabsList className="mb-4 bg-transparent p-0 mx-auto w-fit">
           <TabsTrigger
@@ -353,7 +423,6 @@ export default function DashboardPage() {
           <Calendar
             appointments={appointments}
             getStatusColor={getStatusColor}
-            onOpenAppointmentModal={openAppointmentModal}
           />
         </TabsContent>
 

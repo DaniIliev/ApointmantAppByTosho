@@ -7,8 +7,8 @@ import { CalendarIcon, Clock, Mail, Phone } from "lucide-react";
 import React from "react";
 
 interface ViewDetailsProps {
-  handleEditAppointment: () => void;
-  handleDeleteAppointment: () => void;
+  handleEditAppointment?: () => void;
+  handleDeleteAppointment?: () => void;
   selectedAppointment: Appointment;
 }
 
@@ -75,22 +75,23 @@ const ViewDetails = ({
           </p>
         </div>
       )}
-
-      <div className="flex gap-3 pt-4">
-        <Button
-          onClick={handleEditAppointment}
-          className="flex-1 bg-gradient-to-r from-primary to-accent hover:from-primary/90 hover:to-accent/90 rounded-xl"
-        >
-          {t("Edit Appointment")}
-        </Button>
-        <Button
-          variant="destructive"
-          onClick={handleDeleteAppointment}
-          className="flex-1 rounded-xl"
-        >
-          {t("Delete Appointment")}
-        </Button>
-      </div>
+      {handleEditAppointment && handleDeleteAppointment && (
+        <div className="flex gap-3 pt-4">
+          <Button
+            onClick={handleEditAppointment}
+            className="flex-1 bg-gradient-to-r from-primary to-accent hover:from-primary/90 hover:to-accent/90 rounded-xl"
+          >
+            {t("Edit Appointment")}
+          </Button>
+          <Button
+            variant="destructive"
+            onClick={handleDeleteAppointment}
+            className="flex-1 rounded-xl"
+          >
+            {t("Delete Appointment")}
+          </Button>
+        </div>
+      )}
     </>
   );
 };

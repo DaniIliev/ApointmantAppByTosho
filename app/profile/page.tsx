@@ -1,19 +1,19 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { User, Mail, Phone, MapPin, Camera, Palette } from "lucide-react"
+import { useState } from "react";
+import { User, Mail, Phone, MapPin, Camera, Palette } from "lucide-react";
 
 export default function ProfilePage() {
-  const [isEditing, setIsEditing] = useState(false)
+  const [isEditing, setIsEditing] = useState(false);
   const [profile, setProfile] = useState({
     name: "John Doe",
     email: "john.doe@example.com",
     phone: "+1 (555) 123-4567",
     address: "123 Main St, City, State 12345",
     bio: "Professional appointment manager with 5+ years of experience.",
-  })
+  });
 
-  const [selectedPalette, setSelectedPalette] = useState("purple-blue")
+  const [selectedPalette, setSelectedPalette] = useState("purple-blue");
 
   const colorPalettes = [
     {
@@ -61,21 +61,19 @@ export default function ProfilePage() {
       accent2: "bg-indigo-500/30",
       preview: "bg-gradient-to-r from-rose-400 to-indigo-500",
     },
-  ]
+  ];
 
-  const currentPalette = colorPalettes.find((p) => p.id === selectedPalette) || colorPalettes[0]
+  const currentPalette =
+    colorPalettes.find((p) => p.id === selectedPalette) || colorPalettes[0];
 
   const handlePaletteChange = (paletteId: string) => {
-    setSelectedPalette(paletteId)
-    // Store in localStorage for persistence
-    localStorage.setItem("selectedPalette", paletteId)
-    // Apply theme to document root
-    document.documentElement.setAttribute("data-theme", paletteId)
-  }
+    setSelectedPalette(paletteId);
+    localStorage.setItem("selectedPalette", paletteId);
+    document.documentElement.setAttribute("data-theme", paletteId);
+  };
 
   return (
-    <div className={`min-h-screen bg-gradient-to-br ${currentPalette.background} p-6`}>
-      {/* Animated background elements */}
+    <div className={`min-h-screen p-6`}>
       <div className="fixed inset-0 overflow-hidden pointer-events-none">
         <div
           className={`absolute -top-40 -right-40 w-80 h-80 ${currentPalette.accent1} rounded-full blur-3xl animate-pulse`}
@@ -138,8 +136,12 @@ export default function ProfilePage() {
                           : "border-white/20 hover:border-white/40"
                       }`}
                     >
-                      <div className={`w-full h-8 rounded-lg ${palette.preview} mb-2`}></div>
-                      <span className="text-white/80 text-sm font-medium">{palette.name}</span>
+                      <div
+                        className={`w-full h-8 rounded-lg ${palette.preview} mb-2`}
+                      ></div>
+                      <span className="text-white/80 text-sm font-medium">
+                        {palette.name}
+                      </span>
                     </button>
                   ))}
                 </div>
@@ -147,65 +149,95 @@ export default function ProfilePage() {
 
               <div className="grid md:grid-cols-2 gap-6">
                 <div>
-                  <label className="block text-white/80 text-sm font-medium mb-2">Full Name</label>
+                  <label className="block text-white/80 text-sm font-medium mb-2">
+                    Full Name
+                  </label>
                   <div className="relative">
                     <User className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-white/40" />
                     <input
                       type="text"
                       value={profile.name}
                       disabled={!isEditing}
-                      className={`w-full pl-12 pr-4 py-3 bg-slate-800/50 border border-white/20 rounded-xl text-white placeholder-white/40 focus:border-current focus:outline-none transition-colors disabled:opacity-60 ${isEditing ? `focus:border-opacity-60 ${currentPalette.primary}` : ""}`}
+                      className={`w-full pl-12 pr-4 py-3 bg-slate-800/50 border border-white/20 rounded-xl text-white placeholder-white/40 focus:border-current focus:outline-none transition-colors disabled:opacity-60 ${
+                        isEditing
+                          ? `focus:border-opacity-60 ${currentPalette.primary}`
+                          : ""
+                      }`}
                     />
                   </div>
                 </div>
 
                 <div>
-                  <label className="block text-white/80 text-sm font-medium mb-2">Email</label>
+                  <label className="block text-white/80 text-sm font-medium mb-2">
+                    Email
+                  </label>
                   <div className="relative">
                     <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-white/40" />
                     <input
                       type="email"
                       value={profile.email}
                       disabled={!isEditing}
-                      className={`w-full pl-12 pr-4 py-3 bg-slate-800/50 border border-white/20 rounded-xl text-white placeholder-white/40 focus:border-current focus:outline-none transition-colors disabled:opacity-60 ${isEditing ? `focus:border-opacity-60 ${currentPalette.primary}` : ""}`}
+                      className={`w-full pl-12 pr-4 py-3 bg-slate-800/50 border border-white/20 rounded-xl text-white placeholder-white/40 focus:border-current focus:outline-none transition-colors disabled:opacity-60 ${
+                        isEditing
+                          ? `focus:border-opacity-60 ${currentPalette.primary}`
+                          : ""
+                      }`}
                     />
                   </div>
                 </div>
 
                 <div>
-                  <label className="block text-white/80 text-sm font-medium mb-2">Phone</label>
+                  <label className="block text-white/80 text-sm font-medium mb-2">
+                    Phone
+                  </label>
                   <div className="relative">
                     <Phone className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-white/40" />
                     <input
                       type="tel"
                       value={profile.phone}
                       disabled={!isEditing}
-                      className={`w-full pl-12 pr-4 py-3 bg-slate-800/50 border border-white/20 rounded-xl text-white placeholder-white/40 focus:border-current focus:outline-none transition-colors disabled:opacity-60 ${isEditing ? `focus:border-opacity-60 ${currentPalette.primary}` : ""}`}
+                      className={`w-full pl-12 pr-4 py-3 bg-slate-800/50 border border-white/20 rounded-xl text-white placeholder-white/40 focus:border-current focus:outline-none transition-colors disabled:opacity-60 ${
+                        isEditing
+                          ? `focus:border-opacity-60 ${currentPalette.primary}`
+                          : ""
+                      }`}
                     />
                   </div>
                 </div>
 
                 <div>
-                  <label className="block text-white/80 text-sm font-medium mb-2">Address</label>
+                  <label className="block text-white/80 text-sm font-medium mb-2">
+                    Address
+                  </label>
                   <div className="relative">
                     <MapPin className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-white/40" />
                     <input
                       type="text"
                       value={profile.address}
                       disabled={!isEditing}
-                      className={`w-full pl-12 pr-4 py-3 bg-slate-800/50 border border-white/20 rounded-xl text-white placeholder-white/40 focus:border-current focus:outline-none transition-colors disabled:opacity-60 ${isEditing ? `focus:border-opacity-60 ${currentPalette.primary}` : ""}`}
+                      className={`w-full pl-12 pr-4 py-3 bg-slate-800/50 border border-white/20 rounded-xl text-white placeholder-white/40 focus:border-current focus:outline-none transition-colors disabled:opacity-60 ${
+                        isEditing
+                          ? `focus:border-opacity-60 ${currentPalette.primary}`
+                          : ""
+                      }`}
                     />
                   </div>
                 </div>
               </div>
 
               <div>
-                <label className="block text-white/80 text-sm font-medium mb-2">Bio</label>
+                <label className="block text-white/80 text-sm font-medium mb-2">
+                  Bio
+                </label>
                 <textarea
                   value={profile.bio}
                   disabled={!isEditing}
                   rows={4}
-                  className={`w-full px-4 py-3 bg-slate-800/50 border border-white/20 rounded-xl text-white placeholder-white/40 focus:border-current focus:outline-none transition-colors disabled:opacity-60 resize-none ${isEditing ? `focus:border-opacity-60 ${currentPalette.primary}` : ""}`}
+                  className={`w-full px-4 py-3 bg-slate-800/50 border border-white/20 rounded-xl text-white placeholder-white/40 focus:border-current focus:outline-none transition-colors disabled:opacity-60 resize-none ${
+                    isEditing
+                      ? `focus:border-opacity-60 ${currentPalette.primary}`
+                      : ""
+                  }`}
                 />
               </div>
             </div>
@@ -213,5 +245,5 @@ export default function ProfilePage() {
         </div>
       </div>
     </div>
-  )
+  );
 }
