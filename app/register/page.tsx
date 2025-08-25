@@ -14,6 +14,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Building2, User, Sparkles } from "lucide-react";
+import callApi from "../Api/callApi";
 
 type AccountType = "personal" | "business" | null;
 
@@ -40,10 +41,23 @@ export default function RegisterPage() {
     setFormData((prev) => ({ ...prev, [field]: value }));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     // Handle form submission
     console.log(t("Form submitted:"), { accountType, ...formData });
+
+    const payload = {
+      email: formData.email,
+      password: formData.password,
+      role: accountType,
+      phone:
+        accountType == "business" ? formData.businessPhone : formData.phone,
+      ...(accountType == "business" && {
+        name: formData.businessName,
+      }),
+    };
+    const authedUser = await callApi("/api/auth/register", "POST", payload);
+    console.log("authedUser", authedUser);
   };
 
   return (

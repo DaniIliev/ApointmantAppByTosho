@@ -14,6 +14,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { LogIn } from "lucide-react";
+import callApi from "../Api/callApi";
 
 export default function LoginPage() {
   const { t } = useTranslation(); // Initialize useTranslation
@@ -26,9 +27,15 @@ export default function LoginPage() {
     setFormData((prev) => ({ ...prev, [field]: value }));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     console.log(t("Login submitted:"), formData); // Wrap text
+
+    const payload = {
+      email: formData.email,
+      password: formData.password,
+    };
+    const authedUser = await callApi("/api/auth/login", "POST", payload);
   };
 
   return (
