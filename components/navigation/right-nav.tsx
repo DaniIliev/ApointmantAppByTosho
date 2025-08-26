@@ -22,7 +22,7 @@ export default function RightNavigation() {
       {extraRightNavMenu && (
         <aside
           className={cn(
-            "fixed right-0 z-50 flex flex-col justify-start",
+            "fixed right-0 z-10 flex flex-col justify-start",
             "bg-background border-l border-border shadow-lg",
             "h-[calc(100vh-4rem)]",
             "transition-all duration-300 ease-in-out",

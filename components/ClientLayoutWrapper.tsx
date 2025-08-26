@@ -7,6 +7,8 @@ import ClientLayout from "@/components/ClientLayout";
 import { PageTitleProvider } from "@/context/PageTitleContext";
 import { RightNavProvider } from "@/context/RightNavContext";
 import i18n from "@/i18n";
+import { AuthProvider, useAuthContext } from "@/context/AuthContext";
+import GuestLayout from "./GuestLayout";
 
 export default function ClientLayoutWrapper({
   children,
@@ -14,7 +16,7 @@ export default function ClientLayoutWrapper({
   children: React.ReactNode;
 }>) {
   const pathname = usePathname();
-
+  const { user } = useAuthContext();
   useEffect(() => {
     const parts = pathname.split("/");
     const localeFromPath = parts[1];
@@ -35,7 +37,11 @@ export default function ClientLayoutWrapper({
     <I18nextProvider i18n={i18n}>
       <PageTitleProvider>
         <RightNavProvider>
-          <ClientLayout>{children}</ClientLayout>
+          {user ? (
+            <ClientLayout>{children}</ClientLayout>
+          ) : (
+            <GuestLayout>{children}</GuestLayout>
+          )}
         </RightNavProvider>
       </PageTitleProvider>
     </I18nextProvider>
