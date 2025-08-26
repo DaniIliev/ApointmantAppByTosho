@@ -2,7 +2,7 @@
 
 import type React from "react";
 import { useState } from "react";
-import { useTranslation } from "react-i18next"; // Import useTranslation
+import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -15,9 +15,11 @@ import {
 } from "@/components/ui/card";
 import { LogIn } from "lucide-react";
 import callApi from "../Api/callApi";
+import { useAuthContext } from "@/context/AuthContext";
 
 export default function LoginPage() {
-  const { t } = useTranslation(); // Initialize useTranslation
+  const { t } = useTranslation();
+  const { login } = useAuthContext();
   const [formData, setFormData] = useState({
     email: "",
     password: "",
@@ -29,13 +31,15 @@ export default function LoginPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log(t("Login submitted:"), formData); // Wrap text
 
     const payload = {
       email: formData.email,
       password: formData.password,
     };
-    const authedUser = await callApi("/api/auth/login", "POST", payload);
+    const authedUser: any = await callApi("/api/auth/login", "POST", payload);
+    login(formData);
+    console.log("authedUser", authedUser);
+    localStorage.setItem("token", authedUser.token);
   };
 
   return (

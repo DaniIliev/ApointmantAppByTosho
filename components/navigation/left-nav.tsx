@@ -10,6 +10,7 @@ import {
   ClipboardList,
   TrendingUp,
 } from "lucide-react";
+import { useAuthContext } from "@/context/AuthContext";
 
 interface LeftNavProps {
   isOpen: boolean;
@@ -27,8 +28,6 @@ export default function LeftNav({ isOpen }: LeftNavProps) {
       label: t("Appointment Types"),
       icon: ClipboardList,
     },
-    { href: "/register", label: t("Register"), icon: UserPlus },
-    { href: "/login", label: t("Login"), icon: LogIn },
   ];
 
   return (

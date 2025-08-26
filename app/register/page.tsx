@@ -55,6 +55,14 @@ export default function RegisterPage() {
       ...(accountType == "business" && {
         name: formData.businessName,
       }),
+      ...(accountType == "personal" &&
+        formData.firstName && {
+          firstName: formData.firstName,
+        }),
+      ...(accountType == "personal" &&
+        formData.lastName && {
+          lastName: formData.lastName,
+        }),
     };
     const authedUser = await callApi("/api/auth/register", "POST", payload);
     console.log("authedUser", authedUser);
