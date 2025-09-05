@@ -47,7 +47,11 @@ export default function ClientLayout({
                 ? RIGHT_NAV_OPEN_WIDTH_CLASS
                 : RIGHT_NAV_CLOSED_WIDTH_CLASS
             }
-               min-h-[87vh] bg-gradient-to-br from-primary/20 via-background to-accent/20 p-7 relative overflow-hidden
+               min-h-[87vh] 
+               bg-gradient-to-br 
+              
+              from-primary/20 via-background to-accent/20
+               p-7 relative overflow-hidden
           `}
         >
           {children}

@@ -19,20 +19,20 @@ export function ExportButton({ onExport }: ExportButtonProps) {
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <button className="p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors cursor-pointer">
-          <Download className="h-4 w-4 mr-2" />
+          <Download size={18} />
         </button>
       </DropdownMenuTrigger>
       <DropdownMenuContent className="backdrop-blur-md bg-popover/90 border-white/20">
         <DropdownMenuItem onClick={() => onExport("csv")}>
-          <Table className="h-4 w-4 mr-2" />
+          <Table size={18} />
           {t("Export as CSV")}
         </DropdownMenuItem>
         <DropdownMenuItem onClick={() => onExport("pdf")}>
-          <FileText className="h-4 w-4 mr-2" />
+          <FileText size={18} />
           {t("Export as PDF")}
         </DropdownMenuItem>
         <DropdownMenuItem onClick={() => onExport("png")}>
-          <ImageIcon className="h-4 w-4 mr-2" />
+          <ImageIcon size={18} />
           {t("Export as Image")}
         </DropdownMenuItem>
       </DropdownMenuContent>

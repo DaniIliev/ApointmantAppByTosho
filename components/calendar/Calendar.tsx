@@ -17,21 +17,20 @@ import ViewDetails from "@/app/dashboard/Forms/ViewDetails";
 interface CalendarProps {
   appointments: Appointment[];
   getStatusColor: (status: AppointmentStatus) => string;
+  openDetailsModal: () => void;
+  onSelectAppointment: (appointment: Appointment) => void;
 }
 
 export default function Calendar({
   appointments,
   getStatusColor,
+  openDetailsModal,
+  onSelectAppointment,
 }: CalendarProps) {
   const { t } = useTranslation();
   const [currentDate, setCurrentDate] = useState(new Date());
   const [calendarView, setCalendarView] = useState<"week" | "month">("week");
   const [searchTerm, setSearchTerm] = useState("");
-
-  // Добавени състояния за управление на модала
-  const [isViewModalOpen, setIsViewModalOpen] = useState(false);
-  const [selectedAppointment, setSelectedAppointment] =
-    useState<Appointment | null>(null);
 
   const handleDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newDateStr = e.target.value;
@@ -42,8 +41,8 @@ export default function Calendar({
   };
 
   const handleOpenAppointmentModal = (appointment: Appointment) => {
-    setSelectedAppointment(appointment);
-    setIsViewModalOpen(true);
+    onSelectAppointment(appointment);
+    openDetailsModal();
   };
 
   const getAppointmentsForDate = (date: Date) => {
@@ -286,22 +285,6 @@ export default function Calendar({
           )}
         </CardContent>
       </Card>
-
-      <Dialog open={isViewModalOpen} onOpenChange={setIsViewModalOpen}>
-        <DialogContent className="max-w-2xl bg-card/95 backdrop-blur-lg border-2 border-primary/20">
-          <DialogHeader>
-            <DialogTitle className="text-2xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
-              {t("Appointment Details")}
-            </DialogTitle>
-          </DialogHeader>
-
-          {selectedAppointment && (
-            <div className="space-y-6">
-              <ViewDetails selectedAppointment={selectedAppointment} />
-            </div>
-          )}
-        </DialogContent>
-      </Dialog>
     </>
   );
 }

@@ -9,7 +9,9 @@ import {
   LogIn,
   ClipboardList,
   TrendingUp,
+  ListTodo,
 } from "lucide-react";
+
 import { useAuthContext } from "@/context/AuthContext";
 
 interface LeftNavProps {
@@ -23,6 +25,7 @@ export default function LeftNav({ isOpen }: LeftNavProps) {
   const navItems = [
     { href: "/dashboard", label: t("Dashboard"), icon: LayoutDashboard },
     { href: "/performance", label: t("Performance"), icon: TrendingUp },
+    { href: "/taskManager", label: t("Task Manager"), icon: ListTodo },
     {
       href: "/appointment-types",
       label: t("Appointment Types"),

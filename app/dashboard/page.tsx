@@ -13,12 +13,6 @@ import {
 import { usePageTitle } from "@/context/PageTitleContext";
 import { useRightNav } from "@/context/RightNavContext";
 import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
-import {
   Appointment,
   AppointmentStatus,
   AppointmentType,
@@ -31,6 +25,9 @@ import CreateAppointmant from "./Forms/CreateAppointmant";
 import { AppointmentsTable } from "@/components/AppointmantTable/AppointmantTable";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useTranslation } from "react-i18next";
+import AppointmentsBoardView from "./Components/AppointmentsBoardView";
+import { CustomTooltip } from "@/components/customUIComponents/CustomTooltip";
+import { Modal } from "@/components/customUIComponents/Modal";
 
 const mockAppointmentTypes: AppointmentType[] = [
   {
@@ -256,23 +253,7 @@ const CreateNewDashboardMenu = ({
   onOpenModal,
 }: CreateNewDashboardMenuProps) => {
   return (
-    <TooltipProvider>
-      <div className="flex flex-col items-center space-y-2">
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <button
-              onClick={onOpenModal}
-              className="p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors cursor-pointer"
-            >
-              <Plus className="h-5 w-5" />
-            </button>
-          </TooltipTrigger>
-          <TooltipContent>
-            <p>Add new Appointment</p>
-          </TooltipContent>
-        </Tooltip>
-      </div>
-    </TooltipProvider>
+    <CustomTooltip onClick={onOpenModal} tooltipText="Add" icon={<Plus />} />
   );
 };
 
@@ -284,11 +265,13 @@ export default function DashboardPage() {
   const [statusFilter, setStatusFilter] = useState<AppointmentStatus | "all">(
     "all"
   );
-  const [selectedAppointment, setSelectedAppointment] =
-    useState<Appointment | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isViewModalOpen, setIsViewModalOpen] = useState(false);
   const [isEditMode, setIsEditMode] = useState(false);
+
+  const [selectedAppointment, setSelectedAppointment] =
+    useState<Appointment | null>(null);
+
   const [editingAppointment, setEditingAppointment] =
     useState<Appointment | null>(null);
   const [newAppointment, setNewAppointment] = useState({
@@ -417,12 +400,22 @@ export default function DashboardPage() {
           >
             {t("Table View")}
           </TabsTrigger>
+          <TabsTrigger
+            value="board"
+            className="data-[state=active]:bg-transparent data-[state=active]:text-primary data-[state=active]:shadow-none transition-colors px-6 py-3 border-b-2 data-[state=active]:border-primary border-transparent"
+          >
+            {t("Board View")}
+          </TabsTrigger>
         </TabsList>
 
         <TabsContent value="calendar">
           <Calendar
             appointments={appointments}
             getStatusColor={getStatusColor}
+            openDetailsModal={() => setIsViewModalOpen(true)}
+            onSelectAppointment={(appointment) =>
+              setSelectedAppointment(appointment)
+            }
           />
         </TabsContent>
 
@@ -507,59 +500,57 @@ export default function DashboardPage() {
             </Card>
           )}
         </TabsContent>
-      </Tabs>
-      {/* </div> */}
-      <Dialog open={isViewModalOpen} onOpenChange={setIsViewModalOpen}>
-        <DialogContent className="max-w-2xl bg-card/95 backdrop-blur-lg border-2 border-primary/20">
-          <DialogHeader>
-            <DialogTitle className="text-2xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
-              {t(isEditMode ? "Edit Appointment" : "Appointment Details")}
-            </DialogTitle>
-          </DialogHeader>
 
-          {selectedAppointment && (
-            <div className="space-y-6">
-              {!isEditMode ? (
-                <>
-                  <ViewDetails
-                    handleEditAppointment={handleEditAppointment}
-                    handleDeleteAppointment={handleDeleteAppointment}
-                    selectedAppointment={selectedAppointment}
-                  />
-                </>
-              ) : (
-                <>
-                  {editingAppointment && (
-                    <EditForm
-                      handleSaveEdit={handleSaveEdit}
-                      editingAppointment={editingAppointment}
-                      setEditingAppointment={setEditingAppointment}
-                      setIsEditMode={setIsEditMode}
-                    />
-                  )}
-                </>
-              )}
-            </div>
-          )}
-        </DialogContent>
-      </Dialog>
-
-      <Dialog open={isCreateModalOpen} onOpenChange={setIsCreateModalOpen}>
-        <DialogContent className="max-w-2xl bg-card/95 backdrop-blur-lg border-2 border-primary/20">
-          <DialogHeader>
-            <DialogTitle className="text-2xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
-              {t("Create New Appointment")}
-            </DialogTitle>
-          </DialogHeader>
-          <CreateAppointmant
-            handleCreateAppointment={handleCreateAppointment}
-            newAppointment={newAppointment}
-            setNewAppointment={setNewAppointment}
-            setIsCreateModalOpen={setIsCreateModalOpen}
-            mockAppointmentTypes={mockAppointmentTypes}
+        <TabsContent value="board">
+          <AppointmentsBoardView
+            onOpenModal={() => setIsCreateModalOpen(true)}
           />
-        </DialogContent>
-      </Dialog>
+        </TabsContent>
+      </Tabs>
+      <Modal
+        label={t(isEditMode ? "Edit Appointment" : "Appointment Details")}
+        open={isCreateModalOpen}
+        onOpenChange={setIsCreateModalOpen}
+      >
+        {selectedAppointment && (
+          <div className="space-y-6">
+            {!isEditMode ? (
+              <>
+                <ViewDetails
+                  handleEditAppointment={handleEditAppointment}
+                  handleDeleteAppointment={handleDeleteAppointment}
+                  selectedAppointment={selectedAppointment}
+                />
+              </>
+            ) : (
+              <>
+                {editingAppointment && (
+                  <EditForm
+                    handleSaveEdit={handleSaveEdit}
+                    editingAppointment={editingAppointment}
+                    setEditingAppointment={setEditingAppointment}
+                    setIsEditMode={setIsEditMode}
+                  />
+                )}
+              </>
+            )}
+          </div>
+        )}
+      </Modal>
+
+      <Modal
+        label={t("Create New Appointment")}
+        open={isCreateModalOpen}
+        onOpenChange={setIsCreateModalOpen}
+      >
+        <CreateAppointmant
+          handleCreateAppointment={handleCreateAppointment}
+          newAppointment={newAppointment}
+          setNewAppointment={setNewAppointment}
+          setIsCreateModalOpen={setIsCreateModalOpen}
+          mockAppointmentTypes={mockAppointmentTypes}
+        />
+      </Modal>
     </div>
   );
 }

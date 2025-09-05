@@ -237,14 +237,14 @@ export default function TopNav({
           <div className="flex items-center space-x-4">
             <Link
               href="/login"
-              className="flex items-center px-4 py-2 rounded-full text-white/80 bg-white/5 hover:bg-white/10 transition-colors duration-200"
+              className="flex items-center px-4 py-2 rounded-full text-black bg-white/5 hover:bg-white/10 transition-colors duration-200"
             >
               <LogIn className="w-4 h-4 mr-2" />
               {t("Login")}
             </Link>
             <Link
               href="/register"
-              className="flex items-center px-4 py-2 rounded-full text-white/80 bg-white/5 hover:bg-white/10 transition-colors duration-200"
+              className="flex items-center px-4 py-2 rounded-full text-black bg-white/5 hover:bg-white/10 transition-colors duration-200"
             >
               <UserPlus className="w-4 h-4 mr-2" />
               {t("Register")}
