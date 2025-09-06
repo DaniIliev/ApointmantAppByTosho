@@ -93,18 +93,18 @@ export default function TopNav({
     <nav className="fixed top-0 left-0 right-0 z-50 bg-slate-900/20 backdrop-blur-xl border-b border-white/10">
       <div className="flex items-center justify-between px-6 py-4">
         <div className="flex items-center space-x-4">
-          {user && (
-            <button
-              onClick={onToggleLeftNav}
-              className="p-2 rounded-lg bg-gradient-to-r from-purple-500/20 to-blue-500/20 border border-white/20 hover:border-white/40 transition-all duration-200"
-            >
-              {isLeftNavOpen ? (
-                <X className="w-5 h-5 text-white" />
-              ) : (
-                <Menu className="w-5 h-5 text-white" />
-              )}
-            </button>
-          )}
+          {/* {user && ( */}
+          <button
+            onClick={onToggleLeftNav}
+            className="p-2 rounded-lg bg-gradient-to-r from-purple-500/20 to-blue-500/20 border border-white/20 hover:border-white/40 transition-all duration-200"
+          >
+            {isLeftNavOpen ? (
+              <X className="w-5 h-5 text-white" />
+            ) : (
+              <Menu className="w-5 h-5 text-white" />
+            )}
+          </button>
+          {/* )} */}
           <h1 className="text-xl font-bold bg-gradient-to-r from-purple-400 to-blue-400 bg-clip-text text-transparent">
             {t("AppointmentPro")}
           </h1>

@@ -37,11 +37,11 @@ export default function ClientLayoutWrapper({
     <I18nextProvider i18n={i18n}>
       <PageTitleProvider>
         <RightNavProvider>
-          {user ? (
-            <ClientLayout>{children}</ClientLayout>
-          ) : (
+          {/* {user ? ( */}
+          <ClientLayout>{children}</ClientLayout>
+          {/* ) : (
             <GuestLayout>{children}</GuestLayout>
-          )}
+          )} */}
         </RightNavProvider>
       </PageTitleProvider>
     </I18nextProvider>

@@ -74,18 +74,18 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
             console.warn("Invalid token or missing _id in token.");
             logout();
             setIsLoading(false);
-            redirect("/login");
+            // redirect("/login");
           }
         } catch (error) {
           console.error("Error fetching user data:", error);
           logout();
           setIsLoading(false);
-          redirect("/login");
+          // redirect("/login");
         }
       } else {
         setUser(null);
         setIsLoading(false);
-        redirect("/login");
+        // redirect("/login");
       }
       setIsLoading(false);
     };

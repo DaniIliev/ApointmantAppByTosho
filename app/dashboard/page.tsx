@@ -22,12 +22,12 @@ import Calendar from "@/components/calendar/Calendar";
 import ViewDetails from "./Forms/ViewDetails";
 import EditForm from "./Forms/EditForm";
 import CreateAppointmant from "./Forms/CreateAppointmant";
-import { AppointmentsTable } from "@/components/AppointmantTable/AppointmantTable";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useTranslation } from "react-i18next";
 import AppointmentsBoardView from "./Components/AppointmentsBoardView";
 import { CustomTooltip } from "@/components/customUIComponents/CustomTooltip";
 import { Modal } from "@/components/customUIComponents/Modal";
+import AppointmentsTable from "@/components/AppointmantTable/AppointmantTable";
 
 const mockAppointmentTypes: AppointmentType[] = [
   {
@@ -284,18 +284,6 @@ export default function DashboardPage() {
     notes: "",
   });
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
-
-  const filteredAppointments = appointments.filter((appointment) => {
-    const matchesSearch =
-      appointment.clientName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      appointment.service.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesStatus =
-      statusFilter === "all" || appointment.status === statusFilter;
-    return matchesSearch && matchesStatus;
-  });
-
-  const [activeTab, setActiveTab] = useState("calendar");
-
   const { setPageTitle } = usePageTitle();
   const { setExtraRightNavMenu, setIsRightNavVisible } = useRightNav();
 
@@ -420,85 +408,10 @@ export default function DashboardPage() {
         </TabsContent>
 
         <TabsContent value="table" className="space-y-4">
-          <Card className="border-2 shadow-2xl bg-card/70 backdrop-blur-lg border-primary/20">
-            <CardContent className="p-6">
-              <div className="flex flex-col md:flex-row gap-4 items-center justify-between">
-                <div className="flex items-center gap-4 flex-1">
-                  <div className="relative flex-1 max-w-md">
-                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                    <Input
-                      placeholder={t("Search appointments...")}
-                      className="pl-10 h-12 text-base border-2 focus:border-primary transition-all duration-300 bg-input/80 backdrop-blur-sm rounded-xl"
-                      value={searchTerm}
-                      onChange={(e) => setSearchTerm(e.target.value)}
-                    />
-                  </div>
-                  <div className="flex gap-2">
-                    <Button
-                      variant={statusFilter === "all" ? "default" : "outline"}
-                      onClick={() => setStatusFilter("all")}
-                      className="rounded-xl"
-                    >
-                      {t("All")}
-                    </Button>
-                    <Button
-                      variant={
-                        statusFilter === "upcoming" ? "default" : "outline"
-                      }
-                      onClick={() => setStatusFilter("upcoming")}
-                      className="rounded-xl"
-                    >
-                      {t("Upcoming")}
-                    </Button>
-                    <Button
-                      variant={
-                        statusFilter === "completed" ? "default" : "outline"
-                      }
-                      onClick={() => setStatusFilter("completed")}
-                      className="rounded-xl"
-                    >
-                      {t("Completed")}
-                    </Button>
-                    <Button
-                      variant={
-                        statusFilter === "cancelled" ? "default" : "outline"
-                      }
-                      onClick={() => setStatusFilter("cancelled")}
-                      className="rounded-xl"
-                    >
-                      {t("Cancelled")}
-                    </Button>
-                  </div>
-                </div>
-                <Button
-                  onClick={() => setIsCreateModalOpen(true)}
-                  className="bg-gradient-to-r from-primary to-accent hover:from-primary/90 hover:to-accent/90 transition-all duration-300 shadow-xl hover:shadow-2xl hover:scale-105 rounded-xl"
-                >
-                  <Plus className="h-4 w-4 mr-2" />
-                  {t("New Appointment")}
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-
           <AppointmentsTable
-            data={filteredAppointments}
+            data={appointments}
             onOpenViewModal={openViewModal}
           />
-
-          {filteredAppointments.length === 0 && (
-            <Card className="border-2 shadow-2xl bg-card/70 backdrop-blur-lg border-primary/20">
-              <CardContent className="p-12 text-center">
-                <CalendarIcon className="h-16 w-16 mx-auto text-muted-foreground mb-4" />
-                <h3 className="text-xl font-semibold text-muted-foreground mb-2">
-                  {t("No appointments found")}
-                </h3>
-                <p className="text-muted-foreground">
-                  {t("Try adjusting your search or filter criteria")}
-                </p>
-              </CardContent>
-            </Card>
-          )}
         </TabsContent>
 
         <TabsContent value="board">
