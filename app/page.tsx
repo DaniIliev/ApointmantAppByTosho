@@ -1,5 +1,6 @@
 // app/page.tsx
-
+"use client";
+import MobileCalendar from "@/components/calendar/MobileCalendar";
 import { CalendarAppointments } from "@/components/ResponsibleCalendarView/ResponsibleCalendarView";
 import { Appointment } from "@/Global/Types/types";
 
@@ -12,7 +13,7 @@ const mockAppointments: Appointment[] = [
     date: "2025-08-27",
     time: "14:30",
     service: "Подстригване",
-    status: "upcoming", // Променено
+    status: "upcoming",
   },
   {
     id: "2",
@@ -40,7 +41,9 @@ export default function Home() {
   return (
     <div className="container mx-auto py-8">
       <h1 className="text-3xl font-bold mb-6">График за срещи</h1>
-      <CalendarAppointments appointments={mockAppointments} />
+      {/* <CalendarAppointments appointments={mockAppointments} />
+       */}
+      {/* <MobileCalendar /> */}
     </div>
   );
 }

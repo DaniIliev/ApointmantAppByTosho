@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { ChevronLeft, ChevronRight, Search } from "lucide-react";
 import { Card, CardContent } from "../ui/card";
@@ -13,6 +13,7 @@ import {
 } from "@/Global/Utils/commonFn";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "../ui/dialog";
 import ViewDetails from "@/app/dashboard/Forms/ViewDetails";
+import MobileCalendar from "./MobileCalendar";
 
 interface CalendarProps {
   appointments: Appointment[];
@@ -31,6 +32,16 @@ export default function Calendar({
   const [currentDate, setCurrentDate] = useState(new Date());
   const [calendarView, setCalendarView] = useState<"week" | "month">("week");
   const [searchTerm, setSearchTerm] = useState("");
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const checkIsMobile = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    checkIsMobile();
+    window.addEventListener("resize", checkIsMobile);
+    return () => window.removeEventListener("resize", checkIsMobile);
+  }, []);
 
   const handleDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newDateStr = e.target.value;
@@ -91,6 +102,9 @@ export default function Calendar({
 
   const translatedMonthNames = monthNames.map((name) => t(name));
 
+  if (isMobile) {
+    return <MobileCalendar appointments={appointments} />;
+  }
   return (
     <>
       <Card className="border-2 shadow-2xl bg-card/70 backdrop-blur-lg border-primary/20 mb-8 overflow-hidden transition-all duration-500 ease-in-out">

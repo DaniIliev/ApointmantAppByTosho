@@ -93,7 +93,6 @@ export const GenericTable = <T extends Record<string, any>>({
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    // ... (същата логика за isMobile и fullScreen)
     const checkIsMobile = () => {
       setIsMobile(window.innerWidth < 768);
     };
