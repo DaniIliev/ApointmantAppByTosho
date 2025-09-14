@@ -1,17 +1,11 @@
 import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { Textarea } from "@/components/ui/textarea";
 import { AppointmentType } from "@/Global/Types/types";
 import React from "react";
+import { LabeledInput } from "@/components/customUIComponents/LabeledInput";
+import { LabeledSelect } from "@/components/customUIComponents/LabeledSelect";
+import { LabeledTextarea } from "@/components/customUIComponents/LabeledTextarea";
+import { FormGrid } from "@/Global/Styles/FormGrid";
 
 interface CreateAppointmantProps {
   newAppointment: {
@@ -47,153 +41,91 @@ const CreateAppointmant = ({
   setIsCreateModalOpen,
 }: CreateAppointmantProps) => {
   const { t } = useTranslation();
+
   return (
     <div className="space-y-6">
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div className="space-y-2">
-          <Label htmlFor="clientName" className="text-sm font-medium">
-            {t("Client Name")}
-          </Label>
-          <Input
-            id="clientName"
-            value={newAppointment.clientName}
-            onChange={(e) =>
-              setNewAppointment((prev) => ({
-                ...prev,
-                clientName: e.target.value,
-              }))
-            }
-            className="h-12 border-2 focus:border-primary transition-all duration-300 bg-input/80 backdrop-blur-sm rounded-xl"
-            placeholder={t("Enter client name")}
-          />
-        </div>
-
-        <div className="space-y-2">
-          <Label htmlFor="clientEmail" className="text-sm font-medium">
-            {t("Email")}
-          </Label>
-          <Input
-            id="clientEmail"
-            type="email"
-            value={newAppointment.clientEmail}
-            onChange={(e) =>
-              setNewAppointment((prev) => ({
-                ...prev,
-                clientEmail: e.target.value,
-              }))
-            }
-            className="h-12 border-2 focus:border-primary transition-all duration-300 bg-input/80 backdrop-blur-sm rounded-xl"
-            placeholder={t("client@example.com")}
-          />
-        </div>
-
-        <div className="space-y-2">
-          <Label htmlFor="clientPhone" className="text-sm font-medium">
-            {t("Phone")}
-          </Label>
-          <Input
-            id="clientPhone"
-            value={newAppointment.clientPhone}
-            onChange={(e) =>
-              setNewAppointment((prev) => ({
-                ...prev,
-                clientPhone: e.target.value,
-              }))
-            }
-            className="h-12 border-2 focus:border-primary transition-all duration-300 bg-input/80 backdrop-blur-sm rounded-xl"
-            placeholder={t("+1 (555) 123-4567")}
-          />
-        </div>
-
-        <div className="space-y-2">
-          <Label htmlFor="appointmentType" className="text-sm font-medium">
-            {t("Appointment Type")}
-          </Label>
-          <Select
-            value={newAppointment.appointmentTypeId}
-            onValueChange={(value) =>
-              setNewAppointment((prev) => ({
-                ...prev,
-                appointmentTypeId: value,
-              }))
-            }
-          >
-            <SelectTrigger className="h-12 border-2 focus:border-primary transition-all duration-300 bg-input/80 backdrop-blur-sm rounded-xl">
-              <SelectValue placeholder={t("Select appointment type")} />
-            </SelectTrigger>
-            <SelectContent className="bg-card/95 backdrop-blur-lg border-2 border-primary/20">
-              {mockAppointmentTypes.map((type) => (
-                <SelectItem
-                  key={type.id}
-                  value={type.id}
-                  className="focus:bg-primary/10"
-                >
-                  <div className="flex flex-col">
-                    <span className="font-medium">{type.name}</span>
-                    <span className="text-xs text-muted-foreground">
-                      {type.duration} {t("min")} - ${type.price}
-                    </span>
-                  </div>
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-
-        <div className="space-y-2">
-          <Label htmlFor="date" className="text-sm font-medium">
-            {t("Date")}
-          </Label>
-          <Input
-            id="date"
-            type="date"
-            value={newAppointment.date}
-            onChange={(e) =>
-              setNewAppointment((prev) => ({
-                ...prev,
-                date: e.target.value,
-              }))
-            }
-            className="h-12 border-2 focus:border-primary transition-all duration-300 bg-input/80 backdrop-blur-sm rounded-xl"
-          />
-        </div>
-
-        <div className="space-y-2">
-          <Label htmlFor="time" className="text-sm font-medium">
-            {t("Time")}
-          </Label>
-          <Input
-            id="time"
-            type="time"
-            value={newAppointment.time}
-            onChange={(e) =>
-              setNewAppointment((prev) => ({
-                ...prev,
-                time: e.target.value,
-              }))
-            }
-            className="h-12 border-2 focus:border-primary transition-all duration-300 bg-input/80 backdrop-blur-sm rounded-xl"
-          />
-        </div>
-      </div>
-
-      <div className="space-y-2">
-        <Label htmlFor="notes" className="text-sm font-medium">
-          {t("Notes (Optional)")}
-        </Label>
-        <Textarea
-          id="notes"
-          value={newAppointment.notes}
+      <FormGrid>
+        <LabeledInput
+          label={t("Client Name")}
+          id="clientName"
+          value={newAppointment.clientName}
           onChange={(e) =>
             setNewAppointment((prev) => ({
               ...prev,
-              notes: e.target.value,
+              clientName: e.target.value,
             }))
           }
-          className="min-h-[100px] border-2 focus:border-primary transition-all duration-300 bg-input/80 backdrop-blur-sm rounded-xl resize-none"
-          placeholder={t("Add any additional notes or special requirements...")}
+          placeholder={t("Enter client name")}
         />
-      </div>
+
+        <LabeledInput
+          label={t("Email")}
+          id="clientEmail"
+          type="email"
+          value={newAppointment.clientEmail}
+          onChange={(e) =>
+            setNewAppointment((prev) => ({
+              ...prev,
+              clientEmail: e.target.value,
+            }))
+          }
+          placeholder={t("client@example.com")}
+        />
+
+        <LabeledInput
+          label={t("Phone")}
+          id="clientPhone"
+          value={newAppointment.clientPhone}
+          onChange={(e) =>
+            setNewAppointment((prev) => ({
+              ...prev,
+              clientPhone: e.target.value,
+            }))
+          }
+          placeholder={t("+1 (555) 123-4567")}
+        />
+
+        <LabeledSelect
+          label={t("Appointment Type")}
+          id="appointmentType"
+          value={newAppointment.appointmentTypeId}
+          onValueChange={(value) =>
+            setNewAppointment((prev) => ({ ...prev, appointmentTypeId: value }))
+          }
+          placeholder={t("Select appointment type")}
+          options={mockAppointmentTypes}
+        />
+
+        <LabeledInput
+          label={t("Date")}
+          id="date"
+          type="date"
+          value={newAppointment.date}
+          onChange={(e) =>
+            setNewAppointment((prev) => ({ ...prev, date: e.target.value }))
+          }
+        />
+
+        <LabeledInput
+          label={t("Time")}
+          id="time"
+          type="time"
+          value={newAppointment.time}
+          onChange={(e) =>
+            setNewAppointment((prev) => ({ ...prev, time: e.target.value }))
+          }
+        />
+      </FormGrid>
+
+      <LabeledTextarea
+        label={t("Notes (Optional)")}
+        id="notes"
+        value={newAppointment.notes}
+        onChange={(e) =>
+          setNewAppointment((prev) => ({ ...prev, notes: e.target.value }))
+        }
+        placeholder={t("Add any additional notes or special requirements...")}
+      />
 
       {newAppointment.appointmentTypeId && (
         <div className="p-4 bg-primary/10 rounded-xl border border-primary/20">

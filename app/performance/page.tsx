@@ -14,6 +14,8 @@ import {
   XCircle,
   TrendingUp,
   UserPlus,
+  ListFilterPlus,
+  Download,
 } from "lucide-react";
 import { usePageTitle } from "@/context/PageTitleContext";
 import {
@@ -23,6 +25,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { useRightNav } from "@/context/RightNavContext";
+import { CustomTooltip } from "@/components/customUIComponents/CustomTooltip";
 
 // Mock data - replace with real data from your backend
 const mockKPIData = {
@@ -83,18 +86,27 @@ type PerformanceRightNavProps = {
 const PerformanceRightNav = ({ handleExport }: PerformanceRightNavProps) => {
   const { t } = useTranslation();
   return (
-    <TooltipProvider>
+    <>
       <div className="flex flex-col items-center space-y-2">
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <ExportButton onExport={handleExport} />
-          </TooltipTrigger>
-          <TooltipContent>
-            <p>{t("Export")}</p>
-          </TooltipContent>
-        </Tooltip>
+        <CustomTooltip
+          onClick={() => {}}
+          tooltipText={t("Filter")}
+          icon={<ListFilterPlus />}
+        />
+        <TooltipProvider>
+          <div className="flex flex-col items-center">
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <ExportButton onExport={handleExport} />
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>{t("Export")}</p>
+              </TooltipContent>
+            </Tooltip>
+          </div>
+        </TooltipProvider>
       </div>
-    </TooltipProvider>
+    </>
   );
 };
 

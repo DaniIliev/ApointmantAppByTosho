@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { ChevronLeft, ChevronRight, Search } from "lucide-react";
 import { Card, CardContent } from "../ui/card";
@@ -13,25 +13,35 @@ import {
 } from "@/Global/Utils/commonFn";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "../ui/dialog";
 import ViewDetails from "@/app/dashboard/Forms/ViewDetails";
+import MobileCalendar from "./MobileCalendar";
 
 interface CalendarProps {
   appointments: Appointment[];
   getStatusColor: (status: AppointmentStatus) => string;
+  openDetailsModal: () => void;
+  onSelectAppointment: (appointment: Appointment) => void;
 }
 
 export default function Calendar({
   appointments,
   getStatusColor,
+  openDetailsModal,
+  onSelectAppointment,
 }: CalendarProps) {
   const { t } = useTranslation();
   const [currentDate, setCurrentDate] = useState(new Date());
   const [calendarView, setCalendarView] = useState<"week" | "month">("week");
   const [searchTerm, setSearchTerm] = useState("");
+  const [isMobile, setIsMobile] = useState(false);
 
-  // Добавени състояния за управление на модала
-  const [isViewModalOpen, setIsViewModalOpen] = useState(false);
-  const [selectedAppointment, setSelectedAppointment] =
-    useState<Appointment | null>(null);
+  useEffect(() => {
+    const checkIsMobile = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    checkIsMobile();
+    window.addEventListener("resize", checkIsMobile);
+    return () => window.removeEventListener("resize", checkIsMobile);
+  }, []);
 
   const handleDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newDateStr = e.target.value;
@@ -42,8 +52,8 @@ export default function Calendar({
   };
 
   const handleOpenAppointmentModal = (appointment: Appointment) => {
-    setSelectedAppointment(appointment);
-    setIsViewModalOpen(true);
+    onSelectAppointment(appointment);
+    openDetailsModal();
   };
 
   const getAppointmentsForDate = (date: Date) => {
@@ -92,6 +102,9 @@ export default function Calendar({
 
   const translatedMonthNames = monthNames.map((name) => t(name));
 
+  if (isMobile) {
+    return <MobileCalendar appointments={appointments} />;
+  }
   return (
     <>
       <Card className="border-2 shadow-2xl bg-card/70 backdrop-blur-lg border-primary/20 mb-8 overflow-hidden transition-all duration-500 ease-in-out">
@@ -286,22 +299,6 @@ export default function Calendar({
           )}
         </CardContent>
       </Card>
-
-      <Dialog open={isViewModalOpen} onOpenChange={setIsViewModalOpen}>
-        <DialogContent className="max-w-2xl bg-card/95 backdrop-blur-lg border-2 border-primary/20">
-          <DialogHeader>
-            <DialogTitle className="text-2xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
-              {t("Appointment Details")}
-            </DialogTitle>
-          </DialogHeader>
-
-          {selectedAppointment && (
-            <div className="space-y-6">
-              <ViewDetails selectedAppointment={selectedAppointment} />
-            </div>
-          )}
-        </DialogContent>
-      </Dialog>
     </>
   );
 }

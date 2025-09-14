@@ -1,3 +1,7 @@
+import { parseISO } from "date-fns";
+import { format } from "date-fns/format";
+import { isValid } from "date-fns/isValid";
+
 export const getWeekDates = (date: Date) => {
   const week: Date[] = [];
   const startOfWeek = new Date(date);
@@ -45,3 +49,45 @@ export const monthNames = [
   "November",
   "December",
 ];
+
+export const formatDateAndTime = (
+  date: Date | string,
+  onlyOne?: "date" | "time" | "dateTime"
+) => {
+  let parsedDate: Date;
+
+  // Handle string input (e.g., ISO string)
+  if (typeof date === "string") {
+    parsedDate = parseISO(date);
+  } else {
+    parsedDate = date;
+  }
+  // Validate the date
+  if (!isValid(parsedDate)) {
+    return `${date}`;
+  }
+
+  const dateResult = format(parsedDate, "dd.MM.yyyy");
+  const timeResult = format(parsedDate, "HH:mm:ss");
+
+  if (onlyOne === "date") {
+    return dateResult;
+  }
+  if (onlyOne === "time") {
+    return timeResult;
+  }
+  if (onlyOne === "dateTime") {
+    return `${dateResult}, ${timeResult}`;
+  }
+
+  return `${dateResult}, ${timeResult}`;
+};
+
+export const getInitials = (name: string) => {
+  const parts = name.split(" ");
+  if (parts.length === 1) return parts[0][0]?.toUpperCase() || "";
+  return (
+    (parts[0][0]?.toUpperCase() || "") +
+    (parts[parts.length - 1][0]?.toUpperCase() || "")
+  );
+};

@@ -13,12 +13,6 @@ import {
 import { usePageTitle } from "@/context/PageTitleContext";
 import { useRightNav } from "@/context/RightNavContext";
 import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
-import {
   Appointment,
   AppointmentStatus,
   AppointmentType,
@@ -28,9 +22,12 @@ import Calendar from "@/components/calendar/Calendar";
 import ViewDetails from "./Forms/ViewDetails";
 import EditForm from "./Forms/EditForm";
 import CreateAppointmant from "./Forms/CreateAppointmant";
-import { AppointmentsTable } from "@/components/AppointmantTable/AppointmantTable";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useTranslation } from "react-i18next";
+import AppointmentsBoardView from "./Components/AppointmentsBoardView";
+import { CustomTooltip } from "@/components/customUIComponents/CustomTooltip";
+import { Modal } from "@/components/customUIComponents/Modal";
+import AppointmentsTable from "@/components/AppointmantTable/AppointmantTable";
 
 const mockAppointmentTypes: AppointmentType[] = [
   {
@@ -256,23 +253,7 @@ const CreateNewDashboardMenu = ({
   onOpenModal,
 }: CreateNewDashboardMenuProps) => {
   return (
-    <TooltipProvider>
-      <div className="flex flex-col items-center space-y-2">
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <button
-              onClick={onOpenModal}
-              className="p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors cursor-pointer"
-            >
-              <Plus className="h-5 w-5" />
-            </button>
-          </TooltipTrigger>
-          <TooltipContent>
-            <p>Add new Appointment</p>
-          </TooltipContent>
-        </Tooltip>
-      </div>
-    </TooltipProvider>
+    <CustomTooltip onClick={onOpenModal} tooltipText="Add" icon={<Plus />} />
   );
 };
 
@@ -284,11 +265,13 @@ export default function DashboardPage() {
   const [statusFilter, setStatusFilter] = useState<AppointmentStatus | "all">(
     "all"
   );
-  const [selectedAppointment, setSelectedAppointment] =
-    useState<Appointment | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isViewModalOpen, setIsViewModalOpen] = useState(false);
   const [isEditMode, setIsEditMode] = useState(false);
+
+  const [selectedAppointment, setSelectedAppointment] =
+    useState<Appointment | null>(null);
+
   const [editingAppointment, setEditingAppointment] =
     useState<Appointment | null>(null);
   const [newAppointment, setNewAppointment] = useState({
@@ -301,18 +284,6 @@ export default function DashboardPage() {
     notes: "",
   });
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
-
-  const filteredAppointments = appointments.filter((appointment) => {
-    const matchesSearch =
-      appointment.clientName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      appointment.service.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesStatus =
-      statusFilter === "all" || appointment.status === statusFilter;
-    return matchesSearch && matchesStatus;
-  });
-
-  const [activeTab, setActiveTab] = useState("calendar");
-
   const { setPageTitle } = usePageTitle();
   const { setExtraRightNavMenu, setIsRightNavVisible } = useRightNav();
 
@@ -417,149 +388,82 @@ export default function DashboardPage() {
           >
             {t("Table View")}
           </TabsTrigger>
+          <TabsTrigger
+            value="board"
+            className="data-[state=active]:bg-transparent data-[state=active]:text-primary data-[state=active]:shadow-none transition-colors px-6 py-3 border-b-2 data-[state=active]:border-primary border-transparent"
+          >
+            {t("Board View")}
+          </TabsTrigger>
         </TabsList>
 
         <TabsContent value="calendar">
           <Calendar
             appointments={appointments}
             getStatusColor={getStatusColor}
+            openDetailsModal={() => setIsViewModalOpen(true)}
+            onSelectAppointment={(appointment) =>
+              setSelectedAppointment(appointment)
+            }
           />
         </TabsContent>
 
         <TabsContent value="table" className="space-y-4">
-          <Card className="border-2 shadow-2xl bg-card/70 backdrop-blur-lg border-primary/20">
-            <CardContent className="p-6">
-              <div className="flex flex-col md:flex-row gap-4 items-center justify-between">
-                <div className="flex items-center gap-4 flex-1">
-                  <div className="relative flex-1 max-w-md">
-                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                    <Input
-                      placeholder={t("Search appointments...")}
-                      className="pl-10 h-12 text-base border-2 focus:border-primary transition-all duration-300 bg-input/80 backdrop-blur-sm rounded-xl"
-                      value={searchTerm}
-                      onChange={(e) => setSearchTerm(e.target.value)}
-                    />
-                  </div>
-                  <div className="flex gap-2">
-                    <Button
-                      variant={statusFilter === "all" ? "default" : "outline"}
-                      onClick={() => setStatusFilter("all")}
-                      className="rounded-xl"
-                    >
-                      {t("All")}
-                    </Button>
-                    <Button
-                      variant={
-                        statusFilter === "upcoming" ? "default" : "outline"
-                      }
-                      onClick={() => setStatusFilter("upcoming")}
-                      className="rounded-xl"
-                    >
-                      {t("Upcoming")}
-                    </Button>
-                    <Button
-                      variant={
-                        statusFilter === "completed" ? "default" : "outline"
-                      }
-                      onClick={() => setStatusFilter("completed")}
-                      className="rounded-xl"
-                    >
-                      {t("Completed")}
-                    </Button>
-                    <Button
-                      variant={
-                        statusFilter === "cancelled" ? "default" : "outline"
-                      }
-                      onClick={() => setStatusFilter("cancelled")}
-                      className="rounded-xl"
-                    >
-                      {t("Cancelled")}
-                    </Button>
-                  </div>
-                </div>
-                <Button
-                  onClick={() => setIsCreateModalOpen(true)}
-                  className="bg-gradient-to-r from-primary to-accent hover:from-primary/90 hover:to-accent/90 transition-all duration-300 shadow-xl hover:shadow-2xl hover:scale-105 rounded-xl"
-                >
-                  <Plus className="h-4 w-4 mr-2" />
-                  {t("New Appointment")}
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-
           <AppointmentsTable
-            data={filteredAppointments}
+            data={appointments}
             onOpenViewModal={openViewModal}
           />
+        </TabsContent>
 
-          {filteredAppointments.length === 0 && (
-            <Card className="border-2 shadow-2xl bg-card/70 backdrop-blur-lg border-primary/20">
-              <CardContent className="p-12 text-center">
-                <CalendarIcon className="h-16 w-16 mx-auto text-muted-foreground mb-4" />
-                <h3 className="text-xl font-semibold text-muted-foreground mb-2">
-                  {t("No appointments found")}
-                </h3>
-                <p className="text-muted-foreground">
-                  {t("Try adjusting your search or filter criteria")}
-                </p>
-              </CardContent>
-            </Card>
-          )}
+        <TabsContent value="board">
+          <AppointmentsBoardView
+            onOpenModal={() => setIsCreateModalOpen(true)}
+          />
         </TabsContent>
       </Tabs>
-      {/* </div> */}
-      <Dialog open={isViewModalOpen} onOpenChange={setIsViewModalOpen}>
-        <DialogContent className="max-w-2xl bg-card/95 backdrop-blur-lg border-2 border-primary/20">
-          <DialogHeader>
-            <DialogTitle className="text-2xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
-              {t(isEditMode ? "Edit Appointment" : "Appointment Details")}
-            </DialogTitle>
-          </DialogHeader>
-
-          {selectedAppointment && (
-            <div className="space-y-6">
-              {!isEditMode ? (
-                <>
-                  <ViewDetails
-                    handleEditAppointment={handleEditAppointment}
-                    handleDeleteAppointment={handleDeleteAppointment}
-                    selectedAppointment={selectedAppointment}
+      <Modal
+        label={t(isEditMode ? "Edit Appointment" : "Appointment Details")}
+        open={isCreateModalOpen}
+        onOpenChange={setIsCreateModalOpen}
+      >
+        {selectedAppointment && (
+          <div className="space-y-6">
+            {!isEditMode ? (
+              <>
+                <ViewDetails
+                  handleEditAppointment={handleEditAppointment}
+                  handleDeleteAppointment={handleDeleteAppointment}
+                  selectedAppointment={selectedAppointment}
+                />
+              </>
+            ) : (
+              <>
+                {editingAppointment && (
+                  <EditForm
+                    handleSaveEdit={handleSaveEdit}
+                    editingAppointment={editingAppointment}
+                    setEditingAppointment={setEditingAppointment}
+                    setIsEditMode={setIsEditMode}
                   />
-                </>
-              ) : (
-                <>
-                  {editingAppointment && (
-                    <EditForm
-                      handleSaveEdit={handleSaveEdit}
-                      editingAppointment={editingAppointment}
-                      setEditingAppointment={setEditingAppointment}
-                      setIsEditMode={setIsEditMode}
-                    />
-                  )}
-                </>
-              )}
-            </div>
-          )}
-        </DialogContent>
-      </Dialog>
+                )}
+              </>
+            )}
+          </div>
+        )}
+      </Modal>
 
-      <Dialog open={isCreateModalOpen} onOpenChange={setIsCreateModalOpen}>
-        <DialogContent className="max-w-2xl bg-card/95 backdrop-blur-lg border-2 border-primary/20">
-          <DialogHeader>
-            <DialogTitle className="text-2xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
-              {t("Create New Appointment")}
-            </DialogTitle>
-          </DialogHeader>
-          <CreateAppointmant
-            handleCreateAppointment={handleCreateAppointment}
-            newAppointment={newAppointment}
-            setNewAppointment={setNewAppointment}
-            setIsCreateModalOpen={setIsCreateModalOpen}
-            mockAppointmentTypes={mockAppointmentTypes}
-          />
-        </DialogContent>
-      </Dialog>
+      <Modal
+        label={t("Create New Appointment")}
+        open={isCreateModalOpen}
+        onOpenChange={setIsCreateModalOpen}
+      >
+        <CreateAppointmant
+          handleCreateAppointment={handleCreateAppointment}
+          newAppointment={newAppointment}
+          setNewAppointment={setNewAppointment}
+          setIsCreateModalOpen={setIsCreateModalOpen}
+          mockAppointmentTypes={mockAppointmentTypes}
+        />
+      </Modal>
     </div>
   );
 }

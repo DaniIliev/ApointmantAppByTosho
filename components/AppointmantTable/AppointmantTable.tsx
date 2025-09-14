@@ -1,81 +1,160 @@
 "use client";
 
-import { useState } from "react";
-import { useTranslation } from "react-i18next";
-import {
-  ColumnDef,
-  flexRender,
-  getCoreRowModel,
-  useReactTable,
-  ColumnFiltersState,
-} from "@tanstack/react-table";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Clock, CalendarIcon, FileText, Trash2, Edit } from "lucide-react";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
 import { Appointment, AppointmentStatus } from "@/Global/Types/types";
+import { CellProps, Column, GenericTable } from "../GenericTable/GenericTable";
+import { useTranslation } from "react-i18next";
+import { Clock, CalendarIcon, FileText, Trash2, Edit } from "lucide-react";
+import { getStatusColor } from "@/Global/Utils/statusIndicator";
 
-// Define the component's props
 type AppointmentsTableProps = {
   data: Appointment[];
   onOpenViewModal: (appointment: Appointment) => void;
 };
 
-// Helper function to get status color
-const getStatusColor = (status: AppointmentStatus) => {
-  switch (status) {
-    case "upcoming":
-      return "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200";
-    case "completed":
-      return "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200";
-    case "cancelled":
-      return "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200";
-    default:
-      return "bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200";
-  }
-};
-
-export const AppointmentsTable = ({
+export default function AppointmentsTable({
   data,
   onOpenViewModal,
-}: AppointmentsTableProps) => {
+}: AppointmentsTableProps) {
   const { t } = useTranslation();
-  const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
+  //   {
+  //     id: "1",
+  //     clientName: "Иван Петров",
+  //     date: "2023-11-20T10:00:00Z",
+  //     time: "10:00 AM",
+  //     service: "Подстригване",
+  //     status: "completed",
+  //     clientEmail: "",
+  //     clientPhone: "",
+  //   },
+  //   {
+  //     id: "2",
+  //     clientName: "Мария Георгиева",
+  //     date: "2023-11-21T14:30:00Z",
+  //     time: "02:30 PM",
+  //     service: "Боядисване",
+  //     status: "upcoming",
+  //     clientEmail: "",
+  //     clientPhone: "",
+  //   },
+  //   {
+  //     id: "3",
+  //     clientName: "Георги Колев",
+  //     date: "2023-11-19T09:00:00Z",
+  //     time: "09:00 AM",
+  //     service: "Маникюр",
+  //     status: "cancelled",
+  //     clientEmail: "",
+  //     clientPhone: "",
+  //   },
+  //   {
+  //     id: "4",
+  //     clientName: "Анна Иванова",
+  //     date: "2023-11-25T11:00:00Z",
+  //     time: "11:00 AM",
+  //     service: "Масаж",
+  //     status: "upcoming",
+  //     clientEmail: "",
+  //     clientPhone: "",
+  //   },
+  //   {
+  //     id: "5",
+  //     clientName: "Петър Димитров",
+  //     date: "2023-11-18T16:00:00Z",
+  //     time: "04:00 PM",
+  //     service: "Фризура",
+  //     status: "completed",
+  //     clientEmail: "",
+  //     clientPhone: "",
+  //   },
+  //   {
+  //     id: "6",
+  //     clientName: "Елена Стоянова",
+  //     date: "2023-11-22T15:00:00Z",
+  //     time: "03:00 PM",
+  //     service: "Подстригване",
+  //     status: "upcoming",
+  //     clientEmail: "",
+  //     clientPhone: "",
+  //   },
+  //   {
+  //     id: "7",
+  //     clientName: "Николай Николов",
+  //     date: "2023-11-17T13:00:00Z",
+  //     time: "01:00 PM",
+  //     service: "Фризура",
+  //     status: "completed",
+  //     clientEmail: "",
+  //     clientPhone: "",
+  //   },
+  //   {
+  //     id: "8",
+  //     clientName: "Десислава Петкова",
+  //     date: "2023-11-23T10:30:00Z",
+  //     time: "10:30 AM",
+  //     service: "Боядисване",
+  //     status: "upcoming",
+  //     clientEmail: "",
+  //     clientPhone: "",
+  //   },
+  //   {
+  //     id: "9",
+  //     clientName: "Александър Иванов",
+  //     date: "2023-11-16T17:00:00Z",
+  //     time: "05:00 PM",
+  //     service: "Маникюр",
+  //     status: "cancelled",
+  //     clientEmail: "",
+  //     clientPhone: "",
+  //   },
+  //   {
+  //     id: "10",
+  //     clientName: "Симона Василева",
+  //     date: "2023-11-24T12:00:00Z",
+  //     time: "12:00 PM",
+  //     service: "Масаж",
+  //     status: "upcoming",
+  //     clientEmail: "",
+  //     clientPhone: "",
+  //   },
+  //   {
+  //     id: "11",
+  //     clientName: "Ивайло Борисов",
+  //     date: "2023-11-15T11:30:00Z",
+  //     time: "11:30 AM",
+  //     service: "Подстригване",
+  //     status: "completed",
+  //     clientEmail: "",
+  //     clientPhone: "",
+  //   },
+  // ];
 
-  const columns: ColumnDef<Appointment>[] = [
+  const handleOpenViewModal = (appointment: Appointment): void => {
+    console.log("View details for:", appointment);
+    // Добавете логика за отваряне на модален прозорец тук
+    // onOpenViewModal(appointment);
+  };
+
+  const columns: Column<Appointment>[] = [
     {
       accessorKey: "clientName",
       header: t("Client Name"),
-      cell: ({ row }) => {
+      cell: ({ row }: CellProps<Appointment>) => {
         const appointment = row.original;
         return (
           <div className="flex items-center gap-2">
             <h3 className="font-semibold text-foreground">
               {appointment.clientName}
             </h3>
-            <Badge
-              className={`${getStatusColor(
+            <span
+              className={`px-2 py-0.5 text-xs rounded-full ${getStatusColor(
                 appointment.status
-              )} px-2 py-0.5 text-xs rounded-full`}
+              )}`}
             >
               {t(
                 appointment.status.charAt(0).toUpperCase() +
                   appointment.status.slice(1)
               )}
-            </Badge>
+            </span>
           </div>
         );
       },
@@ -83,7 +162,7 @@ export const AppointmentsTable = ({
     {
       accessorKey: "date",
       header: t("Date"),
-      cell: ({ row }) => (
+      cell: ({ row }: CellProps<Appointment>) => (
         <div className="flex items-center gap-1 text-sm text-muted-foreground">
           <CalendarIcon className="h-3 w-3" />
           <span>{new Date(row.original.date).toLocaleDateString()}</span>
@@ -93,7 +172,7 @@ export const AppointmentsTable = ({
     {
       accessorKey: "time",
       header: t("Time"),
-      cell: ({ row }) => (
+      cell: ({ row }: CellProps<Appointment>) => (
         <div className="flex items-center gap-1 text-sm text-muted-foreground">
           <Clock className="h-3 w-3" />
           <span>{row.original.time}</span>
@@ -103,113 +182,40 @@ export const AppointmentsTable = ({
     {
       accessorKey: "service",
       header: t("Service"),
-      cell: ({ row }) => (
+      cell: ({ row }: CellProps<Appointment>) => (
         <span className="font-medium text-primary">{row.original.service}</span>
       ),
     },
     {
-      id: "actions",
+      accessorKey: "actions",
       header: t("Actions"),
-      cell: ({ row }) => (
-        <div className="flex items-center gap-2">
-          <TooltipProvider>
-            {/* View Details */}
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button
-                  variant="ghost"
-                  className="h-8 w-8 p-0"
-                  onClick={() => onOpenViewModal(row.original)}
-                >
-                  <FileText className="h-4 w-4" />
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>
-                <p>{t("View Details")}</p>
-              </TooltipContent>
-            </Tooltip>
-
-            {/* Edit */}
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button variant="ghost" className="h-8 w-8 p-0">
-                  <Edit className="h-4 w-4" />
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>
-                <p>{t("Edit")}</p>
-              </TooltipContent>
-            </Tooltip>
-
-            {/* Delete */}
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button variant="ghost" className="h-8 w-8 p-0">
-                  <Trash2 className="h-4 w-4 text-red-500" />
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>
-                <p>{t("Delete")}</p>
-              </TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
+      cell: ({ row }: CellProps<Appointment>) => (
+        <div className="flex items-center gap-2 mobile-actions">
+          <button
+            className="p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
+            onClick={() => handleOpenViewModal(row.original)}
+          >
+            <FileText className="h-4 w-4" />
+          </button>
+          <button className="p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors">
+            <Edit className="h-4 w-4" />
+          </button>
+          <button className="p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors">
+            <Trash2 className="h-4 w-4 text-red-500" />
+          </button>
         </div>
       ),
+      enableHiding: false,
     },
   ];
 
-  const table = useReactTable({
-    data,
-    columns,
-    getCoreRowModel: getCoreRowModel(),
-    onColumnFiltersChange: setColumnFilters,
-    state: {
-      columnFilters,
-    },
-  });
-
   return (
-    <div className="rounded-xl border shadow-lg bg-card/70 backdrop-blur-lg border-primary/20">
-      <Table>
-        <TableHeader>
-          {table.getHeaderGroups().map((headerGroup) => (
-            <TableRow key={headerGroup.id}>
-              {headerGroup.headers.map((header) => (
-                <TableHead key={header.id}>
-                  {header.isPlaceholder
-                    ? null
-                    : flexRender(
-                        header.column.columnDef.header,
-                        header.getContext()
-                      )}
-                </TableHead>
-              ))}
-            </TableRow>
-          ))}
-        </TableHeader>
-        <TableBody>
-          {table.getRowModel().rows?.length ? (
-            table.getRowModel().rows.map((row) => (
-              <TableRow
-                key={row.id}
-                data-state={row.getIsSelected() && "selected"}
-              >
-                {row.getVisibleCells().map((cell) => (
-                  <TableCell key={cell.id}>
-                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                  </TableCell>
-                ))}
-              </TableRow>
-            ))
-          ) : (
-            <TableRow>
-              <TableCell colSpan={columns.length} className="h-24 text-center">
-                {t("No results.")}
-              </TableCell>
-            </TableRow>
-          )}
-        </TableBody>
-      </Table>
+    <div>
+      <GenericTable
+        data={data}
+        columns={columns}
+        onOpenViewModal={handleOpenViewModal}
+      />
     </div>
   );
-};
+}
