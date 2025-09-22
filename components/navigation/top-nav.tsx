@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import Link from "next/link";
 import { useTranslation } from "react-i18next";
 import { usePathname, useRouter } from "next/navigation";
@@ -17,6 +17,23 @@ import {
 import { usePageTitle } from "@/context/PageTitleContext";
 import useClickOutside from "@/Global/Hooks/useClickOutside";
 import { useAuthContext } from "@/context/AuthContext";
+import io from "socket.io-client";
+import callApi from "@/app/Api/callApi";
+import { toast } from "sonner";
+
+// Интерфейс за аларма
+interface Alert {
+  _id: string;
+  isRead: boolean;
+  message: string;
+  createdAt: string;
+  appointment: {
+    _id: string;
+    clientName: string;
+    serviceName: string;
+    appointmentTime: { start: string; end: string };
+  };
+}
 
 interface TopNavProps {
   onToggleLeftNav: () => void;
@@ -35,6 +52,8 @@ export default function TopNav({
   const [isHelpOpen, setIsHelpOpen] = useState(false);
   const [isAlertsOpen, setIsAlertsOpen] = useState(false);
   const [isLanguagesOpen, setIsLanguagesOpen] = useState(false);
+  const [alerts, setAlerts] = useState<Alert[]>([]);
+  const hasUnreadAlerts = alerts.some((alert) => !alert.isRead);
 
   const profileRef = useRef<HTMLDivElement>(null);
   const helpRef = useRef<HTMLDivElement>(null);
@@ -89,22 +108,107 @@ export default function TopNav({
     setIsAlertsOpen(false);
   };
 
+  const handleConfirmAppointment = async (alert: Alert) => {
+    try {
+      const appointmentId = alert.appointment._id;
+      const alertId = alert._id;
+
+      // Стъпка 1: Изпращаме заявка за потвърждаване на срещата
+      const confirmedAppointment = await callApi(
+        `/api/appointment/${appointmentId}/status`,
+        "PUT",
+        { status: "confirmed" }
+      );
+
+      // Ако срещата е успешно потвърдена
+      if (confirmedAppointment) {
+        // Стъпка 2: Изпращаме заявка за изтриване на алармата
+        await callApi(`/api/alerts/${alertId}`, "DELETE");
+
+        setAlerts((prevAlerts) =>
+          prevAlerts.filter((a) => a._id !== alert._id)
+        );
+
+        toast.success(t("Appointment confirmed successfully!"));
+      }
+    } catch (error) {
+      console.error("Failed to confirm appointment:", error);
+      toast.error(t("Failed to confirm appointment. Please try again."));
+    }
+  };
+
+  const handleAlertClick = async (alert: Alert) => {
+    if (!alert.isRead) {
+      try {
+        await callApi(`/api/alerts/${alert._id}/read`, "PUT", {});
+        setAlerts((prevAlerts) =>
+          prevAlerts.map((a) =>
+            a._id === alert._id ? { ...a, isRead: true } : a
+          )
+        );
+      } catch (error) {
+        console.error("Failed to mark alert as read:", error);
+      }
+    }
+  };
+
+  useEffect(() => {
+    console.log("user", user);
+    if (user && (user.role === "staff" || user.role === "business")) {
+      const socket = io("http://localhost:8080");
+
+      socket.on("connect", () => {
+        console.log("Connected to Socket.IO server:", socket.id);
+        if (user && user._id) {
+          socket.emit("joinRoom", user._id);
+        }
+      });
+
+      socket.on("newAppointment", (newAlert) => {
+        console.log("Received new alert:", newAlert);
+        setAlerts((prevAlerts) => [newAlert, ...prevAlerts]);
+      });
+
+      socket.on("disconnect", (reason) => {
+        console.log("Socket.IO disconnected:", reason);
+      });
+
+      const fetchAlerts = async () => {
+        console.log("Fetching alerts from API...");
+        try {
+          const fetchedAlerts = await callApi("/api/alerts", "GET");
+          if (fetchedAlerts) {
+            setAlerts(fetchedAlerts);
+          }
+        } catch (error) {
+          console.error("Error fetching alerts:", error);
+        }
+      };
+      fetchAlerts();
+
+      return () => {
+        console.log("Cleaning up Socket.IO connection...");
+        socket.disconnect();
+      };
+    }
+  }, [user]);
+
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 bg-slate-900/20 backdrop-blur-xl border-b border-white/10">
       <div className="flex items-center justify-between px-6 py-4">
         <div className="flex items-center space-x-4">
-          {/* {user && ( */}
-          <button
-            onClick={onToggleLeftNav}
-            className="p-2 rounded-lg bg-gradient-to-r from-purple-500/20 to-blue-500/20 border border-white/20 hover:border-white/40 transition-all duration-200"
-          >
-            {isLeftNavOpen ? (
-              <X className="w-5 h-5 text-white" />
-            ) : (
-              <Menu className="w-5 h-5 text-white" />
-            )}
-          </button>
-          {/* )} */}
+          {user && (
+            <button
+              onClick={onToggleLeftNav}
+              className="p-2 rounded-lg bg-gradient-to-r from-purple-500/20 to-blue-500/20 border border-white/20 hover:border-white/40 transition-all duration-200"
+            >
+              {isLeftNavOpen ? (
+                <X className="w-5 h-5 text-white" />
+              ) : (
+                <Menu className="w-5 h-5 text-white" />
+              )}
+            </button>
+          )}
           <h1 className="text-xl font-bold bg-gradient-to-r from-purple-400 to-blue-400 bg-clip-text text-transparent">
             {t("AppointmentPro")}
           </h1>
@@ -117,22 +221,86 @@ export default function TopNav({
             </h2>
           )}
         </div>
+
         {user ? (
           <div className="flex items-center space-x-4">
-            {" "}
-            {/* Намален space-x */}
             <div className="relative" ref={alertsRef}>
               <button
                 onClick={toggleAlerts}
-                className="p-2 rounded-full hover:bg-white/10 transition-colors duration-200"
+                className={`p-2 rounded-full hover:bg-white/10 transition-colors duration-200 relative ${
+                  hasUnreadAlerts ? "animate-wiggle" : ""
+                }`}
               >
-                <Bell className="w-4 h-4 text-white" /> {/* Намален размер */}
+                <Bell
+                  className={`w-4 h-4 transition-colors duration-200 ${
+                    hasUnreadAlerts ? "text-red-400" : "text-white"
+                  }`}
+                />
+                {hasUnreadAlerts && (
+                  <span className="absolute top-1 right-1 h-2 w-2 bg-red-500 rounded-full animate-ping-once" />
+                )}
               </button>
               {isAlertsOpen && (
-                <div className="absolute right-0 mt-2 w-56 bg-slate-900/90 backdrop-blur-xl border border-white/20 rounded-xl shadow-2xl p-4">
-                  <p className="text-white/80">
-                    {t("You have no new notifications.")}
-                  </p>
+                <div className="absolute right-0 mt-2 w-72 md:w-80 bg-slate-900/90 backdrop-blur-xl border border-white/20 rounded-xl shadow-2xl p-4 max-h-96 overflow-y-auto">
+                  <h3 className="text-white font-bold mb-3">
+                    {t("Notifications")}
+                  </h3>
+                  {alerts.length > 0 ? (
+                    alerts.map((alert) => (
+                      <div
+                        key={alert._id}
+                        onClick={() => handleAlertClick(alert)}
+                        className={`mb-2 p-3 rounded-lg cursor-pointer transition-all duration-200 ${
+                          !alert.isRead
+                            ? "bg-blue-600/20 border-l-4 border-blue-400"
+                            : "bg-white/5"
+                        } hover:bg-white/10`}
+                      >
+                        <p className="text-sm font-semibold text-white/90">
+                          {alert.message}
+                        </p>
+                        <p className="text-xs text-white/60 mt-1">
+                          {t("Appointment from")}:{" "}
+                          {alert.appointment.clientName}
+                        </p>
+                        <p className="text-xs text-white/60">
+                          {t("Time")}:{" "}
+                          {alert.appointment.appointmentTime.start
+                            ? new Date(
+                                alert.appointment.appointmentTime.start
+                              ).toLocaleTimeString("bg-BG", {
+                                hour: "2-digit",
+                                minute: "2-digit",
+                              })
+                            : "N/A"}{" "}
+                          -{" "}
+                          {alert.appointment.appointmentTime.end
+                            ? new Date(
+                                alert.appointment.appointmentTime.end
+                              ).toLocaleTimeString("bg-BG", {
+                                hour: "2-digit",
+                                minute: "2-digit",
+                              })
+                            : "N/A"}
+                        </p>
+                        <div className="flex justify-end mt-2">
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleConfirmAppointment(alert);
+                            }}
+                            className="px-3 py-1 text-sm font-semibold text-white bg-green-500 rounded-full hover:bg-green-600 transition-colors"
+                          >
+                            {t("Confirm")}
+                          </button>
+                        </div>
+                      </div>
+                    ))
+                  ) : (
+                    <p className="text-white/80">
+                      {t("You have no new notifications.")}
+                    </p>
+                  )}
                 </div>
               )}
             </div>
@@ -141,7 +309,7 @@ export default function TopNav({
                 onClick={toggleLanguages}
                 className="p-2 rounded-full hover:bg-white/10 transition-colors duration-200"
               >
-                <Globe className="w-4 h-4 text-white" /> {/* Намален размер */}
+                <Globe className="w-4 h-4 text-white" />
               </button>
               {isLanguagesOpen && (
                 <div className="absolute right-0 mt-2 w-48 bg-slate-900/90 backdrop-blur-xl border border-white/20 rounded-xl shadow-2xl">
@@ -186,7 +354,7 @@ export default function TopNav({
                 onClick={toggleHelp}
                 className="p-2 rounded-full hover:bg-white/10 transition-colors duration-200"
               >
-                <Info className="w-4 h-4 text-white" /> {/* Намален размер */}
+                <Info className="w-4 h-4 text-white" />
               </button>
               {isHelpOpen && (
                 <div className="absolute right-0 mt-2 w-48 bg-slate-900/90 backdrop-blur-xl border border-white/20 rounded-xl shadow-2xl">

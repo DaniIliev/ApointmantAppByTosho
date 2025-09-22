@@ -50,19 +50,13 @@ export default function RegisterPage() {
       email: formData.email,
       password: formData.password,
       role: accountType,
+      firstName: formData.firstName,
+      lastName: formData.lastName,
       phone:
         accountType == "business" ? formData.businessPhone : formData.phone,
       ...(accountType == "business" && {
         name: formData.businessName,
       }),
-      ...(accountType == "personal" &&
-        formData.firstName && {
-          firstName: formData.firstName,
-        }),
-      ...(accountType == "personal" &&
-        formData.lastName && {
-          lastName: formData.lastName,
-        }),
     };
     const authedUser = await callApi("/api/auth/register", "POST", payload);
     console.log("authedUser", authedUser);
@@ -306,7 +300,7 @@ export default function RegisterPage() {
 
                   {accountType === "business" && (
                     <>
-                      <div className="space-y-2">
+                      {/* <div className="space-y-2">
                         <Label
                           htmlFor="businessName"
                           className="text-sm font-semibold text-foreground"
@@ -323,29 +317,65 @@ export default function RegisterPage() {
                           }
                           required
                         />
-                      </div>
+                      </div> */}
 
                       <div className="grid grid-cols-2 gap-3">
                         <div className="space-y-2">
                           <Label
-                            htmlFor="businessEmail"
+                            htmlFor="firstName"
                             className="text-sm font-semibold text-foreground"
                           >
-                            {t("Business Email")}
+                            {t("First Name")}
                           </Label>
                           <Input
-                            id="businessEmail"
-                            type="email"
-                            placeholder={t("Business email")}
+                            id="firstName"
+                            placeholder={t("First name")}
                             className="h-10 text-sm border-2 focus:border-primary transition-all duration-300 bg-input/80 backdrop-blur-sm rounded-lg"
-                            value={formData.businessEmail}
+                            value={formData.firstName}
                             onChange={(e) =>
-                              handleInputChange("businessEmail", e.target.value)
+                              handleInputChange("firstName", e.target.value)
                             }
                             required
                           />
                         </div>
-
+                        <div className="space-y-2">
+                          <Label
+                            htmlFor="lastName"
+                            className="text-sm font-semibold text-foreground"
+                          >
+                            {t("Last Name")}
+                          </Label>
+                          <Input
+                            id="lastName"
+                            placeholder={t("Last name")}
+                            className="h-10 text-sm border-2 focus:border-primary transition-all duration-300 bg-input/80 backdrop-blur-sm rounded-lg"
+                            value={formData.lastName}
+                            onChange={(e) =>
+                              handleInputChange("lastName", e.target.value)
+                            }
+                            required
+                          />
+                        </div>
+                      </div>
+                      <div className="grid grid-cols-2 gap-3">
+                        <div className="space-y-2">
+                          <Label
+                            htmlFor="businessName"
+                            className="text-sm font-semibold text-foreground"
+                          >
+                            {t("Business Name")}
+                          </Label>
+                          <Input
+                            id="businessName"
+                            placeholder={t("Your business name")}
+                            className="h-10 text-sm border-2 focus:border-primary transition-all duration-300 bg-input/80 backdrop-blur-sm rounded-lg"
+                            value={formData.businessName}
+                            onChange={(e) =>
+                              handleInputChange("businessName", e.target.value)
+                            }
+                            required
+                          />
+                        </div>
                         <div className="space-y-2">
                           <Label
                             htmlFor="businessPhone"
@@ -366,7 +396,6 @@ export default function RegisterPage() {
                           />
                         </div>
                       </div>
-
                       <div className="space-y-2">
                         <Label
                           htmlFor="businessAddress"

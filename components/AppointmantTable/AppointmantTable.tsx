@@ -134,7 +134,7 @@ export default function AppointmentsTable({
     // onOpenViewModal(appointment);
   };
 
-  const columns: Column<Appointment>[] = [
+  const columns: Column<any>[] = [
     {
       accessorKey: "clientName",
       header: t("Client Name"),
@@ -165,7 +165,7 @@ export default function AppointmentsTable({
       cell: ({ row }: CellProps<Appointment>) => (
         <div className="flex items-center gap-1 text-sm text-muted-foreground">
           <CalendarIcon className="h-3 w-3" />
-          <span>{new Date(row.original.date).toLocaleDateString()}</span>
+          <span>{new Date(row.original.dateTime).toLocaleDateString()}</span>
         </div>
       ),
     },
@@ -175,7 +175,7 @@ export default function AppointmentsTable({
       cell: ({ row }: CellProps<Appointment>) => (
         <div className="flex items-center gap-1 text-sm text-muted-foreground">
           <Clock className="h-3 w-3" />
-          <span>{row.original.time}</span>
+          <span>{new Date(row.original.dateTime).toLocaleDateString()}</span>
         </div>
       ),
     },

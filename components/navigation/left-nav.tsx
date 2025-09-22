@@ -10,6 +10,8 @@ import {
   ClipboardList,
   TrendingUp,
   ListTodo,
+  Calendar,
+  Users,
 } from "lucide-react";
 
 import { useAuthContext } from "@/context/AuthContext";
@@ -31,6 +33,8 @@ export default function LeftNav({ isOpen }: LeftNavProps) {
       label: t("Appointment Types"),
       icon: ClipboardList,
     },
+    { href: "/schedule", label: t("Schedule"), icon: Calendar },
+    { href: "/staff", label: t("Staff Management"), icon: Users },
   ];
 
   return (

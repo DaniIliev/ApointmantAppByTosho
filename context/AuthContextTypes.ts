@@ -1,9 +1,10 @@
 export type User = {
-  id: string;
+  _id: string;
   email: string;
-  role: "personal" | "businnes";
+  role: "personal" | "business" | "staff";
   firstName?: string;
   lastName?: string;
+  businessId: string;
 };
 
 export type AuthContextType = {

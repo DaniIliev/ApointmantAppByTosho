@@ -33,7 +33,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       localStorage.setItem("token", authedUser.token);
 
       const decodedUser = jwtDecode<any>(authedUser.token);
-
       if (decodedUser && decodedUser._id) {
         findUserByID(decodedUser._id)
           .then((fetchedUser) => {
@@ -62,7 +61,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     const fetchUser = async () => {
       setIsLoading(true);
       const storedToken = localStorage.getItem("token");
-
       if (storedToken) {
         try {
           const decodedUser = jwtDecode<any>(storedToken);
@@ -74,18 +72,18 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
             console.warn("Invalid token or missing _id in token.");
             logout();
             setIsLoading(false);
-            // redirect("/login");
+            redirect("/login");
           }
         } catch (error) {
           console.error("Error fetching user data:", error);
           logout();
           setIsLoading(false);
-          // redirect("/login");
+          redirect("/login");
         }
       } else {
         setUser(null);
         setIsLoading(false);
-        // redirect("/login");
+        redirect("/login");
       }
       setIsLoading(false);
     };

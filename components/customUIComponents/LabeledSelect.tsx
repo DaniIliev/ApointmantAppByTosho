@@ -30,6 +30,7 @@ export function LabeledSelect<T extends string>({
   placeholder,
   options,
 }: LabeledSelectProps<T>) {
+  console.log("options", options);
   return (
     <div className="flex flex-col space-y-2">
       <Label htmlFor={id} className="text-sm font-medium">

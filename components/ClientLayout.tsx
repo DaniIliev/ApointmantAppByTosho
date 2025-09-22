@@ -6,6 +6,7 @@ import TopNav from "@/components/navigation/top-nav";
 import LeftNav from "@/components/navigation/left-nav";
 import RightNavigation from "./navigation/right-nav";
 import { useRightNav } from "@/context/RightNavContext";
+import Chatbot from "./chatBot/Chatbot";
 
 // Дефинираме ширините на навигациите като константи за по-лесно управление
 const LEFT_NAV_OPEN_WIDTH_CLASS = "ml-64";
@@ -58,6 +59,7 @@ export default function ClientLayout({
         </main>
         <RightNavigation />
       </div>
+      <Chatbot />
     </div>
   );
 }

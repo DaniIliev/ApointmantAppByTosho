@@ -9,6 +9,7 @@ import { RightNavProvider } from "@/context/RightNavContext";
 import i18n from "@/i18n";
 import { AuthProvider, useAuthContext } from "@/context/AuthContext";
 import GuestLayout from "./GuestLayout";
+import { Toaster } from "sonner";
 
 export default function ClientLayoutWrapper({
   children,
@@ -37,11 +38,14 @@ export default function ClientLayoutWrapper({
     <I18nextProvider i18n={i18n}>
       <PageTitleProvider>
         <RightNavProvider>
-          {/* {user ? ( */}
-          <ClientLayout>{children}</ClientLayout>
-          {/* ) : (
+          {user ? (
+            <ClientLayout>
+              <Toaster />
+              {children}
+            </ClientLayout>
+          ) : (
             <GuestLayout>{children}</GuestLayout>
-          )} */}
+          )}
         </RightNavProvider>
       </PageTitleProvider>
     </I18nextProvider>

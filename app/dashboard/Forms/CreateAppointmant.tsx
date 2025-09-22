@@ -1,11 +1,21 @@
+// components/Forms/CreateAppointmant.js
+
+"use client";
+
 import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
-import { AppointmentType } from "@/Global/Types/types";
-import React from "react";
+import {
+  AppointmentType,
+  SelectOptionsAppointmentType,
+} from "@/Global/Types/types";
+import React, { useState, useEffect } from "react";
 import { LabeledInput } from "@/components/customUIComponents/LabeledInput";
 import { LabeledSelect } from "@/components/customUIComponents/LabeledSelect";
 import { LabeledTextarea } from "@/components/customUIComponents/LabeledTextarea";
 import { FormGrid } from "@/Global/Styles/FormGrid";
+import callApi from "@/app/Api/callApi";
+import { Modal } from "@/components/customUIComponents/Modal";
+import { Clock } from "lucide-react"; // Добавен икон
 
 interface CreateAppointmantProps {
   newAppointment: {
@@ -16,6 +26,7 @@ interface CreateAppointmantProps {
     time: string;
     appointmentTypeId: string;
     notes: string;
+    staffId: string;
   };
   setNewAppointment: React.Dispatch<
     React.SetStateAction<{
@@ -26,10 +37,12 @@ interface CreateAppointmantProps {
       time: string;
       appointmentTypeId: string;
       notes: string;
+      staffId: string;
     }>
   >;
-  mockAppointmentTypes: AppointmentType[];
-  handleCreateAppointment: () => void;
+  appointmentTypes: AppointmentType[] | null;
+  appoitmentTypesOptions: SelectOptionsAppointmentType[];
+  handleCreateAppointment: (appointmentData: any) => void; // Променено да приема параметър
   setIsCreateModalOpen: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
@@ -37,10 +50,98 @@ const CreateAppointmant = ({
   newAppointment,
   setNewAppointment,
   handleCreateAppointment,
-  mockAppointmentTypes,
+  appoitmentTypesOptions,
   setIsCreateModalOpen,
+  appointmentTypes,
 }: CreateAppointmantProps) => {
   const { t } = useTranslation();
+  const [availableStaff, setAvailableStaff] = useState<any[]>([]);
+  const [availableSlots, setAvailableSlots] = useState<any[]>([]);
+  const [closestSlot, setClosestSlot] = useState<any>(null);
+  const [isClosestSlotModalOpen, setIsClosestSlotModalOpen] = useState(false);
+  const [loadingClosestSlot, setLoadingClosestSlot] = useState(false);
+
+  useEffect(() => {
+    const fetchStaff = async () => {
+      if (newAppointment.appointmentTypeId) {
+        const selectedService = appointmentTypes?.find(
+          (type) => type._id === newAppointment.appointmentTypeId
+        );
+        if (selectedService && selectedService.staffIds) {
+          const staffDetails = await callApi(`/api/staff/by-ids`, "POST", {
+            staffIds: selectedService.staffIds,
+          });
+          setAvailableStaff(staffDetails);
+        }
+      }
+    };
+    fetchStaff();
+  }, [newAppointment.appointmentTypeId, appointmentTypes]);
+
+  useEffect(() => {
+    const fetchSlots = async () => {
+      if (
+        newAppointment.staffId &&
+        newAppointment.date &&
+        newAppointment.appointmentTypeId
+      ) {
+        const slots = await callApi(
+          `/api/appointment/availability?staffId=${newAppointment.staffId}&date=${newAppointment.date}&serviceId=${newAppointment.appointmentTypeId}`,
+          "GET"
+        );
+        setAvailableSlots(slots.slots);
+      }
+    };
+    fetchSlots();
+  }, [
+    newAppointment.staffId,
+    newAppointment.date,
+    newAppointment.appointmentTypeId,
+  ]);
+
+  useEffect(() => {
+    const fetchClosestSlot = async () => {
+      if (newAppointment.appointmentTypeId && newAppointment.staffId) {
+        setLoadingClosestSlot(true);
+        const response = await callApi(
+          `/api/appointment/closest-slot?staffId=${newAppointment.staffId}&serviceId=${newAppointment.appointmentTypeId}`,
+          "GET"
+        );
+
+        if (response.slot) {
+          console.log("response.slot", response.slot);
+          setClosestSlot(response.slot);
+          setIsClosestSlotModalOpen(true);
+        } else {
+          setClosestSlot(null);
+        }
+        setLoadingClosestSlot(false);
+      }
+    };
+    fetchClosestSlot();
+  }, [newAppointment.appointmentTypeId, newAppointment.staffId]);
+
+  const handleSaveClosestSlot = () => {
+    if (closestSlot) {
+      // Създаваме временен обект с правилните данни
+      const updatedAppointmentData = {
+        ...newAppointment,
+        date: closestSlot.date,
+        time: closestSlot.startTime,
+      };
+      // Извикваме родителската функция, като ѝ подаваме актуализираните данни
+      handleCreateAppointment(updatedAppointmentData);
+      setIsClosestSlotModalOpen(false);
+    }
+  };
+
+  const handleManualSelection = () => {
+    setIsClosestSlotModalOpen(false);
+  };
+
+  const handleCreateButton = () => {
+    handleCreateAppointment(newAppointment);
+  };
 
   return (
     <div className="space-y-6">
@@ -57,7 +158,6 @@ const CreateAppointmant = ({
           }
           placeholder={t("Enter client name")}
         />
-
         <LabeledInput
           label={t("Email")}
           id="clientEmail"
@@ -71,10 +171,10 @@ const CreateAppointmant = ({
           }
           placeholder={t("client@example.com")}
         />
-
         <LabeledInput
           label={t("Phone")}
           id="clientPhone"
+          type="tel"
           value={newAppointment.clientPhone}
           onChange={(e) =>
             setNewAppointment((prev) => ({
@@ -84,18 +184,42 @@ const CreateAppointmant = ({
           }
           placeholder={t("+1 (555) 123-4567")}
         />
-
         <LabeledSelect
           label={t("Appointment Type")}
           id="appointmentType"
           value={newAppointment.appointmentTypeId}
           onValueChange={(value) =>
-            setNewAppointment((prev) => ({ ...prev, appointmentTypeId: value }))
+            setNewAppointment((prev) => ({
+              ...prev,
+              appointmentTypeId: value,
+              staffId: "",
+              date: "",
+              time: "",
+            }))
           }
           placeholder={t("Select appointment type")}
-          options={mockAppointmentTypes}
+          options={appoitmentTypesOptions}
         />
-
+        {newAppointment.appointmentTypeId && (
+          <LabeledSelect
+            label={t("Staff")}
+            id="staff"
+            value={newAppointment.staffId}
+            onValueChange={(value) =>
+              setNewAppointment((prev) => ({
+                ...prev,
+                staffId: value,
+                date: "",
+                time: "",
+              }))
+            }
+            placeholder={t("Select a staff member")}
+            options={availableStaff.map((staff) => ({
+              id: staff._id,
+              name: `${staff.firstName} ${staff.lastName}`,
+            }))}
+          />
+        )}
         <LabeledInput
           label={t("Date")}
           id="date"
@@ -105,18 +229,22 @@ const CreateAppointmant = ({
             setNewAppointment((prev) => ({ ...prev, date: e.target.value }))
           }
         />
-
-        <LabeledInput
-          label={t("Time")}
-          id="time"
-          type="time"
-          value={newAppointment.time}
-          onChange={(e) =>
-            setNewAppointment((prev) => ({ ...prev, time: e.target.value }))
-          }
-        />
+        {newAppointment.staffId && newAppointment.date && (
+          <LabeledSelect
+            label={t("Time")}
+            id="time"
+            value={newAppointment.time}
+            onValueChange={(value) =>
+              setNewAppointment((prev) => ({ ...prev, time: value }))
+            }
+            placeholder={t("Select time")}
+            options={availableSlots.map((slot) => ({
+              id: slot.startTime,
+              name: `${slot.startTime} - ${slot.endTime}`,
+            }))}
+          />
+        )}
       </FormGrid>
-
       <LabeledTextarea
         label={t("Notes (Optional)")}
         id="notes"
@@ -126,12 +254,11 @@ const CreateAppointmant = ({
         }
         placeholder={t("Add any additional notes or special requirements...")}
       />
-
       {newAppointment.appointmentTypeId && (
         <div className="p-4 bg-primary/10 rounded-xl border border-primary/20">
           {(() => {
-            const selectedType = mockAppointmentTypes.find(
-              (type) => type.id === newAppointment.appointmentTypeId
+            const selectedType = appointmentTypes?.find(
+              (type) => type._id === newAppointment.appointmentTypeId
             );
             return selectedType ? (
               <div className="space-y-2">
@@ -157,7 +284,6 @@ const CreateAppointmant = ({
           })()}
         </div>
       )}
-
       <div className="flex gap-3 pt-4">
         <Button
           variant="outline"
@@ -167,19 +293,59 @@ const CreateAppointmant = ({
           {t("Cancel")}
         </Button>
         <Button
-          onClick={handleCreateAppointment}
+          onClick={handleCreateButton} // Извикваме нова функция за бутона
           disabled={
             !newAppointment.clientName ||
             !newAppointment.clientEmail ||
             !newAppointment.date ||
             !newAppointment.time ||
-            !newAppointment.appointmentTypeId
+            !newAppointment.appointmentTypeId ||
+            !newAppointment.staffId
           }
           className="flex-1 bg-gradient-to-r from-primary to-accent hover:from-primary/90 hover:to-accent/90 rounded-xl"
         >
           {t("Create Appointment")}
         </Button>
       </div>
+
+      {isClosestSlotModalOpen && closestSlot && (
+        <Modal
+          label={t("Closest Available Time")}
+          open={isClosestSlotModalOpen}
+          onOpenChange={setIsClosestSlotModalOpen}
+        >
+          <div className="text-center">
+            <div className="flex justify-center mb-4">
+              <Clock className="w-10 h-10 text-primary" />
+            </div>
+            <p className="text-lg text-white font-medium">
+              {t("The closest available time is:")}
+            </p>
+            <h3 className="text-2xl font-bold text-primary mt-2">
+              {closestSlot.startTime} - {closestSlot.endTime} on{" "}
+              {closestSlot.date}
+            </h3>
+            <p className="text-sm text-gray-400 mt-1">
+              {t("Would you like to book this time?")}
+            </p>
+          </div>
+          <div className="flex gap-3 pt-6">
+            <Button
+              variant="outline"
+              onClick={handleManualSelection}
+              className="flex-1 rounded-xl bg-transparent"
+            >
+              {t("Continue to manual selection")}
+            </Button>
+            <Button
+              onClick={handleSaveClosestSlot}
+              className="flex-1 bg-gradient-to-r from-primary to-accent hover:from-primary/90 hover:to-accent/90 rounded-xl"
+            >
+              {t("Book this time")}
+            </Button>
+          </div>
+        </Modal>
+      )}
     </div>
   );
 };

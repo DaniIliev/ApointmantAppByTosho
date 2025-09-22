@@ -1,21 +1,14 @@
+// DashboardPage.js
+
 "use client";
 import { useEffect, useState } from "react";
-import { Card, CardContent } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { CalendarIcon, Plus, Search } from "lucide-react";
-import { Input } from "@/components/ui/input";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
+import { Plus } from "lucide-react";
 import { usePageTitle } from "@/context/PageTitleContext";
 import { useRightNav } from "@/context/RightNavContext";
 import {
   Appointment,
-  AppointmentStatus,
   AppointmentType,
+  SelectOptionsAppointmentType,
 } from "@/Global/Types/types";
 import { getStatusColor } from "@/Global/Utils/statusIndicator";
 import Calendar from "@/components/calendar/Calendar";
@@ -28,223 +21,11 @@ import AppointmentsBoardView from "./Components/AppointmentsBoardView";
 import { CustomTooltip } from "@/components/customUIComponents/CustomTooltip";
 import { Modal } from "@/components/customUIComponents/Modal";
 import AppointmentsTable from "@/components/AppointmantTable/AppointmantTable";
+import callApi from "../Api/callApi";
+import { useAuthContext } from "@/context/AuthContext";
+import moment from "moment"; // Добави import-а за moment
+import { toast } from "sonner";
 
-const mockAppointmentTypes: AppointmentType[] = [
-  {
-    id: "1",
-    name: "Business Consultation",
-    description: "Strategic business planning and consultation",
-    duration: 60,
-    price: 150,
-    color: "from-blue-500 to-purple-500",
-  },
-  {
-    id: "2",
-    name: "Strategy Session",
-    description: "Deep dive into business strategy and planning",
-    duration: 90,
-    price: 200,
-    color: "from-green-500 to-teal-500",
-  },
-  {
-    id: "3",
-    name: "Follow-up Meeting",
-    description: "Progress review and next steps discussion",
-    duration: 30,
-    price: 75,
-    color: "from-orange-500 to-red-500",
-  },
-  {
-    id: "4",
-    name: "Project Review",
-    description: "Comprehensive project evaluation and feedback",
-    duration: 45,
-    price: 100,
-    color: "from-purple-500 to-pink-500",
-  },
-  {
-    id: "5",
-    name: "Initial Consultation",
-    description: "First meeting to understand client needs",
-    duration: 60,
-    price: 120,
-    color: "from-cyan-500 to-blue-500",
-  },
-];
-
-const mockAppointments: Appointment[] = [
-  {
-    id: "1",
-    clientName: "Sarah Johnson",
-    clientEmail: "sarah@example.com",
-    clientPhone: "+1 (555) 123-4567",
-    date: "2024-01-15",
-    time: "10:00 AM",
-    service: "Business Consultation",
-    status: "upcoming",
-    notes: "First-time client, interested in digital marketing",
-  },
-  {
-    id: "2",
-    clientName: "Michael Chen",
-    clientEmail: "michael@example.com",
-    clientPhone: "+1 (555) 987-6543",
-    date: "2024-01-15",
-    time: "2:30 PM",
-    service: "Strategy Session",
-    status: "upcoming",
-  },
-  {
-    id: "21",
-    clientName: "Michael Chen",
-    clientEmail: "michael@example.com",
-    clientPhone: "+1 (555) 987-6543",
-    date: "2024-01-15",
-    time: "2:30 PM",
-    service: "Strategy Session",
-    status: "upcoming",
-  },
-  {
-    id: "22",
-    clientName: "Michael Chen",
-    clientEmail: "michael@example.com",
-    clientPhone: "+1 (555) 987-6543",
-    date: "2024-01-15",
-    time: "2:30 PM",
-    service: "Strategy Session",
-    status: "upcoming",
-  },
-  {
-    id: "23",
-    clientName: "Michael Chen",
-    clientEmail: "michael@example.com",
-    clientPhone: "+1 (555) 987-6543",
-    date: "2024-01-15",
-    time: "2:30 PM",
-    service: "Strategy Session",
-    status: "upcoming",
-  },
-  {
-    id: "234",
-    clientName: "Michael Chen",
-    clientEmail: "michael@example.com",
-    clientPhone: "+1 (555) 987-6543",
-    date: "2024-01-15",
-    time: "2:30 PM",
-    service: "Strategy Session",
-    status: "upcoming",
-  },
-  {
-    id: "235",
-    clientName: "Michael Chen",
-    clientEmail: "michael@example.com",
-    clientPhone: "+1 (555) 987-6543",
-    date: "2024-01-15",
-    time: "2:30 PM",
-    service: "Strategy Session",
-    status: "upcoming",
-  },
-  {
-    id: "236",
-    clientName: "Michael Chen",
-    clientEmail: "michael@example.com",
-    clientPhone: "+1 (555) 987-6543",
-    date: "2024-01-15",
-    time: "2:30 PM",
-    service: "Strategy Session",
-    status: "upcoming",
-  },
-  {
-    id: "23",
-    clientName: "Michael Chen",
-    clientEmail: "michael@example.com",
-    clientPhone: "+1 (555) 987-6543",
-    date: "2024-01-15",
-    time: "2:30 PM",
-    service: "Strategy Session",
-    status: "upcoming",
-  },
-  {
-    id: "3",
-    clientName: "Emily Davis",
-    clientEmail: "emily@example.com",
-    clientPhone: "+1 (555) 456-7890",
-    date: "2024-01-14",
-    time: "11:00 AM",
-    service: "Follow-up Meeting",
-    status: "completed",
-  },
-  {
-    id: "4",
-    clientName: "Robert Wilson",
-    clientEmail: "robert@example.com",
-    clientPhone: "+1 (555) 321-0987",
-    date: "2024-01-13",
-    time: "3:00 PM",
-    service: "Project Review",
-    status: "cancelled",
-  },
-  {
-    id: "5",
-    clientName: "Lisa Anderson",
-    clientEmail: "lisa@example.com",
-    clientPhone: "+1 (555) 111-2222",
-    date: "2024-01-16",
-    time: "9:00 AM",
-    service: "Initial Consultation",
-    status: "upcoming",
-  },
-  {
-    id: "6",
-    clientName: "David Brown",
-    clientEmail: "david@example.com",
-    clientPhone: "+1 (555) 333-4444",
-    date: "2024-01-17",
-    time: "1:00 PM",
-    service: "Project Planning",
-    status: "upcoming",
-  },
-  {
-    id: "7",
-    clientName: "Jennifer White",
-    clientEmail: "jennifer@example.com",
-    clientPhone: "+1 (555) 555-5555",
-    date: "2024-01-15",
-    time: "4:00 PM",
-    service: "Follow-up Meeting",
-    status: "upcoming",
-  },
-  {
-    id: "8",
-    clientName: "Mark Taylor",
-    clientEmail: "mark@example.com",
-    clientPhone: "+1 (555) 666-7777",
-    date: "2024-01-15",
-    time: "5:30 PM",
-    service: "Business Consultation",
-    status: "upcoming",
-  },
-  {
-    id: "9",
-    clientName: "Amanda Green",
-    clientEmail: "amanda@example.com",
-    clientPhone: "+1 (555) 888-9999",
-    date: "2024-01-16",
-    time: "10:30 AM",
-    service: "Strategy Session",
-    status: "upcoming",
-  },
-  {
-    id: "10",
-    clientName: "Chris Miller",
-    clientEmail: "chris@example.com",
-    clientPhone: "+1 (555) 000-1111",
-    date: "2024-01-16",
-    time: "2:00 PM",
-    service: "Project Review",
-    status: "upcoming",
-  },
-];
 type CreateNewDashboardMenuProps = {
   onOpenModal: () => void;
 };
@@ -259,19 +40,20 @@ const CreateNewDashboardMenu = ({
 
 export default function DashboardPage() {
   const { t } = useTranslation();
-  const [appointments, setAppointments] =
-    useState<Appointment[]>(mockAppointments);
-  const [searchTerm, setSearchTerm] = useState("");
-  const [statusFilter, setStatusFilter] = useState<AppointmentStatus | "all">(
-    "all"
-  );
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  const { user } = useAuthContext();
+
+  const [appointments, setAppointments] = useState<Appointment[]>([]);
+  const [appointmentTypes, setAppointmentTypes] = useState<
+    AppointmentType[] | null
+  >(null);
+  const [appoitmentTypesOptions, setAppointmentTypesOptions] = useState<
+    SelectOptionsAppointmentType[]
+  >([]);
+
   const [isViewModalOpen, setIsViewModalOpen] = useState(false);
   const [isEditMode, setIsEditMode] = useState(false);
-
   const [selectedAppointment, setSelectedAppointment] =
     useState<Appointment | null>(null);
-
   const [editingAppointment, setEditingAppointment] =
     useState<Appointment | null>(null);
   const [newAppointment, setNewAppointment] = useState({
@@ -282,10 +64,16 @@ export default function DashboardPage() {
     time: "",
     appointmentTypeId: "",
     notes: "",
+    staffId: "",
   });
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const { setPageTitle } = usePageTitle();
   const { setExtraRightNavMenu, setIsRightNavVisible } = useRightNav();
+
+  useEffect(() => {
+    getDashboardData();
+    fetchServices();
+  }, []);
 
   useEffect(() => {
     setPageTitle(t("Dashboard"));
@@ -300,9 +88,25 @@ export default function DashboardPage() {
     };
   }, [setPageTitle, setExtraRightNavMenu, setIsRightNavVisible, t]);
 
-  const openAppointmentModal = (appointment: Appointment) => {
-    setSelectedAppointment(appointment);
-    setIsModalOpen(true);
+  const fetchServices = async () => {
+    try {
+      const services: AppointmentType[] = await callApi("/api/service", "GET");
+      setAppointmentTypes(services);
+      const transformedOptions: SelectOptionsAppointmentType[] = services.map(
+        (type) => ({
+          id: type._id,
+          name: type.name,
+        })
+      );
+      setAppointmentTypesOptions(transformedOptions);
+    } catch (error) {
+      console.error("Failed to fetch services:", error);
+    }
+  };
+
+  const getDashboardData = async () => {
+    const data = await callApi("/api/appointment/dashboard", "GET");
+    setAppointments(data);
   };
 
   const openViewModal = (appointment: Appointment) => {
@@ -321,7 +125,7 @@ export default function DashboardPage() {
     if (editingAppointment) {
       setAppointments((prev) =>
         prev.map((apt) =>
-          apt.id === editingAppointment.id ? editingAppointment : apt
+          apt._id === editingAppointment._id ? editingAppointment : apt
         )
       );
       setIsEditMode(false);
@@ -334,42 +138,61 @@ export default function DashboardPage() {
   const handleDeleteAppointment = () => {
     if (selectedAppointment) {
       setAppointments((prev) =>
-        prev.filter((apt) => apt.id !== selectedAppointment.id)
+        prev.filter((apt) => apt._id !== selectedAppointment._id)
       );
       setIsViewModalOpen(false);
       setSelectedAppointment(null);
     }
   };
 
-  const handleCreateAppointment = () => {
-    const selectedType = mockAppointmentTypes.find(
-      (type) => type.id === newAppointment.appointmentTypeId
+  // ПРОМЕНЕНА ФУНКЦИЯ - приема данните като параметър
+  const handleCreateAppointment = async (appointmentData: any) => {
+    const service = appointmentTypes?.find(
+      (s) => s._id === appointmentData.appointmentTypeId
     );
-    if (!selectedType) return;
+    if (!service) {
+      toast.error("Invalid service selected.");
+      return;
+    }
 
-    const appointment: Appointment = {
-      id: Date.now().toString(),
-      clientName: newAppointment.clientName,
-      clientEmail: newAppointment.clientEmail,
-      clientPhone: newAppointment.clientPhone,
-      date: newAppointment.date,
-      time: newAppointment.time,
-      service: selectedType.name,
-      status: "upcoming",
-      notes: newAppointment.notes,
+    const startDateTime = moment(
+      `${appointmentData.date}T${appointmentData.time}`
+    ).toISOString();
+
+    const payload = {
+      business: user?.businessId,
+      service: service._id,
+      dateTime: startDateTime,
+      clientName: appointmentData.clientName,
+      clientPhone: appointmentData.clientPhone,
+      email: appointmentData.clientEmail,
+      staff: appointmentData.staffId,
     };
-
-    setAppointments((prev) => [...prev, appointment]);
-    setIsCreateModalOpen(false);
-    setNewAppointment({
-      clientName: "",
-      clientEmail: "",
-      clientPhone: "",
-      date: "",
-      time: "",
-      appointmentTypeId: "",
-      notes: "",
-    });
+    try {
+      const appointment: Appointment = await callApi(
+        "/api/appointment",
+        "POST",
+        payload
+      );
+      setIsCreateModalOpen(false);
+      setAppointments((prev) => [...prev, appointment]);
+      setIsCreateModalOpen(false);
+      // Нулираме състоянието
+      setNewAppointment({
+        clientName: "",
+        clientEmail: "",
+        clientPhone: "",
+        date: "",
+        time: "",
+        appointmentTypeId: "",
+        notes: "",
+        staffId: "",
+      });
+      toast.success("Appointment created successfully!");
+    } catch (error) {
+      console.error("Failed to create appointment:", error);
+      toast.error("Failed to create appointment. Please try again.");
+    }
   };
 
   return (
@@ -422,8 +245,8 @@ export default function DashboardPage() {
       </Tabs>
       <Modal
         label={t(isEditMode ? "Edit Appointment" : "Appointment Details")}
-        open={isCreateModalOpen}
-        onOpenChange={setIsCreateModalOpen}
+        open={isViewModalOpen} // Коригирано
+        onOpenChange={setIsViewModalOpen} // Коригирано
       >
         {selectedAppointment && (
           <div className="space-y-6">
@@ -461,7 +284,8 @@ export default function DashboardPage() {
           newAppointment={newAppointment}
           setNewAppointment={setNewAppointment}
           setIsCreateModalOpen={setIsCreateModalOpen}
-          mockAppointmentTypes={mockAppointmentTypes}
+          appoitmentTypesOptions={appoitmentTypesOptions}
+          appointmentTypes={appointmentTypes}
         />
       </Modal>
     </div>
