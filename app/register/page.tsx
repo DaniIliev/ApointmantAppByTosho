@@ -75,11 +75,6 @@ export default function RegisterPage() {
           }`}
         >
           <div className="text-center space-y-4">
-            <div className="flex justify-center">
-              <div className="p-3 bg-gradient-to-br from-primary to-accent rounded-3xl shadow-2xl">
-                <Sparkles className="h-8 w-8 text-white" />
-              </div>
-            </div>
             <h1 className="text-4xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent tracking-tight">
               {t("Join the Future")}
             </h1>
