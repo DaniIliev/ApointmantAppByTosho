@@ -27,10 +27,10 @@ export default function LeftNav({ isOpen }: LeftNavProps) {
   const navItems = [
     { href: "/dashboard", label: t("Dashboard"), icon: LayoutDashboard },
     { href: "/performance", label: t("Performance"), icon: TrendingUp },
-    { href: "/taskManager", label: t("Task Manager"), icon: ListTodo },
+    // { href: "/taskManager", label: t("Task Manager"), icon: ListTodo },
     {
       href: "/appointment-types",
-      label: t("Appointment Types"),
+      label: t("Types"),
       icon: ClipboardList,
     },
     { href: "/schedule", label: t("Schedule"), icon: Calendar },
@@ -39,7 +39,7 @@ export default function LeftNav({ isOpen }: LeftNavProps) {
 
   return (
     <nav
-      className={`fixed left-0 top-17.5 bottom-0 bg-slate-900/20 backdrop-blur-xl border-r border-white/10 z-40 transition-all duration-300 ${
+      className={`bg-primary-foreground fixed left-0 top-17.5 bottom-0  backdrop-blur-xl border-r border-white/10 z-40 transition-all duration-300 ${
         isOpen ? "w-64 translate-x-0" : "w-0 -translate-x-full"
       }`}
     >
@@ -59,8 +59,8 @@ export default function LeftNav({ isOpen }: LeftNavProps) {
                 href={item.href}
                 className={`flex items-center space-x-3 px-4 py-3 rounded-xl transition-all duration-200 ${
                   isActive
-                    ? "bg-gradient-to-r from-purple-500/30 to-blue-500/30 border border-white/20 text-white"
-                    : "text-white/70 hover:text-white hover:bg-white/10"
+                    ? "bg-primary text-white hover:bg-primary-dark"
+                    : "text-text-primary hover:text-white hover:bg-primary-dark"
                 }`}
               >
                 <Icon className="w-5 h-5" />

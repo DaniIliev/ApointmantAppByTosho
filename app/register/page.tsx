@@ -4,8 +4,6 @@ import type React from "react";
 import { useTranslation } from "react-i18next";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import {
   Card,
   CardContent,
@@ -15,6 +13,7 @@ import {
 } from "@/components/ui/card";
 import { Building2, User, Sparkles } from "lucide-react";
 import callApi from "../Api/callApi";
+import { LabeledInput } from "@/components/customUIComponents/LabeledInput";
 
 type AccountType = "personal" | "business" | null;
 
@@ -25,11 +24,9 @@ export default function RegisterPage() {
     email: "",
     password: "",
     repassword: "",
-    // Personal fields
     firstName: "",
     lastName: "",
     phone: "",
-    // Business fields
     businessName: "",
     businessEmail: "",
     businessPhone: "",
@@ -43,7 +40,6 @@ export default function RegisterPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Handle form submission
     console.log(t("Form submitted:"), { accountType, ...formData });
 
     const payload = {
@@ -64,7 +60,6 @@ export default function RegisterPage() {
 
   return (
     <div className="min-h-[87vh] flex items-center justify-center p-4 relative overflow-hidden">
-      {/* Условно прилагаме flexbox класове, за да центрираме съдържанието, когато няма избрана форма */}
       <div
         className={`w-full max-w-7xl mx-auto z-10 
         ${
@@ -73,7 +68,7 @@ export default function RegisterPage() {
             : "flex flex-col items-center justify-center"
         }`}
       >
-        {/* Лява Колона: Избор на тип акаунт */}
+        {/* Лява колона */}
         <div
           className={`flex flex-col items-center space-y-6 w-full ${
             accountType ? "lg:w-1/2" : "lg:max-w-md"
@@ -93,6 +88,7 @@ export default function RegisterPage() {
             </p>
           </div>
 
+          {/* Избор акаунт */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 w-full max-w-md">
             <Card
               className={`cursor-pointer transition-all duration-500 hover:scale-105 hover:shadow-2xl border-2 backdrop-blur-sm ${
@@ -156,10 +152,10 @@ export default function RegisterPage() {
           </div>
         </div>
 
-        {/* Дясна Колона: Формата */}
+        {/* Дясна колона: формата */}
         {accountType && (
           <div className="w-full lg:w-1/2 flex items-center mt-8 lg:mt-0">
-            <Card className="border-2 shadow-2xl bg-card/70 backdrop-blur-lg border-primary/20 w-full">
+            <Card className="py-4 border-2 shadow-2xl bg-card/70 backdrop-blur-lg border-primary/20 w-full">
               <CardHeader className="pb-4">
                 <CardTitle className="text-2xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
                   {accountType === "personal"
@@ -174,273 +170,158 @@ export default function RegisterPage() {
               </CardHeader>
               <CardContent>
                 <form onSubmit={handleSubmit} className="space-y-3">
-                  <div className="space-y-2">
-                    <Label
-                      htmlFor="email"
-                      className="text-sm font-semibold text-foreground"
-                    >
-                      {t("Email Address")}
-                    </Label>
-                    <Input
-                      id="email"
-                      type="email"
-                      placeholder={t("Enter your email address")}
-                      className="h-10 text-sm border-2 focus:border-primary transition-all duration-300 bg-input/80 backdrop-blur-sm rounded-lg"
-                      value={formData.email}
-                      onChange={(e) =>
-                        handleInputChange("email", e.target.value)
-                      }
-                      required
-                    />
-                  </div>
+                  <LabeledInput
+                    id="email"
+                    label={t("Email Address")}
+                    type="email"
+                    value={formData.email}
+                    onChange={(e) => handleInputChange("email", e.target.value)}
+                    placeholder={t("Enter your email address")}
+                    className="bg-input/80 backdrop-blur-sm rounded-lg"
+                  />
 
                   <div className="grid grid-cols-2 gap-3">
-                    <div className="space-y-2">
-                      <Label
-                        htmlFor="password"
-                        className="text-sm font-semibold text-foreground"
-                      >
-                        {t("Password")}
-                      </Label>
-                      <Input
-                        id="password"
-                        type="password"
-                        placeholder={t("Create a password")}
-                        className="h-10 text-sm border-2 focus:border-primary transition-all duration-300 bg-input/80 backdrop-blur-sm rounded-lg"
-                        value={formData.password}
-                        onChange={(e) =>
-                          handleInputChange("password", e.target.value)
-                        }
-                        required
-                      />
-                    </div>
-
-                    <div className="space-y-2">
-                      <Label
-                        htmlFor="repassword"
-                        className="text-sm font-semibold text-foreground"
-                      >
-                        {t("Confirm Password")}
-                      </Label>
-                      <Input
-                        id="repassword"
-                        type="password"
-                        placeholder={t("Confirm password")}
-                        className="h-10 text-sm border-2 focus:border-primary transition-all duration-300 bg-input/80 backdrop-blur-sm rounded-lg"
-                        value={formData.repassword}
-                        onChange={(e) =>
-                          handleInputChange("repassword", e.target.value)
-                        }
-                        required
-                      />
-                    </div>
+                    <LabeledInput
+                      id="password"
+                      label={t("Password")}
+                      type="password"
+                      value={formData.password}
+                      onChange={(e) =>
+                        handleInputChange("password", e.target.value)
+                      }
+                      placeholder={t("Create a password")}
+                      className="bg-input/80 backdrop-blur-sm rounded-lg"
+                    />
+                    <LabeledInput
+                      id="repassword"
+                      label={t("Confirm Password")}
+                      type="password"
+                      value={formData.repassword}
+                      onChange={(e) =>
+                        handleInputChange("repassword", e.target.value)
+                      }
+                      placeholder={t("Confirm password")}
+                      className="bg-input/80 backdrop-blur-sm rounded-lg"
+                    />
                   </div>
 
                   {accountType === "personal" && (
                     <>
                       <div className="grid grid-cols-2 gap-3">
-                        <div className="space-y-2">
-                          <Label
-                            htmlFor="firstName"
-                            className="text-sm font-semibold text-foreground"
-                          >
-                            {t("First Name")}
-                          </Label>
-                          <Input
-                            id="firstName"
-                            placeholder={t("First name")}
-                            className="h-10 text-sm border-2 focus:border-primary transition-all duration-300 bg-input/80 backdrop-blur-sm rounded-lg"
-                            value={formData.firstName}
-                            onChange={(e) =>
-                              handleInputChange("firstName", e.target.value)
-                            }
-                            required
-                          />
-                        </div>
-                        <div className="space-y-2">
-                          <Label
-                            htmlFor="lastName"
-                            className="text-sm font-semibold text-foreground"
-                          >
-                            {t("Last Name")}
-                          </Label>
-                          <Input
-                            id="lastName"
-                            placeholder={t("Last name")}
-                            className="h-10 text-sm border-2 focus:border-primary transition-all duration-300 bg-input/80 backdrop-blur-sm rounded-lg"
-                            value={formData.lastName}
-                            onChange={(e) =>
-                              handleInputChange("lastName", e.target.value)
-                            }
-                            required
-                          />
-                        </div>
-                      </div>
-
-                      <div className="space-y-2">
-                        <Label
-                          htmlFor="phone"
-                          className="text-sm font-semibold text-foreground"
-                        >
-                          {t("Phone Number")}
-                        </Label>
-                        <Input
-                          id="phone"
-                          type="tel"
-                          placeholder={t("Your phone number")}
-                          className="h-10 text-sm border-2 focus:border-primary transition-all duration-300 bg-input/80 backdrop-blur-sm rounded-lg"
-                          value={formData.phone}
+                        <LabeledInput
+                          id="firstName"
+                          label={t("First Name")}
+                          value={formData.firstName}
                           onChange={(e) =>
-                            handleInputChange("phone", e.target.value)
+                            handleInputChange("firstName", e.target.value)
                           }
+                          placeholder={t("First name")}
+                          className="bg-input/80 backdrop-blur-sm rounded-lg"
+                        />
+                        <LabeledInput
+                          id="lastName"
+                          label={t("Last Name")}
+                          value={formData.lastName}
+                          onChange={(e) =>
+                            handleInputChange("lastName", e.target.value)
+                          }
+                          placeholder={t("Last name")}
+                          className="bg-input/80 backdrop-blur-sm rounded-lg"
                         />
                       </div>
+
+                      <LabeledInput
+                        id="phone"
+                        label={t("Phone Number")}
+                        type="tel"
+                        value={formData.phone}
+                        onChange={(e) =>
+                          handleInputChange("phone", e.target.value)
+                        }
+                        placeholder={t("Your phone number")}
+                        className="bg-input/80 backdrop-blur-sm rounded-lg"
+                      />
                     </>
                   )}
 
                   {accountType === "business" && (
                     <>
-                      {/* <div className="space-y-2">
-                        <Label
-                          htmlFor="businessName"
-                          className="text-sm font-semibold text-foreground"
-                        >
-                          {t("Business Name")}
-                        </Label>
-                        <Input
+                      <div className="grid grid-cols-2 gap-3">
+                        <LabeledInput
+                          id="firstName"
+                          label={t("First Name")}
+                          value={formData.firstName}
+                          onChange={(e) =>
+                            handleInputChange("firstName", e.target.value)
+                          }
+                          placeholder={t("First name")}
+                          className="bg-input/80 backdrop-blur-sm rounded-lg"
+                        />
+                        <LabeledInput
+                          id="lastName"
+                          label={t("Last Name")}
+                          value={formData.lastName}
+                          onChange={(e) =>
+                            handleInputChange("lastName", e.target.value)
+                          }
+                          placeholder={t("Last name")}
+                          className="bg-input/80 backdrop-blur-sm rounded-lg"
+                        />
+                      </div>
+
+                      <div className="grid grid-cols-2 gap-3">
+                        <LabeledInput
                           id="businessName"
-                          placeholder={t("Your business name")}
-                          className="h-10 text-sm border-2 focus:border-primary transition-all duration-300 bg-input/80 backdrop-blur-sm rounded-lg"
+                          label={t("Business Name")}
                           value={formData.businessName}
                           onChange={(e) =>
                             handleInputChange("businessName", e.target.value)
                           }
-                          required
+                          placeholder={t("Your business name")}
+                          className="bg-input/80 backdrop-blur-sm rounded-lg"
                         />
-                      </div> */}
-
-                      <div className="grid grid-cols-2 gap-3">
-                        <div className="space-y-2">
-                          <Label
-                            htmlFor="firstName"
-                            className="text-sm font-semibold text-foreground"
-                          >
-                            {t("First Name")}
-                          </Label>
-                          <Input
-                            id="firstName"
-                            placeholder={t("First name")}
-                            className="h-10 text-sm border-2 focus:border-primary transition-all duration-300 bg-input/80 backdrop-blur-sm rounded-lg"
-                            value={formData.firstName}
-                            onChange={(e) =>
-                              handleInputChange("firstName", e.target.value)
-                            }
-                            required
-                          />
-                        </div>
-                        <div className="space-y-2">
-                          <Label
-                            htmlFor="lastName"
-                            className="text-sm font-semibold text-foreground"
-                          >
-                            {t("Last Name")}
-                          </Label>
-                          <Input
-                            id="lastName"
-                            placeholder={t("Last name")}
-                            className="h-10 text-sm border-2 focus:border-primary transition-all duration-300 bg-input/80 backdrop-blur-sm rounded-lg"
-                            value={formData.lastName}
-                            onChange={(e) =>
-                              handleInputChange("lastName", e.target.value)
-                            }
-                            required
-                          />
-                        </div>
-                      </div>
-                      <div className="grid grid-cols-2 gap-3">
-                        <div className="space-y-2">
-                          <Label
-                            htmlFor="businessName"
-                            className="text-sm font-semibold text-foreground"
-                          >
-                            {t("Business Name")}
-                          </Label>
-                          <Input
-                            id="businessName"
-                            placeholder={t("Your business name")}
-                            className="h-10 text-sm border-2 focus:border-primary transition-all duration-300 bg-input/80 backdrop-blur-sm rounded-lg"
-                            value={formData.businessName}
-                            onChange={(e) =>
-                              handleInputChange("businessName", e.target.value)
-                            }
-                            required
-                          />
-                        </div>
-                        <div className="space-y-2">
-                          <Label
-                            htmlFor="businessPhone"
-                            className="text-sm font-semibold text-foreground"
-                          >
-                            {t("Business Phone")}
-                          </Label>
-                          <Input
-                            id="businessPhone"
-                            type="tel"
-                            placeholder={t("Business phone")}
-                            className="h-10 text-sm border-2 focus:border-primary transition-all duration-300 bg-input/80 backdrop-blur-sm rounded-lg"
-                            value={formData.businessPhone}
-                            onChange={(e) =>
-                              handleInputChange("businessPhone", e.target.value)
-                            }
-                            required
-                          />
-                        </div>
-                      </div>
-                      <div className="space-y-2">
-                        <Label
-                          htmlFor="businessAddress"
-                          className="text-sm font-semibold text-foreground"
-                        >
-                          {t("Business Address")}
-                        </Label>
-                        <Input
-                          id="businessAddress"
-                          placeholder={t("Business address")}
-                          className="h-10 text-sm border-2 focus:border-primary transition-all duration-300 bg-input/80 backdrop-blur-sm rounded-lg"
-                          value={formData.businessAddress}
+                        <LabeledInput
+                          id="businessPhone"
+                          label={t("Business Phone")}
+                          type="tel"
+                          value={formData.businessPhone}
                           onChange={(e) =>
-                            handleInputChange("businessAddress", e.target.value)
+                            handleInputChange("businessPhone", e.target.value)
                           }
-                          required
+                          placeholder={t("Business phone")}
+                          className="bg-input/80 backdrop-blur-sm rounded-lg"
                         />
                       </div>
 
-                      <div className="space-y-2">
-                        <Label
-                          htmlFor="taxId"
-                          className="text-sm font-semibold text-foreground"
-                        >
-                          {t("Tax ID")}
-                        </Label>
-                        <Input
-                          id="taxId"
-                          placeholder={t("Tax ID number")}
-                          className="h-10 text-sm border-2 focus:border-primary transition-all duration-300 bg-input/80 backdrop-blur-sm rounded-lg"
-                          value={formData.taxId}
-                          onChange={(e) =>
-                            handleInputChange("taxId", e.target.value)
-                          }
-                          required
-                        />
-                      </div>
+                      <LabeledInput
+                        id="businessAddress"
+                        label={t("Business Address")}
+                        value={formData.businessAddress}
+                        onChange={(e) =>
+                          handleInputChange("businessAddress", e.target.value)
+                        }
+                        placeholder={t("Business address")}
+                        className="bg-input/80 backdrop-blur-sm rounded-lg"
+                      />
+
+                      <LabeledInput
+                        id="taxId"
+                        label={t("Tax ID")}
+                        value={formData.taxId}
+                        onChange={(e) =>
+                          handleInputChange("taxId", e.target.value)
+                        }
+                        placeholder={t("Tax ID number")}
+                        className="bg-input/80 backdrop-blur-sm rounded-lg"
+                      />
                     </>
                   )}
 
                   <Button
                     type="submit"
-                    className="w-full h-10 text-md font-bold bg-gradient-to-r from-primary to-accent hover:from-primary/90 hover:to-accent/90 transition-all duration-300 shadow-xl hover:shadow-2xl hover:scale-105 rounded-lg"
+                    className="w-40 block mx-auto h-10 text-lg font-bold bg-primary hover:bg-primary-dark transition-all duration-300 shadow-xl hover:shadow-2xl hover:scale-105 rounded-xl"
                   >
-                    {t("Create Your Account")}
+                    {t("Sign up")}
                   </Button>
                 </form>
               </CardContent>

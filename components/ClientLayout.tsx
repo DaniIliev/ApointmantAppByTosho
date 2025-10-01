@@ -8,7 +8,6 @@ import RightNavigation from "./navigation/right-nav";
 import { useRightNav } from "@/context/RightNavContext";
 import Chatbot from "./chatBot/Chatbot";
 
-// Дефинираме ширините на навигациите като константи за по-лесно управление
 const LEFT_NAV_OPEN_WIDTH_CLASS = "ml-64";
 const LEFT_NAV_CLOSED_WIDTH_CLASS = "ml-0";
 const RIGHT_NAV_OPEN_WIDTH_CLASS = "mr-10";
@@ -49,9 +48,6 @@ export default function ClientLayout({
                 : RIGHT_NAV_CLOSED_WIDTH_CLASS
             }
                min-h-[87vh] 
-               bg-gradient-to-br 
-              
-              from-primary/20 via-background to-accent/20
                p-7 relative overflow-hidden
           `}
         >

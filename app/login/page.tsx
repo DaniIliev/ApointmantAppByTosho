@@ -4,8 +4,6 @@ import type React from "react";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import {
   Card,
   CardContent,
@@ -13,9 +11,9 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { LogIn } from "lucide-react";
 import callApi from "../Api/callApi";
-import { useAuthContext } from "@/context/AuthContext";
+import { useAuthContext } from "@/context/AuthContext"; // 👈 твоя custom input
+import { LabeledInput } from "@/components/customUIComponents/LabeledInput";
 
 export default function LoginPage() {
   const { t } = useTranslation();
@@ -36,6 +34,7 @@ export default function LoginPage() {
       email: formData.email,
       password: formData.password,
     };
+
     const authedUser: any = await callApi("/api/auth/login", "POST", payload);
     login(formData);
     console.log("authedUser", authedUser);
@@ -46,66 +45,49 @@ export default function LoginPage() {
     <div className="flex items-center justify-center p-4 relative overflow-hidden">
       <div className="relative w-full max-w-md space-y-8 z-10">
         <div className="text-center space-y-6">
-          <div className="flex justify-center">
-            <div className="p-4 bg-gradient-to-br from-primary to-accent rounded-3xl shadow-2xl">
-              <LogIn className="h-10 w-10 text-white" />
-            </div>
-          </div>
           <h1 className="text-5xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent tracking-tight">
-            {t("Welcome Back")} {/* Wrap text */}
+            {t("Welcome Back")}
           </h1>
           <p className="text-xl text-muted-foreground font-medium">
             {t("Sign in to continue your journey")}
           </p>
         </div>
 
-        <Card className="border-2 shadow-2xl bg-card/70 backdrop-blur-lg border-primary/20">
+        <Card className="py-6 border-2 shadow-2xl bg-card/70 backdrop-blur-lg border-primary/20">
           <CardHeader className="pb-8">
             <CardTitle className="text-3xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
-              {t("Sign In")} {/* Wrap text */}
+              {t("Sign In")}
             </CardTitle>
             <CardDescription className="text-lg text-muted-foreground">
-              {t("Enter your credentials to access your account")}{" "}
-              {/* Wrap text */}
+              {t("Enter your credentials to access your account")}
             </CardDescription>
           </CardHeader>
+
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-6">
+              {/* Email */}
               <div className="space-y-3">
-                <Label
-                  htmlFor="email"
-                  className="text-base font-semibold text-foreground"
-                >
-                  {t("Email Address")} {/* Wrap text */}
-                </Label>
-                <Input
+                <LabeledInput
                   id="email"
+                  label={t("Email Address")}
                   type="email"
-                  placeholder={t("Enter your email address")}
-                  className="h-14 text-base border-2 focus:border-primary transition-all duration-300 bg-input/80 backdrop-blur-sm rounded-xl"
                   value={formData.email}
                   onChange={(e) => handleInputChange("email", e.target.value)}
-                  required
+                  placeholder={t("Enter your email address")}
                 />
               </div>
 
+              {/* Password */}
               <div className="space-y-3">
-                <Label
-                  htmlFor="password"
-                  className="text-base font-semibold text-foreground"
-                >
-                  {t("Password")} {/* Wrap text */}
-                </Label>
-                <Input
+                <LabeledInput
                   id="password"
+                  label={t("Password")}
                   type="password"
-                  placeholder={t("Enter your password")}
-                  className="h-14 text-base border-2 focus:border-primary transition-all duration-300 bg-input/80 backdrop-blur-sm rounded-xl"
                   value={formData.password}
                   onChange={(e) =>
                     handleInputChange("password", e.target.value)
                   }
-                  required
+                  placeholder={t("Enter your password")}
                 />
               </div>
 
@@ -114,27 +96,27 @@ export default function LoginPage() {
                   href="/forgot-password"
                   className="text-primary hover:text-accent font-medium hover:underline transition-all duration-300"
                 >
-                  {t("Forgot your password?")} {/* Wrap text */}
+                  {t("Forgot your password?")}
                 </a>
               </div>
 
               <Button
                 type="submit"
-                className="w-full h-14 text-lg font-bold bg-gradient-to-r from-primary to-accent hover:from-primary/90 hover:to-accent/90 transition-all duration-300 shadow-xl hover:shadow-2xl hover:scale-105 rounded-xl"
+                className="w-40 block mx-auto h-10 text-lg font-bold bg-primary hover:bg-primary-dark transition-all duration-300 shadow-xl hover:shadow-2xl hover:scale-105 rounded-xl"
               >
-                {t("Sign In")} {/* Wrap text */}
+                {t("Sign In")}
               </Button>
             </form>
           </CardContent>
         </Card>
 
         <div className="text-center text-lg text-muted-foreground">
-          {t("Don't have an account?")} {/* Wrap text */}
+          {t("Don't have an account?")}{" "}
           <a
             href="/register"
             className="text-primary hover:text-accent font-bold hover:underline transition-all duration-300"
           >
-            {t("Create one here")} {/* Wrap text */}
+            {t("Create one here")}
           </a>
         </div>
       </div>

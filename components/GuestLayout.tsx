@@ -35,7 +35,7 @@ export default function GuestLayout({
             transition-all duration-300
                min-h-[87vh]
                
-               bg-gradient-to-br from-primary/20 via-background to-accent/20 
+                
                p-7 relative overflow-hidden
           `}
         >

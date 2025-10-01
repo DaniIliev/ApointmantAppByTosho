@@ -9,13 +9,13 @@ import {
   SelectOptionsAppointmentType,
 } from "@/Global/Types/types";
 import React, { useState, useEffect } from "react";
-import { LabeledInput } from "@/components/customUIComponents/LabeledInput";
 import { LabeledSelect } from "@/components/customUIComponents/LabeledSelect";
 import { LabeledTextarea } from "@/components/customUIComponents/LabeledTextarea";
 import { FormGrid } from "@/Global/Styles/FormGrid";
 import callApi from "@/app/Api/callApi";
 import { Modal } from "@/components/customUIComponents/Modal";
-import { Clock } from "lucide-react"; // Добавен икон
+import { Clock, Mail } from "lucide-react"; // Добавен икон
+import { LabeledInput } from "@/components/customUIComponents/LabeledInput";
 
 interface CreateAppointmantProps {
   newAppointment: {
@@ -170,6 +170,7 @@ const CreateAppointmant = ({
             }))
           }
           placeholder={t("client@example.com")}
+          // icon={<Mail size={20} />}
         />
         <LabeledInput
           label={t("Phone")}
