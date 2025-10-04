@@ -1,25 +1,48 @@
-import type React from "react"
-import { Card, CardContent } from "@/components/ui/card"
-import { cn } from "@/lib/utils"
+import { cn } from "@/lib/utils";
+import { Card, CardContent } from "../ui/card";
+import { useTranslation } from "react-i18next";
 
 interface KPICardProps {
-  title: string
-  value: string | number
+  title: string;
+  value: string | number;
   change?: {
-    value: number
-    type: "increase" | "decrease"
-  }
-  icon?: React.ReactNode
-  className?: string
+    value: number;
+    type: "increase" | "decrease" | "neutral";
+  };
+  icon?: React.ReactNode;
+  className?: string;
 }
+export function KPICard({
+  title,
+  value,
+  change,
+  icon,
+  className,
+}: KPICardProps) {
+  const { t } = useTranslation();
 
-export function KPICard({ title, value, change, icon, className }: KPICardProps) {
+  // Определяме цвета на промяната
+  const changeColor =
+    change?.type === "increase"
+      ? "text-green-500"
+      : change?.type === "decrease"
+      ? "text-red-500"
+      : "text-muted-foreground";
+
+  // Определяме символа
+  const changeSymbol =
+    change?.type === "increase" ? "+" : change?.type === "decrease" ? "-" : "";
+
+  // Проверяваме дали трябва да покажем промяната
+  const shouldShowChange =
+    change && change.type !== "neutral" && change.value !== 0;
+
   return (
     <Card
       className={cn(
         "border-2 shadow-2xl bg-card/70 backdrop-blur-lg border-primary/20",
         "hover:shadow-2xl transition-all duration-300",
-        className,
+        className
       )}
     >
       <CardContent className="p-6">
@@ -29,16 +52,24 @@ export function KPICard({ title, value, change, icon, className }: KPICardProps)
             <p className="text-3xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
               {value}
             </p>
-            {change && (
-              <p className={cn("text-xs mt-1", change.type === "increase" ? "text-green-500" : "text-red-500")}>
-                {change.type === "increase" ? "+" : "-"}
-                {Math.abs(change.value)}% from last period
+            {shouldShowChange && (
+              <p className={cn("text-xs mt-1", changeColor)}>
+                {changeSymbol}
+                {Math.abs(change.value).toFixed(1)}% {t("from last period")}
               </p>
+            )}
+            {!shouldShowChange && change && (
+              <p className="text-xs mt-1 text-muted-foreground">
+                {t("No change from last period")}
+              </p>
+            )}
+            {!change && ( // Ако change изобщо не е подаден, запазваме мястото
+              <p className="text-xs mt-1 text-transparent">.</p>
             )}
           </div>
           {icon && <div className="h-8 w-8 text-primary">{icon}</div>}
         </div>
       </CardContent>
     </Card>
-  )
+  );
 }

@@ -1,20 +1,133 @@
-import * as React from "react"
-import { Slot } from "@radix-ui/react-slot"
-import { cva, type VariantProps } from "class-variance-authority"
+import * as React from "react";
+import { Slot } from "@radix-ui/react-slot";
+import { cva, type VariantProps } from "class-variance-authority";
+import { cn } from "@/lib/utils";
+import {
+  Eye,
+  Edit,
+  Trash2,
+  Save,
+  Plus,
+  X,
+  Check,
+  Printer,
+  Download,
+  Upload,
+  Search,
+  Settings,
+  FileText,
+  AlertTriangle,
+  AlertCircle,
+  RotateCw,
+  Share2,
+  Copy,
+  ChevronDown,
+  Filter,
+  BarChart,
+  Clipboard,
+  ZoomIn,
+  ZoomOut,
+  ChevronUp,
+  Info,
+  XCircle,
+  RefreshCcw,
+  ArrowRight,
+  ArrowLeft,
+  Send,
+  CheckCircle,
+  Repeat,
+} from "lucide-react";
 
-import { cn } from "@/lib/utils"
+export type IconType =
+  | "view"
+  | "edit"
+  | "delete"
+  | "save"
+  | "add"
+  | "cancel"
+  | "check"
+  | "print"
+  | "download"
+  | "upload"
+  | "search"
+  | "settings"
+  | "details"
+  | "warning"
+  | "error"
+  | "refresh"
+  | "share"
+  | "copy"
+  | "expand"
+  | "filter"
+  | "chart"
+  | "paste"
+  | "zoomIn"
+  | "zoomOut"
+  | "collapse"
+  | "reset"
+  | "info"
+  | "clear"
+  | "process"
+  | "next"
+  | "back"
+  | "send"
+  | "confirm"
+  | "repeatable"
+  | "reject"
+  | "approve";
 
+// Коригираният IconMap
+const IconMap: Record<IconType, React.ElementType> = {
+  view: Eye,
+  edit: Edit,
+  delete: Trash2,
+  save: Save,
+  add: Plus,
+  cancel: XCircle,
+  check: Check,
+  print: Printer,
+  download: Download,
+  upload: Upload,
+  search: Search,
+  settings: Settings,
+  details: FileText,
+  warning: AlertTriangle,
+  error: AlertCircle,
+  refresh: RotateCw,
+  share: Share2,
+  copy: Copy,
+  expand: ChevronDown,
+  filter: Filter,
+  chart: BarChart,
+  paste: Clipboard,
+  zoomIn: ZoomIn,
+  zoomOut: ZoomOut,
+  collapse: ChevronUp,
+  reset: RefreshCcw,
+  info: Info,
+  clear: X,
+  process: RefreshCcw,
+  next: ArrowRight,
+  back: ArrowLeft,
+  send: Send,
+  confirm: Check,
+  repeatable: Repeat,
+  approve: CheckCircle,
+  reject: XCircle,
+};
+
+// 3. Дефиниция на вариантите за бутона (остава непроменена)
 const buttonVariants = cva(
-  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 shrink-0 [&_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive",
+  "cursor-pointer inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-lg text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 shrink-0 [&_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive",
   {
     variants: {
       variant: {
         default:
-          "bg-primary text-primary-foreground shadow-xs hover:bg-primary/90",
+          "bg-primary text-primary-foreground shadow-xs hover:bg-primary-dark",
         destructive:
           "bg-destructive text-white shadow-xs hover:bg-destructive/90 focus-visible:ring-destructive/20 dark:focus-visible:ring-destructive/40 dark:bg-destructive/60",
         outline:
-          "border bg-background shadow-xs hover:bg-accent hover:text-accent-foreground dark:bg-input/30 dark:border-input dark:hover:bg-input/50",
+          "border border-primary/50 text-primary bg-transparent shadow-xs hover:bg-primary/10 dark:bg-input/30 dark:border-input dark:hover:bg-input/50",
         secondary:
           "bg-secondary text-secondary-foreground shadow-xs hover:bg-secondary/80",
         ghost:
@@ -33,27 +146,41 @@ const buttonVariants = cva(
       size: "default",
     },
   }
-)
+);
 
+// 4. Компонентът Button с добавен iconType
 function Button({
   className,
   variant,
   size,
   asChild = false,
+  iconType, // Нов проп
+  children,
   ...props
 }: React.ComponentProps<"button"> &
   VariantProps<typeof buttonVariants> & {
-    asChild?: boolean
+    asChild?: boolean;
+    iconType?: IconType; // Добавяме iconType в Props
   }) {
-  const Comp = asChild ? Slot : "button"
+  // Избор на компонент за рендиране
+  const Comp = asChild ? Slot : "button";
+
+  // Избор на компонент за икона
+  const IconComponent = iconType ? IconMap[iconType] : null;
 
   return (
     <Comp
       data-slot="button"
       className={cn(buttonVariants({ variant, size, className }))}
       {...props}
-    />
-  )
+    >
+      {/* Рендиране на иконата, ако е подадена */}
+      {IconComponent && <IconComponent />}
+
+      {/* Рендиране на съдържанието */}
+      {children}
+    </Comp>
+  );
 }
 
-export { Button, buttonVariants }
+export { Button, buttonVariants };

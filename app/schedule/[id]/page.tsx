@@ -1,3 +1,5 @@
+// staffDailySchedulePage.js
+
 "use client";
 
 import { useEffect, useState } from "react";
@@ -10,9 +12,12 @@ import { Switch } from "@/components/ui/switch";
 import callApi from "@/app/Api/callApi";
 import { toast } from "sonner";
 import { format } from "date-fns";
-import { ArrowLeft, Plus, Trash2 } from "lucide-react";
+import { ArrowLeft, Plus, Trash2, ListIcon, CalendarIcon } from "lucide-react"; // Добавени икони за табовете
 import { Button } from "@/components/ui/button";
 import { CustomTooltip } from "@/components/customUIComponents/CustomTooltip";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"; // ИМПОРТ ЗА ТАБОВЕ
+import ScheduleCalendarView from "@/components/calendar/ScheduleCalendarView";
+// ИМПОРТ ЗА НОВИЯ КАЛЕНДАРЕН ИЗГЛЕД
 
 // Актуализирани типове за да отговарят на бекенд схемата
 type TimeRange = {
@@ -34,7 +39,6 @@ export default function StaffDailySchedulePage() {
   const params = useParams();
 
   const scheduleId = params.id;
-  console.log("scheduleId", scheduleId);
   const [dailyData, setDailyData] = useState<WorkHours[]>([]);
   const { setPageTitle } = usePageTitle();
 
@@ -45,22 +49,25 @@ export default function StaffDailySchedulePage() {
           `/api/staff-schedules/${scheduleId}/details`,
           "GET"
         );
-        console.log("data", data);
         // Обработка на данните, за да се гарантира, че workTime е обект
         const formattedData = data.map((item: any) => ({
           ...item,
+          // Преобразуваме датата в Date обект за по-лесно форматиране във външните компоненти
+          date: new Date(item.date),
           workTime: item.workTime || { start: "", end: "" },
           breaks: item.breaks || [],
         }));
         setDailyData(formattedData);
 
         if (formattedData.length > 0) {
-          const startDate = format(
-            new Date(formattedData[0].date),
-            "dd.MM.yyyy"
+          // Уверете се, че датите са сортирани за да получите правилните начална и крайна дата
+          const sortedData = [...formattedData].sort(
+            (a, b) => a.date.getTime() - b.date.getTime()
           );
+
+          const startDate = format(sortedData[0].date, "dd.MM.yyyy");
           const endDate = format(
-            new Date(formattedData[formattedData.length - 1].date),
+            sortedData[sortedData.length - 1].date,
             "dd.MM.yyyy"
           );
           setPageTitle(`График за период: ${startDate} - ${endDate}`);
@@ -78,9 +85,16 @@ export default function StaffDailySchedulePage() {
 
   const handleSave = async (updatedData: WorkHours[]) => {
     try {
+      // Премахваме Date обектите преди изпращане, ако API очаква стринг
+      const dataToSend = updatedData.map((item) => ({
+        ...item,
+        date: item.date.toISOString(),
+      }));
+
       await callApi(`/api/staff-schedules/${scheduleId}/details`, "PUT", {
-        workHours: updatedData,
+        workHours: dataToSend,
       });
+      // Обновяваме state с новите данни (които вече имат Date обекти)
       setDailyData(updatedData);
       toast.success("Графикът е запазен успешно!");
     } catch (error) {
@@ -217,7 +231,6 @@ export default function StaffDailySchedulePage() {
               const updatedBreaks = [
                 ...row.original.breaks,
                 {
-                  _id: Date.now().toString(),
                   start: "12:00",
                   end: "13:00",
                 },
@@ -233,7 +246,7 @@ export default function StaffDailySchedulePage() {
   ];
 
   return (
-    <div>
+    <div className="space-y-4">
       <div className="absolute top-2 right-4">
         <CustomTooltip
           onClick={() => router.back()}
@@ -241,12 +254,35 @@ export default function StaffDailySchedulePage() {
           icon={<ArrowLeft />}
         />
       </div>
-      <GenericTable
-        data={dailyData}
-        columns={columns}
-        editable
-        onSave={handleSave}
-      />
+
+      {/* ИНТЕГРАЦИЯТА НА ТАБОВЕТЕ ЗАПОЧВА ТУК */}
+      <Tabs defaultValue="table" className="w-full">
+        <TabsList className="grid w-full grid-cols-2">
+          <TabsTrigger value="table" className="flex items-center gap-2">
+            <ListIcon className="h-4 w-4" /> Табличен Изглед
+          </TabsTrigger>
+          <TabsTrigger value="calendar" className="flex items-center gap-2">
+            <CalendarIcon className="h-4 w-4" /> Календарен Изглед
+          </TabsTrigger>
+        </TabsList>
+
+        {/* Табличен Изглед (Вашата съществуваща таблица) */}
+        <TabsContent value="table">
+          <GenericTable
+            data={dailyData}
+            columns={columns}
+            editable
+            onSave={handleSave}
+          />
+        </TabsContent>
+
+        <TabsContent value="calendar">
+          <ScheduleCalendarView
+            dailyData={dailyData}
+            onEditDay={() => console.log("edit day")}
+          />
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }
@@ -258,7 +294,6 @@ export default function StaffDailySchedulePage() {
 // import { useRightNav } from "@/context/RightNavContext";
 // import { GenericTable, Column } from "@/components/GenericTable/GenericTable";
 // import { LabeledInput } from "@/components/customUIComponents/LabeledInput";
-// import { Label } from "@/components/ui/label";
 // import { Switch } from "@/components/ui/switch";
 // import callApi from "@/app/Api/callApi";
 // import { toast } from "sonner";
@@ -267,20 +302,19 @@ export default function StaffDailySchedulePage() {
 // import { Button } from "@/components/ui/button";
 // import { CustomTooltip } from "@/components/customUIComponents/CustomTooltip";
 
+// // Актуализирани типове за да отговарят на бекенд схемата
+// type TimeRange = {
+//   start: string;
+//   end: string;
+// };
+
 // type WorkHours = {
 //   _id: string;
 //   day: string;
 //   date: Date;
 //   isDayOff: boolean;
-//   startTime: string;
-//   endTime: string;
-//   breaks: Break[];
-// };
-
-// type Break = {
-//   _id: string;
-//   startTime: string;
-//   endTime: string;
+//   workTime: TimeRange | null; // Променено на workTime обект
+//   breaks: TimeRange[]; // Променено на TimeRange[]
 // };
 
 // export default function StaffDailySchedulePage() {
@@ -300,11 +334,21 @@ export default function StaffDailySchedulePage() {
 //           "GET"
 //         );
 //         console.log("data", data);
-//         setDailyData(data);
-//         if (data.length > 0) {
-//           const startDate = format(new Date(data[0].date), "dd.MM.yyyy");
+//         // Обработка на данните, за да се гарантира, че workTime е обект
+//         const formattedData = data.map((item: any) => ({
+//           ...item,
+//           workTime: item.workTime || { start: "", end: "" },
+//           breaks: item.breaks || [],
+//         }));
+//         setDailyData(formattedData);
+
+//         if (formattedData.length > 0) {
+//           const startDate = format(
+//             new Date(formattedData[0].date),
+//             "dd.MM.yyyy"
+//           );
 //           const endDate = format(
-//             new Date(data[data.length - 1].date),
+//             new Date(formattedData[formattedData.length - 1].date),
 //             "dd.MM.yyyy"
 //           );
 //           setPageTitle(`График за период: ${startDate} - ${endDate}`);
@@ -359,35 +403,44 @@ export default function StaffDailySchedulePage() {
 //       ),
 //     },
 //     {
-//       accessorKey: "startTime",
-//       header: "Начало",
+//       accessorKey: "workTime",
+//       header: "Работно време",
 //       cell: ({ row }) => (
-//         <span>{row.original.isDayOff ? "-" : row.original.startTime}</span>
+//         <span>
+//           {row.original.isDayOff
+//             ? "-"
+//             : `${row.original.workTime?.start} - ${row.original.workTime?.end}`}
+//         </span>
 //       ),
 //       editableCell: ({ row }, onUpdate) => (
-//         <LabeledInput
-//           type="time"
-//           value={row.original.startTime}
-//           onChange={(e) => onUpdate("startTime", e.target.value)}
-//           label={""}
-//           id={""} // disabled={row.original.isDayOff}
-//         />
-//       ),
-//     },
-//     {
-//       accessorKey: "endTime",
-//       header: "Край",
-//       cell: ({ row }) => (
-//         <span>{row.original.isDayOff ? "-" : row.original.endTime}</span>
-//       ),
-//       editableCell: ({ row }, onUpdate) => (
-//         <LabeledInput
-//           type="time"
-//           value={row.original.endTime}
-//           onChange={(e) => onUpdate("endTime", e.target.value)}
-//           label={""}
-//           id={""} // disabled={row.original.isDayOff}
-//         />
+//         <div className="flex flex-col space-y-2">
+//           <LabeledInput
+//             type="time"
+//             value={row.original.workTime?.start || ""}
+//             onChange={(e) => {
+//               const updatedWorkTime = {
+//                 ...(row.original.workTime || {}),
+//                 start: e.target.value,
+//               };
+//               onUpdate("workTime", updatedWorkTime);
+//             }}
+//             label={"Начало"}
+//             id={"workStart"}
+//           />
+//           <LabeledInput
+//             type="time"
+//             value={row.original.workTime?.end || ""}
+//             onChange={(e) => {
+//               const updatedWorkTime = {
+//                 ...(row.original.workTime || {}),
+//                 end: e.target.value,
+//               };
+//               onUpdate("workTime", updatedWorkTime);
+//             }}
+//             label={"Край"}
+//             id={"workEnd"}
+//           />
+//         </div>
 //       ),
 //     },
 //     // Колона за почивките
@@ -398,7 +451,7 @@ export default function StaffDailySchedulePage() {
 //         <div className="flex flex-col space-y-1">
 //           {row.original.breaks.map((br, index) => (
 //             <span key={index} className="text-sm">
-//               {br.startTime} - {br.endTime}
+//               {br.start} - {br.end}
 //             </span>
 //           ))}
 //         </div>
@@ -406,13 +459,13 @@ export default function StaffDailySchedulePage() {
 //       editableCell: ({ row }, onUpdate) => (
 //         <div className="flex flex-col space-y-2">
 //           {row.original.breaks.map((br, index) => (
-//             <div key={br._id} className="flex items-center space-x-2">
+//             <div key={index} className="flex items-center space-x-2">
 //               <LabeledInput
 //                 type="time"
-//                 value={br.startTime}
+//                 value={br.start}
 //                 onChange={(e) => {
 //                   const updatedBreaks = [...row.original.breaks];
-//                   updatedBreaks[index].startTime = e.target.value;
+//                   updatedBreaks[index].start = e.target.value;
 //                   onUpdate("breaks", updatedBreaks);
 //                 }}
 //                 label={""}
@@ -420,10 +473,10 @@ export default function StaffDailySchedulePage() {
 //               />
 //               <LabeledInput
 //                 type="time"
-//                 value={br.endTime}
+//                 value={br.end}
 //                 onChange={(e) => {
 //                   const updatedBreaks = [...row.original.breaks];
-//                   updatedBreaks[index].endTime = e.target.value;
+//                   updatedBreaks[index].end = e.target.value;
 //                   onUpdate("breaks", updatedBreaks);
 //                 }}
 //                 label={""}
@@ -453,8 +506,8 @@ export default function StaffDailySchedulePage() {
 //                 ...row.original.breaks,
 //                 {
 //                   _id: Date.now().toString(),
-//                   startTime: "12:00",
-//                   endTime: "13:00",
+//                   start: "12:00",
+//                   end: "13:00",
 //                 },
 //               ];
 //               onUpdate("breaks", updatedBreaks);

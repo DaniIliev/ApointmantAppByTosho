@@ -188,11 +188,7 @@
 /* Added utility classes for dynamic theming */
 @layer utilities {
   .theme-gradient-primary {
-    background: linear-gradient(
-      to right,
-      rgb(var(--theme-primary-from)),
-      rgb(var(--theme-primary-to))
-    );
+    background: linear-gradient(to right, var(--primary), var(--accent));
   }
 
   .theme-gradient-bg {
@@ -213,11 +209,7 @@
   }
 
   .theme-text-gradient {
-    background: linear-gradient(
-      to right,
-      rgb(var(--theme-primary-from)),
-      rgb(var(--theme-primary-to))
-    );
+    background: linear-gradient(to right, var(--primary), var(--accent));
     -webkit-background-clip: text;
     background-clip: text;
     color: transparent;

@@ -1,5 +1,3 @@
-// components/Forms/CreateAppointmant.js
-
 "use client";
 
 import { useTranslation } from "react-i18next";
@@ -10,11 +8,10 @@ import {
 } from "@/Global/Types/types";
 import React, { useState, useEffect } from "react";
 import { LabeledSelect } from "@/components/customUIComponents/LabeledSelect";
-import { LabeledTextarea } from "@/components/customUIComponents/LabeledTextarea";
 import { FormGrid } from "@/Global/Styles/FormGrid";
 import callApi from "@/app/Api/callApi";
 import { Modal } from "@/components/customUIComponents/Modal";
-import { Clock, Mail } from "lucide-react"; // Добавен икон
+import { Clock } from "lucide-react";
 import { LabeledInput } from "@/components/customUIComponents/LabeledInput";
 
 interface CreateAppointmantProps {
@@ -100,6 +97,11 @@ const CreateAppointmant = ({
   ]);
 
   useEffect(() => {
+    console.log(
+      "staffid",
+      newAppointment.staffId,
+      newAppointment.appointmentTypeId
+    );
     const fetchClosestSlot = async () => {
       if (newAppointment.appointmentTypeId && newAppointment.staffId) {
         setLoadingClosestSlot(true);
@@ -123,13 +125,11 @@ const CreateAppointmant = ({
 
   const handleSaveClosestSlot = () => {
     if (closestSlot) {
-      // Създаваме временен обект с правилните данни
       const updatedAppointmentData = {
         ...newAppointment,
         date: closestSlot.date,
         time: closestSlot.startTime,
       };
-      // Извикваме родителската функция, като ѝ подаваме актуализираните данни
       handleCreateAppointment(updatedAppointmentData);
       setIsClosestSlotModalOpen(false);
     }
@@ -246,7 +246,7 @@ const CreateAppointmant = ({
           />
         )}
       </FormGrid>
-      <LabeledTextarea
+      <LabeledInput
         label={t("Notes (Optional)")}
         id="notes"
         value={newAppointment.notes}
@@ -254,6 +254,7 @@ const CreateAppointmant = ({
           setNewAppointment((prev) => ({ ...prev, notes: e.target.value }))
         }
         placeholder={t("Add any additional notes or special requirements...")}
+        rows={2}
       />
       {newAppointment.appointmentTypeId && (
         <div className="p-4 bg-primary/10 rounded-xl border border-primary/20">
@@ -285,16 +286,17 @@ const CreateAppointmant = ({
           })()}
         </div>
       )}
-      <div className="flex gap-3 pt-4">
+      <div className="flex justify-center gap-3">
         <Button
+          iconType="cancel"
           variant="outline"
           onClick={() => setIsCreateModalOpen(false)}
-          className="flex-1 rounded-xl bg-transparent"
         >
           {t("Cancel")}
         </Button>
         <Button
-          onClick={handleCreateButton} // Извикваме нова функция за бутона
+          iconType="save"
+          onClick={handleCreateButton}
           disabled={
             !newAppointment.clientName ||
             !newAppointment.clientEmail ||
@@ -303,9 +305,8 @@ const CreateAppointmant = ({
             !newAppointment.appointmentTypeId ||
             !newAppointment.staffId
           }
-          className="flex-1 bg-gradient-to-r from-primary to-accent hover:from-primary/90 hover:to-accent/90 rounded-xl"
         >
-          {t("Create Appointment")}
+          {t("Create")}
         </Button>
       </div>
 

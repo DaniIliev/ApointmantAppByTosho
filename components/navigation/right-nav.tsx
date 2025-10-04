@@ -23,7 +23,7 @@ export default function RightNavigation() {
         <aside
           className={cn(
             "fixed right-0 z-10 flex flex-col justify-start",
-            "bg-background border-l border-border shadow-lg",
+            "bg-primary-foreground border-l border-border shadow-lg",
             "h-[calc(100vh-4rem)]",
             "transition-all duration-300 ease-in-out",
             isRightNavVisible ? RIGHT_NAV_OPEN_WIDTH : RIGHT_NAV_CLOSED_WIDTH
@@ -35,7 +35,7 @@ export default function RightNavigation() {
               "absolute -left-7 top-1/2 -translate-y-1/2",
               "p-1 bg-background border border-border rounded-full shadow-md",
               "transition-transform duration-300 ease-in-out",
-              "hover:bg-accent hover:border-primary/20"
+              "hover:bg-primary/20 hover:border-primary/10"
             )}
           >
             {isRightNavVisible ? (
