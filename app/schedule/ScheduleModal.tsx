@@ -6,8 +6,9 @@ import { Modal } from "@/components/customUIComponents/Modal";
 import { LabeledInput } from "@/components/customUIComponents/LabeledInput";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
-import { Plus, Minus } from "lucide-react";
+import { Plus, Minus, Trash } from "lucide-react";
 import { Schedule, TimeRange } from "./page";
+import { CustomTooltip } from "@/components/customUIComponents/CustomTooltip";
 
 // Използваме 'Partial<Schedule>' за да може 'schedule' да е null или да липсват полета при създаване
 type ScheduleModalProps = {
@@ -109,7 +110,7 @@ export const ScheduleModal = ({
   };
 
   const removeBreak = (index: number) => {
-    if (breaks.length > 1) {
+    if (breaks.length) {
       const newBreaks = breaks.filter((_, i) => i !== index);
       setBreaks(newBreaks);
     } else {
@@ -157,20 +158,22 @@ export const ScheduleModal = ({
     >
       <div className="space-y-3 p-2">
         {/* Date Period */}
-        <LabeledInput
-          type="date"
-          value={localSchedule.startDate}
-          onChange={(e) => handleInputChange("startDate", e.target.value)}
-          label={t("Start Date")}
-          id="startDate"
-        />
-        <LabeledInput
-          type="date"
-          value={localSchedule.endDate}
-          onChange={(e) => handleInputChange("endDate", e.target.value)}
-          label={t("End Date")}
-          id="endDate"
-        />
+        <div className="flex space-x-2">
+          <LabeledInput
+            type="date"
+            value={localSchedule.startDate}
+            onChange={(e) => handleInputChange("startDate", e.target.value)}
+            label={t("Start Date")}
+            id="startDate"
+          />
+          <LabeledInput
+            type="date"
+            value={localSchedule.endDate}
+            onChange={(e) => handleInputChange("endDate", e.target.value)}
+            label={t("End Date")}
+            id="endDate"
+          />
+        </div>
 
         {/* Work Time */}
         <div className="flex space-x-2">
@@ -214,29 +217,29 @@ export const ScheduleModal = ({
               id={`break${index + 1}End`}
               className="flex-grow"
             />
-            {breaks.length > 1 && (
-              <Button
-                variant="destructive"
-                size="icon"
-                onClick={() => removeBreak(index)}
-                className="mb-1"
-              >
-                <Minus className="h-4 w-4" />
-              </Button>
-            )}
+            <CustomTooltip
+              onClick={() => removeBreak(index)}
+              tooltipText={t("Delete Brake")}
+              icon={<Trash color="red" />}
+            />
+            <CustomTooltip
+              onClick={() => addBreak()}
+              tooltipText={t("Add Brake")}
+              icon={<Plus />}
+            />
           </div>
         ))}
 
-        {breaks.length < 3 && (
-          <div className="flex justify-end">
+        {breaks.length == 0 && (
+          <div className="flex justify-center">
             <Button
               variant="outline"
               size="sm"
               onClick={addBreak}
               className="mt-1"
+              iconType="add"
             >
-              <Plus className="h-4 w-4 mr-2" />
-              {t("Add Break")}
+              {t("Add")}
             </Button>
           </div>
         )}
@@ -270,7 +273,7 @@ export const ScheduleModal = ({
         </div>
 
         {/* Action buttons */}
-        <div className="flex justify-end gap-2 pt-4">
+        <div className="flex justify-center gap-2 pt-4">
           <Button variant="outline" onClick={() => onOpenChange(false)}>
             {t("Cancel")}
           </Button>
