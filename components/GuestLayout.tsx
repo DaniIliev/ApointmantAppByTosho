@@ -4,10 +4,12 @@ import type React from "react";
 import { useState } from "react";
 import TopNav from "@/components/navigation/top-nav";
 import { useRightNav } from "@/context/RightNavContext";
+import LeftNav from "./navigation/left-nav";
+import Footer from "./Footer/Footer";
 
 // Дефинираме ширините на навигациите като константи за по-лесно управление
 const LEFT_NAV_OPEN_WIDTH_CLASS = "ml-64";
-const LEFT_NAV_CLOSED_WIDTH_CLASS = "ml-0";
+const LEFT_NAV_CLOSED_WIDTH_CLASS = "ml-20";
 const RIGHT_NAV_OPEN_WIDTH_CLASS = "mr-10";
 const RIGHT_NAV_CLOSED_WIDTH_CLASS = "mr-0";
 
@@ -29,18 +31,43 @@ export default function GuestLayout({
         <TopNav onToggleLeftNav={toggleLeftNav} isLeftNavOpen={isLeftNavOpen} />
       </div>
       <div className="flex flex-1 pt-17.5 transition-all duration-300">
+        <LeftNav isOpen={isLeftNavOpen} />
+
         <main
           className={`
             flex-1 
             transition-all duration-300
-               min-h-[87vh]
-               
-                
+            ${
+              isLeftNavOpen
+                ? LEFT_NAV_OPEN_WIDTH_CLASS
+                : LEFT_NAV_CLOSED_WIDTH_CLASS
+            }
+            ${
+              isRightNavVisible
+                ? RIGHT_NAV_OPEN_WIDTH_CLASS
+                : RIGHT_NAV_CLOSED_WIDTH_CLASS
+            }
+               min-h-[87vh] 
                p-7 relative overflow-hidden
           `}
         >
           {children}
         </main>
+      </div>
+      <div
+        className={`   
+                        transition-all duration-300         ${
+                          isLeftNavOpen
+                            ? LEFT_NAV_OPEN_WIDTH_CLASS
+                            : LEFT_NAV_CLOSED_WIDTH_CLASS
+                        }
+              ${
+                isRightNavVisible
+                  ? RIGHT_NAV_OPEN_WIDTH_CLASS
+                  : RIGHT_NAV_CLOSED_WIDTH_CLASS
+              }`}
+      >
+        <Footer />
       </div>
     </div>
   );

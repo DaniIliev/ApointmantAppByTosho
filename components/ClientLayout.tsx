@@ -7,9 +7,10 @@ import LeftNav from "@/components/navigation/left-nav";
 import RightNavigation from "./navigation/right-nav";
 import { useRightNav } from "@/context/RightNavContext";
 import Chatbot from "./chatBot/Chatbot";
+import Footer from "./Footer/Footer";
 
 const LEFT_NAV_OPEN_WIDTH_CLASS = "ml-64";
-const LEFT_NAV_CLOSED_WIDTH_CLASS = "ml-0";
+const LEFT_NAV_CLOSED_WIDTH_CLASS = "ml-20";
 const RIGHT_NAV_OPEN_WIDTH_CLASS = "mr-10";
 const RIGHT_NAV_CLOSED_WIDTH_CLASS = "mr-0";
 
@@ -56,6 +57,21 @@ export default function ClientLayout({
         <RightNavigation />
       </div>
       <Chatbot />
+      <div
+        className={`   
+                      transition-all duration-300         ${
+                        isLeftNavOpen
+                          ? LEFT_NAV_OPEN_WIDTH_CLASS
+                          : LEFT_NAV_CLOSED_WIDTH_CLASS
+                      }
+            ${
+              isRightNavVisible
+                ? RIGHT_NAV_OPEN_WIDTH_CLASS
+                : RIGHT_NAV_CLOSED_WIDTH_CLASS
+            }`}
+      >
+        <Footer />
+      </div>
     </div>
   );
 }

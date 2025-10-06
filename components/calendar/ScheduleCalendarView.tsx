@@ -341,7 +341,7 @@ export default function ScheduleCalendarView({
 
                     {/* Почивен ден - голяма иконка */}
                     {dayData.isDayOff && (
-                      <div className="text-center text-red-500/80 text-lg italic mt-1 flex-grow flex flex-col items-center justify-center space-y-2">
+                      <div className="text-center text-red-400/80 text-lg italic mt-1 flex-grow flex flex-col items-center justify-center space-y-2">
                         <Home className="h-6 w-6 text-red-400" />
                         <span>Почивен ден</span>
                       </div>

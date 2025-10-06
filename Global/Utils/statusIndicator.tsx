@@ -7,6 +7,9 @@ import {
   AlertTriangle,
   Calendar,
   CalendarDays,
+  Clock,
+  CheckSquare,
+  XCircle,
 } from "lucide-react";
 
 type CardStatusIndicator = {
@@ -23,6 +26,7 @@ export const getStatusColor = (status: AppointmentStatus) => {
     case "completed":
       return "bg-gradient-to-r from-green-500 to-emerald-500 text-white";
     case "cancelled":
+    case "missed":
       return "bg-gradient-to-r from-red-500 to-rose-500 text-white";
     default:
       return "bg-muted text-muted-foreground";
@@ -45,6 +49,28 @@ export const getStatusIndicator = (status: string): CardStatusIndicator => {
       return {
         color: "#A5D6A7",
         icon: <CheckCircle size={20} />,
+      };
+    case "pending":
+      return {
+        color: "bg-gradient-to-r from-yellow-500 to-amber-500 text-white",
+        icon: <Clock size={20} />,
+      };
+    case "confirmed":
+      return {
+        color: "bg-gradient-to-r from-green-500 to-emerald-500 text-white",
+        icon: <CheckCircle size={20} />,
+      };
+
+    case "completed":
+      return {
+        color: "bg-gradient-to-r from-green-500 to-emerald-500 text-white",
+        icon: <CheckSquare size={20} />,
+      };
+    case "cancelled":
+    case "cancelled":
+      return {
+        color: "bg-gradient-to-r from-red-500 to-rose-500 text-white",
+        icon: <XCircle size={20} />,
       };
     default:
       return {

@@ -68,7 +68,7 @@ export const formatDateAndTime = (
   }
 
   const dateResult = format(parsedDate, "dd.MM.yyyy");
-  const timeResult = format(parsedDate, "HH:mm:ss");
+  const timeResult = format(parsedDate, "HH:mm");
 
   if (onlyOne === "date") {
     return dateResult;

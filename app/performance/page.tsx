@@ -26,14 +26,8 @@ import {
 import { useRightNav } from "@/context/RightNavContext";
 import { CustomTooltip } from "@/components/customUIComponents/CustomTooltip";
 import callApi from "../Api/callApi";
-import { cn } from "@/lib/utils";
-import { Card, CardContent } from "@/components/ui/card";
 import type React from "react";
 import { KPICard } from "@/components/performance/KPICard";
-
-// ************************************************************
-// 1. АКТУАЛИЗИРАН ИНТЕРФЕЙС
-// ************************************************************
 
 export interface DateRange {
   from: Date | undefined;
@@ -247,8 +241,8 @@ export default function PerformancePage() {
 
   useEffect(() => {
     setPageTitle(t("Performance Tracking"));
-    setExtraRightNavMenu(<PerformanceRightNav handleExport={handleExport} />);
-    setIsRightNavVisible(true);
+    // setExtraRightNavMenu(<PerformanceRightNav handleExport={handleExport} />);
+    // setIsRightNavVisible(true);
     return () => {
       setPageTitle(null);
       setExtraRightNavMenu(null);
@@ -420,32 +414,32 @@ export default function PerformancePage() {
   );
 }
 
-type PerformanceRightNavProps = {
-  handleExport: (format: "csv" | "pdf" | "png") => void;
-};
-const PerformanceRightNav = ({ handleExport }: PerformanceRightNavProps) => {
-  const { t } = useTranslation();
-  return (
-    <>
-      <div className="flex flex-col items-center space-y-2">
-        <CustomTooltip
-          onClick={() => {}}
-          tooltipText={t("Filter")}
-          icon={<ListFilterPlus />}
-        />
-        <TooltipProvider>
-          <div className="flex flex-col items-center">
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <ExportButton onExport={handleExport} />
-              </TooltipTrigger>
-              <TooltipContent>
-                <p>{t("Export")}</p>
-              </TooltipContent>
-            </Tooltip>
-          </div>
-        </TooltipProvider>
-      </div>
-    </>
-  );
-};
+// type PerformanceRightNavProps = {
+//   handleExport: (format: "csv" | "pdf" | "png") => void;
+// };
+// const PerformanceRightNav = ({ handleExport }: PerformanceRightNavProps) => {
+//   const { t } = useTranslation();
+//   return (
+//     <>
+//       <div className="flex flex-col items-center space-y-2">
+//         <CustomTooltip
+//           onClick={() => {}}
+//           tooltipText={t("Filter")}
+//           icon={<ListFilterPlus />}
+//         />
+//         <TooltipProvider>
+//           <div className="flex flex-col items-center">
+//             <Tooltip>
+//               <TooltipTrigger asChild>
+//                 <ExportButton onExport={handleExport} />
+//               </TooltipTrigger>
+//               <TooltipContent>
+//                 <p>{t("Export")}</p>
+//               </TooltipContent>
+//             </Tooltip>
+//           </div>
+//         </TooltipProvider>
+//       </div>
+//     </>
+//   );
+// };

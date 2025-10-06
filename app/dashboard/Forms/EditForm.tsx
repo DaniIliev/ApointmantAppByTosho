@@ -1,12 +1,5 @@
 import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { Appointment, AppointmentStatus } from "@/Global/Types/types";
 import React from "react";
 import { LabeledSelect } from "@/components/customUIComponents/LabeledSelect";
@@ -34,7 +27,6 @@ const LabeledStatusSelect = ({
   const statuses: AppointmentStatus[] = ["upcoming", "completed", "cancelled"];
 
   return (
-    // <div className="space-y-2">
     <LabeledSelect
       label={t("Status")}
       id="editStatus"
@@ -46,7 +38,6 @@ const LabeledStatusSelect = ({
         name: t(s),
       }))}
     />
-    // </div>
   );
 };
 
@@ -98,14 +89,14 @@ const EditForm = ({
           <LabeledInput
             label={t("Service")}
             id="service"
-            value={editingAppointment.service}
+            value={editingAppointment.serviceName}
             onChange={handleInputChange}
           />
           <LabeledInput
             label={t("Date")}
             id="date"
             type="date"
-            value={editingAppointment.date}
+            value={editingAppointment.appointmentTime.start}
             onChange={handleInputChange}
           />
           <LabeledInput
