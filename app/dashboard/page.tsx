@@ -284,12 +284,12 @@ export default function DashboardPage() {
           >
             {t("Table View")}
           </TabsTrigger>
-          <TabsTrigger
+          {/* <TabsTrigger
             value="board"
             className="data-[state=active]:bg-transparent data-[state=active]:text-primary data-[state=active]:shadow-none transition-colors px-6 py-3 border-b-2 data-[state=active]:border-primary border-transparent"
           >
             {t("Board View")}
-          </TabsTrigger>
+          </TabsTrigger> */}
         </TabsList>
 
         <TabsContent value="calendar">

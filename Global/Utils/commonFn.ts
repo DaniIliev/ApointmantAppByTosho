@@ -91,3 +91,7 @@ export const getInitials = (name: string) => {
     (parts[parts.length - 1][0]?.toUpperCase() || "")
   );
 };
+export const capitalizeFirstLetter = (text: string) => {
+  if (!text) return "";
+  return text.charAt(0).toUpperCase() + text.slice(1);
+};

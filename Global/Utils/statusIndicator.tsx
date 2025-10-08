@@ -38,39 +38,39 @@ export const getStatusIndicator = (status: string): CardStatusIndicator => {
     case "Planned":
       return {
         color: "#90CAF9",
-        icon: <NotebookText size={20} />,
+        icon: <NotebookText size={15} />,
       };
     case "In Progress":
       return {
         color: "rgba(255, 213, 79, 0.6)",
-        icon: <RefreshCw size={20} />,
+        icon: <RefreshCw size={15} />,
       };
     case "Finished":
       return {
         color: "#A5D6A7",
-        icon: <CheckCircle size={20} />,
+        icon: <CheckCircle size={15} />,
       };
     case "pending":
       return {
         color: "bg-gradient-to-r from-yellow-500 to-amber-500 text-white",
-        icon: <Clock size={20} />,
+        icon: <Clock size={15} />,
       };
     case "confirmed":
       return {
-        color: "bg-gradient-to-r from-green-500 to-emerald-500 text-white",
-        icon: <CheckCircle size={20} />,
+        color: "bg-gradient-to-r from-blue-500 to-cyan-500 text-white",
+        icon: <CheckCircle size={15} />,
       };
 
     case "completed":
       return {
         color: "bg-gradient-to-r from-green-500 to-emerald-500 text-white",
-        icon: <CheckSquare size={20} />,
+        icon: <CheckSquare size={15} />,
       };
-    case "cancelled":
+    case "missed":
     case "cancelled":
       return {
         color: "bg-gradient-to-r from-red-500 to-rose-500 text-white",
-        icon: <XCircle size={20} />,
+        icon: <XCircle size={15} />,
       };
     default:
       return {

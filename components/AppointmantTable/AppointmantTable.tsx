@@ -3,8 +3,19 @@
 import { Appointment, AppointmentStatus } from "@/Global/Types/types";
 import { CellProps, Column, GenericTable } from "../GenericTable/GenericTable";
 import { useTranslation } from "react-i18next";
-import { Clock, CalendarIcon, FileText, Trash2, Edit } from "lucide-react";
+import {
+  Clock,
+  CalendarIcon,
+  FileText,
+  Trash2,
+  Edit,
+  Eye,
+  Pencil,
+} from "lucide-react";
 import { getStatusColor } from "@/Global/Utils/statusIndicator";
+import { formatDateAndTime } from "@/Global/Utils/commonFn";
+import { CustomTooltip } from "../customUIComponents/CustomTooltip";
+import { StatusChip } from "../customUIComponents/StatusChip";
 
 type AppointmentsTableProps = {
   data: Appointment[];
@@ -145,15 +156,12 @@ export default function AppointmentsTable({
             <h3 className="font-semibold text-foreground">
               {appointment.clientName}
             </h3>
-            <span
-              className={`px-2 py-0.5 text-xs rounded-full ${getStatusColor(
-                appointment.status
-              )}`}
-            >
-              {t(
+            <span className={`px-2 py-0.5 text-xs rounded-full`}>
+              <StatusChip status={appointment.status as AppointmentStatus} />
+              {/* {t(
                 appointment.status.charAt(0).toUpperCase() +
                   appointment.status.slice(1)
-              )}
+              )} */}
             </span>
           </div>
         );
@@ -165,7 +173,9 @@ export default function AppointmentsTable({
       cell: ({ row }: CellProps<Appointment>) => (
         <div className="flex items-center gap-1 text-sm text-muted-foreground">
           <CalendarIcon className="h-3 w-3" />
-          <span>{new Date(row.original.dateTime).toLocaleDateString()}</span>
+          <span>
+            {formatDateAndTime(row.original.appointmentTime.start, "date")}
+          </span>
         </div>
       ),
     },
@@ -175,7 +185,11 @@ export default function AppointmentsTable({
       cell: ({ row }: CellProps<Appointment>) => (
         <div className="flex items-center gap-1 text-sm text-muted-foreground">
           <Clock className="h-3 w-3" />
-          <span>{new Date(row.original.dateTime).toLocaleDateString()}</span>
+          <span>
+            {formatDateAndTime(row.original.appointmentTime.start, "time")}
+            {"-"}
+            {formatDateAndTime(row.original.appointmentTime.end, "time")}
+          </span>
         </div>
       ),
     },
@@ -183,26 +197,29 @@ export default function AppointmentsTable({
       accessorKey: "service",
       header: t("Service"),
       cell: ({ row }: CellProps<Appointment>) => (
-        <span className="font-medium text-primary">{row.original.service}</span>
+        <span>{row.original.serviceName}</span>
       ),
     },
     {
       accessorKey: "actions",
       header: t("Actions"),
       cell: ({ row }: CellProps<Appointment>) => (
-        <div className="flex items-center gap-2 mobile-actions">
-          <button
-            className="p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
+        <div className="flex items-center gap-0.5 mobile-actions">
+          <CustomTooltip
             onClick={() => handleOpenViewModal(row.original)}
-          >
-            <FileText className="h-4 w-4" />
-          </button>
-          <button className="p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors">
-            <Edit className="h-4 w-4" />
-          </button>
-          <button className="p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors">
-            <Trash2 className="h-4 w-4 text-red-500" />
-          </button>
+            tooltipText={t("View Details")}
+            icon={<Eye />}
+          />
+          <CustomTooltip
+            onClick={() => console.log("Edit")}
+            tooltipText={t("Edit")}
+            icon={<Pencil />}
+          />
+          <CustomTooltip
+            onClick={() => console.log("Edit")}
+            tooltipText={t("Delete")}
+            icon={<Trash2 className=" text-red-500" />}
+          />
         </div>
       ),
       enableHiding: false,
