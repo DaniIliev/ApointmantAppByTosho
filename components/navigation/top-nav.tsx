@@ -757,18 +757,17 @@ export default function TopNav({
     <nav className="fixed top-0 left-0 right-0 z-50 bg-primary-foreground backdrop-blur-xl border-b border-white/10">
       <div className="flex items-center justify-between px-6 py-2">
         <div className="flex items-center space-x-4">
-          {user && (
-            <button
-              onClick={onToggleLeftNav}
-              className="p-2 rounded-lg bg-primary border-white/20 hover:bg-primary-dark hover:border-white/40 transition-all duration-200"
-            >
-              {isLeftNavOpen ? (
-                <X className="w-5 h-5 text-white" />
-              ) : (
-                <Menu className="w-5 h-5 text-white" />
-              )}
-            </button>
-          )}
+          {/* {user && ( */}
+          <button
+            onClick={onToggleLeftNav}
+            className="p-2 rounded-lg bg-primary border-white/20 hover:bg-primary-dark hover:border-white/40 transition-all duration-200"
+          >
+            {isLeftNavOpen ? (
+              <X className="w-5 h-5 text-white" />
+            ) : (
+              <Menu className="w-5 h-5 text-white" />
+            )}
+          </button>
           <h1 className="text-xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
             {t("AppointmentPro")}
           </h1>
@@ -976,7 +975,55 @@ export default function TopNav({
           </div>
         ) : (
           <div className="flex items-center space-x-4">
-            <Link
+            <div className="relative" ref={languagesRef}>
+              <button
+                onClick={toggleLanguages}
+                className="flex flex-col items-center justify-center p-2 rounded-lg hover:bg-white/10 transition-colors duration-200"
+              >
+                <Globe className="w-5 h-5 text-primary" />
+                <span className="text-xs text-primary mt-1">
+                  {t("Language")}
+                </span>
+              </button>
+              {isLanguagesOpen && (
+                <div className="absolute right-0 mt-2 w-48 bg-slate-900/90 backdrop-blur-xl border border-white/20 rounded-xl shadow-2xl">
+                  <button
+                    onClick={() => changeLanguage("bg")}
+                    className="flex items-center w-full text-left px-4 py-3 text-white/80 hover:text-white hover:bg-white/10"
+                  >
+                    <img
+                      src="/Flag_of_Bulgaria.png"
+                      alt="Bulgarian Flag"
+                      className="w-5 h-4 mr-2"
+                    />
+                    {t("Bulgarian")}
+                  </button>
+                  <button
+                    onClick={() => changeLanguage("en")}
+                    className="flex items-center w-full text-left px-4 py-3 text-white/80 hover:text-white hover:bg-white/10"
+                  >
+                    <img
+                      src="/Flag_of_the_United_Kingdom.png"
+                      alt="British Flag"
+                      className="w-5 h-4 mr-2"
+                    />
+                    {t("English")}
+                  </button>
+                  <button
+                    onClick={() => changeLanguage("de")}
+                    className="flex items-center w-full text-left px-4 py-3 text-white/80 hover:text-white hover:bg-white/10"
+                  >
+                    <img
+                      src="/Flag_of_Germany.png"
+                      alt="German Flag"
+                      className="w-5 h-4 mr-2"
+                    />
+                    {t("German")}
+                  </button>
+                </div>
+              )}
+            </div>
+            {/* <Link
               href="/login"
               className="flex items-center px-4 py-2 rounded-full text-black bg-white/5 hover:bg-white/10 transition-colors duration-200"
             >
@@ -989,7 +1036,7 @@ export default function TopNav({
             >
               <UserPlus className="w-4 h-4 mr-2" />
               {t("Register")}
-            </Link>
+            </Link> */}
           </div>
         )}
       </div>

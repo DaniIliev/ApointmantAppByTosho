@@ -53,15 +53,17 @@ const AppointmentCard: React.FC<AppointmentCardProps> = ({ appointment }) => {
       <div className="space-y-1 text-sm text-gray-600 dark:text-gray-300">
         <div className="flex items-center space-x-2">
           <CalendarDays className="h-4 w-4 text-purple-500" />
-          <p>{format(parseISO(appointment.date), "dd.MM.yyyy")}</p>
+          <p>
+            {format(parseISO(appointment.appointmentTime.start), "dd.MM.yyyy")}
+          </p>
         </div>
         <div className="flex items-center space-x-2">
           <Clock className="h-4 w-4 text-green-500" />
-          <p>{appointment.time}</p>
+          <p>{appointment.appointmentTime.start}</p>
         </div>
         <div className="flex items-center space-x-2">
           <Briefcase className="h-4 w-4 text-blue-500" />
-          <p>{appointment.service}</p>
+          <p>{appointment.serviceName}</p>
         </div>
       </div>
     </div>
@@ -246,7 +248,9 @@ const MobileCalendar = ({ appointments }: MobileCalendarProps) => {
 
   const sortedAppointments: Appointment[] = React.useMemo(() => {
     return [...appointments].sort(
-      (a, b) => parseISO(a.date).getTime() - parseISO(b.date).getTime()
+      (a, b) =>
+        parseISO(a.appointmentTime.start).getTime() -
+        parseISO(b.appointmentTime.start).getTime()
     );
   }, [appointments]);
 
@@ -262,7 +266,7 @@ const MobileCalendar = ({ appointments }: MobileCalendarProps) => {
       const groups: Record<string, Appointment[]> = {};
       sortedAppointments.forEach((appointment) => {
         const dateKey: string = format(
-          parseISO(appointment.date),
+          parseISO(appointment.appointmentTime.start),
           "dd MMMM yyyy г.",
           {
             locale: bg,
@@ -279,7 +283,7 @@ const MobileCalendar = ({ appointments }: MobileCalendarProps) => {
   const uniqueDates: Record<string, boolean> = React.useMemo(() => {
     return appointments.reduce(
       (acc: Record<string, boolean>, appointment: Appointment) => {
-        const date: Date = parseISO(appointment.date);
+        const date: Date = parseISO(appointment.appointmentTime.start);
         const key: string = format(date, "yyyy-MM-dd");
         if (!acc[key]) {
           acc[key] = true;
@@ -490,7 +494,7 @@ const MobileCalendar = ({ appointments }: MobileCalendarProps) => {
                 {filteredAppointments.length > 0 ? (
                   filteredAppointments.map((appointment: Appointment) => (
                     <AppointmentCard
-                      key={appointment.id}
+                      key={appointment._id}
                       appointment={appointment}
                     />
                   ))

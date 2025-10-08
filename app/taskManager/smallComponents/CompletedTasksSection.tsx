@@ -2,7 +2,7 @@ import React from "react";
 import {
   IBaseKanbanCard,
   KanbanUserPermissionType,
-  UserPossibleAssignes,
+  UserPossibleAssignee,
 } from "@/components/InteractiveKanbanBoard/KanbanboardUtils";
 import { ChevronDown, ChevronRight } from "lucide-react";
 import { useTranslation } from "react-i18next";
@@ -18,7 +18,7 @@ interface CompletedTasksSectionProps<T extends IBaseKanbanCard> {
   handleViewTask: (id: string) => void;
   handleDeleteTask: (id: string) => void;
   handleUpdateTask: (updatedTask: T[]) => void;
-  allUserOptions?: UserPossibleAssignes[];
+  allUserOptions?: UserPossibleAssignee[];
 }
 
 const CompletedTasksSection = <T extends IBaseKanbanCard>({

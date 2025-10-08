@@ -3,6 +3,8 @@ import { Check, X, Clock } from "lucide-react";
 import { AppointmentStatus } from "@/Global/Types/types";
 import { useTranslation } from "react-i18next";
 import React from "react";
+import { getStatusIndicator } from "@/Global/Utils/statusIndicator";
+import { capitalizeFirstLetter } from "@/Global/Utils/commonFn";
 
 interface StatusChipProps {
   status: AppointmentStatus;
@@ -37,18 +39,19 @@ const getStatusProps = (status: AppointmentStatus) => {
 };
 
 export const StatusChip = ({ status }: StatusChipProps) => {
+  console.log("status", status);
   const { t } = useTranslation();
-  const { icon, className } = getStatusProps(status);
+  const { icon, color } = getStatusIndicator(status);
 
   return (
     <div
       className={cn(
-        "flex items-center gap-1 rounded-full px-3 py-1 text-sm font-semibold whitespace-nowrap",
-        className
+        `flex items-center gap-1 rounded-full px-3 py-1 text-sm font-semibold whitespace-nowrap ${color}`
+        // className
       )}
     >
       {icon}
-      <span>{t(status)}</span>
+      <span className="text-sm">{capitalizeFirstLetter(t(status))}</span>
     </div>
   );
 };

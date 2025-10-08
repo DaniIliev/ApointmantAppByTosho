@@ -111,7 +111,9 @@ export function CalendarAppointments({
 
   const sortedAppointments = React.useMemo(() => {
     return [...appointments].sort(
-      (a, b) => parseISO(a.date).getTime() - parseISO(b.date).getTime()
+      (a, b) =>
+        parseISO(a.appointmentTime.start).getTime() -
+        parseISO(b.appointmentTime.start).getTime()
     );
   }, [appointments]);
 
@@ -126,9 +128,13 @@ export function CalendarAppointments({
 
   const groupedAppointments = React.useMemo(() => {
     return filteredAppointmentsBySearch.reduce((acc, appointment) => {
-      const dateKey = format(parseISO(appointment.date), "dd MMMM yyyy г.", {
-        locale: bg,
-      });
+      const dateKey = format(
+        parseISO(appointment.appointmentTime.start),
+        "dd MMMM yyyy г.",
+        {
+          locale: bg,
+        }
+      );
       if (!acc[dateKey]) {
         acc[dateKey] = [];
       }
@@ -188,7 +194,7 @@ export function CalendarAppointments({
 
   const uniqueDates = React.useMemo(() => {
     return appointments.reduce((acc, appointment) => {
-      const date = parseISO(appointment.date);
+      const date = parseISO(appointment.appointmentTime.start);
       const key = format(date, "yyyy-MM-dd");
       if (!acc[key]) {
         acc[key] = true;
@@ -305,14 +311,14 @@ export function CalendarAppointments({
               ref={(el) => {
                 if (el) appointmentRefs.current[date] = el;
               }}
-              data-date={appointments[0].date}
+              data-date={appointments[0].appointmentTime.start}
             >
               <h2 className="font-semibold text-lg sticky top-0 bg-white dark:bg-black py-2 z-10">
                 {date}
               </h2>
               {appointments.map((appointment) => (
                 <div
-                  key={appointment.id}
+                  key={appointment._id}
                   className="p-4 border rounded-lg shadow-sm mb-2 hover:shadow-lg transition-shadow duration-200"
                 >
                   <div className="flex items-center space-x-3 mb-2">
@@ -324,11 +330,11 @@ export function CalendarAppointments({
                   <div className="space-y-1 text-sm text-gray-600 dark:text-gray-300">
                     <div className="flex items-center space-x-2">
                       <Briefcase className="h-4 w-4 text-purple-500" />
-                      <p>{appointment.service}</p>
+                      <p>{appointment.serviceName}</p>
                     </div>
                     <div className="flex items-center space-x-2">
                       <Clock className="h-4 w-4 text-green-500" />
-                      <p>{appointment.time}</p>
+                      <p>{appointment.appointmentTime.start}</p>
                     </div>
                     <p className="text-xs text-gray-500 mt-1">
                       Статус: {appointment.status}

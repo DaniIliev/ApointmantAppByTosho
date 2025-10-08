@@ -7,20 +7,13 @@ import { Button } from "../ui/button";
 import { Input } from "../ui/input";
 import { Appointment, AppointmentStatus } from "@/Global/Types/types";
 import {
+  formatDateAndTime,
   // formatDate,
   getMonthDates,
   getWeekDates,
   monthNames,
 } from "@/Global/Utils/commonFn";
 import MobileCalendar from "./MobileCalendar";
-
-// Helper function to format time (e.g., 9:00 AM)
-const formatTime = (date: string) => {
-  return new Date(date).toLocaleTimeString("bg-BG", {
-    hour: "2-digit",
-    minute: "2-digit",
-  });
-};
 
 interface CalendarProps {
   appointments: Appointment[];
@@ -234,14 +227,21 @@ export default function Calendar({
                             <div
                               key={apt._id}
                               onClick={() => handleOpenAppointmentModal(apt)}
-                              className={`text-xs p-2 rounded cursor-pointer hover:scale-[1.02] transition-transform ${getStatusColor(
+                              className={`text-xs p-2 rounded cursor-pointer hover:scale-[1.02] transition-transform  ${getStatusColor(
                                 apt.status
                               )}`}
                             >
                               {/* **ПРОМЯНА:** Използваме appointmentTime за показване на интервала */}
                               <div className="font-medium">
-                                {formatTime(apt.appointmentTime.start)} -{" "}
-                                {formatTime(apt.appointmentTime.end)}
+                                {formatDateAndTime(
+                                  apt.appointmentTime.start,
+                                  "time"
+                                )}{" "}
+                                -{" "}
+                                {formatDateAndTime(
+                                  apt.appointmentTime.end,
+                                  "time"
+                                )}
                               </div>
                               <div className="truncate font-semibold">
                                 {apt.serviceName}
@@ -300,8 +300,15 @@ export default function Calendar({
                             >
                               {/* **ПРОМЯНА:** Използваме appointmentTime за показване на интервала */}
                               <div className="font-medium truncate">
-                                {formatTime(apt.appointmentTime.start)} -{" "}
-                                {formatTime(apt.appointmentTime.end)}
+                                {formatDateAndTime(
+                                  apt.appointmentTime.start,
+                                  "time"
+                                )}{" "}
+                                -{" "}
+                                {formatDateAndTime(
+                                  apt.appointmentTime.end,
+                                  "time"
+                                )}
                               </div>
                               <div className="truncate">{apt.clientName}</div>
                             </div>

@@ -1,11 +1,11 @@
 import React, { useState, useMemo } from "react";
 import { Search, UserPlus, UserMinus } from "lucide-react";
 import { useTranslation } from "react-i18next";
-import { UserPossibleAssignes } from "@/components/InteractiveKanbanBoard/KanbanboardUtils";
+import { UserPossibleAssignee } from "@/components/InteractiveKanbanBoard/KanbanboardUtils";
 
 interface AssigneeSelectorProps {
-  allUserOptions: UserPossibleAssignes[];
-  assignedUsers: UserPossibleAssignes[];
+  allUserOptions: UserPossibleAssignee[];
+  assignedUsers: UserPossibleAssignee[];
   onAssignUser: (userId: string) => void;
   onUnassignUser: (userId: string) => void;
   canEdit: boolean;
@@ -52,7 +52,7 @@ const AssigneeSelector: React.FC<AssigneeSelectorProps> = ({
     users,
     isAssigned,
   }: {
-    users: UserPossibleAssignes[];
+    users: UserPossibleAssignee[];
     isAssigned: boolean;
   }) => (
     <ul className="max-h-80 overflow-y-auto space-y-2">

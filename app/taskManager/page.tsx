@@ -20,7 +20,7 @@ import {
   NewFormData,
   // OrganizerUserWithPrivileges,
   // TableData,
-  UserPossibleAssignes,
+  UserPossibleAssignee,
 } from "@/components/InteractiveKanbanBoard/KanbanboardUtils";
 // import {
 //   getQueryKanbanBoard,
@@ -116,7 +116,7 @@ const page: React.FC = () => {
   );
 
   const [usersPossibleToAssignees, setUsersPossibleToAssignees] = useState<
-    UserPossibleAssignes[]
+    UserPossibleAssignee[]
   >([]);
 
   const [searchTerm, setSearchTerm] = useState<string>("");

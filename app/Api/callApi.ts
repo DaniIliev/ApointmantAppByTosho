@@ -37,17 +37,12 @@ const callApi = async (
     }
   }
 
-  const result: any = await fetch(`http://localhost:8080${endpoint}`, {
+  const url = "https://apointmantappservice-production.up.railway.app";
+  const result: any = await fetch(`${url}${endpoint}`, {
     method: method,
     headers: headers,
     body: body,
   });
-  // const url = "https://apointmantappservice-production.up.railway.app";
-  // const result: any = await fetch(`${url}${endpoint}`, {
-  //   method: method,
-  //   headers: headers,
-  //   body: body,
-  // });
 
   if (!result.ok) {
     console.error("API error:", result);

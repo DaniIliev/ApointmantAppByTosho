@@ -68,7 +68,7 @@ export const formatDateAndTime = (
   }
 
   const dateResult = format(parsedDate, "dd.MM.yyyy");
-  const timeResult = format(parsedDate, "HH:mm:ss");
+  const timeResult = format(parsedDate, "HH:mm");
 
   if (onlyOne === "date") {
     return dateResult;
@@ -90,4 +90,8 @@ export const getInitials = (name: string) => {
     (parts[0][0]?.toUpperCase() || "") +
     (parts[parts.length - 1][0]?.toUpperCase() || "")
   );
+};
+export const capitalizeFirstLetter = (text: string) => {
+  if (!text) return "";
+  return text.charAt(0).toUpperCase() + text.slice(1);
 };

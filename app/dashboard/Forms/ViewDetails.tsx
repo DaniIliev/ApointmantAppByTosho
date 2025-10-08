@@ -5,6 +5,7 @@ import { Appointment } from "@/Global/Types/types";
 import { getStatusColor } from "@/Global/Utils/statusIndicator";
 import { CalendarIcon, Clock, Mail, Phone } from "lucide-react";
 import React from "react";
+import { formatDateAndTime } from "@/Global/Utils/commonFn";
 
 interface ViewDetailsProps {
   handleEditAppointment?: () => void;
@@ -18,6 +19,7 @@ const ViewDetails = ({
   selectedAppointment,
 }: ViewDetailsProps) => {
   const { t } = useTranslation();
+
   return (
     <>
       <div className="flex items-center justify-between">
@@ -51,20 +53,32 @@ const ViewDetails = ({
           <div className="flex items-center gap-3">
             <CalendarIcon className="h-5 w-5 text-primary" />
             <span>
-              {new Date(selectedAppointment.date).toLocaleDateString()}
+              {new Date(
+                selectedAppointment.appointmentTime.start
+              ).toLocaleDateString()}
             </span>
           </div>
 
           <div className="flex items-center gap-3">
             <Clock className="h-5 w-5 text-primary" />
-            <span>{selectedAppointment.time}</span>
+            <span>
+              {formatDateAndTime(
+                selectedAppointment.appointmentTime.start,
+                "time"
+              )}{" "}
+              -{" "}
+              {formatDateAndTime(
+                selectedAppointment.appointmentTime.end,
+                "time"
+              )}
+            </span>
           </div>
         </div>
       </div>
 
       <div className="space-y-2">
         <h4 className="font-semibold text-primary">{t("Service")}</h4>
-        <p className="text-lg">{selectedAppointment.service}</p>
+        <p className="text-lg">{selectedAppointment.serviceName}</p>
       </div>
 
       {selectedAppointment.notes && (
@@ -76,19 +90,21 @@ const ViewDetails = ({
         </div>
       )}
       {handleEditAppointment && handleDeleteAppointment && (
-        <div className="flex gap-3 pt-4">
+        <div className="flex justify-center gap-3 pt-4">
           <Button
-            onClick={handleEditAppointment}
-            className="flex-1 bg-gradient-to-r from-primary to-accent hover:from-primary/90 hover:to-accent/90 rounded-xl"
+            variant="outline"
+            onClick={handleDeleteAppointment}
+            iconType="delete"
+            className="border-red-500 text-red-500 hover:bg-red-500 hover:text-white"
           >
-            {t("Edit Appointment")}
+            {t("Delete")}
           </Button>
           <Button
-            variant="destructive"
-            onClick={handleDeleteAppointment}
-            className="flex-1 rounded-xl"
+            onClick={handleEditAppointment}
+            iconType="edit"
+            // className="flex-1 bg-gradient-to-r from-primary to-accent hover:from-primary/90 hover:to-accent/90 rounded-xl"
           >
-            {t("Delete Appointment")}
+            {t("Edit")}
           </Button>
         </div>
       )}
