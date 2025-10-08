@@ -4,7 +4,7 @@ import { cn } from "@/lib/utils";
 import { useTranslation } from "react-i18next";
 import {
   NewFormData,
-  UserPossibleAssignes,
+  UserPossibleAssignee,
 } from "@/components/InteractiveKanbanBoard/KanbanboardUtils";
 import { getPriorityIndicator } from "@/Global/Utils/statusIndicator";
 import AssigneeSelector from "./AssigneeSelector";
@@ -12,7 +12,7 @@ import AssigneeSelector from "./AssigneeSelector";
 interface NewTaskFormProps {
   onSubmit: (data: NewFormData) => void;
   onCancel: () => void;
-  allUserOptions: UserPossibleAssignes[];
+  allUserOptions: UserPossibleAssignee[];
 }
 
 const NewTaskForm: React.FC<NewTaskFormProps> = ({

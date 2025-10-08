@@ -16,7 +16,7 @@ import {
 } from "@/Global/Utils/statusIndicator";
 import {
   KAN_TASK_PRIORITY_OPTIONS,
-  UserPossibleAssignes,
+  UserPossibleAssignee,
 } from "@/components/InteractiveKanbanBoard/KanbanboardUtils";
 import { getInitials } from "@/Global/Utils/commonFn";
 import { formatDateAndTime } from "@/Global/Utils/commonFn";
@@ -59,7 +59,7 @@ interface KanbanFiltersProps {
   setSelectedPriorityFilters: React.Dispatch<React.SetStateAction<string[]>>;
   selectedStatusFilters: string[];
   setSelectedStatusFilters: React.Dispatch<React.SetStateAction<string[]>>;
-  allUserOptions: UserPossibleAssignes[];
+  allUserOptions: UserPossibleAssignee[];
   selectedAssignedUsersFilters: string[];
   setSelectedAssignedUsersFilters: React.Dispatch<
     React.SetStateAction<string[]>

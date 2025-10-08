@@ -5,10 +5,10 @@ import {
   KanbanBoardType,
   KanbanTask,
 } from "@/app/taskManager/types";
-import { UserPossibleAssignes } from "../KanbanboardUtils";
+import { UserPossibleAssignee } from "../KanbanboardUtils";
 
 // Мокнат списък с потребители
-export const mockUsers: UserPossibleAssignes[] = [
+export const mockUsers: UserPossibleAssignee[] = [
   { user_id: "user-1", user_name: "Ivan Petrov", profile_picture_url: null },
   {
     user_id: "user-2",

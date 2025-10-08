@@ -6,7 +6,7 @@ import {
   IBaseKanbanCard,
   KanbanBoardId,
   KanbanUserPermissionType,
-  UserPossibleAssignes,
+  UserPossibleAssignee,
 } from "./KanbanboardUtils";
 // import {
 //   getPriorityIndicator,
@@ -30,7 +30,7 @@ interface Props<T extends IBaseKanbanCard> {
   handleViewTask: (id: string) => void;
   handleDeleteTask: (id: string) => void;
   currentUserPermissions?: KanbanUserPermissionType;
-  allUserOptions?: UserPossibleAssignes[];
+  allUserOptions?: UserPossibleAssignee[];
   handleAssignee?: (card_id: string, data: { user_id: string }) => void;
   handleUnAssignee?: (card_id: string, data: { user_id: string }) => void;
   // boardType: BoardType;

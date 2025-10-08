@@ -3,6 +3,7 @@ import { useTranslation } from "react-i18next";
 import { cn } from "@/lib/utils";
 import { getPriorityIndicator } from "@/Global/Utils/statusIndicator";
 import { KAN_TASK_PRIORITY_OPTIONS } from "@/components/InteractiveKanbanBoard/KanbanboardUtils";
+
 interface PrioritySubMenuProps {
   anchorEl: HTMLElement | null;
   open: boolean;
@@ -21,10 +22,10 @@ function PrioritySubMenu({
   // Calculate position based on the anchor element
   const style = anchorEl
     ? {
-        position: "absolute" as "absolute",
+        position: "absolute" as const,
         top: anchorEl.offsetTop,
         left: anchorEl.offsetLeft + anchorEl.offsetWidth,
-        zIndex: 60, // A higher z-index than the parent menu
+        zIndex: 60, // Higher z-index than the parent menu
       }
     : {};
 
@@ -48,10 +49,8 @@ function PrioritySubMenu({
             onChangePriority(priority.value);
             onClose();
           }}
-          className="
-            flex items-center w-full px-4 py-2 text-sm text-gray-700 dark:text-gray-200
-            hover:bg-gray-100 dark:hover:bg-zinc-700 transition-colors
-          "
+          className="flex items-center w-full px-4 py-2 text-sm text-gray-700 dark:text-gray-200
+                     hover:bg-gray-100 dark:hover:bg-zinc-700 transition-colors"
         >
           <div className="flex-shrink-0 w-6 flex items-center justify-start mr-2">
             <Circle

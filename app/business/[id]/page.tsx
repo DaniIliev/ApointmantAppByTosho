@@ -60,8 +60,20 @@ export default function BusinessDetailPage({
         <div className="grid lg:grid-cols-3 gap-8">
           {/* Left Column - Main Content */}
           <div className="lg:col-span-2 space-y-8">
-            <BusinessInfo business={businessData} />
-            <ServicesSection businessId={params.id} />
+            <BusinessInfo
+              business={businessData}
+              isEditMode={false}
+              onDescriptionChange={function (
+                field: string,
+                value: string
+              ): void {
+                throw new Error("Function not implemented.");
+              }}
+              onHoursChange={function (field: string, value: string): void {
+                throw new Error("Function not implemented.");
+              }}
+            />
+            <ServicesSection businessId={params.id} isEditMode={false} />
             <StaffSection businessId={params.id} />
             <BusinessMap business={businessData} />
             <ReviewsSection businessId={params.id} />

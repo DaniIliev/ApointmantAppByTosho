@@ -9,7 +9,7 @@ import {
   KanbanBoardId,
   KanbanUserPermissionType,
   NewFormData,
-  UserPossibleAssignes,
+  UserPossibleAssignee,
 } from "./KanbanboardUtils";
 import KanbanBoardColumnContainer from "./KanbanBoardColumnContainer";
 import KanbanBoardTaskCard from "./KanbanBoardColumnCard";
@@ -30,7 +30,7 @@ interface KanbanBoardProps<T extends IBaseKanbanCard> {
   handleUpdateColumns?: (updatedColumns: KanbanBoardColumn[]) => void;
   handleDeleteColumn?: (columnId: KanbanBoardId) => void;
   handleCreateColumn?: (newColumn: KanbanBoardColumn) => void;
-  allUserOptions?: UserPossibleAssignes[];
+  allUserOptions?: UserPossibleAssignee[];
   currentUserPermissions?: KanbanUserPermissionType;
   handleAssignee?: (card_id: string, data: { user_id: string }) => void;
   handleUnAssignee?: (card_id: string, data: { user_id: string }) => void;

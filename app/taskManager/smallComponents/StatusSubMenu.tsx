@@ -21,7 +21,7 @@ function StatusSubMenu({
   // Calculate position based on the anchor element
   const style = anchorEl
     ? {
-        position: "absolute" as "absolute",
+        position: "absolute" as const,
         top: anchorEl.offsetTop,
         left: anchorEl.offsetLeft + anchorEl.offsetWidth,
         zIndex: 60, // A higher z-index than the parent menu
@@ -48,10 +48,8 @@ function StatusSubMenu({
             onChangeStatus(status);
             onClose();
           }}
-          className="
-            flex items-center w-full px-4 py-2 text-sm text-gray-700 dark:text-gray-200
-            hover:bg-gray-100 dark:hover:bg-zinc-700 transition-colors
-          "
+          className="flex items-center w-full px-4 py-2 text-sm text-gray-700 dark:text-gray-200
+                     hover:bg-gray-100 dark:hover:bg-zinc-700 transition-colors"
         >
           <div className="flex-shrink-0 w-6 flex items-center justify-start mr-2">
             {getStatusIndicator(status).icon}

@@ -49,7 +49,9 @@ const EditForm = ({
 }: ViewDetailsProps) => {
   const { t } = useTranslation();
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleInputChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
     const { id, value } = e.target;
     setEditingAppointment((prev) => (prev ? { ...prev, [id]: value } : null));
   };
@@ -103,7 +105,7 @@ const EditForm = ({
             label={t("Time")}
             id="time"
             type="time"
-            value={editingAppointment.time}
+            value={editingAppointment.appointmentTime.start}
             onChange={handleInputChange}
           />
         </FormGrid>

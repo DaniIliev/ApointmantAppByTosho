@@ -65,7 +65,7 @@ function TaskOptionsMenu({
   // Calculate position based on the anchor element
   const style = anchorEl
     ? {
-        position: "absolute" as "absolute",
+        position: "absolute" as const,
         top: anchorEl.offsetTop,
         left: anchorEl.offsetLeft + anchorEl.offsetWidth,
         zIndex: 50, // High z-index to be on top
