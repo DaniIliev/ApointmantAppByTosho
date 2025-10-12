@@ -768,8 +768,9 @@ export default function TopNav({
               <Menu className="w-5 h-5 text-white" />
             )}
           </button>
-          <h1 className="text-xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
-            {t("AppointmentPro")}
+          <h1 className="flex align-end text-l font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
+            <img src="/AppointmantPro.png" alt="logo" className="w-8" />
+            <span className="">{t("AppointDI ")}</span>
           </h1>
         </div>
 
