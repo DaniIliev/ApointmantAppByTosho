@@ -28,7 +28,7 @@ html {
 }
         `}</style>
       </head>
-      <body>
+      <body className="dark">
         <AuthProvider>
           <ClientLayoutWrapper>{children}</ClientLayoutWrapper>
         </AuthProvider>

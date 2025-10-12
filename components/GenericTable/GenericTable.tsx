@@ -538,7 +538,7 @@ export const GenericTable = <T extends Record<string, any>>({
           : ""
       }`}
     >
-      <div className="rounded-xl border shadow-lg bg-white dark:bg-gray-800/70 backdrop-blur-lg border-primary/20">
+      <div className="rounded-xl border shadow-lg bg-white dark:bg-card backdrop-blur-lg border-primary/20">
         <div className="flex flex-col md:flex-row gap-4 py-3 px-4 justify-between items-center border-b border-gray-200 dark:border-gray-700">
           <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-500" />

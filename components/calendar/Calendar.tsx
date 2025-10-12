@@ -114,7 +114,7 @@ export default function Calendar({
   }
   return (
     <>
-      <Card className="border-2 shadow-2xl bg-card/70 backdrop-blur-lg border-primary/20 mb-8 overflow-hidden transition-all duration-500 ease-in-out">
+      <Card className="border-2 shadow-2xl bg-card backdrop-blur-lg border-primary/20 mb-8 overflow-hidden transition-all duration-500 ease-in-out">
         <CardContent className="p-6">
           <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-6 gap-4">
             <h2 className="text-2xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">

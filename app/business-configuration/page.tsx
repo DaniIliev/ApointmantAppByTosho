@@ -78,37 +78,6 @@ export default function BusinessConfigurationPage() {
 
   return (
     <div className="container mx-auto px-4 py-8 min-h-screen">
-      {/* Заглавие и Switch за режим */}
-      <div className="flex justify-between items-center mb-8">
-        <div className="flex items-center space-x-4">
-          <div className="flex items-center space-x-2">
-            <Edit
-              className={`h-5 w-5 ${
-                isEditMode ? "text-primary" : "text-muted-foreground"
-              }`}
-            />
-            <Label htmlFor="edit-mode" className="text-lg font-sans">
-              Edit Mode
-            </Label>
-            <Switch
-              id="edit-mode"
-              checked={isEditMode}
-              onCheckedChange={setIsEditMode}
-            />
-            <Eye
-              className={`h-5 w-5 ${
-                !isEditMode ? "text-primary" : "text-muted-foreground"
-              }`}
-            />
-          </div>
-          {isEditMode && (
-            <Button onClick={handleSave} className="ml-4">
-              <Save className="mr-2 h-4 w-4" /> Save Changes
-            </Button>
-          )}
-        </div>
-      </div>
-
       <div className="space-y-10">
         {/* <ConfigCard title="General Information & Hours"> */}
         <BusinessHeader business={initialBusinessData} />
@@ -126,32 +95,6 @@ export default function BusinessConfigurationPage() {
 
         <BusinessMap business={businessData} />
       </div>
-
-      {/* Save Button for mobile/bottom */}
-      {isEditMode && (
-        <div className="sticky bottom-0 left-0 right-0 p-4 bg-card border-t z-50 lg:hidden">
-          <Button onClick={handleSave} className="w-full">
-            <Save className="mr-2 h-4 w-4" /> Save Changes
-          </Button>
-        </div>
-      )}
     </div>
-  );
-}
-
-function ConfigCard({
-  title,
-  children,
-}: {
-  title: string;
-  children: React.ReactNode;
-}) {
-  return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="text-2xl font-sans">{title}</CardTitle>
-      </CardHeader>
-      <CardContent>{children}</CardContent>
-    </Card>
   );
 }

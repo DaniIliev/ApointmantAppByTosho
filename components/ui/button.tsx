@@ -76,7 +76,6 @@ export type IconType =
   | "reject"
   | "approve";
 
-// Коригираният IconMap
 const IconMap: Record<IconType, React.ElementType> = {
   view: Eye,
   edit: Edit,
@@ -116,7 +115,6 @@ const IconMap: Record<IconType, React.ElementType> = {
   reject: XCircle,
 };
 
-// 3. Дефиниция на вариантите за бутона (остава непроменена)
 const buttonVariants = cva(
   "cursor-pointer inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-lg text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 shrink-0 [&_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive",
   {
@@ -147,24 +145,21 @@ const buttonVariants = cva(
   }
 );
 
-// 4. Компонентът Button с добавен iconType
 function Button({
   className,
   variant,
   size,
   asChild = false,
-  iconType, // Нов проп
+  iconType,
   children,
   ...props
 }: React.ComponentProps<"button"> &
   VariantProps<typeof buttonVariants> & {
     asChild?: boolean;
-    iconType?: IconType; // Добавяме iconType в Props
+    iconType?: IconType;
   }) {
-  // Избор на компонент за рендиране
   const Comp = asChild ? Slot : "button";
 
-  // Избор на компонент за икона
   const IconComponent = iconType ? IconMap[iconType] : null;
 
   return (
@@ -173,10 +168,7 @@ function Button({
       className={cn(buttonVariants({ variant, size, className }))}
       {...props}
     >
-      {/* Рендиране на иконата, ако е подадена */}
-      {IconComponent && <IconComponent />}
-
-      {/* Рендиране на съдържанието */}
+      {!asChild && IconComponent && <IconComponent />}
       {children}
     </Comp>
   );

@@ -239,7 +239,7 @@ export function ServicesSection({
                 {categorizedServices[category].map((service) => (
                   <div
                     key={service.id}
-                    className="flex items-start justify-between gap-6 p-4 rounded-xl bg-background border border-border/70 hover:border-primary/50 transition-all shadow-sm"
+                    className="flex items-start justify-between gap-6 p-4 rounded-xl bg-background/60 border border-border/70 hover:border-primary/50 transition-all shadow-sm"
                   >
                     {/* Информация за Услугата (Снимка, Име, Описание) */}
                     <div className="flex-1 flex items-start gap-4">

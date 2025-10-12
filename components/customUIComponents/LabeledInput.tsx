@@ -1,12 +1,11 @@
 import React, { useState, forwardRef } from "react";
-// createRoot е премахнат, тъй като не е нужен.
 
 // Simple utility function to merge Tailwind classes
 const cn = (...classes: (string | boolean | undefined | null)[]): string => {
   return classes.filter(Boolean).join(" ");
 };
 
-// 1. Обновен интерфейс за поддръжка на rows и разширен тип на onChange
+// Обновен интерфейс за поддръжка на rows и разширен тип на onChange
 interface LabeledInputProps {
   label: string;
   id: string;
@@ -56,7 +55,8 @@ export const LabeledInput = forwardRef<
 
     // Базови класове, общи за input и textarea
     const baseClasses = cn(
-      "peer w-full bg-gray-200 focus:bg-gray-300 rounded-t-md transition-all duration-300 px-4 pt-4 pb-1",
+      // ЗАБЕЛЕЖКА: bg-card/80 е класът, който искаме да запазим
+      "peer w-full bg-card/80 focus:bg-card/90 rounded-t-md transition-all duration-300 px-4 pt-4 pb-1",
       "border-b-2 border-transparent",
       "outline-none",
       "placeholder-transparent focus:placeholder-gray-400",
@@ -69,7 +69,6 @@ export const LabeledInput = forwardRef<
       : cn(baseClasses, "h-12"); // За Input: фиксирана височина
 
     // Коригиране на позицията на label-а за textarea, когато не е фокусирано
-    // За multiline input, лейбълът трябва да започне по-високо, отколкото 'top-1/2'
     const finalLabelPosition =
       isFocused || hasValue
         ? "-top-0.5 text-xs left-3" // Позиция при активност/попълване
@@ -79,6 +78,34 @@ export const LabeledInput = forwardRef<
 
     return (
       <div className="relative group/labeled-input w-full">
+        {/*
+          *** ФИКС ЗА AUTOFILLED ФОН НА БРАУЗЪРА ***
+          Този стилов блок използва псевдо-класата :-webkit-autofill
+          за да приложи голям box-shadow, който да презапише белия фон,
+          наложен от браузъра (обикновено с !important).
+          Цветът #fefefe е избран като прокси за "card" фон, за да се слее.
+        */}
+        <style jsx global>{`
+          /* Предотвратява белия/жълт фон на Chrome/Safari при Autofill */
+          input:-webkit-autofill,
+          input:-webkit-autofill:hover,
+          input:-webkit-autofill:focus,
+          textarea:-webkit-autofill,
+          textarea:-webkit-autofill:hover,
+          textarea:-webkit-autofill:focus {
+            /* Използваме box-shadow за да презапишем фона. 
+               Цветът #fefefe е много светъл сив/бял, близък до 'card' */
+            -webkit-box-shadow: 0 0 0 1000px #fefefe inset !important;
+            box-shadow: 0 0 0 1000px #fefefe inset !important;
+
+            /* Осигурява че текстът остава тъмен и четлив */
+            -webkit-text-fill-color: #1f2937 !important; /* Прокси за тъмен текст (Tailwind gray-800) */
+
+            /* Премахва евентуални сини или жълти граници, наложени от браузъра */
+            transition: background-color 5000s ease-in-out 0s;
+          }
+        `}</style>
+
         {/* Етикетът, който се "движи" */}
         <label
           htmlFor={id}
