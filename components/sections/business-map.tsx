@@ -4,19 +4,10 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { MapPin, ArrowUpRight } from "lucide-react";
 import { Button } from "@/components/ui/button"; // Добавяме Button за линка
+import { BusinessData } from "@/app/business/[id]/page";
 
 interface BusinessMapProps {
-  business: {
-    name: string;
-    address: string;
-    city: string;
-    state: string;
-    // Оставяме координатите, но ще използваме пълния адрес за Google Maps URL
-    coordinates: {
-      lat: number;
-      lng: number;
-    };
-  };
+  business: BusinessData;
   // isEditMode е премахнат
 }
 
@@ -34,24 +25,20 @@ const getGoogleMapEmbedUrl = (address: string, city: string, state: string) => {
 };
 
 // Функцията генерира директен линк към Google Maps за навигация
-const getGoogleMapLink = (address: string, city: string, state: string) => {
-  const fullAddress = `${address}, ${city}, ${state}`;
+const getGoogleMapLink = (address: string, city: string) => {
+  const fullAddress = `${address}, ${city}`;
   const encodedAddress = encodeURIComponent(fullAddress);
   return `https://www.google.com/maps/search/?api=1&query=${encodedAddress}`;
 };
 
 export function BusinessMap({ business }: BusinessMapProps) {
-  const fullAddress = `${business.address}, ${business.city}, ${business.state}`;
+  const fullAddress = `${business.address}, ${business.city}`;
   // const mapEmbedUrl = getGoogleMapEmbedUrl(
   //   business.address,
   //   business.city,
   //   business.state
   // );
-  const mapLink = getGoogleMapLink(
-    business.address,
-    business.city,
-    business.state
-  );
+  const mapLink = getGoogleMapLink(business.address, business.city);
 
   // Ако нямате API ключ или не искате да го използвате:
   // Използвайте този URL за iframe, той обикновено работи без ключ за основни нужди:
@@ -90,14 +77,14 @@ export function BusinessMap({ business }: BusinessMapProps) {
               allowFullScreen
               referrerPolicy="no-referrer-when-downgrade"
               src={fallbackEmbedUrl} // Използваме Fallback URL за по-голяма съвместимост без API ключ
-              aria-label={`Location of ${business.name}`}
+              aria-label={`Location of ${business.address}`}
               className="border-0"
             />
           </div>
 
           {/* Информация за адреса */}
           <div className="text-base space-y-1">
-            <p className="font-bold text-lg text-primary">{business.name}</p>
+            <p className="font-bold text-lg text-primary">{business.address}</p>
             <p className="text-muted-foreground">{fullAddress}</p>
           </div>
         </div>

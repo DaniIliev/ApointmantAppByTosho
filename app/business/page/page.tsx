@@ -9,47 +9,19 @@ import { useTranslation } from "react-i18next";
 import { usePageTitle } from "@/context/PageTitleContext";
 import { BusinessHeader } from "@/components/sections/business-header";
 import callApi from "@/app/Api/callApi";
-import { useParams } from "next/navigation";
+import { BusinessData } from "../[id]/page";
+import { useAuthContext } from "@/context/AuthContext";
 
-export interface BusinessData {
-  _id: string;
-  owner: string;
-  aboutUs: string;
-  businessName: string;
-  phone: string;
-  qrCodeUrl: string;
-  address: string;
-  addressLine2: string;
-  businessImageUrl: string;
-  category: string;
-  city: string;
-  country: string;
-  email: string;
-  postalCode: string;
-  website: string;
-  schedule: {
-    monday: string;
-    tuesday: string;
-    wednesday: string;
-    thursday: string;
-    friday: string;
-    saturday: string;
-    sunday: string;
-  };
-}
-
-export default function BusinessConfigurationPage() {
+export default function OwnerPage() {
+  const { user } = useAuthContext();
   const [businessData, setBusinessData] = useState<BusinessData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-
-  const params = useParams();
-  const businessId = params.id as string;
   const { t } = useTranslation();
   const { setPageTitle } = usePageTitle();
 
   useEffect(() => {
-    setPageTitle(t("Business Configuration"));
+    setPageTitle(t("My Public Page"));
     return () => setPageTitle(null);
   }, [setPageTitle, t]);
 
@@ -60,7 +32,7 @@ export default function BusinessConfigurationPage() {
 
       try {
         const backendData: BusinessData = await callApi(
-          `/api/business/${businessId}`,
+          `/api/business/${user?.businessId}`,
           "GET"
         );
 
@@ -76,7 +48,6 @@ export default function BusinessConfigurationPage() {
     fetchBusinessConfig();
   }, []);
 
-  // 3. Зареждащ екран / Обработка на грешки
   if (isLoading) {
     return (
       <div className="container mx-auto px-4 py-8 text-center text-lg">

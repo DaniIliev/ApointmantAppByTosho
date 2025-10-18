@@ -9,8 +9,8 @@ import { useRightNav } from "@/context/RightNavContext";
 import Chatbot from "./chatBot/Chatbot";
 import Footer from "./Footer/Footer";
 
-const LEFT_NAV_OPEN_WIDTH_CLASS = "ml-64";
-const LEFT_NAV_CLOSED_WIDTH_CLASS = "ml-20";
+const LEFT_NAV_OPEN_WIDTH_CLASS = "ml-0 lg:ml-64";
+const LEFT_NAV_CLOSED_WIDTH_CLASS = "ml-0 lg:ml-20";
 const RIGHT_NAV_OPEN_WIDTH_CLASS = "mr-10";
 const RIGHT_NAV_CLOSED_WIDTH_CLASS = "mr-0";
 
@@ -27,7 +27,7 @@ export default function ClientLayout({
   };
 
   return (
-    <div className="dark flex flex-col min-h-screen">
+    <div className=" flex flex-col min-h-screen">
       <div className="fixed top-0 left-0 right-0 z-50">
         <TopNav onToggleLeftNav={toggleLeftNav} isLeftNavOpen={isLeftNavOpen} />
       </div>

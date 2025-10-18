@@ -14,6 +14,7 @@ import AppointmentCard from "./AppointmentCard";
 import EmptyState from "./EmptyState";
 import CreateAppointmentModal from "./CreateAppointmentModal";
 import AppointmentDetailsModal from "./AppointmentDetailsModal";
+import { useAuthContext } from "@/context/AuthContext";
 
 type CreateNewDashboardMenuProps = {
   onOpenModal: () => void;
@@ -25,6 +26,7 @@ const CreateNewTypeMenu = ({ onOpenModal }: CreateNewDashboardMenuProps) => {
 };
 
 export default function AppointmentTypesPage() {
+  const { user } = useAuthContext();
   const [appointmentTypes, setAppointmentTypes] = useState<AppointmentType[]>(
     []
   );
@@ -37,9 +39,11 @@ export default function AppointmentTypesPage() {
     price: string;
     color: string;
     imageUrl: File | string | null;
-    staffMembers: string[];
+    category: string;
+    staffMembers: { _id: string; name: string }[];
   }>({
     name: "",
+    category: "",
     description: "",
     duration: "",
     price: "",
@@ -62,7 +66,10 @@ export default function AppointmentTypesPage() {
 
   const fetchServices = async () => {
     try {
-      const services = await callApi("/api/service", "GET");
+      const services = await callApi(
+        `/api/service?businessId=${user?.businessId}`,
+        "GET"
+      );
       setAppointmentTypes(services);
     } catch (error) {
       console.error("Failed to fetch services:", error);
@@ -98,17 +105,19 @@ export default function AppointmentTypesPage() {
       setEditingType(type);
       setFormData({
         name: type.name,
+        category: type.category,
         description: type.description || "",
         duration: type.duration.toString(),
         price: type.price.toString(),
         color: type.color || "from-blue-500 to-cyan-500",
         imageUrl: type.imageUrl || null,
-        staffMembers: type.staffIds || [],
+        staffMembers: type.staffs || [],
       });
     } else {
       setEditingType(null);
       setFormData({
         name: "",
+        category: "",
         description: "",
         duration: "",
         price: "",
@@ -125,6 +134,7 @@ export default function AppointmentTypesPage() {
     const method = editingType ? "PUT" : "POST";
     const endpoint = `/api/service${editingType ? "/" + editingType._id : ""}`;
     setIsLoading(true);
+    console.log("formdata", formData.staffMembers);
     try {
       const isFile = formData.imageUrl instanceof File;
       const dataToSend = {
@@ -134,7 +144,8 @@ export default function AppointmentTypesPage() {
         price: Number(formData.price),
         color: formData.color,
         imageUrl: formData.imageUrl,
-        staffIds: formData.staffMembers,
+        category: formData.category,
+        staffs: JSON.stringify(formData.staffMembers),
       };
       console.log("payload", dataToSend);
       await callApi(endpoint, method, dataToSend, isFile);

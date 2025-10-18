@@ -1,11 +1,19 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { Card, CardContent } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
-import { MapPin, Star, Clock, ArrowRight, Heart, TrendingUp, Award } from "lucide-react"
-import Link from "next/link"
+import { useState } from "react";
+import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import {
+  MapPin,
+  Star,
+  Clock,
+  ArrowRight,
+  Heart,
+  TrendingUp,
+  Award,
+} from "lucide-react";
+import Link from "next/link";
 
 // Mock data for businesses
 const businesses = [
@@ -81,15 +89,17 @@ const businesses = [
     openNow: true,
     nextAvailable: "Tomorrow at 11:00 AM",
   },
-]
+];
 
 export function BusinessList() {
-  const [loading, setLoading] = useState(false)
-  const [favorites, setFavorites] = useState<number[]>([])
+  const [loading, setLoading] = useState(false);
+  const [favorites, setFavorites] = useState<number[]>([]);
 
   const toggleFavorite = (id: number) => {
-    setFavorites((prev) => (prev.includes(id) ? prev.filter((fav) => fav !== id) : [...prev, id]))
-  }
+    setFavorites((prev) =>
+      prev.includes(id) ? prev.filter((fav) => fav !== id) : [...prev, id]
+    );
+  };
 
   if (loading) {
     return (
@@ -106,7 +116,7 @@ export function BusinessList() {
           </Card>
         ))}
       </div>
-    )
+    );
   }
 
   if (businesses.length === 0) {
@@ -114,21 +124,28 @@ export function BusinessList() {
       <div className="text-center py-16">
         <div className="max-w-md mx-auto">
           <div className="text-6xl mb-4">🔍</div>
-          <h3 className="text-2xl font-bold mb-2 font-sans">No businesses found</h3>
+          <h3 className="text-2xl font-bold mb-2 font-sans">
+            No businesses found
+          </h3>
           <p className="text-muted-foreground mb-6">
-            Try adjusting your search filters or explore different appointment types
+            Try adjusting your search filters or explore different appointment
+            types
           </p>
           <Button variant="outline">Clear Filters</Button>
         </div>
       </div>
-    )
+    );
   }
 
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <p className="text-sm text-muted-foreground">
-          Showing <span className="font-semibold text-foreground">{businesses.length}</span> businesses
+          Showing{" "}
+          <span className="font-semibold text-foreground">
+            {businesses.length}
+          </span>{" "}
+          businesses
         </p>
         <div className="flex items-center gap-2">
           <span className="text-sm text-muted-foreground">Sort by:</span>
@@ -147,7 +164,7 @@ export function BusinessList() {
             style={{ animationDelay: `${index * 100}ms` }}
           >
             <div className="relative h-48 overflow-hidden">
-              <Link href={`/business/${business.id}`}>
+              <Link href={`/business/68eec2193442d296c38f016b`}>
                 <img
                   src={business.image || "/placeholder.svg"}
                   alt={business.name}
@@ -156,14 +173,16 @@ export function BusinessList() {
               </Link>
               <button
                 onClick={(e) => {
-                  e.preventDefault()
-                  toggleFavorite(business.id)
+                  e.preventDefault();
+                  toggleFavorite(business.id);
                 }}
                 className="absolute top-3 left-3 p-2 rounded-full bg-card/80 backdrop-blur-sm hover:bg-card transition-all hover:scale-110"
               >
                 <Heart
                   className={`h-4 w-4 transition-colors ${
-                    favorites.includes(business.id) ? "fill-destructive text-destructive" : "text-muted-foreground"
+                    favorites.includes(business.id)
+                      ? "fill-destructive text-destructive"
+                      : "text-muted-foreground"
                   }`}
                 />
               </button>
@@ -185,15 +204,21 @@ export function BusinessList() {
                   <h3 className="text-lg font-semibold mb-1 group-hover:text-primary transition-colors duration-300 font-sans">
                     {business.name}
                   </h3>
-                  <p className="text-sm text-muted-foreground">{business.category}</p>
+                  <p className="text-sm text-muted-foreground">
+                    {business.category}
+                  </p>
                 </div>
 
                 <div className="flex items-center gap-2 mb-3">
                   <div className="flex items-center gap-1">
                     <Star className="h-4 w-4 fill-primary text-primary" />
-                    <span className="font-semibold text-sm">{business.rating}</span>
+                    <span className="font-semibold text-sm">
+                      {business.rating}
+                    </span>
                   </div>
-                  <span className="text-sm text-muted-foreground">({business.reviews} reviews)</span>
+                  <span className="text-sm text-muted-foreground">
+                    ({business.reviews} reviews)
+                  </span>
                 </div>
 
                 <div className="flex items-start gap-2 mb-3 text-sm text-muted-foreground">
@@ -203,7 +228,9 @@ export function BusinessList() {
 
                 <div className="flex items-center gap-2 text-sm mb-4">
                   <Clock className="h-4 w-4 flex-shrink-0 text-accent" />
-                  <span className="text-accent font-medium">Next: {business.nextAvailable}</span>
+                  <span className="text-accent font-medium">
+                    Next: {business.nextAvailable}
+                  </span>
                 </div>
 
                 <Button className="w-full group-hover:bg-primary group-hover:text-primary-foreground transition-all duration-300 group-hover:scale-105">
@@ -216,5 +243,5 @@ export function BusinessList() {
         ))}
       </div>
     </div>
-  )
+  );
 }

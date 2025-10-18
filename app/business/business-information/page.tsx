@@ -1,27 +1,18 @@
 "use client";
+import callApi from "@/app/Api/callApi";
 import { LabeledInput } from "@/components/customUIComponents/LabeledInput";
 import { LabeledSelect } from "@/components/customUIComponents/LabeledSelect";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { useAuthContext } from "@/context/AuthContext";
 import { usePageTitle } from "@/context/PageTitleContext";
-import { SelectOption } from "@/Global/Types/types";
-// Importing the necessary icons for the headers
-import {
-  ArrowLeft,
-  Clock,
-  Globe,
-  Mail,
-  Phone,
-  Upload,
-  X,
-  Info, // Icon for 'General Information'
-  Contact, // Icon for 'Contact Details'
-  MapPin, // Icon for 'Addresses'
-} from "lucide-react";
-import React, { ChangeEvent, useEffect, useState } from "react";
-import { useTranslation } from "react-i18next";
+import { getBusinessCategories } from "@/Global/Types/types";
 
-// Interface for business information
+import { Upload, X, Info, Contact, MapPin } from "lucide-react";
+import React, { ChangeEvent, useEffect, useState, useMemo } from "react";
+import { useTranslation } from "react-i18next";
+import { toast } from "sonner";
+
 export interface BusinessInformation {
   category: string;
   businessName: string;
@@ -35,76 +26,70 @@ export interface BusinessInformation {
   phone: string;
   email: string;
   website: string;
+  businessImageUrl?: string; // Съществуващият URL, ако има такъв
 }
 
+// Помощна функция за инициализация на състоянието (използвана за изчистване на кода)
+const getInitialState = (): BusinessInformation => ({
+  category: "",
+  businessName: "",
+  openingHours: "",
+  aboutUs: "",
+  address: "",
+  addressLine2: "",
+  postalCode: "",
+  city: "",
+  country: "",
+  phone: "",
+  email: "",
+  website: "",
+  businessImageUrl: "",
+});
+
 const SectionHeader = ({
-  icon: Icon, // Accepting the icon component as 'Icon'
+  icon: Icon,
   title,
 }: {
-  icon: React.ElementType; // Type is a React component (e.g., Info, Contact, MapPin)
+  icon: React.ElementType;
   title: string;
 }) => (
   <div className="flex items-center space-x-3 mb-4 mt-6">
-    <Icon className="h-6 w-6 text-blue-400" /> {/* Colored icon */}
+    <Icon className="h-6 w-6 text-blue-400" />
     <h2 className="text-xl font-semibold text-white">{title}</h2>
   </div>
 );
 
 export default function BusinessFormPage() {
-  // imagePreview can be a string (data URL) or null
   const [imagePreview, setImagePreview] = useState<string | ArrayBuffer | null>(
     null
   );
+  const [imageFile, setImageFile] = useState<File | null>(null);
 
-  const [formData, setFormData] = useState<BusinessInformation>({
-    category: "",
-    businessName: "",
-    openingHours: "",
-    aboutUs: "",
-    address: "",
-    addressLine2: "",
-    postalCode: "",
-    city: "",
-    country: "",
-    phone: "",
-    email: "",
-    website: "",
-  });
+  // Ново състояние за съхранение на оригиналните данни, заредени от API
+  const [initialFormData, setInitialFormData] =
+    useState<BusinessInformation>(getInitialState);
+
+  const [formData, setFormData] =
+    useState<BusinessInformation>(getInitialState);
 
   const { t } = useTranslation();
   const { setPageTitle } = usePageTitle();
-  const generateOptions = (items: string[]): SelectOption[] => {
-    return items.map((item) => ({
-      id: item, // id and name are the same
-      name: item,
-    }));
-  };
+  const { user } = useAuthContext();
+  const [isLoading, setIsLoading] = useState(true);
+  const [isSaving, setIsSaving] = useState(false);
 
-  const cities: SelectOption[] = generateOptions([
-    "New York",
-    "Los Angeles",
-    "Chicago",
-    "Houston",
-    "Phoenix",
-    "Philadelphia",
-    "San Antonio",
-    "San Diego",
-    "Dallas",
-    "San Jose",
-  ]);
+  const BUSINESS_CATEGORIES = getBusinessCategories(t);
+  const hasChanges = useMemo(() => {
+    const formChanged = Object.keys(formData).some((key) => {
+      const k = key as keyof BusinessInformation;
+      return formData[k] !== initialFormData[k];
+    });
 
-  const countries: SelectOption[] = generateOptions([
-    "United States",
-    "Canada",
-    "United Kingdom",
-    "Germany",
-    "France",
-    "Spain",
-    "Italy",
-    "Australia",
-    "Japan",
-    "Brazil",
-  ]);
+    const imageChanged =
+      !!imageFile || (formData.businessImageUrl && imagePreview === null);
+
+    return formChanged || imageChanged;
+  }, [formData, initialFormData, imageFile, imagePreview]);
 
   useEffect(() => {
     setPageTitle(t("Business Info"));
@@ -112,9 +97,48 @@ export default function BusinessFormPage() {
       setPageTitle(null);
     };
   }, [setPageTitle, t]);
+
+  // Ефект за зареждане на данните от API при отваряне
+  useEffect(() => {
+    const fetchBusinessData = async () => {
+      if (!user?.businessId) {
+        setIsLoading(false);
+        return;
+      }
+      const url = `/api/business/${user.businessId}`;
+      try {
+        const data: BusinessInformation = await callApi(url, "GET");
+
+        // Проверка и нормализиране на данните, ако е необходимо
+        const normalizedData = {
+          ...getInitialState(), // Осигурява всички ключове
+          ...data,
+        };
+
+        setFormData(normalizedData);
+        setInitialFormData(normalizedData);
+
+        // Задаваме imagePreview, ако има съществуващ imageUrl
+        if (data.businessImageUrl) {
+          setImagePreview(data.businessImageUrl);
+        }
+      } catch (error) {
+        console.error("Error fetching business info:", error);
+        toast.error(t("Could not load business information."));
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchBusinessData();
+  }, [user?.businessId, t]);
+
+  // Хендлър за качване на изображение
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
+    console.log("file on handleupload", file);
     if (file) {
+      setImageFile(file);
       const reader = new FileReader();
       reader.onloadend = () => {
         setImagePreview(reader.result);
@@ -125,6 +149,8 @@ export default function BusinessFormPage() {
 
   const removeImage = () => {
     setImagePreview(null);
+    setImageFile(null);
+    setFormData((prev) => ({ ...prev, businessImageUrl: "" }));
   };
 
   const handleInputChange = (
@@ -136,16 +162,20 @@ export default function BusinessFormPage() {
     if (
       typeof valueOrEvent === "object" &&
       valueOrEvent !== null &&
-      "target" in valueOrEvent &&
-      valueOrEvent.target instanceof HTMLInputElement
+      "target" in valueOrEvent
     ) {
-      value = valueOrEvent.target.value;
-    }
-    // If it's a direct value (for LabeledSelect)
-    else if (typeof valueOrEvent === "string") {
+      const target = valueOrEvent.target as
+        | HTMLInputElement
+        | HTMLTextAreaElement;
+      if (target && "value" in target) {
+        value = target.value;
+      } else {
+        console.error("Event target missing value property.");
+        return;
+      }
+    } else if (typeof valueOrEvent === "string") {
       value = valueOrEvent;
     } else {
-      // fallback or error if the type is not the expected one
       console.error("Unexpected value type in handleInputChange");
       return;
     }
@@ -153,20 +183,92 @@ export default function BusinessFormPage() {
     setFormData((prev) => ({ ...prev, [field]: value }));
   };
 
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (!hasChanges) {
+      toast.info(t("No changes to save."));
+      return;
+    }
+
+    setIsSaving(true);
+
+    const payload: { [key: string]: any } = {
+      ...formData,
+    };
+
+    // Ако има нов файл, го добавяме
+    console.log("imageFile", imageFile);
+    if (imageFile) {
+      payload.businessImageUrl = imageFile;
+      // delete payload.businessImageUrl;
+    }
+    // else if (initialFormData.businessImageUrl && imagePreview === null) {
+    //   payload.businessImageUrl = "";
+    //   payload.businessImageUrl = formData.businessImageUrl;
+    // }
+
+    const url = `/api/business/${user?.businessId}`;
+
+    try {
+      // 5. Изпращане на данните като multipartForm: true
+      const updatedBusinessData: BusinessInformation = await callApi(
+        url,
+        "PUT",
+        payload,
+        true
+      );
+
+      // При успешен запис, актуализираме initialFormData и formData
+      const newNormalizedData = {
+        ...formData,
+        businessImageUrl: updatedBusinessData.businessImageUrl || "",
+      };
+
+      setFormData(newNormalizedData);
+      setInitialFormData(newNormalizedData);
+
+      // Изчистваме imageFile, тъй като вече е запазен
+      setImageFile(null);
+
+      // Актуализираме imagePreview до новия URL, ако има такъв
+      if (updatedBusinessData.businessImageUrl) {
+        setImagePreview(updatedBusinessData.businessImageUrl);
+      }
+
+      toast.success(t("Business information saved successfully!"));
+    } catch (error: any) {
+      console.error("Error saving business info:", error);
+      toast.error(
+        t(`Error: ${error.message || "Could not save information."}`)
+      );
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const currentImageSource =
+    (imagePreview as string | undefined) || formData.businessImageUrl;
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#0f1419] via-[#1a1f2e] to-[#0f1419] text-white">
+        <p>{t("Loading business information...")}</p>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#0f1419] via-[#1a1f2e] to-[#0f1419] text-white p-4 md:px-8 py-1 font-[Inter]">
       <div className="max-w-7xl mx-auto">
-        {/* Main Content */}
         <div className="grid lg:grid-cols-[1fr,1.2fr] gap-8 lg:gap-12">
-          {/* Left Side - Image Upload */}
           <div className="space-y-3">
-            {/* ⭐️ Section 1: Image 📸 */}
             <SectionHeader icon={Upload} title={t("1. Business Photo")} />
             <Card className="bg-gradient-to-br from-[#2a3142] to-[#1f2533] border border-white/10 overflow-hidden aspect-[1/0.7] shadow-xl">
-              {imagePreview ? (
+              {currentImageSource ? ( // Използваме currentImageSource
                 <div className="relative w-full h-full">
                   <img
-                    src={imagePreview as string} // Type assertion, since it's string | ArrayBuffer | null
+                    src={currentImageSource}
                     alt={t("Business preview")}
                     style={{ objectFit: "cover" }}
                     className="w-full h-full"
@@ -202,35 +304,24 @@ export default function BusinessFormPage() {
             </Card>
           </div>
 
-          {/* Right Side - Form Fields */}
           <div className="space-y-6">
-            {/* ⭐️ Section 2: General Information 📝 */}
             <SectionHeader icon={Info} title={t("2. General Information")} />
-            <div className="grid grid-cols-3 gap-3">
-              {/* Category */}
-              <LabeledInput
+            <div className="grid grid-cols-2 gap-3">
+              <LabeledSelect<string>
                 id="category"
                 label={t("Category")}
                 placeholder={t("e.g. Hair and Beauty")}
                 value={formData.category}
-                onChange={(e) => handleInputChange("category", e)} // Passing event
+                onValueChange={(e) => handleInputChange("category", e)}
+                options={BUSINESS_CATEGORIES}
               />
 
-              {/* Business Name */}
               <LabeledInput
                 id="businessName"
                 label={t("Business Name")}
                 placeholder={t("e.g. Luxe Hair Salon")}
                 value={formData.businessName}
                 onChange={(e) => handleInputChange("businessName", e)}
-              />
-              <LabeledInput
-                id="openingHours"
-                label={t("Opening Hours")}
-                placeholder={t("e.g. Mon-Fri: 9:00 - 18:00")}
-                value={formData.openingHours}
-                onChange={(e) => handleInputChange("openingHours", e)}
-                className="col-span-2"
               />
             </div>
             <LabeledInput
@@ -245,7 +336,6 @@ export default function BusinessFormPage() {
             />
             <SectionHeader icon={Contact} title={t("3. Contact Details")} />
             <div className="grid grid-cols-3 gap-3">
-              {/* Phone */}
               <LabeledInput
                 id="phone"
                 type="tel"
@@ -255,7 +345,6 @@ export default function BusinessFormPage() {
                 onChange={(e) => handleInputChange("phone", e)}
               />
 
-              {/* Email */}
               <LabeledInput
                 id="email"
                 type="email"
@@ -264,7 +353,6 @@ export default function BusinessFormPage() {
                 value={formData.email}
                 onChange={(e) => handleInputChange("email", e)}
               />
-              {/* Website */}
               <LabeledInput
                 id="website"
                 type="url"
@@ -275,38 +363,37 @@ export default function BusinessFormPage() {
               />
             </div>
 
-            {/* ⭐️ Section 4: Addresses 🗺️ */}
             <SectionHeader icon={MapPin} title={t("4. Addresses")} />
             <div className="grid grid-cols-2 gap-3">
-              <LabeledSelect
+              <LabeledInput
                 id="country"
                 label={t("Country")}
                 placeholder={t("Select country")}
                 value={formData.country}
-                onValueChange={(value) => handleInputChange("country", value)}
-                options={countries}
+                onChange={(value) => handleInputChange("country", value)}
               />
-              <LabeledSelect
+              <LabeledInput
                 id="city"
                 label={t("City")}
                 placeholder={t("Select city")}
                 value={formData.city}
-                onValueChange={(value) => handleInputChange("city", value)}
-                options={cities}
+                onChange={(value) => handleInputChange("city", value)}
               />
             </div>
-            <div className="grid grid-cols-3 gap-3">
-              {/* Address Line 1 */}
+            <div
+              className={`grid grid-cols-3 gap-3 ${
+                hasChanges ? "p-1" : "pb-3"
+              }`}
+            >
               <LabeledInput
                 id="address"
                 label={t("Street and Number")}
                 placeholder={t("Street and Number")}
                 value={formData.address}
                 onChange={(e) => handleInputChange("address", e)}
-                className="col-span-2" // Occupies 2 columns
+                className="col-span-2"
               />
 
-              {/* Postal Code */}
               <LabeledInput
                 id="postalCode"
                 label={t("Postal Code")}
@@ -315,26 +402,29 @@ export default function BusinessFormPage() {
                 onChange={(e) => handleInputChange("postalCode", e)}
               />
 
-              {/* Address Line 2 */}
               <LabeledInput
                 id="addressLine2"
                 label={t("Apartment, floor, etc. (optional)")}
                 placeholder={t("Apartment, floor, etc. (optional)")}
                 value={formData.addressLine2}
                 onChange={(e) => handleInputChange("addressLine2", e)}
-                className="col-span-3" // Occupies 3 columns for more space
+                className="col-span-3"
               />
             </div>
 
-            <div className="flex align-center justify-center w-full ">
-              <Button
-                className="bg-primary hover:bg-primary-dark mb-3"
-                size="lg"
-                iconType="save"
-              >
-                {t("Save")}
-              </Button>
-            </div>
+            {hasChanges && (
+              <div className="flex align-center justify-center w-full ">
+                <Button
+                  className="bg-primary hover:bg-primary-dark mb-4"
+                  size="lg"
+                  iconType="save"
+                  onClick={handleSubmit}
+                  disabled={isSaving || isLoading}
+                >
+                  {isSaving ? t("Saving...") : t("Save")}
+                </Button>
+              </div>
+            )}
           </div>
         </div>
       </div>

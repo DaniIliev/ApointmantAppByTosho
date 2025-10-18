@@ -8,8 +8,10 @@ import LeftNav from "./navigation/left-nav";
 import Footer from "./Footer/Footer";
 
 // Дефинираме ширините на навигациите като константи за по-лесно управление
-const LEFT_NAV_OPEN_WIDTH_CLASS = "ml-64";
-const LEFT_NAV_CLOSED_WIDTH_CLASS = "ml-20";
+// const LEFT_NAV_OPEN_WIDTH_CLASS = "ml-64";
+// const LEFT_NAV_CLOSED_WIDTH_CLASS = "ml-20";
+const LEFT_NAV_OPEN_WIDTH_CLASS = "ml-0 lg:ml-64";
+const LEFT_NAV_CLOSED_WIDTH_CLASS = "ml-0 lg:ml-20";
 const RIGHT_NAV_OPEN_WIDTH_CLASS = "mr-10";
 const RIGHT_NAV_CLOSED_WIDTH_CLASS = "mr-0";
 

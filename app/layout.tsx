@@ -7,7 +7,7 @@ import ClientLayoutWrapper from "@/components/ClientLayoutWrapper";
 import { AuthProvider } from "@/context/AuthContext";
 
 export const metadata: Metadata = {
-  title: "v0 App",
+  title: "AppointDI",
   description: "Created with v0",
   generator: "v0.app",
 };
@@ -28,7 +28,9 @@ html {
 }
         `}</style>
       </head>
-      <body className="dark">
+      <body
+      // className="dark"
+      >
         <AuthProvider>
           <ClientLayoutWrapper>{children}</ClientLayoutWrapper>
         </AuthProvider>

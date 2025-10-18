@@ -65,9 +65,10 @@ const AppointmentForm = ({
         const selectedService = appointmentTypes?.find(
           (type) => type._id === appointmentData.appointmentTypeId
         );
-        if (selectedService && selectedService.staffIds) {
+        if (selectedService && selectedService.staffs) {
+          console.log("inn", selectedService.staffs);
           const staffDetails = await callApi(`/api/staff/by-ids`, "POST", {
-            staffIds: selectedService.staffIds,
+            staffIds: selectedService.staffs,
           });
           setAvailableStaff(staffDetails);
         }
