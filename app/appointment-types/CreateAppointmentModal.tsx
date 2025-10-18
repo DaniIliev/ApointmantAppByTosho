@@ -25,7 +25,7 @@ import { Badge } from "@/components/ui/badge"; // Assuming you have Badge compon
 
 import { cn } from "@/lib/utils";
 import callApi from "../Api/callApi";
-import { SelectOption } from "@/Global/Types/types";
+import { getCategoryOptions, SelectOption } from "@/Global/Types/types";
 import { useTranslation } from "react-i18next";
 import { MultiSelectCombobox } from "@/components/customUIComponents/MultiSelectCombobox";
 
@@ -57,32 +57,6 @@ type StaffMember = {
   lastName: string;
 };
 
-// Mock data for Category and SubCategory options
-// In a real application, you would fetch this data
-const categoryOptions: SelectOption[] = [
-  { id: "business", name: "Business Services" },
-  { id: "medical", name: "Medical/Health" },
-  { id: "beauty", name: "Beauty/Spa" },
-];
-
-const subCategoryOptions = {
-  business: [
-    { id: "consultation", name: "Consultation" },
-    { id: "planning", name: "Strategic Planning" },
-    { id: "review", name: "Quarterly Review" },
-  ],
-  medical: [
-    { id: "checkup", name: "Annual Check-up" },
-    { id: "therapy", name: "Physiotherapy" },
-  ],
-  beauty: [
-    { id: "haircut", name: "Haircut & Styling" },
-    { id: "massage", name: "Full Body Massage" },
-    { id: "facial", name: "Facial Treatment" },
-  ],
-};
-
-// Helper component for Staff Avatars
 const StaffAvatarsDisplay = ({
   selectedStaffIds,
   staffMembers,
@@ -140,12 +114,14 @@ const CreateAppointmentModal = ({
     formData.category || ""
   );
 
+  const categoryOptions = getCategoryOptions(t);
   useEffect(() => {
     if (isModalOpen) {
       const fetchStaff = async () => {
         try {
           // You might want to consider memoizing the fetch or using a global state management solution
           const staffList = await callApi("/api/staff/staff-list", "GET");
+          console.log("stafflist", staffList);
           setStaffMembers(staffList);
         } catch (error) {
           console.error("Failed to fetch staff members:", error);
@@ -161,25 +137,16 @@ const CreateAppointmentModal = ({
     setFormData((prev: any) => ({
       ...prev,
       category: newCategory,
-      subCategory: "", // Reset subCategory on category change
+      subCategory: "",
     }));
   };
 
-  // Function to remove a staff member (for the Avatar display click)
   const handleRemoveStaff = (staffId: string) => {
     setFormData((prev: any) => ({
       ...prev,
       staffMembers: prev.staffMembers.filter((id: string) => id !== staffId),
     }));
   };
-
-  // Get the subcategory options based on the currently selected category
-  const currentSubCategoryOptions = useMemo(() => {
-    return (
-      subCategoryOptions[selectedCategory as keyof typeof subCategoryOptions] ||
-      []
-    );
-  }, [selectedCategory]);
 
   return (
     <Modal
@@ -201,7 +168,7 @@ const CreateAppointmentModal = ({
             // isMulti={true}
           />
 
-          <LabeledSelect<string>
+          {/* <LabeledSelect<string>
             id="subCategory"
             label="Subcategory"
             value={formData.subCategory}
@@ -210,7 +177,7 @@ const CreateAppointmentModal = ({
             }
             placeholder="Select a subcategory"
             options={currentSubCategoryOptions}
-          />
+          /> */}
         </div>
 
         <LabeledInput
@@ -267,18 +234,6 @@ const CreateAppointmentModal = ({
 
         {/* Staff Selection with Avatar Display */}
         <div className="space-y-2">
-          {/* <MultiSelectCombobox
-            items={staffMembers}
-            selectedIds={formData.staffMembers}
-            onSelectIdsChange={handleStaffChange} // Използваме новата функция
-            // 4. Променена getLabel: Работи с StaffItem
-            getLabel={(item: StaffItem) =>
-              `${item.firstName} ${item.lastName} (${item.role})`
-            }
-            triggerPlaceholder="Изберете служители..."
-            searchPlaceholder="Търсене на служители..."
-            emptyMessage="Няма намерени служители."
-          /> */}
           <Popover open={open} onOpenChange={setOpen}>
             <PopoverTrigger asChild>
               <Button
@@ -299,8 +254,8 @@ const CreateAppointmentModal = ({
                 <CommandEmpty>No staff found.</CommandEmpty>
                 <CommandGroup>
                   {staffMembers.map((staff) => {
-                    const isSelected = formData.staffMembers.includes(
-                      staff._id
+                    const isSelected = formData.staffMembers.some(
+                      (s: { _id: string }) => s._id === staff._id
                     );
                     return (
                       <CommandItem
@@ -309,17 +264,21 @@ const CreateAppointmentModal = ({
                         onSelect={() => {
                           let newSelected = [...formData.staffMembers];
                           if (isSelected) {
+                            // ПРЕМАХВАНЕ: Филтрираме обекта по _id
                             newSelected = newSelected.filter(
-                              (id) => id !== staff._id
+                              (s) => s._id !== staff._id
                             );
                           } else {
-                            newSelected.push(staff._id);
+                            // ДОБАВЯНЕ: Добавяме обекта с _id и name
+                            newSelected.push({
+                              _id: staff._id,
+                              name: `${staff.firstName} ${staff.lastName}`,
+                            });
                           }
                           setFormData((prev: any) => ({
                             ...prev,
                             staffMembers: newSelected,
                           }));
-                          // Keep popover open for multi-select, optionally close after a delay if desired.
                         }}
                       >
                         <Check

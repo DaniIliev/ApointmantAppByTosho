@@ -36,7 +36,7 @@ const callApi = async (
       }
     }
   }
-
+  // const url = "http://localhost:8080";
   const url = "https://apointmantappservice-production.up.railway.app";
   const result: any = await fetch(`${url}${endpoint}`, {
     method: method,
@@ -54,29 +54,3 @@ const callApi = async (
 };
 
 export default callApi;
-
-// const callApi = async (
-//   endpoint: string,
-//   method: "GET" | "POST" | "PUT" | "DELETE",
-//   variables?: any
-// ) => {
-//   const token = localStorage.getItem("token");
-
-//   const headers: HeadersInit = {
-//     "Content-Type": "application/json",
-//   };
-
-//   if (token) {
-//     headers["x-auth-token"] = token;
-//   }
-
-//   const result: any = await fetch(`http://localhost:8080${endpoint}`, {
-//     method: method,
-//     headers: headers,
-//     ...(variables && { body: JSON.stringify(variables) }),
-//   });
-
-//   return await result.json();
-// };
-
-// export default callApi;

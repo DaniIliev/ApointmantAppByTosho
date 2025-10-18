@@ -183,8 +183,8 @@ export default function LeftNav({ isOpen }: LeftNavProps) {
             icon: Briefcase,
             children: [
               {
-                href: "/business-configuration",
-                label: t("Your Public Page"),
+                href: "/business/page",
+                label: t("My Public Page"),
                 icon: Users,
               },
               {
@@ -226,9 +226,10 @@ export default function LeftNav({ isOpen }: LeftNavProps) {
 
   return (
     <nav
-      className={`bg-primary-foreground fixed left-0 top-17.5 bottom-0 backdrop-blur-xl border-r border-white/10 z-40 transition-all duration-300 ${
-        isOpen ? "w-64 translate-x-0" : "w-20 translate-x-0"
-      }`}
+      className={`bg-primary-foreground fixed left-0 top-17.5 bottom-0 backdrop-blur-xl border-r border-white/10 z-40 transition-all duration-300 
+        ${isOpen ? "w-64 translate-x-0" : "w-64 -translate-x-full"}
+        ${isOpen ? "lg:w-64 lg:translate-x-0" : "lg:w-20 lg:translate-x-0"}
+      `}
     >
       <div className={`p-4 overflow-hidden h-full`}>
         <div className="space-y-2">

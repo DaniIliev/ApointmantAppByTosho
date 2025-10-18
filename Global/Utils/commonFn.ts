@@ -1,3 +1,4 @@
+import { BusinessData } from "@/app/business/[id]/page";
 import { parseISO } from "date-fns";
 import { format } from "date-fns/format";
 import { isValid } from "date-fns/isValid";
@@ -94,4 +95,101 @@ export const getInitials = (name: string) => {
 export const capitalizeFirstLetter = (text: string) => {
   if (!text) return "";
   return text.charAt(0).toUpperCase() + text.slice(1);
+};
+
+export const isBusinessOpenNow = (
+  schedule: BusinessData["schedule"]
+): boolean => {
+  // 1. Вземане на текущия ден и час
+  const now = new Date();
+  const dayIndex = now.getDay(); // 0 = Sunday, 1 = Monday, ..., 6 = Saturday
+  const currentHours = now.getHours();
+  const currentMinutes = now.getMinutes();
+  const currentTimeInMinutes = currentHours * 60 + currentMinutes;
+
+  // 2. Съпоставяне на индекса с името на деня
+  const days: (keyof BusinessData["schedule"])[] = [
+    "sunday",
+    "monday",
+    "tuesday",
+    "wednesday",
+    "thursday",
+    "friday",
+    "saturday",
+  ];
+  const todayName = days[dayIndex];
+
+  // 3. Вземане на работното време за днес
+  const hoursString = schedule[todayName]; // e.g., "08:00-17:00", "Почивен Ден", or "Няма зададен график"
+
+  // Проверка за почивен ден или липса на график
+  if (
+    !hoursString ||
+    hoursString === "Почивен Ден" ||
+    hoursString === "Няма зададен график"
+  ) {
+    return false;
+  }
+
+  // 4. Парсване на времевия интервал (e.g., "08:00-17:00")
+  const [startTimeStr, endTimeStr] = hoursString.split("-"); // ["08:00", "17:00"]
+
+  if (!startTimeStr || !endTimeStr) {
+    return false; // Невалиден формат
+  }
+
+  // Функция за преобразуване на "HH:MM" в минути
+  const timeToMinutes = (timeStr: string): number => {
+    const [h, m] = timeStr.split(":").map(Number);
+    return h * 60 + m;
+  };
+
+  const startTimeInMinutes = timeToMinutes(startTimeStr);
+  let endTimeInMinutes = timeToMinutes(endTimeStr);
+
+  // Обработка на преминаване през полунощ (ако е необходимо, напр. "22:00-02:00")
+  // В твоя случай (08:00-17:00) това вероятно не е проблем, но е добра практика.
+  if (endTimeInMinutes < startTimeInMinutes) {
+    // Ако крайният час е по-малък от началния, добавяме 24 часа (1440 минути)
+    // за да може сравнението да работи коректно в рамките на деня,
+    // в който е започнало работното време.
+    endTimeInMinutes += 24 * 60;
+  }
+
+  // 5. Проверка дали текущият час е в интервала
+  // Ако текущият час е след полунощ и крайният час е минал полунощ,
+  // трябва да добавим 24 часа и към текущото време за коректно сравнение.
+  // За интервала 08:00-17:00, това не е необходимо.
+
+  return (
+    currentTimeInMinutes >= startTimeInMinutes &&
+    currentTimeInMinutes <= endTimeInMinutes
+  );
+};
+
+type DayName =
+  | "sunday"
+  | "monday"
+  | "tuesday"
+  | "wednesday"
+  | "thursday"
+  | "friday"
+  | "saturday";
+
+export const getTodayDayName = (): DayName => {
+  const now = new Date();
+  const dayIndex = now.getDay();
+
+  const days: DayName[] = [
+    "sunday",
+    "monday",
+    "tuesday",
+    "wednesday",
+    "thursday",
+    "friday",
+    "saturday",
+  ];
+
+  // 3. Връщане на името на деня
+  return days[dayIndex];
 };

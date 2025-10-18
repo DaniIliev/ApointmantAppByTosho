@@ -1,256 +1,123 @@
-// import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-// import { Clock } from "lucide-react";
-// import { Textarea } from "../ui/textarea";
-
-// interface BusinessInfoProps {
-//   business: {
-//     description: string;
-//     hours: {
-//       monday: string;
-//       tuesday: string;
-//       wednesday: string;
-//       thursday: string;
-//       friday: string;
-//       saturday: string;
-//       sunday: string;
-//     };
-//   };
-//   isEditMode: boolean; // Добавен prop
-//   onDescriptionChange: (field: string, value: string) => void; // Добавен callback
-//   onHoursChange: (field: string, value: string) => void; // Добавен callback
-// }
-
-// export function BusinessInfo({
-//   business,
-//   isEditMode,
-//   onDescriptionChange,
-//   onHoursChange,
-// }: BusinessInfoProps) {
-//   const days = [
-//     "monday",
-//     "tuesday",
-//     "wednesday",
-//     "thursday",
-//     "friday",
-//     "saturday",
-//     "sunday",
-//   ];
-//   const today = days[new Date().getDay() === 0 ? 6 : new Date().getDay() - 1];
-
-//   return (
-//     <div className="grid md:grid-cols-2 gap-6">
-//       {/* About */}
-//       <Card>
-//         <CardHeader>
-//           <CardTitle className="font-sans">About</CardTitle>
-//         </CardHeader>
-//         <CardContent>
-//           {isEditMode ? (
-//             <Textarea
-//               value={business.description}
-//               onChange={(e) =>
-//                 onDescriptionChange("description", e.target.value)
-//               }
-//               className="min-h-[150px]"
-//             />
-//           ) : (
-//             <p className="text-muted-foreground leading-relaxed">
-//               {business.description}
-//             </p>
-//           )}
-//         </CardContent>
-//       </Card>
-
-//       {/* Hours */}
-//       <Card>
-//         {/* ... CardHeader за Hours */}
-//         <CardContent>
-//           <div className="space-y-2">
-//             {days.map((day) => (
-//               <div
-//                 key={day}
-//                 className={`flex justify-between text-sm items-center ${
-//                   day === today
-//                     ? "font-semibold text-foreground"
-//                     : "text-muted-foreground"
-//                 }`}
-//               >
-//                 <span className="capitalize">{day}</span>
-//                 {isEditMode ? (
-//                   <input
-//                     type="text"
-//                     value={business.hours[day as keyof typeof business.hours]}
-//                     onChange={(e) =>
-//                       onHoursChange(`hours.${day}`, e.target.value)
-//                     }
-//                     className="w-1/2 text-right border rounded px-1 py-0.5 text-foreground bg-secondary/50"
-//                   />
-//                 ) : (
-//                   <span>
-//                     {business.hours[day as keyof typeof business.hours]}
-//                   </span>
-//                 )}
-//               </div>
-//             ))}
-//           </div>
-//         </CardContent>
-//       </Card>
-//     </div>
-//   );
-// }
 "use client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Clock, Info, CheckCircle, XCircle } from "lucide-react"; // Добавяме Info, CheckCircle, XCircle
-import { Textarea } from "../ui/textarea";
-
-// Използвайте Input за по-добър вид в Edit Mode, ако имате достъп до него
-// import { Input } from "../ui/input";
-
-interface BusinessHours {
-  monday: string;
-  tuesday: string;
-  wednesday: string;
-  thursday: string;
-  friday: string;
-  saturday: string;
-  sunday: string;
-}
+import { Clock, Info, CheckCircle, XCircle } from "lucide-react";
+import { useTranslation } from "react-i18next";
+import { BusinessData } from "@/app/business/[id]/page";
+import { getTodayDayName } from "@/Global/Utils/commonFn";
 
 interface BusinessInfoProps {
-  business: {
-    description: string;
-    hours: BusinessHours;
-  };
-  isEditMode: boolean;
-  onDescriptionChange: (field: string, value: string) => void;
-  onHoursChange: (field: string, value: string) => void;
+  business: BusinessData;
 }
 
-// Помощна функция за получаване на българско име на деня
-const getDayNameBg = (dayKey: string) => {
-  const map: { [key: string]: string } = {
-    monday: "Понеделник",
-    tuesday: "Вторник",
-    wednesday: "Сряда",
-    thursday: "Четвъртък",
-    friday: "Петък",
-    saturday: "Събота",
-    sunday: "Неделя",
-  };
-  return map[dayKey] || dayKey;
-};
+export function BusinessInfo({ business }: BusinessInfoProps) {
+  const { t } = useTranslation();
 
-export function BusinessInfo({
-  business,
-  isEditMode,
-  onDescriptionChange,
-  onHoursChange,
-}: BusinessInfoProps) {
-  const days = [
-    "monday",
-    "tuesday",
-    "wednesday",
-    "thursday",
-    "friday",
-    "saturday",
-    "sunday",
+  // Day keys of the week in order (starting with Monday)
+  const days: string[] = [
+    t("Monday"),
+    t("Tuesday"),
+    t("Wednesday"),
+    t("Thursday"),
+    t("Friday"),
+    t("Saturday"),
+    t("Sunday"),
   ];
-  // Вземане на днешния ден (0=Неделя -> 6=Събота)
-  const currentDayIndex = new Date().getDay();
-  // Мапиране: 0(Неделя) -> 6, 1(Понеделник) -> 0 и т.н.
-  const todayKey = days[currentDayIndex === 0 ? 6 : currentDayIndex - 1];
+
+  const todayKey = getTodayDayName();
+  const isScheduleObject =
+    typeof business.schedule === "object" && business.schedule !== null;
 
   return (
     <div className="grid lg:grid-cols-3 gap-6">
-      {" "}
-      {/* Промяна на 3 колони на голям екран */}
-      {/* About - Преместваме го на 2 колони за повече място за описанието */}
       <Card className="lg:col-span-2">
         <CardHeader className="flex flex-row items-center space-x-2 p-4 border-b">
           <Info className="h-6 w-6 text-primary" />
           <CardTitle className="text-2xl font-bold tracking-tight text-primary">
-            За Нас
+            {t("About us")}
           </CardTitle>
         </CardHeader>
         <CardContent className="pt-6">
-          {isEditMode ? (
-            <Textarea
-              value={business.description}
-              onChange={(e) =>
-                onDescriptionChange("description", e.target.value)
-              }
-              placeholder="Въведете детайлно описание на вашия бизнес..."
-              className="min-h-[200px] border-primary/30 focus-visible:ring-primary/50"
-            />
-          ) : (
-            <p className="text-muted-foreground whitespace-pre-wrap text-base leading-relaxed">
-              {business.description || "Няма налично описание."}
-            </p>
-          )}
+          <p className="text-muted-foreground whitespace-pre-wrap text-base leading-relaxed">
+            {business.aboutUs || t("No description available.")}
+          </p>
         </CardContent>
       </Card>
-      {/* Hours - Остава на 1 колона */}
+
+      {/* Hours Section - Takes 1 column */}
       <Card>
         <CardHeader className={`p-4 border-b `}>
           <div className="flex items-center space-x-2">
             <Clock className="h-6 w-6 text-primary" />
             <CardTitle className="text-2xl font-bold tracking-tight text-primary">
-              Работно Време
+              {t("Working Hours")}
             </CardTitle>
           </div>
-          {/* Индикатор за статус - директно под заглавието
-          <div className="flex items-center gap-2 mt-2">
-            <StatusIcon className={`h-4 w-4 ${statusColor}`} />
-            <span className={`text-sm font-semibold ${statusColor}`}>
-              {statusText}
-            </span>
-          </div> */}
         </CardHeader>
         <CardContent className="pt-6 pb-4">
           <div className="space-y-3">
-            {days.map((day) => {
-              const dayHours = business.hours[day as keyof BusinessHours];
-              const isToday = day === todayKey;
-              const isClosed =
-                dayHours.toLowerCase().includes("closed") ||
-                dayHours.trim() === "";
+            {!isScheduleObject && (
+              <div className="flex items-center space-x-2 text-center py-4 bg-muted/50 rounded-lg">
+                <XCircle className="h-5 w-5 text-red-500 ml-4" />
+                <span className="font-semibold text-muted-foreground">
+                  {business.schedule as any}
+                </span>
+              </div>
+            )}
 
-              return (
-                <div
-                  key={day}
-                  className={`flex justify-between items-center py-1 border-b border-border/50 last:border-b-0 ${
-                    isToday
-                      ? "font-bold text-foreground bg-primary/5 rounded-md px-2 -mx-2"
-                      : "text-muted-foreground"
-                  }`}
-                >
-                  {/* Име на деня */}
-                  <span className="text-base">{getDayNameBg(day)}</span>
+            {isScheduleObject &&
+              days.map((day) => {
+                // Get daily hours from business.schedule
+                const dayToLowerCase = day.toLocaleLowerCase();
+                const dayHours =
+                  business.schedule[
+                    dayToLowerCase as keyof typeof business.schedule
+                  ];
+                const isToday = dayToLowerCase === todayKey;
+                const isDayOff =
+                  dayHours === t("Почивен Ден") || dayHours === t("Затворено");
+                const isNotSet = dayHours === t("Не е зададено");
 
-                  {isEditMode ? (
-                    // Edit Mode: Използвайте по-добре стилизиран Input
-                    <input
-                      type="text"
-                      value={dayHours}
-                      onChange={(e) =>
-                        onHoursChange(`hours.${day}`, e.target.value)
-                      }
-                      placeholder="Напр. 9:00 AM - 5:00 PM"
-                      className={`w-1/2 text-right text-sm border-2 rounded-md px-2 py-1 transition-colors focus:border-primary focus:ring-1 focus:ring-primary ${
-                        isClosed ? "border-red-300" : "border-border"
-                      } bg-background/50`}
-                    />
-                  ) : (
-                    // Read Mode
-                    <span
-                      className={isClosed ? "text-red-500 font-semibold" : ""}
-                    >
-                      {isClosed ? "Затворено" : dayHours}
-                    </span>
-                  )}
-                </div>
-              );
-            })}
+                // Determine display status (e.g., "08:00-17:00" or "Day Off")
+                let displayStatus;
+                if (isDayOff) {
+                  displayStatus = t("Day Off"); // Display translated 'Day Off'
+                } else if (isNotSet) {
+                  displayStatus = t("Not Set"); // Display translated 'Not Set'
+                } else {
+                  displayStatus = dayHours; // Display raw time string e.g., "08:00-17:00"
+                }
+
+                // Determine styling based on status
+                const statusClass =
+                  isDayOff || isNotSet
+                    ? "text-red-500 font-semibold"
+                    : "text-foreground font-medium";
+
+                return (
+                  <div
+                    key={day}
+                    className={`flex justify-between items-center py-1 border-b border-border/50 last:border-b-0 transition-colors ${
+                      isToday
+                        ? "font-bold text-foreground bg-primary/5 rounded-md px-2 -mx-2 shadow-sm"
+                        : "text-muted-foreground"
+                    }`}
+                  >
+                    {/* Day Name (Translated) */}
+                    <span className="text-base">{day}</span>
+
+                    <div className={`flex items-center gap-2 ${statusClass}`}>
+                      {isToday && (isDayOff || isNotSet) && (
+                        <XCircle className="h-4 w-4 text-red-500" />
+                      )}
+                      {isToday && !isDayOff && !isNotSet && (
+                        <CheckCircle className="h-4 w-4 text-green-600" />
+                      )}
+
+                      <span>{displayStatus}</span>
+                    </div>
+                  </div>
+                );
+              })}
           </div>
         </CardContent>
       </Card>

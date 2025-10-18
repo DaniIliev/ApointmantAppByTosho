@@ -51,7 +51,7 @@ export default function RegisterPage() {
       phone:
         accountType == "business" ? formData.businessPhone : formData.phone,
       ...(accountType == "business" && {
-        name: formData.businessName,
+        businessName: formData.businessName,
       }),
     };
     const authedUser = await callApi("/api/auth/register", "POST", payload);

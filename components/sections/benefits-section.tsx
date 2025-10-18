@@ -68,3 +68,4 @@ export function BenefitsSection() {
     </section>
   );
 }
+// @/components/sections/benefits-section.tsx

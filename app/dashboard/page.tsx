@@ -101,9 +101,11 @@ export default function DashboardPage() {
   }, [setPageTitle, setExtraRightNavMenu, setIsRightNavVisible, t]);
 
   const fetchServices = async () => {
-    // ... (логиката за fetchServices остава същата)
     try {
-      const services: AppointmentType[] = await callApi("/api/service", "GET");
+      const services: AppointmentType[] = await callApi(
+        `/api/service?businessId=${user?.businessId}`,
+        "GET"
+      );
       setAppointmentTypes(services);
       const transformedOptions: SelectOptionsAppointmentType[] = services.map(
         (type) => ({
@@ -118,9 +120,7 @@ export default function DashboardPage() {
   };
 
   const getDashboardData = async () => {
-    // ... (логиката за getDashboardData остава същата)
     const data = await callApi("/api/appointment/dashboard", "GET");
-    // setAppointments(data);
     setAppointments(mockAppointments);
   };
 

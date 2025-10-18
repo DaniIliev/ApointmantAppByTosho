@@ -13,7 +13,7 @@ import { CustomTooltip } from "@/components/customUIComponents/CustomTooltip";
 import { Modal } from "@/components/customUIComponents/Modal";
 import callApi from "../Api/callApi";
 
-type StaffMember = {
+export type StaffMember = {
   _id: string;
   firstName: string;
   lastName: string;
