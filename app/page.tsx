@@ -3,6 +3,7 @@
 import MobileCalendar from "@/components/calendar/MobileCalendar";
 import { CalendarAppointments } from "@/components/ResponsibleCalendarView/ResponsibleCalendarView";
 import { Appointment } from "@/Global/Types/types";
+import { redirect } from "next/navigation";
 
 // const mockAppointments: Appointment[] = [
 //   {
@@ -38,6 +39,7 @@ import { Appointment } from "@/Global/Types/types";
 // ];
 
 export default function Home() {
+  redirect("/home");
   return (
     <div className="container mx-auto py-8">
       <h1 className="text-3xl font-bold mb-6">График за срещи</h1>
