@@ -41,7 +41,39 @@
   --input: #1f2937b3;
   --radius: 0.5rem;
 }
-
+.theme-blue {
+  --primary: #3b61c0;
+  --primary-dark: #2a4a8b;
+  --secondary: #00bfff;
+  --accent: #00bfff;
+  --text-primary: #1f2937;
+}
+.theme-purple {
+  --primary: #8a2be2; /* Blue-Violet */
+  --primary-dark: #6a1ba5;
+  --secondary: #d8bfd8; /* Thistle */
+  --accent: #d8bfd8;
+  --text-primary: #1f2937; /* Keeping it dark */
+}
+/* Green Theme */
+.theme-green {
+  /* Replace with your desired green primary color */
+  --primary: #4caf50; /* Primary Green */
+  --primary-dark: #388e3c; /* Darker Green */
+  /* Replace with your desired green secondary/accent color */
+  --secondary: #a5d6a7; /* Lighter Green Accent */
+  --accent: #a5d6a7;
+  --text-primary: #1f2937;
+}
+.theme-red {
+  /* Replace with your desired red primary color */
+  --primary: #f44336; /* Primary Red */
+  --primary-dark: #d32f2f; /* Darker Red */
+  /* Replace with your desired red secondary/accent color */
+  --secondary: #ef9a9a; /* Lighter Red Accent */
+  --accent: #ef9a9a;
+  --text-primary: #1f2937;
+}
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
@@ -79,7 +111,6 @@
   }
 }
 
-/* Added utility classes for dynamic theming */
 @layer utilities {
   .theme-gradient-primary {
     background: linear-gradient(to right, var(--primary), var(--accent));
@@ -116,5 +147,30 @@
         rgb(var(--theme-primary-to))
       )
       1;
+  }
+}
+
+@keyframes float {
+  0%,
+  100% {
+    transform: translateY(0) translateX(0) rotate(0deg);
+  }
+  25% {
+    transform: translateY(-20px) translateX(10px) rotate(5deg);
+  }
+  50% {
+    transform: translateY(0) translateX(20px) rotate(0deg);
+  }
+  75% {
+    transform: translateY(20px) translateX(10px) rotate(-5deg);
+  }
+}
+
+@media (min-width: 768px) {
+  .md-clip-top-slant {
+    clip-path: polygon(0 10%, 100% 0, 100% 100%, 0 100%);
+  }
+  .md-clip-bottom-slant {
+    clip-path: polygon(0 0, 100% 0, 100% 85%, 0 100%);
   }
 }

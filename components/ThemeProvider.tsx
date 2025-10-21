@@ -1,15 +1,17 @@
+// @/context/ThemeContext.tsx (МОДИФИЦИРАН)
 "use client";
 
 import type React from "react";
-
 import { createContext, useContext, useEffect, useState } from "react";
 
-type Theme =
-  | "purple-blue"
-  | "emerald-teal"
-  | "orange-pink"
-  | "cyan-violet"
-  | "rose-indigo";
+// Дефинирай всички възможни класове на палитрата
+type Theme = "theme-blue" | "theme-green" | "theme-purple" | "theme-red";
+const ALL_THEME_CLASSES: Theme[] = [
+  "theme-blue",
+  "theme-green",
+  "theme-purple",
+  "theme-red",
+];
 
 interface ThemeContextType {
   theme: Theme;
@@ -19,32 +21,46 @@ interface ThemeContextType {
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
-  const [theme, setTheme] = useState<Theme>("purple-blue");
+  // theme-blue е твоята default палитра от :root
+  const [theme, setTheme] = useState<Theme>("theme-blue");
 
   useEffect(() => {
-    // Load theme from localStorage on mount
     const savedTheme = localStorage.getItem("selectedPalette") as Theme;
-    if (savedTheme) {
-      setTheme(savedTheme);
-      document.documentElement.setAttribute("data-theme", savedTheme);
-    }
+    const initialTheme =
+      savedTheme && ALL_THEME_CLASSES.includes(savedTheme)
+        ? savedTheme
+        : "theme-blue";
+
+    setTheme(initialTheme);
+    applyThemeClass(initialTheme);
   }, []);
 
+  const applyThemeClass = (themeClass: Theme) => {
+    const html = document.documentElement;
+
+    // 1. Премахваме всички възможни класове за палитри
+    ALL_THEME_CLASSES.forEach((t) => {
+      html.classList.remove(t);
+    });
+
+    // 2. Добавяме избрания клас
+    html.classList.add(themeClass);
+  };
+
   const handleSetTheme = (newTheme: Theme) => {
-    console.log("Setting theme to:", newTheme);
     setTheme(newTheme);
     localStorage.setItem("selectedPalette", newTheme);
-    document.documentElement.setAttribute("data-theme", newTheme);
+    applyThemeClass(newTheme); // Прилагаме промяната към DOM-а
   };
 
   return (
     <ThemeContext.Provider value={{ theme, setTheme: handleSetTheme }}>
-      {children}
+            {children}   {" "}
     </ThemeContext.Provider>
   );
 }
 
-export function useTheme() {
+export function usePaletteTheme() {
   const context = useContext(ThemeContext);
   if (context === undefined) {
     throw new Error("useTheme must be used within a ThemeProvider");

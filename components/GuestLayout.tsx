@@ -6,10 +6,8 @@ import TopNav from "@/components/navigation/top-nav";
 import { useRightNav } from "@/context/RightNavContext";
 import LeftNav from "./navigation/left-nav";
 import Footer from "./Footer/Footer";
+import { usePaddingControl } from "@/context/PaddingContext";
 
-// Дефинираме ширините на навигациите като константи за по-лесно управление
-// const LEFT_NAV_OPEN_WIDTH_CLASS = "ml-64";
-// const LEFT_NAV_CLOSED_WIDTH_CLASS = "ml-20";
 const LEFT_NAV_OPEN_WIDTH_CLASS = "ml-0 lg:ml-64";
 const LEFT_NAV_CLOSED_WIDTH_CLASS = "ml-0 lg:ml-20";
 const RIGHT_NAV_OPEN_WIDTH_CLASS = "mr-10";
@@ -20,13 +18,13 @@ export default function GuestLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const [isLeftNavOpen, setIsLeftNavOpen] = useState(true);
+  const [isLeftNavOpen, setIsLeftNavOpen] = useState(false);
   const { isRightNavVisible } = useRightNav();
 
   const toggleLeftNav = () => {
     setIsLeftNavOpen(!isLeftNavOpen);
   };
-
+  const { removePadding } = usePaddingControl();
   return (
     <div className="flex flex-col min-h-screen">
       <div className="fixed top-0 left-0 right-0 z-50">
@@ -50,7 +48,7 @@ export default function GuestLayout({
                 : RIGHT_NAV_CLOSED_WIDTH_CLASS
             }
                min-h-[87vh] 
-               p-7 relative overflow-hidden
+                ${!removePadding ? "p-7" : ""} relative overflow-hidden
           `}
         >
           {children}
