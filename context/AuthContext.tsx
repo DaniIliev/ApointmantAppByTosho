@@ -90,6 +90,15 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     fetchUser();
   }, []);
 
+  // const updateUser = (updatedData: Partial<User>) => {
+  //   setUser((prevUser) => {
+  //     if (!prevUser) return null;
+  //     return {
+  //       ...prevUser,
+  //       ...updatedData,
+  //     };
+  //   });
+  // };
   return (
     <AuthContext.Provider value={{ user, token, login, logout }}>
       {isLoading ? <div>Loading...</div> : children}

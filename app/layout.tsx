@@ -5,6 +5,7 @@ import { GeistMono } from "geist/font/mono";
 import "./globals.css";
 import ClientLayoutWrapper from "@/components/ClientLayoutWrapper";
 import { AuthProvider } from "@/context/AuthContext";
+import { ThemeProvider } from "@/components/ThemeProvider";
 
 export const metadata: Metadata = {
   title: "AppointDI",
@@ -29,10 +30,13 @@ html {
         `}</style>
       </head>
       <body
-      // className="dark"
+      //  className="dark"
+      // className="theme-green"
       >
         <AuthProvider>
-          <ClientLayoutWrapper>{children}</ClientLayoutWrapper>
+          <ThemeProvider>
+            <ClientLayoutWrapper>{children}</ClientLayoutWrapper>
+          </ThemeProvider>
         </AuthProvider>
       </body>
     </html>

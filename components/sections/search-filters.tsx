@@ -19,44 +19,32 @@ import {
   Briefcase,
   Calendar,
   Clock,
-  X,
   Filter,
 } from "lucide-react";
 
 export function SearchFilters() {
   const [city, setCity] = useState("");
   const [appointmentType, setAppointmentType] = useState("");
+  const [date, setDate] = useState(""); // Запазваме само най-важните филтри в главния изглед
+
+  // Добавяме състояние за показване на допълнителни филтри
+  const [showAdvanced, setShowAdvanced] = useState(false);
+
+  // Допълнителни (Advanced) филтри
   const [business, setBusiness] = useState("");
-  const [date, setDate] = useState("");
   const [time, setTime] = useState("");
   const [quickFilter, setQuickFilter] = useState<string | null>(null);
 
-  const activeFiltersCount = [
-    city,
-    appointmentType,
-    business,
-    date,
-    time,
-  ].filter(Boolean).length;
-
-  const handleClearFilters = () => {
-    setCity("");
-    setAppointmentType("");
-    setBusiness("");
-    setDate("");
-    setTime("");
-    setQuickFilter(null);
-  };
-
   const handleSearch = () => {
-    console.log("[v0] Search triggered:", {
+    console.log("[v1] Top Search triggered:", {
       city,
       appointmentType,
-      business,
       date,
+      business,
       time,
       quickFilter,
     });
+    // Тук може да се добави логика за навигация или извикване на API
   };
 
   const quickFilters = [
@@ -67,184 +55,200 @@ export function SearchFilters() {
   ];
 
   return (
-    <div className="space-y-4">
-      {/* <div className="flex flex-wrap gap-2 justify-center">
-        {quickFilters.map((filter) => (
-          <Badge
-            key={filter.id}
-            variant={quickFilter === filter.id ? "default" : "outline"}
-            className="cursor-pointer hover:scale-105 transition-transform px-4 py-2 text-sm"
-            onClick={() => setQuickFilter(quickFilter === filter.id ? null : filter.id)}
-          >
-            <span className="mr-1.5">{filter.icon}</span>
-            {filter.label}
-          </Badge>
-        ))}
-      </div> */}
-
-      <Card className="max-w-5xl mx-auto p-6 md:p-8 shadow-lg hover:shadow-2xl transition-shadow duration-300">
-        <div className="flex items-center justify-between mb-6">
-          <div className="flex items-center gap-2">
-            <Filter className="h-5 w-5 text-primary" />
-            <h3 className="font-semibold font-sans">Search Filters</h3>
-            {activeFiltersCount > 0 && (
-              <Badge variant="secondary" className="ml-2">
-                {activeFiltersCount} active
-              </Badge>
-            )}
-          </div>
-          {activeFiltersCount > 0 && (
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={handleClearFilters}
-              className="text-muted-foreground hover:text-foreground"
-            >
-              <X className="h-4 w-4 mr-1" />
-              Clear all
-            </Button>
-          )}
+    <div className="py-12 md:py-16 bg-background dark:bg-gray-900">
+      <div className="container mx-auto px-4">
+        {/* ЗАГЛАВИЕ И БЪРЗИ ФИЛТРИ */}
+        <div className="text-center mb-8">
+          <h1 className="text-4xl md:text-5xl font-extrabold text-gray-900 dark:text-white mb-2">
+            Book your next appointment
+          </h1>
+          <p className="text-xl text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
+            Find and book services near you in seconds.
+          </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {/* City with suggestions */}
-          <div className="space-y-2">
-            <Label
-              htmlFor="city"
-              className="flex items-center gap-2 text-sm font-medium"
-            >
-              <MapPin className="h-4 w-4 text-primary" />
-              City <span className="text-destructive">*</span>
-            </Label>
-            <Input
-              id="city"
-              placeholder="e.g., New York, Los Angeles"
-              value={city}
-              onChange={(e) => setCity(e.target.value)}
-              className="w-full transition-all focus:scale-[1.02]"
-              list="city-suggestions"
-            />
-            <datalist id="city-suggestions">
-              <option value="New York" />
-              <option value="Los Angeles" />
-              <option value="Chicago" />
-              <option value="Houston" />
-              <option value="Phoenix" />
-              <option value="Philadelphia" />
-            </datalist>
-          </div>
-
-          {/* Appointment Type */}
-          <div className="space-y-2">
-            <Label
-              htmlFor="appointment-type"
-              className="flex items-center gap-2 text-sm font-medium"
-            >
-              <Briefcase className="h-4 w-4 text-primary" />
-              Appointment Type <span className="text-destructive">*</span>
-            </Label>
-            <Select value={appointmentType} onValueChange={setAppointmentType}>
-              <SelectTrigger
-                id="appointment-type"
-                className="transition-all focus:scale-[1.02]"
+        {/* ОСНОВНА КАРТА ЗА ТЪРСЕНЕ */}
+        <Card
+          className="
+          max-w-6xl mx-auto p-4 md:p-4 
+          shadow-2xl shadow-primary/20 
+          dark:shadow-primary/10 
+          border-primary/50 
+          bg-white dark:bg-gray-800
+          rounded-xl
+        "
+        >
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
+            {/* 1. City */}
+            <div className="space-y-1">
+              <Label
+                htmlFor="city"
+                className="flex items-center gap-1 text-xs text-muted-foreground uppercase"
               >
-                <SelectValue placeholder="What do you need?" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="haircut">💇 Haircut & Styling</SelectItem>
-                <SelectItem value="massage">💆 Massage Therapy</SelectItem>
-                <SelectItem value="dental">🦷 Dental Checkup</SelectItem>
-                <SelectItem value="consultation">💼 Consultation</SelectItem>
-                <SelectItem value="fitness">💪 Fitness Training</SelectItem>
-                <SelectItem value="beauty">✨ Beauty Treatment</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
+                <MapPin className="h-3 w-3" />
+                City
+              </Label>
+              <Input
+                id="city"
+                placeholder="Where are you?"
+                value={city}
+                onChange={(e) => setCity(e.target.value)}
+                className="w-full h-10 border-2"
+                list="city-suggestions"
+              />
+              <datalist id="city-suggestions">
+                <option value="New York" />
+                <option value="Los Angeles" />
+                <option value="Chicago" />
+                <option value="Houston" />
+              </datalist>
+            </div>
 
-          {/* Business (Optional) */}
-          <div className="space-y-2">
-            <Label
-              htmlFor="business"
-              className="flex items-center gap-2 text-sm font-medium"
-            >
-              <Briefcase className="h-4 w-4 text-muted-foreground" />
-              Business{" "}
-              <span className="text-muted-foreground text-xs">(Optional)</span>
-            </Label>
-            <Input
-              id="business"
-              placeholder="Search by name"
-              value={business}
-              onChange={(e) => setBusiness(e.target.value)}
-              className="w-full transition-all focus:scale-[1.02]"
-            />
-          </div>
-
-          {/* Date (Optional) */}
-          <div className="space-y-2">
-            <Label
-              htmlFor="date"
-              className="flex items-center gap-2 text-sm font-medium"
-            >
-              <Calendar className="h-4 w-4 text-muted-foreground" />
-              Date{" "}
-              <span className="text-muted-foreground text-xs">(Optional)</span>
-            </Label>
-            <Input
-              id="date"
-              type="date"
-              value={date}
-              onChange={(e) => setDate(e.target.value)}
-              className="w-full transition-all focus:scale-[1.02]"
-              min={new Date().toISOString().split("T")[0]}
-            />
-          </div>
-
-          {/* Time (Optional) */}
-          <div className="space-y-2">
-            <Label
-              htmlFor="time"
-              className="flex items-center gap-2 text-sm font-medium"
-            >
-              <Clock className="h-4 w-4 text-muted-foreground" />
-              Time{" "}
-              <span className="text-muted-foreground text-xs">(Optional)</span>
-            </Label>
-            <Select value={time} onValueChange={setTime}>
-              <SelectTrigger
-                id="time"
-                className="transition-all focus:scale-[1.02]"
+            {/* 2. Appointment Type */}
+            <div className="space-y-1">
+              <Label
+                htmlFor="type"
+                className="flex items-center gap-1 text-xs text-muted-foreground uppercase"
               >
-                <SelectValue placeholder="Any time" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="morning">🌅 Morning (6am - 12pm)</SelectItem>
-                <SelectItem value="afternoon">
-                  ☀️ Afternoon (12pm - 5pm)
-                </SelectItem>
-                <SelectItem value="evening">🌆 Evening (5pm - 9pm)</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
+                <Briefcase className="h-3 w-3" />
+                Service
+              </Label>
+              <Select
+                value={appointmentType}
+                onValueChange={setAppointmentType}
+              >
+                <SelectTrigger id="type" className="h-10 border-2">
+                  <SelectValue placeholder="What do you need?" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="haircut">💇 Haircut & Styling</SelectItem>
+                  <SelectItem value="massage">💆 Massage Therapy</SelectItem>
+                  <SelectItem value="dental">🦷 Dental Checkup</SelectItem>
+                  <SelectItem value="consultation">💼 Consultation</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
 
-          {/* Search Button */}
-          <div className="flex items-end">
+            {/* 3. Date */}
+            <div className="space-y-1">
+              <Label
+                htmlFor="date"
+                className="flex items-center gap-1 text-xs text-muted-foreground uppercase"
+              >
+                <Calendar className="h-3 w-3" />
+                Date (Optional)
+              </Label>
+              <Input
+                id="date"
+                type="date"
+                value={date}
+                onChange={(e) => setDate(e.target.value)}
+                className="w-full h-10 border-2"
+                min={new Date().toISOString().split("T")[0]}
+              />
+            </div>
+
+            {/* 4. Search Button */}
             <Button
               onClick={handleSearch}
-              className="w-full h-10 hover:scale-105 transition-transform"
-              size="lg"
+              className="w-full h-10 font-bold text-base hover:scale-[1.01] transition-transform shadow-md shadow-primary/30"
               disabled={!city || !appointmentType}
             >
               <Search className="h-4 w-4 mr-2" />
-              Search
+              Search Now
             </Button>
           </div>
-        </div>
 
-        <p className="text-xs text-muted-foreground mt-4 text-center">
-          <span className="text-destructive">*</span> Required fields
-        </p>
-      </Card>
+          {/* БЪРЗИ ФИЛТРИ ПОД ТЪРСАЧКАТА */}
+          <div className="flex flex-wrap gap-2 pt-4 justify-start">
+            <Filter className="h-4 w-4 text-primary mr-1 self-center hidden sm:block" />
+            {quickFilters.map((filter) => (
+              <Badge
+                key={filter.id}
+                variant={quickFilter === filter.id ? "default" : "outline"}
+                className={`
+                  cursor-pointer 
+                  hover:bg-primary hover:text-primary-foreground transition-colors 
+                  px-3 py-1 text-xs font-medium rounded-full 
+                  ${
+                    quickFilter === filter.id
+                      ? "bg-primary text-primary-foreground"
+                      : "border-gray-300 dark:border-gray-600 bg-transparent text-muted-foreground hover:border-primary"
+                  }
+                `}
+                onClick={() =>
+                  setQuickFilter(quickFilter === filter.id ? null : filter.id)
+                }
+              >
+                <span className="mr-1.5">{filter.icon}</span>
+                {filter.label}
+              </Badge>
+            ))}
+            {/* Бутон за Допълнителни филтри */}
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setShowAdvanced(!showAdvanced)}
+              className="text-xs font-medium ml-auto"
+            >
+              <Filter className="h-3 w-3 mr-1" />
+              {showAdvanced ? "Hide Advanced Filters" : "More Filters"}
+            </Button>
+          </div>
+
+          {/* ДОПЪЛНИТЕЛНИ ФИЛТРИ (РАЗШИРЕН ИЗГЛЕД) */}
+          {showAdvanced && (
+            <div className="mt-6 pt-4 border-t border-dashed dark:border-gray-700">
+              <h4 className="text-sm font-semibold mb-3">Optional Filters</h4>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {/* Business */}
+                <div className="space-y-1">
+                  <Label
+                    htmlFor="business"
+                    className="flex items-center gap-1 text-xs text-muted-foreground uppercase"
+                  >
+                    <Briefcase className="h-3 w-3" />
+                    Business Name
+                  </Label>
+                  <Input
+                    id="business"
+                    placeholder="Specific business name (optional)"
+                    value={business}
+                    onChange={(e) => setBusiness(e.target.value)}
+                    className="w-full h-10"
+                  />
+                </div>
+                {/* Time */}
+                <div className="space-y-1">
+                  <Label
+                    htmlFor="time"
+                    className="flex items-center gap-1 text-xs text-muted-foreground uppercase"
+                  >
+                    <Clock className="h-3 w-3" />
+                    Time of Day
+                  </Label>
+                  <Select value={time} onValueChange={setTime}>
+                    <SelectTrigger id="time" className="h-10">
+                      <SelectValue placeholder="Any time" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="morning">
+                        🌅 Morning (6am - 12pm)
+                      </SelectItem>
+                      <SelectItem value="afternoon">
+                        ☀️ Afternoon (12pm - 5pm)
+                      </SelectItem>
+                      <SelectItem value="evening">
+                        🌆 Evening (5pm - 9pm)
+                      </SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+            </div>
+          )}
+        </Card>
+      </div>
     </div>
   );
 }
