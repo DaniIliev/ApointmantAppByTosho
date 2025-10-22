@@ -220,7 +220,7 @@ export default function LeftNav({ isOpen }: LeftNavProps) {
         ]
       : [
           { href: "/home", label: t("For Clients"), icon: Users },
-          { href: "/business", label: t("For Business"), icon: Briefcase },
+          { href: "/for-business", label: t("For Business"), icon: Briefcase },
           { href: "/login", label: t("Sign in"), icon: LogIn },
         ];
 

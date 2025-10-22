@@ -48,7 +48,7 @@ interface KPICardChanges {
   newClientsAcquired: ChangeMetric;
 }
 
-interface PerformanceData {
+export interface PerformanceData {
   kpiData: {
     totalAppointments: number;
     totalRevenue: number;
