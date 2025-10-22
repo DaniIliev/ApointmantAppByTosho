@@ -1,5 +1,14 @@
 import { Card, CardContent } from "@/components/ui/card";
-import { Clock, Calendar, Shield, Zap } from "lucide-react";
+import {
+  Clock,
+  Calendar,
+  Shield,
+  Zap,
+  Users,
+  Bell,
+  BarChart3,
+  Palette,
+} from "lucide-react";
 
 const benefits = [
   {
@@ -27,8 +36,46 @@ const benefits = [
       "Get immediate booking confirmation and reminders via email or SMS",
   },
 ];
-
-export function BenefitsSection() {
+const featureData = [
+  {
+    icon: Calendar,
+    title: "Flexible Scheduling", // Flexible Scheduling
+    description:
+      "Configure business hours and let each staff member create their own personalized schedule. Multiple view options including calendar and table views.",
+  },
+  {
+    icon: Users,
+    title: "Staff Management", // Staff Management
+    description:
+      "Add unlimited staff members, assign services to specific team members, and let each staff track their own appointments independently.",
+  },
+  {
+    icon: Bell,
+    title: "Real-Time Notifications", // Real-Time Notifications
+    description:
+      "Staff receive instant notifications when clients book appointments. Confirm or reschedule with one click, and clients get immediate responses.",
+  },
+  {
+    icon: Zap,
+    title: "Service Configuration", // Service Configuration
+    description:
+      "Create unlimited services with custom durations and pricing. Assign services to specific staff members for specialized expertise.",
+  },
+  {
+    icon: BarChart3,
+    title: "Performance Analytics", // Performance Analytics
+    description:
+      "Track revenue, appointments, client retention, and service popularity. Make data-driven decisions to grow your business.",
+  },
+  {
+    icon: Palette,
+    title: "Customizable Interface", // Customizable Interface
+    description:
+      "Every user can personalize their experience with dark mode and multiple color palettes. Make the app truly yours.",
+  },
+];
+export function BenefitsSection({ type }: { type: string }) {
+  const list = type == "feature" ? featureData : benefits;
   return (
     <section
       className="
@@ -49,7 +96,7 @@ export function BenefitsSection() {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-          {benefits.map((benefit, index) => {
+          {list.map((benefit, index) => {
             const Icon = benefit.icon;
             return (
               <Card

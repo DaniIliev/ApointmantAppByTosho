@@ -1,3 +1,4 @@
+"use client";
 import { cn } from "@/lib/utils";
 import { Card, CardContent } from "../ui/card";
 import { useTranslation } from "react-i18next";
