@@ -166,19 +166,19 @@
   }
 }
 
-@media (min-width: 768px) {
+/* @media (min-width: 768px) {
   .md-clip-top-slant {
     clip-path: polygon(0 10%, 100% 0, 100% 100%, 0 100%);
   }
   .md-clip-bottom-slant {
     clip-path: polygon(0 0, 100% 0, 100% 85%, 0 100%);
   }
-}
+} */
 
 /* Adding scroll reveal animations */
 .animate-in {
   opacity: 1 !important;
-  transform: translateY(0) !important;
+  transform: translateY(0) scale(1) !important;
 }
 
 .fade-up {
@@ -189,13 +189,13 @@
   transform: scale(0.95);
 }
 
-.slide-left {
+/* .slide-left {
   transform: translateX(30px);
 }
 
 .slide-right {
   transform: translateX(-30px);
-}
+} */
 
 /* Adding hero background animations */
 @keyframes subtle-zoom {
