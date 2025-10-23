@@ -30,7 +30,7 @@ export default function GuestLayout({
       <div className="fixed top-0 left-0 right-0 z-50">
         <TopNav onToggleLeftNav={toggleLeftNav} isLeftNavOpen={isLeftNavOpen} />
       </div>
-      <div className="flex flex-1 pt-17.5 transition-all duration-300">
+      <div className="flex flex-1 pt-12.5 transition-all duration-300">
         <LeftNav isOpen={isLeftNavOpen} />
 
         <main

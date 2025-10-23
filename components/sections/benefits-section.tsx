@@ -76,6 +76,13 @@ const featureData = [
 ];
 export function BenefitsSection({ type }: { type: string }) {
   const list = type == "feature" ? featureData : benefits;
+
+  // Определяне на класовете за grid-а динамично
+  const gridClasses =
+    type === "feature"
+      ? "grid-cols-1 md:grid-cols-2 lg:grid-cols-3" // 3 колони за feature
+      : "grid-cols-1 md:grid-cols-2 lg:grid-cols-4"; // 4 колони за benefits
+
   return (
     <section
       className="
@@ -95,7 +102,8 @@ export function BenefitsSection({ type }: { type: string }) {
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+        {/* Използване на динамичните класове */}
+        <div className={`grid gap-8 ${gridClasses}`}>
           {list.map((benefit, index) => {
             const Icon = benefit.icon;
             return (
@@ -106,7 +114,7 @@ export function BenefitsSection({ type }: { type: string }) {
                   shadow-lg 
                   hover:shadow-2xl hover:shadow-primary/30 
                   transition-all duration-300
-                  hover:-translate-y-2  
+                  hover:-translate-y-2  
                   bg-white dark:bg-gray-800
                 "
               >
