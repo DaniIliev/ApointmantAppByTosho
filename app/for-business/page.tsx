@@ -35,7 +35,7 @@ export default function BusinessLandingPage() {
   return (
     <div className="min-h-screen bg-background">
       {/* Hero Section */}
-      <section className="relative min-h- h-[550px] md:h-[770px] flex items-center overflow-hidden">
+      <section className="relative min-h- h-screen flex items-center overflow-hidden">
         <div className="absolute inset-0 z-0">
           <div className="absolute inset-0 bg-gradient-to-br from-primary/90 via-primary/70 to-background/95 z-10" />
           <img
