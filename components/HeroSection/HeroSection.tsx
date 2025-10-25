@@ -3,16 +3,16 @@ import { Clock, Zap, CheckCircle, CalendarCheck } from "lucide-react"; // Lucide
 export function HeroSection() {
   return (
     <section
-      className="relative h-[550px] md:h-[650px] flex items-center justify-center overflow-hidden bg-background 
+      className="relative  h-screen flex items-center justify-center overflow-hidden bg-background 
     "
     >
       <div className="absolute inset-0 z-0">
         <img
-          src="/appointDiHero.jpg"
+          src="/heroHome.jpg"
           alt="Professional appointment booking"
-          className="w-full h-full object-cover opacity-70"
+          className="w-full h-full object-cover animate-subtle-zoom"
         />
-        <div className="absolute inset-0 bg-gradient-to-r from-primary/20 via-primary/20 to-primary-dark/30" />
+        {/* <div className="absolute inset-0 bg-gradient-to-r from-primary/20 via-primary/20 to-primary-dark/30" /> */}
       </div>
       <div
         className="absolute w-32 h-32 flex flex-col items-center justify-center rounded-full bg-secondary/20 top-5 md:top-16 left-5 md:left-80 opacity-70 text-sm font-semibold text-white/90 shadow-xl p-2"
@@ -49,23 +49,14 @@ export function HeroSection() {
         <span className="text-sm tracking-wider">FAST</span>
       </div>
 
-      <div className="relative z-10 container mx-auto px-4 text-center text-white">
+      <div className="relative z-10  w-2xl py-2 mx-auto px-1 text-center backdrop-blur-xs">
         {/* Title */}
         <h1
           className="text-5xl md:text-7xl lg:text-8xl font-extrabold mb-6 text-balance font-sans
-                     text-white animate-in fade-in slide-in-from-top-8 duration-700 [text-shadow:_0_4px_10px_rgb(0_0_0_/_0.5)]"
+                     animate-in fade-in slide-in-from-top-8 duration-700 [text-shadow:_0_4px_10px_rgb(0_0_0_/_0.5)]"
         >
-          Book Your <span className="text-accent/80">Perfect Slot</span>
-          <br className="sm:hidden" /> with AppointDI
+          Book Easily with <span className="text-primary">AppointDI</span>
         </h1>
-
-        {/* Subtitle */}
-        <p
-          className="text-lg md:text-xl text-gray-200 max-w-2xl mx-auto text-balance
-                     animate-in fade-in slide-in-from-top-8 duration-700 delay-150 [text-shadow:_0_2px_5px_rgb(0_0_0_/_0.5)]"
-        >
-          Secure services from top-rated businesses, available instantly.
-        </p>
         <div className="mt-8 animate-in fade-in duration-700 delay-300">
           <button className="px-8 py-3 text-lg font-semibold bg-accent text-white rounded-full shadow-lg hover:bg-accent-dark transition duration-300 transform hover:scale-105">
             Get Started Now
