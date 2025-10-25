@@ -138,7 +138,7 @@ export function BusinessList() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 bg-background">
       <div className="flex items-center justify-between">
         <p className="text-sm text-muted-foreground">
           Showing{" "}

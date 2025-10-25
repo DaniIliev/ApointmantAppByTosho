@@ -35,7 +35,7 @@ export default function BusinessLandingPage() {
   return (
     <div className="min-h-screen bg-background">
       {/* Hero Section */}
-      <section className="relative min-h-[95vh] flex items-center overflow-hidden">
+      <section className="relative min-h- h-[550px] md:h-[770px] flex items-center overflow-hidden">
         <div className="absolute inset-0 z-0">
           <div className="absolute inset-0 bg-gradient-to-br from-primary/90 via-primary/70 to-background/95 z-10" />
           <img
@@ -54,7 +54,7 @@ export default function BusinessLandingPage() {
           <div className="max-w-4xl mx-auto text-center space-y-8">
             <ScrollReveal className="fade-up" delay={200}>
               <h1 className="text-5xl md:text-7xl font-bold tracking-tight text-balance text-white drop-shadow-lg">
-                Transform Your Business with Smart Appointment Management
+                Transform Your Business with AppointDI
               </h1>
             </ScrollReveal>
             <ScrollReveal className="fade-up" delay={300}>
@@ -100,7 +100,7 @@ export default function BusinessLandingPage() {
       <BenefitsSection type="feature" />
 
       {/* Benefits Section */}
-      <section id="benefits" className="bg-muted/30 py-20 md:py-32">
+      <section id="benefits" className="bg-muted/30 py-20 md:py-8">
         <div className="container mx-auto px-4">
           <div className="max-w-6xl mx-auto">
             <div className="grid lg:grid-cols-2 gap-12 items-center">
@@ -172,9 +172,9 @@ export default function BusinessLandingPage() {
               <ScrollReveal className="slide-left">
                 <div className="space-y-6">
                   <Card className="overflow-hidden shadow-xl border-2 hover:shadow-2xl transition-shadow duration-500">
-                    <CardContent className="p-0">
+                    <CardContent className="p-0 pb-0">
                       <img
-                        src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/image-uOlpWyeG2EK72LpwApFgaAXbD2veiP.png"
+                        src="benefits.jpg"
                         alt="Performance analytics dashboard with charts and metrics"
                         className="w-full h-auto"
                       />
@@ -187,22 +187,16 @@ export default function BusinessLandingPage() {
         </div>
       </section>
       {/* New Analytics & Insights Section with Charts */}
-      <section
-        id="analytics"
-        className="container mx-auto px-4 py-20 md:py-32 bg-background"
-      >
+      <section id="analytics" className="bg-gray-50 dark:bg-gray-900 py-6">
         <div className="max-w-7xl mx-auto">
           {/* Header */}
-          <div className="text-center mb-16">
-            {/* ScrollReveal е запазен, ако го ползвате, иначе може да се премахне */}
+          <div className="text-center pt-2">
             <ScrollReveal className="fade-up">
-              <h2 className="text-4xl md:text-5xl font-extrabold mb-4 text-primary text-balance">
+              <h2 className="text-4xl md:text-5xl font-extrabold text-primary text-balance">
                 {/* Променено за по-голямо въздействие */}
                 Отключете Силата на Данните 🚀
               </h2>
-            </ScrollReveal>
-            <ScrollReveal className="fade-up" delay={100}>
-              <p className="text-xl text-muted-foreground text-balance max-w-3xl mx-auto">
+              <p className="text-xl text-muted-foreground text-balance max-w-3xl mx-auto mt-6">
                 Преобразете операциите си с прецизни данни за приходи,
                 популярност на услугите и ангажираност на клиентите – всичко в
                 един интуитивен дашборд.
@@ -212,7 +206,7 @@ export default function BusinessLandingPage() {
 
           {/* KPI Grid (Използваме KPICard от предоставения код) */}
           {/* Използвам 'mockPerformanceData' за демонстрация на данните */}
-          <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
+          <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             <ScrollReveal className="fade-up" delay={200}>
               <KPICard
                 title="Общ Брой Записани Часове"
@@ -304,17 +298,15 @@ export default function BusinessLandingPage() {
           </div>
         </div>
       </section>
-      <section id="pricing" className="bg-muted/30 py-20 md:py-32">
+      <section id="pricing" className="bg-muted/30 py-6 md:py-8">
         <div className="container mx-auto px-4">
           <div className="max-w-6xl mx-auto">
-            <div className="text-center mb-16">
+            <div className="text-center">
               <ScrollReveal className="fade-up">
                 <h2 className="text-4xl md:text-5xl font-bold mb-4 text-balance">
                   Simple, Transparent Pricing
                 </h2>
-              </ScrollReveal>
-              <ScrollReveal className="fade-up" delay={100}>
-                <p className="text-xl text-muted-foreground text-balance max-w-2xl mx-auto">
+                <p className="text-xl text-muted-foreground text-balance max-w-2xl mx-auto pt-2">
                   Choose the perfect plan for your business. All plans include a
                   14-day free trial.
                 </p>

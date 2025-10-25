@@ -86,7 +86,7 @@ export function BenefitsSection({ type }: { type: string }) {
   return (
     <section
       className="
-        relative py-5 pt-25 
+        relative py-10 pt-8.5
         bg-gray-50 dark:bg-gray-900 
         md-clip-top-slant
         md:mt-[-97px]
@@ -94,10 +94,10 @@ export function BenefitsSection({ type }: { type: string }) {
     >
       <div className="container mx-auto px-4">
         <div className="text-center mb-16">
-          <h2 className="text-4xl md:text-5xl font-extrabold mb-4 font-sans text-gray-900 dark:text-white">
+          <h2 className="text-4xl md:text-5xl font-extrabold font-sans text-gray-900 dark:text-white">
             A great way to save time
           </h2>
-          <p className="text-xl text-gray-600 dark:text-gray-400 max-w-3xl mx-auto">
+          <p className="text-xl text-gray-600 dark:text-gray-400 max-w-3xl mx-auto pt-2">
             Experience the convenience of modern appointment booking
           </p>
         </div>

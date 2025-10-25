@@ -183,6 +183,12 @@ export default function LeftNav({ isOpen }: LeftNavProps) {
             icon: Briefcase,
             children: [
               {
+                href: "/for-business",
+                label: t("For Business"),
+                icon: Briefcase,
+              },
+
+              {
                 href: "/business/page",
                 label: t("My Public Page"),
                 icon: Users,

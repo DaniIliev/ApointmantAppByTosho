@@ -24,7 +24,7 @@ export default function HomePage() {
 
       {/* Benefits Section */}
       <BenefitsSection type="benefits" />
-      <section className="py-16   bg-gray-50 dark:bg-gray-900 ">
+      <section className="py-16 bg-background ">
         <div className="container mx-auto px-4">
           <div className="mb-8 text-center ">
             <h2 className="text-3xl font-bold mb-2 font-sans">
