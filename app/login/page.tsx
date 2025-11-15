@@ -12,7 +12,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import callApi from "../Api/callApi";
-import { useAuthContext } from "@/context/AuthContext"; // 👈 твоя custom input
+import { useAuthContext } from "@/context/AuthContext";
 import { LabeledInput } from "@/components/customUIComponents/LabeledInput";
 
 export default function LoginPage() {
@@ -25,6 +25,16 @@ export default function LoginPage() {
 
   const handleInputChange = (field: string, value: string) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
+  };
+
+  // 👈 New clear function for email
+  const handleClearEmail = () => {
+    handleInputChange("email", "");
+  };
+
+  // 👈 New clear function for password
+  const handleClearPassword = () => {
+    handleInputChange("password", "");
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -74,6 +84,7 @@ export default function LoginPage() {
                   value={formData.email}
                   onChange={(e) => handleInputChange("email", e.target.value)}
                   placeholder={t("Enter your email address")}
+                  onClear={handleClearEmail}
                 />
               </div>
 
@@ -88,6 +99,7 @@ export default function LoginPage() {
                     handleInputChange("password", e.target.value)
                   }
                   placeholder={t("Enter your password")}
+                  onClear={handleClearPassword}
                 />
               </div>
 

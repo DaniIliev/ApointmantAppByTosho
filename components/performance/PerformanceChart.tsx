@@ -39,13 +39,11 @@ export function PerformanceChart({
   data,
   type,
   dataKey = "value",
-  dataKeys, // 👈 ИЗПОЛЗВАМЕ НОВИЯ ПРОП
+  dataKeys,
   xAxisKey = "name",
   className,
   colors = defaultColors,
 }: PerformanceChartProps) {
-  // Определяме финалния списък с ключове за данните
-  // Приоритет: dataKeys (масив) > dataKey (единичен ключ)
   const finalDataKeys = dataKeys && dataKeys.length > 0 ? dataKeys : [dataKey];
 
   const renderChart = () => {
@@ -71,7 +69,7 @@ export function PerformanceChart({
                   backdropFilter: "blur(10px)",
                 }}
               />
-              <Legend />
+              <Legend className="text-white" />
               {/* Рендиране на множество линии */}
               {finalDataKeys.map((key, index) => (
                 <Line

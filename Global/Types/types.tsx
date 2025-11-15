@@ -15,7 +15,7 @@ export type AppointmentStatus =
 export interface Appointment {
   _id: string;
   clientName: string;
-  clientEmail: string;
+  email: string;
   clientPhone: string;
   appointmentTime: {
     start: string;
@@ -24,7 +24,10 @@ export interface Appointment {
   serviceName: string; // Променено на serviceName, тъй като така го връща бекендът
   status: AppointmentStatus;
   notes?: string;
-  staff: string;
+  staff: {
+    _id: string;
+    name: string;
+  };
 }
 
 export interface AppointmentType {

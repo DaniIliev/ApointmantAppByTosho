@@ -15,16 +15,19 @@ import { Clock } from "lucide-react";
 import { LabeledInput } from "@/components/customUIComponents/LabeledInput";
 
 // Общ тип за данните, който включва и _id за Edit
-interface AppointmentFormData {
+export interface AppointmentFormData {
   _id?: string; // Добавено за режим на редактиране
   clientName: string;
-  clientEmail: string;
+  email: string;
   clientPhone: string;
   date: string;
   time: string;
   appointmentTypeId: string;
   notes: string;
-  staffId: string;
+  staff: {
+    _id: string;
+    name: string;
+  };
 }
 
 interface AppointmentFormProps {
@@ -58,6 +61,7 @@ const AppointmentForm = ({
   const [isClosestSlotModalOpen, setIsClosestSlotModalOpen] = useState(false);
   const [loadingClosestSlot, setLoadingClosestSlot] = useState(false);
 
+  console.log("appointmentData", appointmentData);
   // 1. Извличане на Персонал по Тип Среща
   useEffect(() => {
     const fetchStaff = async () => {
@@ -66,7 +70,6 @@ const AppointmentForm = ({
           (type) => type._id === appointmentData.appointmentTypeId
         );
         if (selectedService && selectedService.staffs) {
-          console.log("inn", selectedService.staffs);
           const staffDetails = await callApi(`/api/staff/by-ids`, "POST", {
             staffIds: selectedService.staffs,
           });
@@ -79,16 +82,15 @@ const AppointmentForm = ({
     fetchStaff();
   }, [appointmentData.appointmentTypeId, appointmentTypes]);
 
-  // 2. Извличане на Свободни Часове (Слотове)
   useEffect(() => {
     const fetchSlots = async () => {
       if (
-        appointmentData.staffId &&
+        appointmentData.staff._id &&
         appointmentData.date &&
         appointmentData.appointmentTypeId
       ) {
         const slots = await callApi(
-          `/api/appointment/availability?staffId=${appointmentData.staffId}&date=${appointmentData.date}&serviceId=${appointmentData.appointmentTypeId}`,
+          `/api/appointment/availability?staffId=${appointmentData.staff._id}&date=${appointmentData.date}&serviceId=${appointmentData.appointmentTypeId}`,
           "GET"
         );
         setAvailableSlots(slots.slots);
@@ -98,7 +100,7 @@ const AppointmentForm = ({
     };
     fetchSlots();
   }, [
-    appointmentData.staffId,
+    appointmentData.staff._id,
     appointmentData.date,
     appointmentData.appointmentTypeId,
   ]);
@@ -110,14 +112,14 @@ const AppointmentForm = ({
       if (
         mode === "create" &&
         appointmentData.appointmentTypeId &&
-        appointmentData.staffId
+        appointmentData.staff._id
       ) {
         // Проверка дали вече има избрана дата/час (избягва изскачане, ако потребителят вече е избрал)
         if (appointmentData.date && appointmentData.time) return;
 
         setLoadingClosestSlot(true);
         const response = await callApi(
-          `/api/appointment/closest-slot?staffId=${appointmentData.staffId}&serviceId=${appointmentData.appointmentTypeId}`,
+          `/api/appointment/closest-slot?staffId=${appointmentData.staff._id}&serviceId=${appointmentData.appointmentTypeId}`,
           "GET"
         );
 
@@ -133,7 +135,7 @@ const AppointmentForm = ({
     fetchClosestSlot();
   }, [
     appointmentData.appointmentTypeId,
-    appointmentData.staffId,
+    appointmentData.staff._id,
     mode,
     appointmentData.date,
     appointmentData.time,
@@ -176,7 +178,10 @@ const AppointmentForm = ({
   const handleStaffChange = (value: string) => {
     setAppointmentData((prev) => ({
       ...prev,
-      staffId: value,
+      staff: {
+        name: "",
+        _id: value,
+      },
       date: "",
       time: "",
     }));
@@ -199,13 +204,13 @@ const AppointmentForm = ({
         />
         <LabeledInput
           label={t("Email")}
-          id="clientEmail"
+          id="email"
           type="email"
-          value={appointmentData.clientEmail}
+          value={appointmentData.email}
           onChange={(e) =>
             setAppointmentData((prev) => ({
               ...prev,
-              clientEmail: e.target.value,
+              email: e.target.value,
             }))
           }
           placeholder={t("client@example.com")}
@@ -235,7 +240,7 @@ const AppointmentForm = ({
           <LabeledSelect
             label={t("Staff")}
             id="staff"
-            value={appointmentData.staffId}
+            value={appointmentData.staff._id}
             onValueChange={handleStaffChange} // Използваме новия хендлър
             placeholder={t("Select a staff member")}
             options={availableStaff.map((staff) => ({
@@ -253,7 +258,7 @@ const AppointmentForm = ({
             setAppointmentData((prev) => ({ ...prev, date: e.target.value }))
           }
         />
-        {appointmentData.staffId && appointmentData.date && (
+        {appointmentData.staff._id && appointmentData.date && (
           <LabeledSelect
             label={t("Time")}
             id="time"
@@ -322,11 +327,11 @@ const AppointmentForm = ({
           onClick={handleFormSubmit}
           disabled={
             !appointmentData.clientName ||
-            !appointmentData.clientEmail ||
+            !appointmentData.email ||
             !appointmentData.date ||
             !appointmentData.time ||
             !appointmentData.appointmentTypeId ||
-            !appointmentData.staffId
+            !appointmentData.staff._id
           }
         >
           {t(mode === "create" ? "Create" : "Save Changes")}{" "}

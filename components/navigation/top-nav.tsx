@@ -670,6 +670,7 @@ export default function TopNav({
 
   const handleConfirmAppointment = async (alert: Alert) => {
     try {
+      console.log("alert", alert);
       const appointmentId = alert.appointment._id;
       const alertId = alert._id;
 
@@ -680,7 +681,7 @@ export default function TopNav({
         { status: "confirmed" }
       );
 
-      // Ако срещата е успешно потвърдена
+      console.log("alertId", alertId);
       if (confirmedAppointment) {
         // Стъпка 2: Изпращаме заявка за изтриване на алармата
         await callApi(`/api/alerts/${alertId}`, "DELETE");
@@ -701,6 +702,8 @@ export default function TopNav({
     if (!alert.isRead) {
       try {
         await callApi(`/api/alerts/${alert._id}/read`, "PUT", {});
+        console.log("alert", alert);
+
         setAlerts((prevAlerts) =>
           prevAlerts.map((a) =>
             a._id === alert._id ? { ...a, isRead: true } : a

@@ -23,8 +23,11 @@ import { PerformanceData } from "../performance/page";
 import { usePaddingControl } from "@/context/PaddingContext";
 import { useEffect } from "react";
 import { BenefitsSection } from "@/components/sections/benefits-section";
+import PricingSection from "@/components/Pricing/PricingSection";
+import { useTranslation } from "react-i18next";
 
 export default function BusinessLandingPage() {
+  const { t } = useTranslation();
   const { setRemovePadding } = usePaddingControl();
   useEffect(() => {
     setRemovePadding(true);
@@ -193,7 +196,6 @@ export default function BusinessLandingPage() {
           <div className="text-center pt-2">
             <ScrollReveal className="fade-up">
               <h2 className="text-4xl md:text-5xl font-extrabold text-primary text-balance">
-                {/* Променено за по-голямо въздействие */}
                 Отключете Силата на Данните 🚀
               </h2>
               <p className="text-xl text-muted-foreground text-balance max-w-3xl mx-auto mt-6">
@@ -295,184 +297,25 @@ export default function BusinessLandingPage() {
                 />
               </ScrollReveal>
             </div>
-          </div>
-        </div>
-      </section>
-      <section id="pricing" className="bg-muted/30 py-6 md:py-8">
-        <div className="container mx-auto px-4">
-          <div className="max-w-6xl mx-auto">
-            <div className="text-center">
-              <ScrollReveal className="fade-up">
-                <h2 className="text-4xl md:text-5xl font-bold mb-4 text-balance">
-                  Simple, Transparent Pricing
-                </h2>
-                <p className="text-xl text-muted-foreground text-balance max-w-2xl mx-auto pt-2">
-                  Choose the perfect plan for your business. All plans include a
-                  14-day free trial.
-                </p>
-              </ScrollReveal>
-            </div>
-
-            <div className="grid md:grid-cols-3 gap-8">
-              <ScrollReveal className="fade-up" delay={100}>
-                <Card className="border-2 hover:shadow-xl transition-all duration-300 hover:-translate-y-2">
-                  <CardContent className="p-8 space-y-6">
-                    <div>
-                      <h3 className="text-2xl font-bold mb-2">Starter</h3>
-                      <p className="text-muted-foreground">
-                        Perfect for small businesses
-                      </p>
-                    </div>
-                    <div className="flex items-baseline gap-2">
-                      <span className="text-5xl font-bold">$29</span>
-                      <span className="text-muted-foreground">/month</span>
-                    </div>
-                    <ul className="space-y-3">
-                      <li className="flex items-center gap-3">
-                        <Check className="h-5 w-5 text-primary flex-shrink-0" />
-                        <span className="text-sm">Up to 3 staff members</span>
-                      </li>
-                      <li className="flex items-center gap-3">
-                        <Check className="h-5 w-5 text-primary flex-shrink-0" />
-                        <span className="text-sm">Unlimited appointments</span>
-                      </li>
-                      <li className="flex items-center gap-3">
-                        <Check className="h-5 w-5 text-primary flex-shrink-0" />
-                        <span className="text-sm">Calendar & table views</span>
-                      </li>
-                      <li className="flex items-center gap-3">
-                        <Check className="h-5 w-5 text-primary flex-shrink-0" />
-                        <span className="text-sm">Email notifications</span>
-                      </li>
-                      <li className="flex items-center gap-3">
-                        <Check className="h-5 w-5 text-primary flex-shrink-0" />
-                        <span className="text-sm">Basic analytics</span>
-                      </li>
-                    </ul>
-                    <Button className="w-full bg-transparent" variant="outline">
-                      Start Free Trial
-                    </Button>
-                  </CardContent>
-                </Card>
-              </ScrollReveal>
-
-              <ScrollReveal className="fade-up" delay={200}>
-                <Card className="border-2 border-primary shadow-xl hover:shadow-2xl transition-all duration-300 hover:-translate-y-2 relative">
-                  <div className="absolute -top-4 left-1/2 -translate-x-1/2">
-                    <Badge className="bg-primary text-primary-foreground px-4 py-1">
-                      Most Popular
-                    </Badge>
-                  </div>
-                  <CardContent className="p-8 space-y-6">
-                    <div>
-                      <h3 className="text-2xl font-bold mb-2">Professional</h3>
-                      <p className="text-muted-foreground">
-                        For growing businesses
-                      </p>
-                    </div>
-                    <div className="flex items-baseline gap-2">
-                      <span className="text-5xl font-bold">$79</span>
-                      <span className="text-muted-foreground">/month</span>
-                    </div>
-                    <ul className="space-y-3">
-                      <li className="flex items-center gap-3">
-                        <Check className="h-5 w-5 text-primary flex-shrink-0" />
-                        <span className="text-sm">Up to 10 staff members</span>
-                      </li>
-                      <li className="flex items-center gap-3">
-                        <Check className="h-5 w-5 text-primary flex-shrink-0" />
-                        <span className="text-sm">Unlimited appointments</span>
-                      </li>
-                      <li className="flex items-center gap-3">
-                        <Check className="h-5 w-5 text-primary flex-shrink-0" />
-                        <span className="text-sm">All view options</span>
-                      </li>
-                      <li className="flex items-center gap-3">
-                        <Check className="h-5 w-5 text-primary flex-shrink-0" />
-                        <span className="text-sm">
-                          SMS & email notifications
-                        </span>
-                      </li>
-                      <li className="flex items-center gap-3">
-                        <Check className="h-5 w-5 text-primary flex-shrink-0" />
-                        <span className="text-sm">Advanced analytics</span>
-                      </li>
-                      <li className="flex items-center gap-3">
-                        <Check className="h-5 w-5 text-primary flex-shrink-0" />
-                        <span className="text-sm">Custom branding</span>
-                      </li>
-                      <li className="flex items-center gap-3">
-                        <Check className="h-5 w-5 text-primary flex-shrink-0" />
-                        <span className="text-sm">Priority support</span>
-                      </li>
-                    </ul>
-                    <Button className="w-full bg-primary hover:bg-primary/90 text-primary-foreground">
-                      Start Free Trial
-                    </Button>
-                  </CardContent>
-                </Card>
-              </ScrollReveal>
-
-              <ScrollReveal className="fade-up" delay={300}>
-                <Card className="border-2 hover:shadow-xl transition-all duration-300 hover:-translate-y-2">
-                  <CardContent className="p-8 space-y-6">
-                    <div>
-                      <h3 className="text-2xl font-bold mb-2">Enterprise</h3>
-                      <p className="text-muted-foreground">
-                        For large organizations
-                      </p>
-                    </div>
-                    <div className="flex items-baseline gap-2">
-                      <span className="text-5xl font-bold">$199</span>
-                      <span className="text-muted-foreground">/month</span>
-                    </div>
-                    <ul className="space-y-3">
-                      <li className="flex items-center gap-3">
-                        <Check className="h-5 w-5 text-primary flex-shrink-0" />
-                        <span className="text-sm">Unlimited staff members</span>
-                      </li>
-                      <li className="flex items-center gap-3">
-                        <Check className="h-5 w-5 text-primary flex-shrink-0" />
-                        <span className="text-sm">Unlimited appointments</span>
-                      </li>
-                      <li className="flex items-center gap-3">
-                        <Check className="h-5 w-5 text-primary flex-shrink-0" />
-                        <span className="text-sm">All features included</span>
-                      </li>
-                      <li className="flex items-center gap-3">
-                        <Check className="h-5 w-5 text-primary flex-shrink-0" />
-                        <span className="text-sm">Multi-location support</span>
-                      </li>
-                      <li className="flex items-center gap-3">
-                        <Check className="h-5 w-5 text-primary flex-shrink-0" />
-                        <span className="text-sm">API access</span>
-                      </li>
-                      <li className="flex items-center gap-3">
-                        <Check className="h-5 w-5 text-primary flex-shrink-0" />
-                        <span className="text-sm">
-                          Dedicated account manager
-                        </span>
-                      </li>
-                      <li className="flex items-center gap-3">
-                        <Check className="h-5 w-5 text-primary flex-shrink-0" />
-                        <span className="text-sm">24/7 phone support</span>
-                      </li>
-                      <li className="flex items-center gap-3">
-                        <Check className="h-5 w-5 text-primary flex-shrink-0" />
-                        <span className="text-sm">Custom integrations</span>
-                      </li>
-                    </ul>
-                    <Button className="w-full bg-transparent" variant="outline">
-                      Contact Sales
-                    </Button>
-                  </CardContent>
-                </Card>
-              </ScrollReveal>
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <PerformanceChart
+                title={t("Appointment Status Distribution")}
+                data={mockPerformanceData.appointmentStatus}
+                type="pie"
+                dataKey="value"
+                colors={["#22c55e", "#ef4444"]} // Зелено за Completed, Червено за Cancelled
+              />
+              <PerformanceChart
+                title={t("Client Types Distribution")}
+                data={mockPerformanceData.clientTypes}
+                type="pie"
+                dataKey="value"
+              />
             </div>
           </div>
         </div>
       </section>
-
+      <PricingSection />
       {/* CTA Section */}
       <section className="bg-primary text-primary-foreground py-20 md:py-32">
         <div className="container mx-auto px-4 text-center">
