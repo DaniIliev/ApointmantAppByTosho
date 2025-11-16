@@ -132,7 +132,7 @@ export default function StaffDailySchedulePage() {
 
   return (
     <div className="space-y-4">
-      <div className="absolute top-2 right-4">
+      <div className="absolute top-2 right-4  hidden md:block">
         <CustomTooltip
           onClick={() => router.back()}
           tooltipText="Go Back"

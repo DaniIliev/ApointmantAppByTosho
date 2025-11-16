@@ -2,7 +2,6 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { ScrollReveal } from "@/components/scroll-reveal";
 import {
   Calendar,
   Users,
@@ -16,6 +15,8 @@ import {
   Check,
   DollarSign,
   CheckCircle,
+  ArrowRight,
+  PlayCircle,
 } from "lucide-react";
 import { KPICard } from "@/components/performance/KPICard";
 import { PerformanceChart } from "@/components/performance/PerformanceChart";
@@ -37,8 +38,7 @@ export default function BusinessLandingPage() {
   }, [setRemovePadding]);
   return (
     <div className="min-h-screen bg-background">
-      {/* Hero Section */}
-      <section className="relative min-h- h-screen flex items-center overflow-hidden">
+      <section className="relative min-h- h-[85vh] flex items-center overflow-hidden">
         <div className="absolute inset-0 z-0">
           <div className="absolute inset-0 bg-gradient-to-br from-primary/90 via-primary/70 to-background/95 z-10" />
           <img
@@ -47,55 +47,34 @@ export default function BusinessLandingPage() {
             className="w-full h-full object-cover animate-subtle-zoom"
           />
         </div>
-
-        {/* Animated Gradient Orbs */}
-        <div className="absolute top-20 left-10 w-72 h-72 bg-primary/30 rounded-full blur-3xl animate-float" />
-        <div className="absolute bottom-20 right-10 w-96 h-96 bg-accent/20 rounded-full blur-3xl animate-float-delayed" />
-
-        {/* Content */}
         <div className="container mx-auto px-4 py-20 md:py-32 relative z-20">
-          <div className="max-w-4xl mx-auto text-center space-y-8">
-            <ScrollReveal className="fade-up" delay={200}>
-              <h1 className="text-5xl md:text-7xl font-bold tracking-tight text-balance text-white drop-shadow-lg">
-                Transform Your Business with AppointDI
-              </h1>
-            </ScrollReveal>
-            <ScrollReveal className="fade-up" delay={300}>
-              <p className="text-xl md:text-2xl text-white/95 text-balance max-w-3xl mx-auto drop-shadow-md">
-                Streamline scheduling, empower your team, and grow your business
-                with our all-in-one appointment platform designed for modern
-                service businesses.
-              </p>
-            </ScrollReveal>
-            <ScrollReveal className="fade-up" delay={400}>
-              <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4">
-                <Button
-                  size="lg"
-                  className="bg-white text-primary hover:bg-white/90 text-lg px-8 py-6 hover:scale-105 transition-transform shadow-xl"
-                >
-                  Start Free Trial
-                </Button>
-                <Button
-                  size="lg"
-                  variant="outline"
-                  className="text-lg px-8 py-6 bg-transparent border-2 border-white text-white hover:bg-white hover:text-primary hover:scale-105 transition-all shadow-xl"
-                >
-                  Watch Demo
-                </Button>
-              </div>
-            </ScrollReveal>
-            <ScrollReveal className="fade-up" delay={500}>
-              <p className="text-sm text-white/90">
-                No credit card required • 14-day free trial
-              </p>
-            </ScrollReveal>
-          </div>
-        </div>
+          <div className="max-w-4xl mx-auto text-center space-y-6">
+            <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold tracking-tight text-balance text-white drop-shadow-lg">
+              Transform Your Business with AppointDI
+            </h1>
 
-        {/* Scroll Indicator */}
-        <div className="absolute bottom-8 left-1/2 -translate-x-1/2 z-20 animate-bounce">
-          <div className="w-6 h-10 border-2 border-white/50 rounded-full flex items-start justify-center p-2">
-            <div className="w-1.5 h-3 bg-white/70 rounded-full animate-scroll" />
+            <p className="text-base sm:text-lg md:text-xl text-white/95 text-balance max-w-3xl mx-auto drop-shadow-md">
+              Schedule faster, empower your team, and grow with our all-in-one
+              platform.
+            </p>
+
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+              <Button
+                size="lg"
+                className="text-base sm:text-lg px-7 py-6 shadow-xl hover:shadow-2xl hover:scale-[1.02] transition-transform theme-gradient-primary text-white ring-1 ring-white/20"
+              >
+                <span className="mr-2">Join Us</span>
+                <ArrowRight className="h-5 w-5" />
+              </Button>
+              <Button
+                variant="outline"
+                size="lg"
+                className="text-base sm:text-lg px-7 py-6 bg-white/10 text-white border-primary/30 hover:bg-white/20 hover:scale-[1.02] transition-all backdrop-blur-md shadow-xl"
+              >
+                <PlayCircle className="h-5 w-5 mr-2" />
+                Watch Demo
+              </Button>
+            </div>
           </div>
         </div>
       </section>
@@ -107,195 +86,167 @@ export default function BusinessLandingPage() {
         <div className="container mx-auto px-4">
           <div className="max-w-6xl mx-auto">
             <div className="grid lg:grid-cols-2 gap-12 items-center">
-              <ScrollReveal className="slide-right">
-                <div className="space-y-8">
-                  <h2 className="text-4xl md:text-5xl font-bold text-balance">
-                    Why Businesses Choose AppointDI
-                  </h2>
-                  <div className="space-y-6">
-                    <div className="flex gap-4">
-                      <div className="flex-shrink-0">
-                        <CheckCircle2 className="h-6 w-6 text-primary" />
-                      </div>
-                      <div>
-                        <h3 className="text-xl font-semibold mb-2">
-                          Save Time & Reduce No-Shows
-                        </h3>
-                        <p className="text-muted-foreground">
-                          Automated notifications and confirmations reduce
-                          no-shows by up to 60%, saving you time and money.
-                        </p>
-                      </div>
+              <div className="space-y-8">
+                <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-balance">
+                  Why Businesses Choose AppointDI
+                </h2>
+                <div className="space-y-6">
+                  <div className="flex gap-4">
+                    <div className="flex-shrink-0">
+                      <CheckCircle2 className="h-6 w-6 text-primary" />
                     </div>
-                    <div className="flex gap-4">
-                      <div className="flex-shrink-0">
-                        <TrendingUp className="h-6 w-6 text-primary" />
-                      </div>
-                      <div>
-                        <h3 className="text-xl font-semibold mb-2">
-                          Increase Revenue
-                        </h3>
-                        <p className="text-muted-foreground">
-                          Fill more appointment slots, track popular services,
-                          and optimize pricing based on real performance data.
-                        </p>
-                      </div>
+                    <div>
+                      <h3 className="text-lg md:text-xl font-semibold mb-2">
+                        Save Time & Reduce No-Shows
+                      </h3>
+                      <p className="text-sm sm:text-base text-muted-foreground">
+                        Automated notifications and confirmations reduce
+                        no-shows by up to 60%, saving you time and money.
+                      </p>
                     </div>
-                    <div className="flex gap-4">
-                      <div className="flex-shrink-0">
-                        <Users className="h-6 w-6 text-primary" />
-                      </div>
-                      <div>
-                        <h3 className="text-xl font-semibold mb-2">
-                          Empower Your Team
-                        </h3>
-                        <p className="text-muted-foreground">
-                          Give staff members control over their schedules and
-                          appointments while maintaining business oversight.
-                        </p>
-                      </div>
+                  </div>
+                  <div className="flex gap-4">
+                    <div className="flex-shrink-0">
+                      <TrendingUp className="h-6 w-6 text-primary" />
                     </div>
-                    <div className="flex gap-4">
-                      <div className="flex-shrink-0">
-                        <Shield className="h-6 w-6 text-primary" />
-                      </div>
-                      <div>
-                        <h3 className="text-xl font-semibold mb-2">
-                          Professional & Reliable
-                        </h3>
-                        <p className="text-muted-foreground">
-                          Provide clients with a seamless booking experience
-                          that reflects your business&apos;s professionalism.
-                        </p>
-                      </div>
+                    <div>
+                      <h3 className="text-lg md:text-xl font-semibold mb-2">
+                        Increase Revenue
+                      </h3>
+                      <p className="text-sm sm:text-base text-muted-foreground">
+                        Fill more appointment slots, track popular services, and
+                        optimize pricing based on real performance data.
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex gap-4">
+                    <div className="flex-shrink-0">
+                      <Users className="h-6 w-6 text-primary" />
+                    </div>
+                    <div>
+                      <h3 className="text-lg md:text-xl font-semibold mb-2">
+                        Empower Your Team
+                      </h3>
+                      <p className="text-sm sm:text-base text-muted-foreground">
+                        Give staff members control over their schedules and
+                        appointments while maintaining business oversight.
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex gap-4">
+                    <div className="flex-shrink-0">
+                      <Shield className="h-6 w-6 text-primary" />
+                    </div>
+                    <div>
+                      <h3 className="text-lg md:text-xl font-semibold mb-2">
+                        Professional & Reliable
+                      </h3>
+                      <p className="text-sm sm:text-base text-muted-foreground">
+                        Provide clients with a seamless booking experience that
+                        reflects your business&apos;s professionalism.
+                      </p>
                     </div>
                   </div>
                 </div>
-              </ScrollReveal>
-              <ScrollReveal className="slide-left">
-                <div className="space-y-6">
-                  <Card className="overflow-hidden shadow-xl border-2 hover:shadow-2xl transition-shadow duration-500">
-                    <CardContent className="p-0 pb-0">
-                      <img
-                        src="benefits.jpg"
-                        alt="Performance analytics dashboard with charts and metrics"
-                        className="w-full h-auto"
-                      />
-                    </CardContent>
-                  </Card>
-                </div>
-              </ScrollReveal>
+              </div>
+
+              <div className="space-y-6">
+                <Card className="overflow-hidden shadow-xl border-2 hover:shadow-2xl transition-shadow duration-500">
+                  <CardContent className="p-0 pb-0">
+                    <img
+                      src="benefits.jpg"
+                      alt="Performance analytics dashboard with charts and metrics"
+                      className="w-full h-auto"
+                    />
+                  </CardContent>
+                </Card>
+              </div>
             </div>
           </div>
         </div>
       </section>
-      {/* New Analytics & Insights Section with Charts */}
-      <section id="analytics" className="bg-gray-50 dark:bg-gray-900 py-6">
-        <div className="max-w-7xl mx-auto">
+      <section
+        id="analytics"
+        className="bg-gray-50 dark:bg-gray-900 py-8 md:py-12  "
+      >
+        <div className="max-w-7xl mx-auto px-4">
           {/* Header */}
-          <div className="text-center pt-2">
-            <ScrollReveal className="fade-up">
-              <h2 className="text-4xl md:text-5xl font-extrabold text-primary text-balance">
-                Отключете Силата на Данните 🚀
-              </h2>
-              <p className="text-xl text-muted-foreground text-balance max-w-3xl mx-auto mt-6">
-                Преобразете операциите си с прецизни данни за приходи,
-                популярност на услугите и ангажираност на клиентите – всичко в
-                един интуитивен дашборд.
-              </p>
-            </ScrollReveal>
+          <div className="text-center">
+            <h2 className="text-3xl sm:text-4xl md:text-5xl font-extrabold text-primary text-balance">
+              Отключете Силата на Данните 🚀
+            </h2>
+            <p className="text-base sm:text-lg text-muted-foreground text-balance max-w-3xl mx-auto mt-6">
+              Преобразете операциите си с прецизни данни за приходи, популярност
+              на услугите и ангажираност на клиентите – всичко в един интуитивен
+              дашборд.
+            </p>
           </div>
 
-          {/* KPI Grid (Използваме KPICard от предоставения код) */}
-          {/* Използвам 'mockPerformanceData' за демонстрация на данните */}
-          <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            <ScrollReveal className="fade-up" delay={200}>
-              <KPICard
-                title="Общ Брой Записани Часове"
-                value={mockPerformanceData.kpiData.totalAppointments}
-                change={mockPerformanceData.kpiData.changes.totalAppointments}
-                icon={<Calendar />}
-                className="shadow-xl" // Добавяме стил
-              />
-            </ScrollReveal>
-            <ScrollReveal className="fade-up" delay={300}>
-              <KPICard
-                title="Общи Приходи"
-                value={`$${mockPerformanceData.kpiData.totalRevenue.toLocaleString()}`}
-                change={mockPerformanceData.kpiData.changes.totalRevenue}
-                icon={<DollarSign />}
-                className="shadow-xl"
-              />
-            </ScrollReveal>
-            <ScrollReveal className="fade-up" delay={400}>
-              <KPICard
-                title="Процент Задържане на Клиенти"
-                value={`${mockPerformanceData.kpiData.clientRetentionRate.toFixed(
-                  1
-                )}%`}
-                icon={<Users />}
-                className="shadow-xl"
-              />
-            </ScrollReveal>
-            <ScrollReveal className="fade-up" delay={500}>
-              <KPICard
-                title="Намаляване на Неявилите се"
-                // За демо целите, показваме обратна логика на "Cancelled/No-Show"
-                value={`60%`}
-                // Може да не подаваме "change" или да създадем нов mock за този KPI
-                icon={<CheckCircle />}
-                className="shadow-xl"
-              />
-            </ScrollReveal>
+          <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-6 mt-6 md:mt-8 mb-6 md:mb-10">
+            <KPICard
+              title="Общ Брой Записани Часове"
+              value={mockPerformanceData.kpiData.totalAppointments}
+              change={mockPerformanceData.kpiData.changes.totalAppointments}
+              icon={<Calendar />}
+              className="shadow-xl"
+            />
+            <KPICard
+              title="Общи Приходи"
+              value={`$${mockPerformanceData.kpiData.totalRevenue.toLocaleString()}`}
+              change={mockPerformanceData.kpiData.changes.totalRevenue}
+              icon={<DollarSign />}
+              className="shadow-xl"
+            />
+            <KPICard
+              title="Процент Задържане на Клиенти"
+              value={`${mockPerformanceData.kpiData.clientRetentionRate.toFixed(
+                1
+              )}%`}
+              icon={<Users />}
+              className="shadow-xl"
+            />
+            <KPICard
+              title="Намаляване на Неявилите се"
+              value={`60%`}
+              icon={<CheckCircle />}
+              className="shadow-xl"
+            />
           </div>
-
-          {/* Charts Grid */}
           <div className="space-y-8">
-            {/* Appointments & Revenue Over Time (Линейни графики) */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-              <ScrollReveal className="fade-in" delay={600}>
-                <PerformanceChart
-                  title="Записани Часове по Време"
-                  data={mockPerformanceData.appointmentsOverTime}
-                  type="line"
-                  dataKeys={["total", "completed", "cancelled"]}
-                  xAxisKey="name"
-                  colors={["#3b61c0", "#22c55e", "#ef4444"]}
-                />
-              </ScrollReveal>
-              <ScrollReveal className="fade-in" delay={700}>
-                <PerformanceChart
-                  title="Тенденции в Приходите"
-                  data={mockPerformanceData.revenueOverTime}
-                  type="line"
-                  dataKey="value"
-                  xAxisKey="name"
-                  colors={["#00bfff"]}
-                />
-              </ScrollReveal>
+              <PerformanceChart
+                title="Записани Часове по Време"
+                data={mockPerformanceData.appointmentsOverTime}
+                type="line"
+                dataKeys={["total", "completed", "cancelled"]}
+                xAxisKey="name"
+                colors={["#3b61c0", "#22c55e", "#ef4444"]}
+              />
+              <PerformanceChart
+                title="Тенденции в Приходите"
+                data={mockPerformanceData.revenueOverTime}
+                type="line"
+                dataKey="value"
+                xAxisKey="name"
+                colors={["#00bfff"]}
+              />
             </div>
-
-            {/* Popularity & Revenue by Service (Стълбовидни графики) */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-              <ScrollReveal className="fade-in" delay={800}>
-                <PerformanceChart
-                  title="Популярност на Услугите"
-                  data={mockPerformanceData.servicePopularity}
-                  type="bar"
-                  dataKey="value"
-                  xAxisKey="name"
-                />
-              </ScrollReveal>
-              <ScrollReveal className="fade-in" delay={900}>
-                <PerformanceChart
-                  title="Приходи по Категории Услуги"
-                  data={mockPerformanceData.revenueByService}
-                  type="bar"
-                  dataKey="value"
-                  xAxisKey="name"
-                  colors={["#f59e0b"]}
-                />
-              </ScrollReveal>
+              <PerformanceChart
+                title="Популярност на Услугите"
+                data={mockPerformanceData.servicePopularity}
+                type="bar"
+                dataKey="value"
+                xAxisKey="name"
+              />
+              <PerformanceChart
+                title="Приходи по Категории Услуги"
+                data={mockPerformanceData.revenueByService}
+                type="bar"
+                dataKey="value"
+                xAxisKey="name"
+                colors={["#f59e0b"]}
+              />
             </div>
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               <PerformanceChart
@@ -317,43 +268,33 @@ export default function BusinessLandingPage() {
       </section>
       <PricingSection />
       {/* CTA Section */}
-      <section className="bg-primary text-primary-foreground py-20 md:py-32">
+      <section className="bg-primary text-primary-foreground py-10 md:py-10">
         <div className="container mx-auto px-4 text-center">
-          <div className="max-w-3xl mx-auto space-y-8">
-            <ScrollReveal className="fade-up">
-              <h2 className="text-4xl md:text-5xl font-bold text-balance">
-                Ready to Transform Your Business?
-              </h2>
-            </ScrollReveal>
-            <ScrollReveal className="fade-up" delay={100}>
-              <p className="text-xl text-primary-foreground/90 text-balance">
-                Join thousands of businesses that have streamlined their
-                operations and increased revenue with AppointFlow
-              </p>
-            </ScrollReveal>
-            <ScrollReveal className="fade-up" delay={200}>
-              <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4">
-                <Button
-                  size="lg"
-                  variant="secondary"
-                  className="text-lg px-8 py-6 hover:scale-105 transition-transform"
-                >
-                  Start Free Trial
-                </Button>
-                <Button
-                  size="lg"
-                  variant="outline"
-                  className="text-lg px-8 py-6 bg-transparent border-primary-foreground text-primary-foreground hover:bg-primary-foreground hover:text-primary hover:scale-105 transition-all"
-                >
-                  Schedule a Demo
-                </Button>
-              </div>
-            </ScrollReveal>
-            <ScrollReveal className="fade-up" delay={300}>
-              <p className="text-sm text-primary-foreground/80">
-                14-day free trial • No credit card required • Cancel anytime
-              </p>
-            </ScrollReveal>
+          <div className="max-w-3xl mx-auto space-y-4">
+            <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-text-primary">
+              Ready to Transform Your Business?
+            </h2>
+            <p className="text-base sm:text-lg text-primary-foreground/90 text-balance">
+              Join thousands of businesses that have streamlined their
+              operations and increased revenue with AppointFlow
+            </p>
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4">
+              <Button
+                size="lg"
+                className="text-base sm:text-lg px-7 py-6 shadow-xl hover:shadow-2xl hover:scale-[1.02] transition-transform theme-gradient-primary text-white ring-1 ring-white/20"
+              >
+                <span className="mr-2">Join Us</span>
+                <ArrowRight className="h-5 w-5" />
+              </Button>
+              <Button
+                variant="outline"
+                size="lg"
+                className="text-base sm:text-lg px-7 py-6 bg-white/10 text-white border-primary/30 hover:bg-white/20 hover:scale-[1.02] transition-all backdrop-blur-md shadow-xl"
+              >
+                <PlayCircle className="h-5 w-5 mr-2" />
+                Watch Demo
+              </Button>
+            </div>
           </div>
         </div>
       </section>

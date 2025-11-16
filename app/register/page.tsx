@@ -2,327 +2,82 @@
 
 import type React from "react";
 import { useTranslation } from "react-i18next";
-import { useState } from "react";
-import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { Building2, User, Sparkles } from "lucide-react";
-import callApi from "../Api/callApi";
-import { LabeledInput } from "@/components/customUIComponents/LabeledInput";
+import { useRouter } from "next/navigation";
+import { Card, CardContent } from "@/components/ui/card";
+import { Building2, User } from "lucide-react";
 
-type AccountType = "personal" | "business" | null;
+type AccountType = "personal" | "business";
 
 export default function RegisterPage() {
   const { t } = useTranslation();
-  const [accountType, setAccountType] = useState<AccountType>(null);
-  const [formData, setFormData] = useState({
-    email: "",
-    password: "",
-    repassword: "",
-    firstName: "",
-    lastName: "",
-    phone: "",
-    businessName: "",
-    businessEmail: "",
-    businessPhone: "",
-    businessAddress: "",
-    taxId: "",
-  });
+  const router = useRouter();
 
-  const handleInputChange = (field: string, value: string) => {
-    setFormData((prev) => ({ ...prev, [field]: value }));
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    console.log(t("Form submitted:"), { accountType, ...formData });
-
-    const payload = {
-      email: formData.email,
-      password: formData.password,
-      role: accountType,
-      firstName: formData.firstName,
-      lastName: formData.lastName,
-      phone:
-        accountType == "business" ? formData.businessPhone : formData.phone,
-      ...(accountType == "business" && {
-        businessName: formData.businessName,
-      }),
-    };
-    const authedUser = await callApi("/api/auth/register", "POST", payload);
-    console.log("authedUser", authedUser);
+  const handleAccountTypeSelect = (type: AccountType) => {
+    router.push(`/register/form?type=${type}`);
   };
 
   return (
-    <div className="min-h-[87vh] flex items-center justify-center p-4 relative overflow-hidden">
-      <div
-        className={`w-full max-w-7xl mx-auto z-10 
-        ${
-          accountType
-            ? "flex flex-col lg:flex-row items-stretch lg:space-x-12"
-            : "flex flex-col items-center justify-center"
-        }`}
-      >
-        {/* Лява колона */}
-        <div
-          className={`flex flex-col items-center space-y-6 w-full ${
-            accountType ? "lg:w-1/2" : "lg:max-w-md"
-          }`}
-        >
-          <div className="text-center space-y-4">
-            <h1 className="text-4xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent tracking-tight">
-              {t("Join the Future")}
-            </h1>
-            <p className="text-lg text-muted-foreground font-medium">
-              {t("Choose your path and unlock endless possibilities")}
-            </p>
+    <div className="min-h-full flex items-center justify-center p-4 relative overflow-hidden">
+      <div className="w-full max-w-2xl mx-auto z-10 flex flex-col items-center">
+        <div className="text-center space-y-4 mb-8">
+          <div className="flex justify-center mb-6">
+            <img src="/AppointmantPro.png" alt="logo" className="w-12" />
           </div>
+          <h1 className="text-4xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent tracking-tight">
+            {t("Join our Team")}
+          </h1>
+        </div>
 
-          {/* Избор акаунт */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 w-full max-w-md">
-            <Card
-              className={`cursor-pointer transition-all duration-500 hover:scale-105 hover:shadow-2xl border-2 backdrop-blur-sm ${
-                accountType === "personal"
-                  ? "ring-4 ring-primary/50 border-primary bg-gradient-to-br from-primary/10 to-accent/5 shadow-2xl"
-                  : "hover:border-accent/50 hover:bg-gradient-to-br hover:from-accent/5 hover:to-primary/5 bg-card/60"
-              }`}
-              onClick={() => setAccountType("personal")}
-            >
-              <CardContent className="flex flex-col items-center p-6 space-y-3">
-                <div
-                  className={`p-3 rounded-2xl transition-all duration-300 ${
-                    accountType === "personal"
-                      ? "bg-gradient-to-br from-primary to-accent text-white shadow-lg"
-                      : "bg-muted/50 text-muted-foreground hover:bg-gradient-to-br hover:from-primary/20 hover:to-accent/20"
-                  }`}
-                >
-                  <User className="h-6 w-6" />
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 w-full max-w-xl">
+          <div
+            className="relative cursor-pointer group"
+            onClick={() => handleAccountTypeSelect("personal")}
+          >
+            <div className="absolute -inset-0.5 bg-gradient-to-br from-cyan-500 via-primary to-pink-500 rounded-3xl opacity-45 blur-sm" />
+            <Card className="relative transition-all duration-500 hover:scale-105 backdrop-blur-sm bg-white dark:bg-gray-900 rounded-3xl shadow-6xl border border-primary/20">
+              <CardContent className="flex flex-col items-center p-8 space-y-4">
+                <div className="p-4 rounded-2xl bg-gradient-to-br from-primary to-accent text-white shadow-lg">
+                  <User className="h-8 w-8" />
                 </div>
-                <h3 className="font-bold text-lg">{t("Personal")}</h3>
+                <h3 className="font-bold text-xl text-text-primary">
+                  {t("Personal")}
+                </h3>
                 <p className="text-sm text-muted-foreground text-center leading-relaxed">
                   {t("Perfect for individuals and creative projects")}
                 </p>
               </CardContent>
             </Card>
-
-            <Card
-              className={`cursor-pointer transition-all duration-500 hover:scale-105 hover:shadow-2xl border-2 backdrop-blur-sm ${
-                accountType === "business"
-                  ? "ring-4 ring-primary/50 border-primary bg-gradient-to-br from-primary/10 to-accent/5 shadow-2xl"
-                  : "hover:border-accent/50 hover:bg-gradient-to-br hover:from-accent/5 hover:to-primary/5 bg-card/60"
-              }`}
-              onClick={() => setAccountType("business")}
-            >
-              <CardContent className="flex flex-col items-center p-6 space-y-3">
-                <div
-                  className={`p-3 rounded-2xl transition-all duration-300 ${
-                    accountType === "business"
-                      ? "bg-gradient-to-br from-primary to-accent text-white shadow-lg"
-                      : "bg-muted/50 text-muted-foreground hover:bg-gradient-to-br hover:from-primary/20 hover:to-accent/20"
-                  }`}
-                >
-                  <Building2 className="h-6 w-6" />
+          </div>
+          <div
+            className="relative cursor-pointer group"
+            onClick={() => handleAccountTypeSelect("business")}
+          >
+            <div className="absolute -inset-0.5 bg-gradient-to-br from-cyan-500 via-primary to-pink-500 rounded-3xl opacity-45 blur-sm" />
+            <Card className="relative transition-all duration-500 hover:scale-105 backdrop-blur-sm bg-white dark:bg-gray-900 rounded-3xl shadow-2xl border border-primary/20">
+              <CardContent className="flex flex-col items-center p-8 space-y-4">
+                <div className="p-4 rounded-2xl bg-gradient-to-br from-primary to-accent text-white shadow-lg">
+                  <Building2 className="h-8 w-8" />
                 </div>
-                <h3 className="font-bold text-lg">{t("Business")}</h3>
+                <h3 className="font-bold text-xl text-text-primary">
+                  {t("Business")}
+                </h3>
                 <p className="text-sm text-muted-foreground text-center leading-relaxed">
                   {t("Ideal for teams and organizations")}
                 </p>
               </CardContent>
             </Card>
           </div>
-
-          <div className="text-center text-md text-muted-foreground w-full max-w-md">
-            {t("Already have an account?")}{" "}
-            <a
-              href="/login"
-              className="text-primary hover:text-accent font-bold hover:underline transition-all duration-300"
-            >
-              {t("Sign in here")}
-            </a>
-          </div>
         </div>
 
-        {/* Дясна колона: формата */}
-        {accountType && (
-          <div className="w-full lg:w-1/2 flex items-center mt-8 lg:mt-0">
-            <Card className="py-4 border-2 shadow-2xl bg-card/70 backdrop-blur-lg border-primary/20 w-full">
-              <CardHeader className="pb-4">
-                <CardTitle className="text-2xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
-                  {accountType === "personal"
-                    ? t("Personal Details")
-                    : t("Business Information")}
-                </CardTitle>
-                <CardDescription className="text-md text-muted-foreground">
-                  {t("Complete your {{accountType}} registration below", {
-                    accountType,
-                  })}
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <form onSubmit={handleSubmit} className="space-y-3">
-                  <LabeledInput
-                    id="email"
-                    label={t("Email Address")}
-                    type="email"
-                    value={formData.email}
-                    onChange={(e) => handleInputChange("email", e.target.value)}
-                    placeholder={t("Enter your email address")}
-                    className="bg-input/80 backdrop-blur-sm rounded-lg"
-                  />
-
-                  <div className="grid grid-cols-2 gap-3">
-                    <LabeledInput
-                      id="password"
-                      label={t("Password")}
-                      type="password"
-                      value={formData.password}
-                      onChange={(e) =>
-                        handleInputChange("password", e.target.value)
-                      }
-                      placeholder={t("Create a password")}
-                      className="bg-input/80 backdrop-blur-sm rounded-lg"
-                    />
-                    <LabeledInput
-                      id="repassword"
-                      label={t("Confirm Password")}
-                      type="password"
-                      value={formData.repassword}
-                      onChange={(e) =>
-                        handleInputChange("repassword", e.target.value)
-                      }
-                      placeholder={t("Confirm password")}
-                      className="bg-input/80 backdrop-blur-sm rounded-lg"
-                    />
-                  </div>
-
-                  {accountType === "personal" && (
-                    <>
-                      <div className="grid grid-cols-2 gap-3">
-                        <LabeledInput
-                          id="firstName"
-                          label={t("First Name")}
-                          value={formData.firstName}
-                          onChange={(e) =>
-                            handleInputChange("firstName", e.target.value)
-                          }
-                          placeholder={t("First name")}
-                          className="bg-input/80 backdrop-blur-sm rounded-lg"
-                        />
-                        <LabeledInput
-                          id="lastName"
-                          label={t("Last Name")}
-                          value={formData.lastName}
-                          onChange={(e) =>
-                            handleInputChange("lastName", e.target.value)
-                          }
-                          placeholder={t("Last name")}
-                          className="bg-input/80 backdrop-blur-sm rounded-lg"
-                        />
-                      </div>
-
-                      <LabeledInput
-                        id="phone"
-                        label={t("Phone Number")}
-                        type="tel"
-                        value={formData.phone}
-                        onChange={(e) =>
-                          handleInputChange("phone", e.target.value)
-                        }
-                        placeholder={t("Your phone number")}
-                        className="bg-input/80 backdrop-blur-sm rounded-lg"
-                      />
-                    </>
-                  )}
-
-                  {accountType === "business" && (
-                    <>
-                      <div className="grid grid-cols-2 gap-3">
-                        <LabeledInput
-                          id="firstName"
-                          label={t("First Name")}
-                          value={formData.firstName}
-                          onChange={(e) =>
-                            handleInputChange("firstName", e.target.value)
-                          }
-                          placeholder={t("First name")}
-                          className="bg-input/80 backdrop-blur-sm rounded-lg"
-                        />
-                        <LabeledInput
-                          id="lastName"
-                          label={t("Last Name")}
-                          value={formData.lastName}
-                          onChange={(e) =>
-                            handleInputChange("lastName", e.target.value)
-                          }
-                          placeholder={t("Last name")}
-                          className="bg-input/80 backdrop-blur-sm rounded-lg"
-                        />
-                      </div>
-
-                      <div className="grid grid-cols-2 gap-3">
-                        <LabeledInput
-                          id="businessName"
-                          label={t("Business Name")}
-                          value={formData.businessName}
-                          onChange={(e) =>
-                            handleInputChange("businessName", e.target.value)
-                          }
-                          placeholder={t("Your business name")}
-                          className="bg-input/80 backdrop-blur-sm rounded-lg"
-                        />
-                        <LabeledInput
-                          id="businessPhone"
-                          label={t("Business Phone")}
-                          type="tel"
-                          value={formData.businessPhone}
-                          onChange={(e) =>
-                            handleInputChange("businessPhone", e.target.value)
-                          }
-                          placeholder={t("Business phone")}
-                          className="bg-input/80 backdrop-blur-sm rounded-lg"
-                        />
-                      </div>
-
-                      <LabeledInput
-                        id="businessAddress"
-                        label={t("Business Address")}
-                        value={formData.businessAddress}
-                        onChange={(e) =>
-                          handleInputChange("businessAddress", e.target.value)
-                        }
-                        placeholder={t("Business address")}
-                        className="bg-input/80 backdrop-blur-sm rounded-lg"
-                      />
-
-                      <LabeledInput
-                        id="taxId"
-                        label={t("Tax ID")}
-                        value={formData.taxId}
-                        onChange={(e) =>
-                          handleInputChange("taxId", e.target.value)
-                        }
-                        placeholder={t("Tax ID number")}
-                        className="bg-input/80 backdrop-blur-sm rounded-lg"
-                      />
-                    </>
-                  )}
-
-                  <Button
-                    type="submit"
-                    className="w-40 block mx-auto h-10 text-lg font-bold bg-primary hover:bg-primary-dark transition-all duration-300 shadow-xl hover:shadow-2xl hover:scale-105 rounded-xl"
-                  >
-                    {t("Sign up")}
-                  </Button>
-                </form>
-              </CardContent>
-            </Card>
-          </div>
-        )}
+        <div className="text-center text-md text-muted-foreground mt-8">
+          {t("Already have an account?")}{" "}
+          <a
+            href="/login"
+            className="text-primary hover:text-accent font-bold hover:underline transition-all duration-300"
+          >
+            {t("Sign in here")}
+          </a>
+        </div>
       </div>
     </div>
   );

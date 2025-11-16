@@ -145,12 +145,18 @@ const AppointmentForm = ({
 
   const handleSaveClosestSlot = () => {
     if (closestSlot) {
+      console.log("Saving closest slot:", closestSlot);
+
+      // Backend returns date in DD.MM.YYYY format, convert to YYYY-MM-DD
+      const dateParts = closestSlot.date.split(".");
+      const formattedDate = `${dateParts[2]}-${dateParts[1]}-${dateParts[0]}`;
+
       const updatedAppointmentData = {
         ...appointmentData,
-        date: closestSlot.date,
+        date: formattedDate,
         time: closestSlot.startTime,
       };
-      handleSubmit(updatedAppointmentData); // Използваме общия handleSubmit
+      handleSubmit(updatedAppointmentData);
       setIsClosestSlotModalOpen(false);
     }
   };

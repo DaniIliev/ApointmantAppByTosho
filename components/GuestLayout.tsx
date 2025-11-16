@@ -26,7 +26,7 @@ export default function GuestLayout({
   };
   const { removePadding } = usePaddingControl();
   return (
-    <div className="flex flex-col min-h-screen">
+    <div className="flex flex-col min-h-[70vh]">
       <div className="fixed top-0 left-0 right-0 z-50">
         <TopNav onToggleLeftNav={toggleLeftNav} isLeftNavOpen={isLeftNavOpen} />
       </div>
@@ -48,7 +48,7 @@ export default function GuestLayout({
                 : RIGHT_NAV_CLOSED_WIDTH_CLASS
             }
                min-h-[87vh] 
-                ${!removePadding ? "p-7" : ""} relative overflow-hidden
+                ${!removePadding ? "p-2 md:p-7" : ""} relative overflow-hidden
           `}
         >
           {children}
@@ -66,9 +66,7 @@ export default function GuestLayout({
                   ? RIGHT_NAV_OPEN_WIDTH_CLASS
                   : RIGHT_NAV_CLOSED_WIDTH_CLASS
               }`}
-      >
-        <Footer />
-      </div>
+      ></div>
     </div>
   );
 }

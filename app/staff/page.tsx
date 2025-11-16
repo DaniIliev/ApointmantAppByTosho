@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { usePageTitle } from "@/context/PageTitleContext";
 import { useRightNav } from "@/context/RightNavContext";
 import { Button } from "@/components/ui/button";
-import { Plus, Eye } from "lucide-react";
+import { Plus, Eye, Pencil, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { GenericTable, Column } from "@/components/GenericTable/GenericTable";
 import { LabeledInput } from "@/components/customUIComponents/LabeledInput";
@@ -12,15 +12,9 @@ import { useTranslation } from "react-i18next";
 import { CustomTooltip } from "@/components/customUIComponents/CustomTooltip";
 import { Modal } from "@/components/customUIComponents/Modal";
 import callApi from "../Api/callApi";
-
-export type StaffMember = {
-  _id: string;
-  firstName: string;
-  lastName: string;
-  email: string;
-  phone: string;
-  role: string;
-};
+import { StaffMember } from "./types";
+import { StaffViewModal } from "./StaffViewModal";
+import { StaffEditModal } from "./StaffEditModal";
 
 type AddStaffNavProps = {
   onOpenModal: () => void;
@@ -43,6 +37,9 @@ export default function StaffPage() {
 
   const [staff, setStaff] = useState<StaffMember[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isViewModalOpen, setIsViewModalOpen] = useState(false);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [selectedStaff, setSelectedStaff] = useState<StaffMember | null>(null);
   const [newStaffMember, setNewStaffMember] = useState({
     firstName: "",
     lastName: "",
@@ -63,7 +60,6 @@ export default function StaffPage() {
     };
   }, [setPageTitle, setExtraRightNavMenu, setIsRightNavVisible, t]);
 
-  // Зареждане на данни за персонала от бекенда
   useEffect(() => {
     const fetchStaff = async () => {
       try {
@@ -76,20 +72,55 @@ export default function StaffPage() {
     fetchStaff();
   }, []);
 
-  // Изпращане на покана към нов служител
+  // Open staff details modal
+  const openStaffDetailsModal = (staffId: string) => {
+    const staff = findStaffById(staffId);
+    if (staff) {
+      setSelectedStaff(staff);
+      setIsViewModalOpen(true);
+    }
+  };
+
+  // Open staff edit modal
+  const openStaffEditModalModal = (staffId: string) => {
+    const staff = findStaffById(staffId);
+    if (staff) {
+      setSelectedStaff(staff);
+      setIsEditModalOpen(true);
+    }
+  };
+
+  // Find staff by ID
+  const findStaffById = (staffId: string): StaffMember | undefined => {
+    return staff.find((s) => s._id === staffId);
+  };
+
+  // Handle staff update
+  const handleStaffUpdated = (updatedStaff: StaffMember) => {
+    setStaff((prev) =>
+      prev.map((s) => (s._id === updatedStaff._id ? updatedStaff : s))
+    );
+  };
+
+  const removeStaff = async (staffId: string) => {
+    try {
+      await callApi(`/api/staff/${staffId}`, "DELETE");
+      setStaff((prev) => prev.filter((s) => s._id !== staffId));
+      toast.success(t("Staff member removed successfully") as string);
+    } catch (error) {
+      toast.error(t("Failed to remove staff member") as string);
+    }
+  };
+
   const handleInviteStaff = async () => {
     try {
-      // Изпращане на данните към бекенда
       const result = await callApi(
         "/api/staff/invite-staff",
         "POST",
         newStaffMember
       );
-
-      // Добавяне на новия служител в таблицата
       setStaff((prev) => [...prev, result.staff]);
 
-      // Затваряне на модала и показване на съобщение за успех
       setIsModalOpen(false);
       toast.success(
         "Служителят е поканен успешно! Изпратен е имейл с временна парола."
@@ -107,7 +138,6 @@ export default function StaffPage() {
     }
   };
 
-  // Дефиниция на колоните за таблицата
   const columns: Column<StaffMember>[] = [
     {
       accessorKey: "firstName",
@@ -134,14 +164,36 @@ export default function StaffPage() {
       header: "Role",
       cell: ({ row }) => <span>{row.original.role}</span>,
     },
-    // Можете да добавите допълнителни действия тук, ако е необходимо
+    {
+      accessorKey: "actions",
+      header: "Действия",
+      cell: ({ row }) => (
+        <div className="flex items-center gap-0.5 mobile-actions">
+          <CustomTooltip
+            onClick={() => openStaffDetailsModal(row.original._id)}
+            tooltipText={t("View Details")}
+            icon={<Eye />}
+          />
+          <CustomTooltip
+            onClick={() => openStaffEditModalModal(row.original._id)}
+            tooltipText={t("Edit")}
+            icon={<Pencil />}
+          />
+          <CustomTooltip
+            onClick={() => removeStaff(row.original._id)}
+            tooltipText={t("Delete")}
+            icon={<Trash2 className=" text-red-500" />}
+          />
+        </div>
+      ),
+      enableHiding: false,
+    },
   ];
 
   return (
     <>
       <GenericTable data={staff} columns={columns} editable={false} />
 
-      {/* Модален прозорец за добавяне на нов служител */}
       <Modal
         label="Add New Staff Member"
         open={isModalOpen}
@@ -196,6 +248,19 @@ export default function StaffPage() {
           </div>
         </div>
       </Modal>
+
+      <StaffViewModal
+        open={isViewModalOpen}
+        onOpenChange={setIsViewModalOpen}
+        staff={selectedStaff}
+      />
+
+      <StaffEditModal
+        open={isEditModalOpen}
+        onOpenChange={setIsEditModalOpen}
+        staff={selectedStaff}
+        onStaffUpdated={handleStaffUpdated}
+      />
     </>
   );
 }

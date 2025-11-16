@@ -1,4 +1,4 @@
-"úse client";
+"use client";
 import React, { useCallback, useState, useMemo, ReactNode } from "react";
 import { Badge, Check, Loader2 } from "lucide-react";
 import { useAuthContext } from "@/context/AuthContext";
@@ -37,7 +37,7 @@ const PricingSection = () => {
   // Типизиране на useCallback
   const handleCheckout = useCallback(
     async (checkoutPlanName: string) => {
-      // checkoutPlanName ще бъде във формат като 'Starter_Monthly' или 'Professional_Annual'
+      console.log("user", user);
       if (!user?.businessId) {
         console.error("Грешка: businessId липсва. Моля, логнете се.");
         return;
@@ -78,14 +78,10 @@ const PricingSection = () => {
     const isLoading = loadingPlan === checkoutPlanName;
 
     // Определяне на стиловете
-    const primaryClass =
-      "bg-indigo-600 hover:bg-indigo-700 text-white focus:ring-indigo-500";
-    const outlineClass =
-      "bg-white border-gray-300 text-gray-700 hover:bg-gray-100 focus:ring-gray-400";
 
     return (
       <Button
-        className={`w-full ${isPrimary ? primaryClass : outlineClass} mt-6`}
+        className={`w-full bg-primary hover:bg-primary-dark text-text-primary mt-6`}
         variant={isPrimary ? "default" : "outline"}
         onClick={() => handleCheckout(checkoutPlanName)}
         // Преобразуваме businessId в boolean за disabled props
@@ -103,8 +99,6 @@ const PricingSection = () => {
     );
   };
 
-  // Дефиниране на данните за плановете, включително годишните цени (11 месеца)
-  // Типизиране на useMemo
   const plans: Plan[] = useMemo(
     () => [
       {
@@ -173,16 +167,16 @@ const PricingSection = () => {
   };
 
   return (
-    <section id="pricing" className="bg-gray-50 py-16 md:py-24 font-inter">
+    <section id="pricing" className="bg-baground py-10 md:py-10 font-inter">
       <div className="container mx-auto px-4 max-w-7xl">
         <div className="max-w-6xl mx-auto">
           {/* Заглавна секция */}
           <div className="text-center">
             <ScrollReveal>
-              <h2 className="text-4xl md:text-5xl font-extrabold mb-4 text-balance text-gray-900">
+              <h2 className="text-4xl md:text-5xl font-extrabold mb-4 text-primary">
                 Ценообразуване в Евро (€)
               </h2>
-              <p className="text-xl text-gray-500 text-balance max-w-3xl mx-auto pt-2">
+              <p className="text-xl sm:text-lg text-text-primary text-balance max-w-3xl mx-auto pt-2">
                 Изберете перфектния план за вашия бизнес. Годишните планове ви
                 дават 1 месец безплатно!
               </p>
@@ -190,14 +184,14 @@ const PricingSection = () => {
           </div>
 
           {/* Превключвател за Цикъла на Плащане */}
-          <div className="flex justify-center mt-12 mb-16">
-            <div className="inline-flex rounded-xl bg-white p-1 shadow-md border border-gray-200">
+          <div className="flex justify-center mt-4 mb-6">
+            <div className="inline-flex rounded-xl bg-baground p-1 shadow-md border border-primary/20">
               <button
                 onClick={() => setBillingCycle("monthly")}
                 className={`px-6 py-2 text-sm font-medium rounded-lg transition-all ${
                   billingCycle === "monthly"
-                    ? "bg-indigo-600 text-white shadow-inner"
-                    : "text-gray-600 hover:bg-gray-100"
+                    ? "bg-primary text-white shadow-inner"
+                    : "text-text-primary hover:bg-primary-dark"
                 }`}
               >
                 Месечно
@@ -206,8 +200,8 @@ const PricingSection = () => {
                 onClick={() => setBillingCycle("annual")}
                 className={`px-6 py-2 text-sm font-medium rounded-lg transition-all relative ${
                   billingCycle === "annual"
-                    ? "bg-indigo-600 text-white shadow-inner"
-                    : "text-gray-600 hover:bg-gray-100"
+                    ? "bg-primary text-white shadow-inner"
+                    : "text-text-primary hover:bg-primary-dark"
                 }`}
               >
                 Годишно
@@ -226,40 +220,36 @@ const PricingSection = () => {
                 planData;
 
               return (
-                // Използваме index за delay, въпреки че ScrollReveal е имитиран
                 <ScrollReveal key={plan.name} delay={100 * (index + 1)}>
                   <Card
                     className={`h-full flex flex-col transition-all duration-300 hover:-translate-y-2 
                             ${
                               plan.isPopular
-                                ? "border-2 border-indigo-600 shadow-xl relative"
-                                : "border-2 border-gray-200"
+                                ? "border-2 border-primary shadow-xl relative"
+                                : "border-2 border-primary/20"
                             }`}
                   >
                     {plan.isPopular && (
-                      <div className="absolute -top-4 left-1/2 -translate-x-1/2">
-                        <Badge className="bg-indigo-600 text-white px-4 py-1 text-sm font-medium shadow-md">
-                          Най-популярен
-                        </Badge>
+                      <div className="absolute -top-4 left-1/2 -translate-x-1/2 text-text-primary bg-accent rounded-full px-4 py-1 shadow-md">
+                        Най-популярен
                       </div>
                     )}
                     <CardContent className="flex-grow flex flex-col p-8">
                       <div className="mb-6">
-                        <h3 className="text-2xl font-bold mb-2 text-gray-900">
+                        <h3 className="text-2xl font-bold mb-2 text-primary">
                           {plan.name}
                         </h3>
-                        <p className="text-gray-500">{plan.description}</p>
+                        <p className="text-text-primary">{plan.description}</p>
                       </div>
 
                       <div className="flex items-baseline gap-2 mb-2">
-                        {/* Разделяме за по-добро показване на валутата */}
-                        <span className="text-6xl font-extrabold text-gray-900">
+                        <span className="text-6xl font-extrabold text-primary">
                           {price.substring(0, 1)}
                         </span>
-                        <span className="text-6xl font-extrabold text-gray-900">
+                        <span className="text-6xl font-extrabold text-primary">
                           {price.substring(1)}
                         </span>
-                        <span className="text-xl text-gray-500">
+                        <span className="text-xl text-text-primary">
                           {cycleDisplay}
                         </span>
                       </div>
@@ -277,8 +267,8 @@ const PricingSection = () => {
                       >
                         {plan.features.map((feature) => (
                           <li key={feature} className="flex items-start gap-3">
-                            <Check className="h-5 w-5 text-indigo-600 flex-shrink-0 mt-0.5" />
-                            <span className="text-base text-gray-700">
+                            <Check className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" />
+                            <span className="text-base text-text-primary/60">
                               {feature}
                             </span>
                           </li>
@@ -296,7 +286,7 @@ const PricingSection = () => {
 
           {/* Индикатор за логнат потребител */}
           <div className="text-center mt-12 text-sm text-gray-500">
-            <p className="mt-2 text-indigo-600 font-semibold">
+            <p className="mt-2 text-primary font-semibold">
               ВАЖНО: За първи път ще видите 50% отстъпка в Stripe Checkout
               страницата.
             </p>
@@ -308,186 +298,3 @@ const PricingSection = () => {
 };
 
 export default PricingSection;
-
-// const PricingSection = () => {
-//   return (
-//     <section id="pricing" className="bg-muted/30 py-6 md:py-8">
-//       <div className="container mx-auto px-4">
-//         <div className="max-w-6xl mx-auto">
-//           {/* Заглавна секция */}
-//           <div className="text-center">
-//             {/* ScrollReveal е външен компонент и трябва да бъде наличен */}
-//             <ScrollReveal className="fade-up">
-//               <h2 className="text-4xl md:text-5xl font-bold mb-4 text-balance">
-//                 Simple, Transparent Pricing
-//               </h2>
-//               <p className="text-xl text-muted-foreground text-balance max-w-2xl mx-auto pt-2">
-//                 Choose the perfect plan for your business. All plans include a
-//                 14-day free trial.
-//               </p>
-//             </ScrollReveal>
-//           </div>
-
-//           {/* Картите с планове */}
-//           <div className="grid md:grid-cols-3 gap-8 mt-12">
-//             {/* План 1: Starter */}
-//             <ScrollReveal className="fade-up" delay={100}>
-//               <Card className="border-2 hover:shadow-xl transition-all duration-300 hover:-translate-y-2">
-//                 <CardContent className="p-8 space-y-6">
-//                   <div>
-//                     <h3 className="text-2xl font-bold mb-2">Starter</h3>
-//                     <p className="text-muted-foreground">
-//                       Perfect for small businesses
-//                     </p>
-//                   </div>
-//                   <div className="flex items-baseline gap-2">
-//                     <span className="text-5xl font-bold">$29</span>
-//                     <span className="text-muted-foreground">/month</span>
-//                   </div>
-//                   <ul className="space-y-3">
-//                     <li className="flex items-center gap-3">
-//                       <Check className="h-5 w-5 text-primary flex-shrink-0" />
-//                       <span className="text-sm">Up to 3 staff members</span>
-//                     </li>
-//                     <li className="flex items-center gap-3">
-//                       <Check className="h-5 w-5 text-primary flex-shrink-0" />
-//                       <span className="text-sm">Unlimited appointments</span>
-//                     </li>
-//                     <li className="flex items-center gap-3">
-//                       <Check className="h-5 w-5 text-primary flex-shrink-0" />
-//                       <span className="text-sm">Calendar & table views</span>
-//                     </li>
-//                     <li className="flex items-center gap-3">
-//                       <Check className="h-5 w-5 text-primary flex-shrink-0" />
-//                       <span className="text-sm">Email notifications</span>
-//                     </li>
-//                     <li className="flex items-center gap-3">
-//                       <Check className="h-5 w-5 text-primary flex-shrink-0" />
-//                       <span className="text-sm">Basic analytics</span>
-//                     </li>
-//                   </ul>
-//                   <Button className="w-full bg-transparent" variant="outline">
-//                     Start Free Trial
-//                   </Button>
-//                 </CardContent>
-//               </Card>
-//             </ScrollReveal>
-
-//             {/* План 2: Professional (Най-популярен) */}
-//             <ScrollReveal className="fade-up" delay={200}>
-//               <Card className="border-2 border-primary shadow-xl hover:shadow-2xl transition-all duration-300 hover:-translate-y-2 relative">
-//                 <div className="absolute -top-4 left-1/2 -translate-x-1/2">
-//                   <Badge className="bg-primary text-primary-foreground px-4 py-1">
-//                     Most Popular
-//                   </Badge>
-//                 </div>
-//                 <CardContent className="p-8 space-y-6">
-//                   <div>
-//                     <h3 className="text-2xl font-bold mb-2">Professional</h3>
-//                     <p className="text-muted-foreground">
-//                       For growing businesses
-//                     </p>
-//                   </div>
-//                   <div className="flex items-baseline gap-2">
-//                     <span className="text-5xl font-bold">$79</span>
-//                     <span className="text-muted-foreground">/month</span>
-//                   </div>
-//                   <ul className="space-y-3">
-//                     <li className="flex items-center gap-3">
-//                       <Check className="h-5 w-5 text-primary flex-shrink-0" />
-//                       <span className="text-sm">Up to 10 staff members</span>
-//                     </li>
-//                     <li className="flex items-center gap-3">
-//                       <Check className="h-5 w-5 text-primary flex-shrink-0" />
-//                       <span className="text-sm">Unlimited appointments</span>
-//                     </li>
-//                     <li className="flex items-center gap-3">
-//                       <Check className="h-5 w-5 text-primary flex-shrink-0" />
-//                       <span className="text-sm">All view options</span>
-//                     </li>
-//                     <li className="flex items-center gap-3">
-//                       <Check className="h-5 w-5 text-primary flex-shrink-0" />
-//                       <span className="text-sm">SMS & email notifications</span>
-//                     </li>
-//                     <li className="flex items-center gap-3">
-//                       <Check className="h-5 w-5 text-primary flex-shrink-0" />
-//                       <span className="text-sm">Advanced analytics</span>
-//                     </li>
-//                     <li className="flex items-center gap-3">
-//                       <Check className="h-5 w-5 text-primary flex-shrink-0" />
-//                       <span className="text-sm">Custom branding</span>
-//                     </li>
-//                     <li className="flex items-center gap-3">
-//                       <Check className="h-5 w-5 text-primary flex-shrink-0" />
-//                       <span className="text-sm">Priority support</span>
-//                     </li>
-//                   </ul>
-//                   <Button className="w-full bg-primary hover:bg-primary/90 text-primary-foreground">
-//                     Start Free Trial
-//                   </Button>
-//                 </CardContent>
-//               </Card>
-//             </ScrollReveal>
-
-//             {/* План 3: Enterprise */}
-//             <ScrollReveal className="fade-up" delay={300}>
-//               <Card className="border-2 hover:shadow-xl transition-all duration-300 hover:-translate-y-2">
-//                 <CardContent className="p-8 space-y-6">
-//                   <div>
-//                     <h3 className="text-2xl font-bold mb-2">Enterprise</h3>
-//                     <p className="text-muted-foreground">
-//                       For large organizations
-//                     </p>
-//                   </div>
-//                   <div className="flex items-baseline gap-2">
-//                     <span className="text-5xl font-bold">$199</span>
-//                     <span className="text-muted-foreground">/month</span>
-//                   </div>
-//                   <ul className="space-y-3">
-//                     <li className="flex items-center gap-3">
-//                       <Check className="h-5 w-5 text-primary flex-shrink-0" />
-//                       <span className="text-sm">Unlimited staff members</span>
-//                     </li>
-//                     <li className="flex items-center gap-3">
-//                       <Check className="h-5 w-5 text-primary flex-shrink-0" />
-//                       <span className="text-sm">Unlimited appointments</span>
-//                     </li>
-//                     <li className="flex items-center gap-3">
-//                       <Check className="h-5 w-5 text-primary flex-shrink-0" />
-//                       <span className="text-sm">All features included</span>
-//                     </li>
-//                     <li className="flex items-center gap-3">
-//                       <Check className="h-5 w-5 text-primary flex-shrink-0" />
-//                       <span className="text-sm">Multi-location support</span>
-//                     </li>
-//                     <li className="flex items-center gap-3">
-//                       <Check className="h-5 w-5 text-primary flex-shrink-0" />
-//                       <span className="text-sm">API access</span>
-//                     </li>
-//                     <li className="flex items-center gap-3">
-//                       <Check className="h-5 w-5 text-primary flex-shrink-0" />
-//                       <span className="text-sm">Dedicated account manager</span>
-//                     </li>
-//                     <li className="flex items-center gap-3">
-//                       <Check className="h-5 w-5 text-primary flex-shrink-0" />
-//                       <span className="text-sm">24/7 phone support</span>
-//                     </li>
-//                     <li className="flex items-center gap-3">
-//                       <Check className="h-5 w-5 text-primary flex-shrink-0" />
-//                       <span className="text-sm">Custom integrations</span>
-//                     </li>
-//                   </ul>
-//                   <Button className="w-full bg-transparent" variant="outline">
-//                     Contact Sales
-//                   </Button>
-//                 </CardContent>
-//               </Card>
-//             </ScrollReveal>
-//           </div>
-//         </div>
-//       </div>
-//     </section>
-//   );
-// };
-
-// export default PricingSection;

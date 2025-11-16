@@ -1,9 +1,9 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useTranslation } from "react-i18next";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   // Original Icons
   LayoutDashboard,
@@ -25,9 +25,14 @@ import {
   BookOpen, // For Appointments
   CircleDollarSign, // For Types (Services/Pricing)
   CalendarCheck, // For Appointments/Calendar
+  Globe,
+  Info as InfoIcon,
+  User as UserIcon,
+  QrCode, // For QR Code page
 } from "lucide-react";
 
 import { useAuthContext } from "@/context/AuthContext";
+import useClickOutside from "@/Global/Hooks/useClickOutside";
 
 interface NavItem {
   href?: string;
@@ -169,29 +174,50 @@ const SubMenu = ({
 };
 
 export default function LeftNav({ isOpen }: LeftNavProps) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const pathname = usePathname();
+  const router = useRouter();
   const { user } = useAuthContext();
+  const [isLangOpen, setIsLangOpen] = useState(false);
+  const langRef = useRef<HTMLDivElement>(null);
+  useClickOutside(langRef, () => setIsLangOpen(false));
+  // Close language dropdown when the left nav closes
+  useEffect(() => {
+    if (!isOpen) setIsLangOpen(false);
+  }, [isOpen]);
+  const changeLanguage = (lng: string) => {
+    i18n.changeLanguage(lng);
+    const newPathname = pathname.replace(`/${i18n.language}`, `/${lng}`);
+    router.push(newPathname);
+    setIsLangOpen(false);
+  };
 
   const navItems: NavItem[] =
     user?.role === "business" || user?.role === "staff"
       ? [
-          { href: "/home", label: t("Home"), icon: House },
+          // { href: "/home", label: t("Home"), icon: House },
+          { href: "/for-business", label: t("Home"), icon: House },
+
           { href: "/dashboard", label: t("Dashboard"), icon: LayoutDashboard },
           {
             label: t("Business"),
             icon: Briefcase,
             children: [
-              {
-                href: "/for-business",
-                label: t("For Business"),
-                icon: Briefcase,
-              },
+              // {
+              //   href: "/for-business",
+              //   label: t("For Business"),
+              //   icon: Briefcase,
+              // },
 
               {
                 href: "/business/page",
                 label: t("My Public Page"),
                 icon: Users,
+              },
+              {
+                href: "/business/qr-code",
+                label: t("QR Code"),
+                icon: QrCode,
               },
               {
                 label: t("Configuration"),
@@ -225,20 +251,20 @@ export default function LeftNav({ isOpen }: LeftNavProps) {
           },
         ]
       : [
-          { href: "/home", label: t("For Clients"), icon: Users },
+          // { href: "/home", label: t("For Clients"), icon: Users },
           { href: "/for-business", label: t("For Business"), icon: Briefcase },
           { href: "/login", label: t("Sign in"), icon: LogIn },
         ];
 
   return (
     <nav
-      className={`bg-primary-foreground fixed left-0 top-17.5 bottom-0 backdrop-blur-xl border-r border-white/10 z-40 transition-all duration-300 
+      className={`bg-primary-foreground fixed left-0 top-17.5 bottom-0 backdrop-blur-xl  z-40 transition-all duration-300 
         ${isOpen ? "w-64 translate-x-0" : "w-64 -translate-x-full"}
         ${isOpen ? "lg:w-64 lg:translate-x-0" : "lg:w-20 lg:translate-x-0"}
       `}
     >
-      <div className={`p-4 overflow-hidden h-full`}>
-        <div className="space-y-2">
+      <div className={`p-4 h-full flex flex-col relative`}>
+        <div className="space-y-2 flex-1 overflow-y-auto pb-20">
           {navItems.map((item) => (
             <SubMenu
               key={item.label}
@@ -247,6 +273,79 @@ export default function LeftNav({ isOpen }: LeftNavProps) {
               isOpen={isOpen}
             />
           ))}
+        </div>
+        {/* Bottom controls for mobile */}
+        <div className="md:hidden absolute left-0 right-0 bottom-0 p-3 border-t border-white/10 bg-primary-foreground">
+          <div className="flex items-center justify-around">
+            {/* Profile */}
+            <Link
+              href="/profile"
+              className="flex flex-col items-center justify-center p-2 rounded-lg hover:bg-white/10 transition-colors duration-200"
+            >
+              <UserIcon className="w-5 h-5 text-primary" />
+              <span className="text-[11px] text-primary mt-1">
+                {t("Profile")}
+              </span>
+            </Link>
+            {/* Help */}
+            <Link
+              href="/help/faq"
+              className="flex flex-col items-center justify-center p-2 rounded-lg hover:bg-white/10 transition-colors duration-200"
+            >
+              <InfoIcon className="w-5 h-5 text-primary" />
+              <span className="text-[11px] text-primary mt-1">{t("Help")}</span>
+            </Link>
+            {/* Language */}
+            <div className="relative" ref={langRef}>
+              <button
+                onClick={() => setIsLangOpen((v) => !v)}
+                className="flex flex-col items-center justify-center p-2 rounded-lg hover:bg-white/10 transition-colors duration-200"
+                aria-label="Language"
+              >
+                <Globe className="w-5 h-5 text-primary" />
+                <span className="text-[11px] text-primary mt-1">
+                  {t("Language")}
+                </span>
+              </button>
+              {isLangOpen && (
+                <div className="absolute bottom-12 left-1/2 -translate-x-1/2 w-44 bg-slate-900/90 backdrop-blur-xl border border-white/20 rounded-xl shadow-2xl">
+                  <button
+                    onClick={() => changeLanguage("bg")}
+                    className="flex items-center w-full text-left px-4 py-3 text-white/80 hover:text-white hover:bg-white/10"
+                  >
+                    <img
+                      src="/Flag_of_Bulgaria.png"
+                      alt="Bulgarian Flag"
+                      className="w-5 h-4 mr-2"
+                    />
+                    {t("Bulgarian")}
+                  </button>
+                  <button
+                    onClick={() => changeLanguage("en")}
+                    className="flex items-center w-full text-left px-4 py-3 text-white/80 hover:text-white hover:bg-white/10"
+                  >
+                    <img
+                      src="/Flag_of_the_United_Kingdom.png"
+                      alt="British Flag"
+                      className="w-5 h-4 mr-2"
+                    />
+                    {t("English")}
+                  </button>
+                  <button
+                    onClick={() => changeLanguage("de")}
+                    className="flex items-center w-full text-left px-4 py-3 text-white/80 hover:text-white hover:bg-white/10"
+                  >
+                    <img
+                      src="/Flag_of_Germany.png"
+                      alt="German Flag"
+                      className="w-5 h-4 mr-2"
+                    />
+                    {t("German")}
+                  </button>
+                </div>
+              )}
+            </div>
+          </div>
         </div>
       </div>
     </nav>

@@ -8,7 +8,8 @@ import {
   Mail,
   ArrowLeft,
   Clock,
-} from "lucide-react"; // Добавяме Clock
+  CalendarDays,
+} from "lucide-react"; // Добавяме Clock и CalendarDays
 import { CustomTooltip } from "../customUIComponents/CustomTooltip";
 // Може да ви трябват и компоненти като DropdownMenu, Popover или Dialog
 // import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from "@/components/ui/dropdown-menu";
@@ -39,9 +40,16 @@ export function BusinessHeader({ business }: BusinessHeaderProps) {
 
   const isOpen = isBusinessOpenNow(business.schedule);
   const isClosed = !isOpen;
+  // Generic fallback for missing values
+  const displayValue = (val?: string | null) => {
+    if (!val || val.toString().trim() === "") return "N/A";
+    return val;
+  };
+  // Fallback for schedule (keep existing monday reference with N/A safety)
+  const todaySchedule = business.schedule?.monday || "N/A";
   return (
     <div className="relative bg-card border-b border-border shadow-md">
-      <div className="absolute top-4 right-4 z-10">
+      <div className="absolute top-4 right-4 z-10  hidden md:block">
         <CustomTooltip
           onClick={() => router.back()}
           tooltipText={t("Back")}
@@ -49,8 +57,8 @@ export function BusinessHeader({ business }: BusinessHeaderProps) {
         />
       </div>
       <div className="container mx-auto px-4 py-10 lg:py-16">
-        <div className="grid md:grid-cols-12 gap-8">
-          <div className="md:col-span-5 relative h-64 md:h-80 lg:h-96 rounded-xl overflow-hidden shadow-lg">
+        <div className="flex flex-col md:grid md:grid-cols-12 gap-8">
+          <div className=" items-center md:col-span-5 relative h-64 md:h-80 lg:h-96 rounded-xl overflow-hidden shadow-lg">
             <img
               src={business.businessImageUrl || "/default-business-image.png"}
               alt={business.businessName}
@@ -69,64 +77,90 @@ export function BusinessHeader({ business }: BusinessHeaderProps) {
             {/* Contacts and Location - Стилизираме малко по-добре */}
             <div className="space-y-4 text-base text-muted-foreground">
               {/* Работно време - Новото добавяне */}
-              <div className="flex items-center gap-3 font-semibold">
-                <Clock
-                  className="h-5 w-5 flex-shrink-0"
-                  style={{
-                    color: isClosed ? "hsl(0, 80%, 50%)" : "hsl(142, 71%, 45%)",
-                  }}
-                />{" "}
-                {/* Червено/Зелено */}
-                <span className={isClosed ? "text-red-500" : "text-green-600"}>
-                  {isClosed ? t("CLOSED") : t("OPEN")} {t("NOW")}
-                </span>
-                <span className="font-normal text-foreground">
-                  {todayName}: ({business.schedule.monday})
-                </span>
+              <div className="flex flex-col md:flex-row md:items-center gap-2 font-semibold">
+                <div className="flex items-center gap-2">
+                  <Clock
+                    className="h-5 w-5 flex-shrink-0"
+                    style={{
+                      color: isClosed
+                        ? "hsl(0, 80%, 50%)"
+                        : "hsl(142, 71%, 45%)",
+                    }}
+                  />
+                  <span
+                    className={isClosed ? "text-red-500" : "text-green-600"}
+                  >
+                    {isClosed ? t("CLOSED") : t("OPEN")} {t("NOW")}
+                  </span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <CalendarDays className="h-5 w-5 flex-shrink-0 text-primary" />
+                  <span className="font-normal text-foreground">
+                    {todayName}: ({business.schedule.monday})
+                  </span>
+                </div>
               </div>
 
               {/* Адрес */}
               <div className="flex items-start gap-3">
                 <MapPin className="h-5 w-5 mt-0.5 flex-shrink-0 text-primary" />
                 <span className="hover:text-foreground transition-colors cursor-pointer">
-                  {business.address}, {business.city}
+                  {business.address || business.city
+                    ? `${displayValue(business.address)}, ${displayValue(
+                        business.city
+                      )}`
+                    : displayValue("")}
                 </span>
               </div>
 
               {/* Телефон */}
               <div className="flex items-center gap-3">
                 <Phone className="h-5 w-5 flex-shrink-0 text-primary" />
-                <a
-                  href={`tel:${business.phone}`}
-                  className="hover:text-primary font-medium transition-colors"
-                >
-                  {business.phone}
-                </a>
+                {business.phone ? (
+                  <a
+                    href={`tel:${business.phone}`}
+                    className="hover:text-primary font-medium transition-colors"
+                  >
+                    {business.phone}
+                  </a>
+                ) : (
+                  <span className="text-muted-foreground">
+                    {displayValue(business.phone)}
+                  </span>
+                )}
               </div>
 
               {/* Имейл */}
               <div className="flex items-center gap-3">
                 <Mail className="h-5 w-5 flex-shrink-0 text-primary" />
-                <a
-                  href={`mailto:${business.email}`}
-                  className="hover:text-primary transition-colors"
-                >
-                  {business.email}
-                </a>
+                {business.email ? (
+                  <a
+                    href={`mailto:${business.email}`}
+                    className="hover:text-primary transition-colors"
+                  >
+                    {business.email}
+                  </a>
+                ) : (
+                  <span className="text-muted-foreground">
+                    {displayValue(business.email)}
+                  </span>
+                )}
               </div>
 
               {/* Уебсайт */}
-              <div className="flex items-center gap-3">
-                <Globe className="h-5 w-5 flex-shrink-0 text-primary" />
-                <a
-                  href={`https://${business.website}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="hover:text-primary transition-colors"
-                >
-                  {business.website}
-                </a>
-              </div>
+              {business.website && (
+                <div className="flex items-center gap-3">
+                  <Globe className="h-5 w-5 flex-shrink-0 text-primary" />
+                  <a
+                    href={`https://${business.website}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="hover:text-primary transition-colors"
+                  >
+                    {business.website}
+                  </a>
+                </div>
+              )}
             </div>
           </div>
         </div>
