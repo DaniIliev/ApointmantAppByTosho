@@ -39,30 +39,46 @@ export function PerformanceChart({
   data,
   type,
   dataKey = "value",
-  dataKeys, // 👈 ИЗПОЛЗВАМЕ НОВИЯ ПРОП
+  dataKeys,
   xAxisKey = "name",
   className,
   colors = defaultColors,
 }: PerformanceChartProps) {
-  // Определяме финалния списък с ключове за данните
-  // Приоритет: dataKeys (масив) > dataKey (единичен ключ)
   const finalDataKeys = dataKeys && dataKeys.length > 0 ? dataKeys : [dataKey];
 
   const renderChart = () => {
     switch (type) {
       case "line":
         return (
-          <ResponsiveContainer width="100%" height={300}>
+          <ResponsiveContainer
+            width="100%"
+            height={300}
+            className="focus-visible:outline-none"
+            style={{ outline: "none" }}
+          >
             <LineChart
               data={data}
-              margin={{ top: 5, right: 20, left: -20, bottom: 5 }}
+              margin={{ top: 20, right: 20, left: -9, bottom: 20 }}
             >
               <CartesianGrid
                 strokeDasharray="3 3"
                 stroke="rgba(50, 50, 50, 0.5)" // Използваме само един <CartesianGrid>
               />
-              <XAxis dataKey={xAxisKey} stroke="#666" fontSize={14} />
-              <YAxis stroke="#666" fontSize={14} />
+              <XAxis
+                dataKey={xAxisKey}
+                stroke="#666"
+                fontSize={14}
+                // tickMargin={2}
+                // axisLine={false}
+                // tickLine={false}
+              />
+              <YAxis
+                stroke="#666"
+                fontSize={14}
+                // tickMargin={8}
+                // axisLine={false}
+                // tickLine={false}
+              />
               <Tooltip
                 contentStyle={{
                   backgroundColor: "rgba(30, 30, 60, 0.9)",
@@ -71,7 +87,7 @@ export function PerformanceChart({
                   backdropFilter: "blur(10px)",
                 }}
               />
-              <Legend />
+              <Legend className="text-white" />
               {/* Рендиране на множество линии */}
               {finalDataKeys.map((key, index) => (
                 <Line
@@ -94,17 +110,37 @@ export function PerformanceChart({
 
       case "bar":
         return (
-          <ResponsiveContainer width="100%" height={300}>
+          <ResponsiveContainer
+            width="100%"
+            height={300}
+            className="focus-visible:outline-none"
+            style={{ outline: "none" }}
+          >
             <BarChart
               data={data}
-              margin={{ top: 5, right: 20, left: -20, bottom: 5 }}
+              margin={{ top: 24, right: 24, left: 16, bottom: 24 }}
+              barCategoryGap={12}
+              barGap={4}
             >
               <CartesianGrid
                 strokeDasharray="3 3"
                 stroke="rgba(50, 50, 50, 0.5)"
               />
-              <XAxis dataKey={xAxisKey} stroke="#666" fontSize={14} />
-              <YAxis stroke="#666" fontSize={14} />
+              <XAxis
+                dataKey={xAxisKey}
+                stroke="#666"
+                fontSize={14}
+                tickMargin={8}
+                axisLine={false}
+                tickLine={false}
+              />
+              <YAxis
+                stroke="#666"
+                fontSize={14}
+                tickMargin={8}
+                axisLine={false}
+                tickLine={false}
+              />
               <Tooltip
                 contentStyle={{
                   backgroundColor: "rgba(30, 30, 60, 0.9)",
@@ -175,8 +211,9 @@ export function PerformanceChart({
 
   return (
     <Card
+      tabIndex={-1}
       className={cn(
-        "backdrop-blur-md bg-card/80 border-white/20 shadow-xl",
+        "backdrop-blur-md bg-card/80 border-white/20 shadow-xl focus-visible:outline-none focus:outline-none outline-none no-outline",
         className
       )}
     >

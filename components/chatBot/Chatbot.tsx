@@ -74,7 +74,7 @@ export default function Chatbot() {
   };
 
   return (
-    <div className="fixed bottom-4 right-12 z-50">
+    <div className="fixed bottom-4 right-4 z-50">
       {isOpen ? (
         <div className="w-80 h-96 bg-background rounded-xl shadow-2xl flex flex-col transition-all duration-300">
           <div className="flex justify-between items-center p-4 bg-primary text-primary-foreground rounded-t-xl">
@@ -117,7 +117,7 @@ export default function Chatbot() {
           variant="default"
           size="icon"
           onClick={() => setIsOpen(true)}
-          className="rounded-full w-14 h-14 shadow-lg bg-gradient-to-r from-primary to-accent hover:from-primary/90 hover:to-accent/90"
+          className="rounded-full w-10 h-10 shadow-lg bg-gradient-to-r from-primary to-accent hover:from-primary/90 hover:to-accent/90"
         >
           <MessageCircle className="w-6 h-6 text-primary-foreground" />
         </Button>

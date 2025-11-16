@@ -50,7 +50,7 @@ export default function OwnerPage() {
 
   if (isLoading) {
     return (
-      <div className="container mx-auto px-4 py-8 text-center text-lg">
+      <div className="container mx-auto px-4  text-center text-lg">
         Зареждане на бизнес конфигурация...
       </div>
     );
@@ -58,14 +58,14 @@ export default function OwnerPage() {
 
   if (error || !businessData) {
     return (
-      <div className="container mx-auto px-4 py-8 text-center text-red-500">
+      <div className="container mx-auto px-4  text-center text-red-500">
         Грешка: {error || "Няма данни за бизнеса."}
       </div>
     );
   }
 
   return (
-    <div className="container mx-auto px-4 py-8 min-h-screen">
+    <div className="container mx-auto px-4  min-h-screen">
       <div className="space-y-10">
         <BusinessHeader business={businessData} />
         <BusinessInfo business={businessData} />

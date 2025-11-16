@@ -46,14 +46,12 @@
   --primary-dark: #2a4a8b;
   --secondary: #00bfff;
   --accent: #00bfff;
-  --text-primary: #1f2937;
 }
 .theme-purple {
   --primary: #8a2be2; /* Blue-Violet */
   --primary-dark: #6a1ba5;
   --secondary: #d8bfd8; /* Thistle */
   --accent: #d8bfd8;
-  --text-primary: #1f2937; /* Keeping it dark */
 }
 /* Green Theme */
 .theme-green {
@@ -63,7 +61,6 @@
   /* Replace with your desired green secondary/accent color */
   --secondary: #a5d6a7; /* Lighter Green Accent */
   --accent: #a5d6a7;
-  --text-primary: #1f2937;
 }
 .theme-red {
   /* Replace with your desired red primary color */
@@ -72,9 +69,9 @@
   /* Replace with your desired red secondary/accent color */
   --secondary: #ef9a9a; /* Lighter Red Accent */
   --accent: #ef9a9a;
-  --text-primary: #1f2937;
 }
 @theme inline {
+  --color-text-primary: var(--text-primary);
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-card: var(--card);
@@ -109,6 +106,42 @@
     background-color: var(--background);
     color: var(--foreground);
   }
+}
+
+/* Scrollbars: light vs dark theme */
+/* Define CSS variables for scrollbar colors */
+:root {
+  --scrollbar-track: transparent;
+  --scrollbar-thumb: #ffffff; /* white thumb on light */
+  --scrollbar-thumb-hover: #e5e7eb; /* tailwind zinc-200 */
+}
+.dark {
+  --scrollbar-track: transparent;
+  --scrollbar-thumb: #374151; /* slate-700 */
+  --scrollbar-thumb-hover: #4b5563; /* slate-600 */
+}
+
+/* Firefox */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--scrollbar-thumb) var(--scrollbar-track);
+}
+
+/* WebKit (Chrome, Edge, Safari) */
+*::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+*::-webkit-scrollbar-track {
+  background: var(--scrollbar-track);
+}
+*::-webkit-scrollbar-thumb {
+  background-color: var(--scrollbar-thumb);
+  border-radius: 9999px;
+  border: 2px solid var(--scrollbar-track);
+}
+*::-webkit-scrollbar-thumb:hover {
+  background-color: var(--scrollbar-thumb-hover);
 }
 
 @layer utilities {
@@ -150,6 +183,12 @@
   }
 }
 
+/* Utility: remove outlines inside specific containers (e.g., charts) */
+.no-outline,
+.no-outline * {
+  outline: none !important;
+}
+
 @keyframes float {
   0%,
   100% {
@@ -166,38 +205,39 @@
   }
 }
 
-/* @media (min-width: 768px) {
-  .md-clip-top-slant {
-    clip-path: polygon(0 10%, 100% 0, 100% 100%, 0 100%);
-  }
-  .md-clip-bottom-slant {
-    clip-path: polygon(0 0, 100% 0, 100% 85%, 0 100%);
-  }
-} */
-
-/* Adding scroll reveal animations */
 .animate-in {
   opacity: 1 !important;
-  transform: translateY(0) scale(1) !important;
+  transform: scale(1) !important;
+  transition-timing-function: cubic-bezier(0.34, 1.56, 0.64, 1) !important;
 }
 
 .fade-up {
-  transform: translateY(30px);
+  transform: scale(0.88);
 }
 
 .fade-in {
-  transform: scale(0.95);
-}
-
-/* .slide-left {
-  transform: translateX(30px);
+  transform: scale(0.85);
 }
 
 .slide-right {
-  transform: translateX(-30px);
-} */
+  transform: scale(0.88);
+}
 
-/* Adding hero background animations */
+.slide-left {
+  transform: scale(0.88);
+}
+
+/* Add smooth scaling on hover for cards and interactive elements */
+@keyframes scale-in {
+  0% {
+    transform: scale(0.85);
+    opacity: 0;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
 @keyframes subtle-zoom {
   0%,
   100% {

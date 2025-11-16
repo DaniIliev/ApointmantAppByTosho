@@ -20,9 +20,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import callApi from "../Api/callApi";
 import { jwtDecode } from "jwt-decode";
 import { ScheduleModal } from "./ScheduleModal";
-// Импорт на новия компонент
 
-// Типове за данните (запазваме ги тук за момента)
 export type TimeRange = {
   start: string | null;
   end: string | null;
@@ -520,29 +518,22 @@ export default function StaffSchedulePage() {
       accessorKey: "actions",
       header: "Действия",
       cell: ({ row }) => (
-        <div className="flex gap-2">
-          <Button
-            variant="outline"
-            size="icon"
+        <div className="flex items-center gap-0.5 mobile-actions">
+          <CustomTooltip
             onClick={() => router.push(`/schedule/${row.original._id}`)}
-          >
-            <Eye />
-          </Button>
-          {/* Бутон за редактиране, който отваря модала */}
-          <Button
-            variant="outline"
-            size="icon"
+            tooltipText={t("View Details")}
+            icon={<Eye />}
+          />
+          <CustomTooltip
             onClick={() => openScheduleModal(row.original)}
-          >
-            <Pencil className="h-4 w-4" />
-          </Button>
-          <Button
-            variant="destructive"
-            size="icon"
+            tooltipText={t("Edit")}
+            icon={<Pencil />}
+          />
+          <CustomTooltip
             onClick={() => removeSchedule(row.original._id)}
-          >
-            <Trash2 className="h-4 w-4" />
-          </Button>
+            tooltipText={t("Delete")}
+            icon={<Trash2 className=" text-red-500" />}
+          />
         </div>
       ),
       enableHiding: false,

@@ -1,6 +1,6 @@
 // components/sections/staff-section.tsx (МИНИМАЛИСТИЧНА ВЕРСИЯ)
 import callApi from "@/app/Api/callApi";
-import { StaffMember } from "@/app/staff/page";
+import { StaffMember } from "@/app/staff/types";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Star, UserCheck } from "lucide-react"; // Оставихме само нужните икони
 import { useEffect, useState } from "react";

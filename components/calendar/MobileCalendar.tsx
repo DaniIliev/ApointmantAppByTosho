@@ -115,7 +115,7 @@ const WeeklyCalendar: React.FC<WeeklyCalendarProps> = ({
           <ChevronRight className="h-5 w-5" />
         </button>
       </div>
-      <div className="flex justify-between items-center p-2">
+      <div className="flex justify-between items-center p-2 pb-3">
         {weekDays.map((date: Date) => (
           <button
             key={date.toString()}
@@ -303,7 +303,8 @@ const MobileCalendar = ({ appointments }: MobileCalendarProps) => {
     if (element) {
       element.scrollIntoView({
         behavior: "smooth",
-        block: "start",
+        block: "nearest",
+        inline: "nearest",
       });
       setTimeout(() => {
         isUserScrolling.current = false;
@@ -412,6 +413,8 @@ const MobileCalendar = ({ appointments }: MobileCalendarProps) => {
         .scrolling-container::-webkit-scrollbar-thumb:hover {
           background: #555;
         }
+        /* Remove extra top scroll padding to align first day flush under search */
+        .scrolling-container { scroll-padding-top: 0; }
         `}
       </style>
 
@@ -420,7 +423,7 @@ const MobileCalendar = ({ appointments }: MobileCalendarProps) => {
         <div
           className={cn(
             "overflow-hidden transition-all duration-300 ease-in-out w-full",
-            isMonthlyView ? "h-auto" : "h-26"
+            isMonthlyView ? "h-auto" : "h-28"
           )}
         >
           {isMonthlyView ? (
@@ -451,7 +454,7 @@ const MobileCalendar = ({ appointments }: MobileCalendarProps) => {
       </div>
 
       {/* Search Bar */}
-      <div className="relative mb-4 px-4">
+      <div className="relative mb-0 px-4">
         <Search className="absolute left-7 top-1/2 -translate-y-1/2 text-gray-400" />
         <input
           type="text"
@@ -466,7 +469,7 @@ const MobileCalendar = ({ appointments }: MobileCalendarProps) => {
 
       {/* Appointments List */}
       <div
-        className="flex-1 overflow-y-auto space-y-4 p-4 scrolling-container"
+        className="flex-1 overflow-y-auto space-y-4 px-4 pb-4 scrolling-container"
         ref={containerRef}
       >
         {allDatesInYear.length > 0 ? (

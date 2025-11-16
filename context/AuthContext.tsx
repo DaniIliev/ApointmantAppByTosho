@@ -6,6 +6,7 @@ import { jwtDecode } from "jwt-decode";
 import { findUserByID } from "@/app/Api/services/userService";
 import callApi from "@/app/Api/callApi";
 import { redirect } from "next/navigation";
+import LoadingBackdrop from "@/components/ui/LoadingBackdrop";
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
@@ -100,8 +101,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   //   });
   // };
   return (
-    <AuthContext.Provider value={{ user, token, login, logout }}>
-      {isLoading ? <div>Loading...</div> : children}
+    <AuthContext.Provider value={{ user, setUser, token, login, logout }}>
+      {isLoading ? <LoadingBackdrop loading={true} /> : children}
     </AuthContext.Provider>
   );
 };

@@ -53,7 +53,7 @@ export function HeroSection() {
         {/* Title */}
         <h1
           className="text-5xl md:text-7xl lg:text-8xl font-extrabold mb-6 text-balance font-sans
-                     animate-in fade-in slide-in-from-top-8 duration-700 [text-shadow:_0_4px_10px_rgb(0_0_0_/_0.5)]"
+                     animate-in fade-in slide-in-from-top-8 duration-700 text-white [text-shadow:_0_4px_10px_rgb(0_0_0_/_0.5)]"
         >
           Book Easily with <span className="text-primary">AppointDI</span>
         </h1>

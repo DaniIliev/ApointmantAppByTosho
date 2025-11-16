@@ -50,11 +50,11 @@ export function BusinessMap({ business }: BusinessMapProps) {
     window.open(mapLink, "_blank", "noopener,noreferrer");
   };
   return (
-    <Card className="shadow-lg pt-2">
+    <Card className="shadow-lg pt-2 pb-4">
       <CardHeader className="flex flex-row align-center justify-between items-center border-b">
         <div className="flex items-center gap-3">
           <MapPin className="h-6 w-6 text-primary" />
-          <CardTitle className="font-bold text-2xl font-sans">
+          <CardTitle className="font-bold text-primary text-2xl font-sans">
             Our Location
           </CardTitle>
         </div>
