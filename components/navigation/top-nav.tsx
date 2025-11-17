@@ -226,7 +226,13 @@ export default function TopNav({
             )}
           </button>
           <h1 className="flex align-end text-l font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
-            <Image src="/AppointmantPro.png" alt="logo" width={32} height={32} className="w-8 h-auto" />
+            <Image
+              src="/AppointmantPro.png"
+              alt="logo"
+              width={32}
+              height={32}
+              className="w-8 h-auto"
+            />
             <span className="">{t("AppointDI ")}</span>
           </h1>
         </div>

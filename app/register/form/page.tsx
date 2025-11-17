@@ -107,7 +107,13 @@ export default function RegisterFormPage() {
               />
             </div>
             <div className="flex justify-center mb-4">
-              <Image src="/AppointmantPro.png" alt="logo" width={40} height={40} className="w-10 h-auto" />
+              <Image
+                src="/AppointmantPro.png"
+                alt="logo"
+                width={40}
+                height={40}
+                className="w-10 h-auto"
+              />
             </div>
 
             <div className="flex justify-center mb-4">
