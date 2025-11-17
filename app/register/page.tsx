@@ -1,6 +1,7 @@
 "use client";
 
 import type React from "react";
+import Image from "next/image";
 import { useTranslation } from "react-i18next";
 import { useRouter } from "next/navigation";
 import { Card, CardContent } from "@/components/ui/card";
@@ -21,7 +22,7 @@ export default function RegisterPage() {
       <div className="w-full max-w-2xl mx-auto z-10 flex flex-col items-center">
         <div className="text-center space-y-4 mb-8">
           <div className="flex justify-center mb-6">
-            <img src="/AppointmantPro.png" alt="logo" className="w-12" />
+            <Image src="/AppointmantPro.png" alt="logo" width={48} height={48} className="w-12 h-auto" />
           </div>
           <h1 className="text-4xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent tracking-tight">
             {t("Join our Team")}

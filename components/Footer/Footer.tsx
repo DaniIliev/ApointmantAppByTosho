@@ -1,5 +1,6 @@
 import { Calendar } from "lucide-react";
 import React from "react";
+import Image from "next/image";
 
 const Footer = () => {
   return (
@@ -8,7 +9,7 @@ const Footer = () => {
         <div className="flex items-center justify-between max-w-7xl mx-auto">
           {/* Left: Logo + AppointDI */}
           <div className="flex items-center gap-2">
-            <img src="/AppointmantPro.png" alt="logo" className="w-8 h-8" />
+            <Image src="/AppointmantPro.png" alt="logo" width={32} height={32} className="w-8 h-8" />
             <h1 className="text-lg font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
               AppointDI
             </h1>

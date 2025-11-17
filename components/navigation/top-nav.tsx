@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
+import Image from "next/image";
 import Link from "next/link";
 import { useTranslation } from "react-i18next";
 import { usePathname, useRouter } from "next/navigation";
@@ -225,7 +226,7 @@ export default function TopNav({
             )}
           </button>
           <h1 className="flex align-end text-l font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
-            <img src="/AppointmantPro.png" alt="logo" className="w-8" />
+            <Image src="/AppointmantPro.png" alt="logo" width={32} height={32} className="w-8 h-auto" />
             <span className="">{t("AppointDI ")}</span>
           </h1>
         </div>

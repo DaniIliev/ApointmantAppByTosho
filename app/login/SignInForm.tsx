@@ -48,7 +48,7 @@ export function SignInForm({ onBack, onSuccess }: SignInFormProps) {
         <div className="absolute -inset-0.5 bg-gradient-to-br from-cyan-500 via-primary to-pink-500 rounded-3xl opacity-75 blur-sm dark:blur-xl" />
         <div className="w-full relative bg-white dark:bg-gray-900 backdrop-blur-xl rounded-3xl p-6 border border-primary/20 shadow-6xl">
           <div className="flex justify-center mb-4">
-            <img src="/AppointmantPro.png" alt="logo" className="w-10" />
+            <Image src="/AppointmantPro.png" alt="logo" width={40} height={40} className="w-10 h-auto" />
           </div>
 
           <div className="flex justify-center mb-4">
@@ -136,7 +136,7 @@ export function SignInForm({ onBack, onSuccess }: SignInFormProps) {
               </a>
             </div>
             <div className="mt-4 text-center text-sm text-muted-foreground">
-              <span>Don't have an account? </span>
+              <span>Don&apos;t have an account? </span>
               <a
                 href="/register"
                 className="text-primary hover:text-accent font-semibold hover:underline transition-colors"
