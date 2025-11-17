@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, use } from "react";
+import Image from "next/image";
 import { useSearchParams, useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { LabeledInput } from "@/components/customUIComponents/LabeledInput";
@@ -106,7 +107,13 @@ export default function RegisterFormPage() {
               />
             </div>
             <div className="flex justify-center mb-4">
-              <img src="/AppointmantPro.png" alt="logo" className="w-10" />
+              <Image
+                src="/AppointmantPro.png"
+                alt="logo"
+                width={40}
+                height={40}
+                className="w-10 h-auto"
+              />
             </div>
 
             <div className="flex justify-center mb-4">

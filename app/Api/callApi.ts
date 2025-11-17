@@ -36,8 +36,8 @@ const callApi = async (
       }
     }
   }
-  // const url = "http://localhost:8080";
-  const url = "https://apointmantappservice-production.up.railway.app";
+  const url = "http://localhost:8080";
+  // const url = "https://apointmantappservice-production.up.railway.app";
   const result: any = await fetch(`${url}${endpoint}`, {
     method: method,
     headers: headers,
