@@ -29,7 +29,8 @@ import {
   Info as InfoIcon,
   User as UserIcon,
   QrCode,
-  LogOut, // For QR Code page
+  LogOut,
+  LayoutList, // For QR Code page
 } from "lucide-react";
 
 import { useAuthContext } from "@/context/AuthContext";
@@ -249,6 +250,11 @@ export default function LeftNav({ isOpen }: LeftNavProps) {
             href: "/performance",
             label: t("Performance"),
             icon: BarChart3,
+          },
+          {
+            href: "/kanban",
+            label: t("Task Manager"),
+            icon: LayoutList,
           },
         ]
       : [

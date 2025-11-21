@@ -155,6 +155,8 @@ export const ScheduleModal = ({
       label={t(isEditMode ? "Edit Schedule" : "Create New Schedule")}
       open={isOpen}
       onOpenChange={onOpenChange}
+      autoDetectDirty
+      onConfirmSave={handleLocalSave}
     >
       <div className="space-y-3 p-2">
         {/* Date Period */}

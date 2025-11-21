@@ -73,6 +73,8 @@ export const StaffEditModal: React.FC<StaffEditModalProps> = ({
       open={open}
       onOpenChange={onOpenChange}
       label={t("Edit Staff Member") as string}
+      autoDetectDirty
+      onConfirmSave={handleSubmit}
       width="lg"
     >
       <div className="space-y-3 p-2">
