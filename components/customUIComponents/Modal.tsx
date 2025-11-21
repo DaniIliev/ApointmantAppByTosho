@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import {
   Dialog,
   DialogContent,
@@ -26,6 +26,19 @@ interface ModalProps {
     | "6xl"
     | "7xl"
     | "full";
+  className?: string;
+  // Unsaved changes confirmation props
+  confirmClose?: boolean; // enable confirmation when closing with unsaved changes
+  hasUnsavedChanges?: boolean; // parent decides if content is dirty
+  onConfirmSave?: () => Promise<void> | void; // optional save when user chooses Save and close
+  autoDetectDirty?: boolean; // automatically detect input changes inside modal content
+  confirmTexts?: {
+    title?: string;
+    message?: string;
+    continueEditing?: string;
+    discard?: string;
+    saveAndClose?: string;
+  };
 }
 
 export const Modal = ({
@@ -34,8 +47,17 @@ export const Modal = ({
   onOpenChange,
   children,
   width = "2xl",
+  className,
+  confirmClose = true,
+  hasUnsavedChanges,
+  onConfirmSave,
+  autoDetectDirty,
+  confirmTexts,
 }: ModalProps) => {
+  const contentRef = useRef<HTMLDivElement | null>(null);
+  const [internalDirty, setInternalDirty] = useState(false);
   const { t } = useTranslation();
+  const [unsavedOpen, setUnsavedOpen] = useState(false);
   const widthClassMap: Record<NonNullable<ModalProps["width"]>, string> = {
     sm: "max-w-sm",
     md: "max-w-md",
@@ -50,23 +72,136 @@ export const Modal = ({
     full: "max-w-[95vw]",
   };
   const widthClass = widthClassMap[width] ?? widthClassMap["2xl"];
+  const texts = useMemo(
+    () => ({
+      title: confirmTexts?.title ?? "Unsaved changes",
+      message:
+        confirmTexts?.message ??
+        "You have unsaved changes. Do you want to save them before closing?",
+      continueEditing: confirmTexts?.continueEditing ?? "Continue editing",
+      discard: confirmTexts?.discard ?? "Discard changes",
+      saveAndClose: confirmTexts?.saveAndClose ?? "Save and close",
+    }),
+    [confirmTexts]
+  );
+
+  const handleOpenChange = async (nextOpen: boolean) => {
+    const effectiveDirty =
+      hasUnsavedChanges ?? (autoDetectDirty ? internalDirty : false);
+    if (!nextOpen && confirmClose && effectiveDirty) {
+      setUnsavedOpen(true);
+      return;
+    }
+    onOpenChange(nextOpen);
+  };
+
+  // Auto-detect dirty state by observing form fields inside the modal
+  useEffect(() => {
+    if (!open || !autoDetectDirty) return;
+    const container = contentRef.current;
+    if (!container) return;
+
+    const getSnapshot = () => {
+      const fields = Array.from(
+        container.querySelectorAll<
+          HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
+        >("input, textarea, select")
+      );
+      const values = fields.map((el) => {
+        if (
+          el instanceof HTMLInputElement &&
+          (el.type === "checkbox" || el.type === "radio")
+        ) {
+          return { name: el.name || el.id, value: el.checked };
+        }
+        return {
+          name: el.name || el.id,
+          value: (el as HTMLInputElement).value,
+        };
+      });
+      return JSON.stringify(values);
+    };
+
+    const initial = getSnapshot();
+    setInternalDirty(false);
+
+    const handler = () => {
+      const current = getSnapshot();
+      setInternalDirty(current !== initial);
+    };
+
+    container.addEventListener("input", handler, { passive: true });
+    container.addEventListener("change", handler, { passive: true });
+
+    return () => {
+      container.removeEventListener("input", handler as EventListener);
+      container.removeEventListener("change", handler as EventListener);
+    };
+  }, [open, autoDetectDirty]);
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent
-        className={`${widthClass} !important bg-card/95 backdrop-blur-lg border-2 border-primary/20 [&>button]:hidden`}
-      >
-        <DialogHeader>
-          <DialogTitle className="text-2xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
-            {label}
-          </DialogTitle>
-        </DialogHeader>
+    <>
+      <Dialog open={open} onOpenChange={handleOpenChange}>
+        <DialogContent
+          className={`${widthClass} max-h-[90vh] flex flex-col !important bg-card/95 backdrop-blur-lg border-2 border-primary/20 [&>button]:hidden`}
+        >
+          <DialogHeader className="flex-shrink-0">
+            <DialogTitle className="text-2xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
+              {label}
+            </DialogTitle>
+          </DialogHeader>
 
-        <div className="absolute top-4 right-4">
-          <CustomTooltip onClick={() => onOpenChange(false)} icon={<X />} />
-        </div>
+          <div className="absolute top-4 right-4 z-10">
+            <CustomTooltip
+              onClick={() => handleOpenChange(false)}
+              icon={<X />}
+            />
+          </div>
 
-        {children}
-      </DialogContent>
-    </Dialog>
+          <div
+            ref={contentRef}
+            className="flex-1 overflow-y-auto overflow-x-hidden pr-2"
+          >
+            {children}
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Unsaved changes confirmation dialog */}
+      <Dialog open={unsavedOpen} onOpenChange={setUnsavedOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>{texts.title}</DialogTitle>
+          </DialogHeader>
+          <div className="text-sm text-muted-foreground">{texts.message}</div>
+          <div className="flex items-center justify-center gap-2 pt-2">
+            <button
+              className="px-3 py-2 text-sm rounded border"
+              onClick={() => setUnsavedOpen(false)}
+            >
+              {texts.continueEditing}
+            </button>
+            <button
+              className="px-3 py-2 text-sm rounded border"
+              onClick={() => {
+                setUnsavedOpen(false);
+                onOpenChange(false);
+              }}
+            >
+              {texts.discard}
+            </button>
+            <button
+              className="px-3 py-2 text-sm rounded bg-primary text-primary-foreground"
+              onClick={async () => {
+                setUnsavedOpen(false);
+                if (onConfirmSave) await onConfirmSave();
+                onOpenChange(false);
+              }}
+            >
+              {texts.saveAndClose}
+            </button>
+          </div>
+        </DialogContent>
+      </Dialog>
+    </>
   );
 };

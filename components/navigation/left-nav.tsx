@@ -28,7 +28,9 @@ import {
   Globe,
   Info as InfoIcon,
   User as UserIcon,
-  QrCode, // For QR Code page
+  QrCode,
+  LogOut,
+  LayoutList, // For QR Code page
 } from "lucide-react";
 
 import { useAuthContext } from "@/context/AuthContext";
@@ -177,7 +179,7 @@ export default function LeftNav({ isOpen }: LeftNavProps) {
   const { t, i18n } = useTranslation();
   const pathname = usePathname();
   const router = useRouter();
-  const { user } = useAuthContext();
+  const { user, logout } = useAuthContext();
   const [isLangOpen, setIsLangOpen] = useState(false);
   const langRef = useRef<HTMLDivElement>(null);
   useClickOutside(langRef, () => setIsLangOpen(false));
@@ -249,6 +251,11 @@ export default function LeftNav({ isOpen }: LeftNavProps) {
             label: t("Performance"),
             icon: BarChart3,
           },
+          {
+            href: "/kanban",
+            label: t("Task Manager"),
+            icon: LayoutList,
+          },
         ]
       : [
           // { href: "/home", label: t("For Clients"), icon: Users },
@@ -274,79 +281,42 @@ export default function LeftNav({ isOpen }: LeftNavProps) {
             />
           ))}
         </div>
-        {/* Bottom controls for mobile */}
-        <div className="md:hidden absolute left-0 right-0 bottom-0 p-3 border-t border-white/10 bg-primary-foreground">
-          <div className="flex items-center justify-around">
-            {/* Profile */}
-            <Link
-              href="/profile"
-              className="flex flex-col items-center justify-center p-2 rounded-lg hover:bg-white/10 transition-colors duration-200"
-            >
-              <UserIcon className="w-5 h-5 text-primary" />
-              <span className="text-[11px] text-primary mt-1">
-                {t("Profile")}
-              </span>
-            </Link>
-            {/* Help */}
-            <Link
-              href="/help/faq"
-              className="flex flex-col items-center justify-center p-2 rounded-lg hover:bg-white/10 transition-colors duration-200"
-            >
-              <InfoIcon className="w-5 h-5 text-primary" />
-              <span className="text-[11px] text-primary mt-1">{t("Help")}</span>
-            </Link>
-            {/* Language */}
-            <div className="relative" ref={langRef}>
-              <button
-                onClick={() => setIsLangOpen((v) => !v)}
+        {user && (
+          <div className="md:hidden absolute left-0 right-0 bottom-0 p-3 border-t border-white/10 bg-primary-foreground">
+            <div className="flex items-center justify-around">
+              {/* Profile */}
+              <Link
+                href="/profile"
                 className="flex flex-col items-center justify-center p-2 rounded-lg hover:bg-white/10 transition-colors duration-200"
-                aria-label="Language"
               >
-                <Globe className="w-5 h-5 text-primary" />
+                <UserIcon className="w-5 h-5 text-primary" />
                 <span className="text-[11px] text-primary mt-1">
-                  {t("Language")}
+                  {t("Profile")}
                 </span>
-              </button>
-              {isLangOpen && (
-                <div className="absolute bottom-12 left-1/2 -translate-x-1/2 w-44 bg-slate-900/90 backdrop-blur-xl border border-white/20 rounded-xl shadow-2xl">
-                  <button
-                    onClick={() => changeLanguage("bg")}
-                    className="flex items-center w-full text-left px-4 py-3 text-white/80 hover:text-white hover:bg-white/10"
-                  >
-                    <img
-                      src="/Flag_of_Bulgaria.png"
-                      alt="Bulgarian Flag"
-                      className="w-5 h-4 mr-2"
-                    />
-                    {t("Bulgarian")}
-                  </button>
-                  <button
-                    onClick={() => changeLanguage("en")}
-                    className="flex items-center w-full text-left px-4 py-3 text-white/80 hover:text-white hover:bg-white/10"
-                  >
-                    <img
-                      src="/Flag_of_the_United_Kingdom.png"
-                      alt="British Flag"
-                      className="w-5 h-4 mr-2"
-                    />
-                    {t("English")}
-                  </button>
-                  <button
-                    onClick={() => changeLanguage("de")}
-                    className="flex items-center w-full text-left px-4 py-3 text-white/80 hover:text-white hover:bg-white/10"
-                  >
-                    <img
-                      src="/Flag_of_Germany.png"
-                      alt="German Flag"
-                      className="w-5 h-4 mr-2"
-                    />
-                    {t("German")}
-                  </button>
-                </div>
-              )}
+              </Link>
+              {/* Help */}
+              <Link
+                href="/help/faq"
+                className="flex flex-col items-center justify-center p-2 rounded-lg hover:bg-white/10 transition-colors duration-200"
+              >
+                <InfoIcon className="w-5 h-5 text-primary" />
+                <span className="text-[11px] text-primary mt-1">
+                  {t("Help")}
+                </span>
+              </Link>
+              <Link
+                href="/for-business"
+                onClick={() => logout()}
+                className="flex flex-col items-center justify-center p-2 rounded-lg hover:bg-white/10 transition-colors duration-200"
+              >
+                <LogOut className="w-5 h-5 text-primary" />
+                <span className="text-[11px] text-primary mt-1">
+                  {t("Logout")}
+                </span>
+              </Link>
             </div>
           </div>
-        </div>
+        )}
       </div>
     </nav>
   );

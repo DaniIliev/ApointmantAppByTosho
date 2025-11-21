@@ -1,21 +1,12 @@
 "use client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import {
-  LineChart,
-  Line,
-  BarChart,
-  Bar,
-  PieChart,
-  Pie,
-  Cell,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  Legend,
-  ResponsiveContainer,
-} from "recharts";
 import { cn } from "@/lib/utils";
+import { useMemo } from "react";
+import dynamic from "next/dynamic";
+import type { EChartsOption } from "echarts";
+
+// Dynamic import to avoid SSR issues
+const ReactECharts = dynamic(() => import("echarts-for-react"), { ssr: false });
 
 interface ChartData {
   [key: string]: any;
@@ -26,7 +17,7 @@ interface PerformanceChartProps {
   data: ChartData[];
   type: "line" | "bar" | "pie";
   dataKey?: string;
-  dataKeys?: string[]; // 👈 ДОБАВЕНО
+  dataKeys?: string[];
   xAxisKey?: string;
   className?: string;
   colors?: string[];
@@ -46,168 +37,231 @@ export function PerformanceChart({
 }: PerformanceChartProps) {
   const finalDataKeys = dataKeys && dataKeys.length > 0 ? dataKeys : [dataKey];
 
-  const renderChart = () => {
+  const option = useMemo(() => {
     switch (type) {
-      case "line":
-        return (
-          <ResponsiveContainer
-            width="100%"
-            height={300}
-            className="focus-visible:outline-none"
-            style={{ outline: "none" }}
-          >
-            <LineChart
-              data={data}
-              margin={{ top: 20, right: 20, left: -9, bottom: 20 }}
-            >
-              <CartesianGrid
-                strokeDasharray="3 3"
-                stroke="rgba(50, 50, 50, 0.5)" // Използваме само един <CartesianGrid>
-              />
-              <XAxis
-                dataKey={xAxisKey}
-                stroke="#666"
-                fontSize={14}
-                // tickMargin={2}
-                // axisLine={false}
-                // tickLine={false}
-              />
-              <YAxis
-                stroke="#666"
-                fontSize={14}
-                // tickMargin={8}
-                // axisLine={false}
-                // tickLine={false}
-              />
-              <Tooltip
-                contentStyle={{
-                  backgroundColor: "rgba(30, 30, 60, 0.9)",
-                  border: "1px solid rgba(255,255,255,0.2)",
-                  borderRadius: "8px",
-                  backdropFilter: "blur(10px)",
-                }}
-              />
-              <Legend className="text-white" />
-              {/* Рендиране на множество линии */}
-              {finalDataKeys.map((key, index) => (
-                <Line
-                  key={key}
-                  type="monotone"
-                  dataKey={key}
-                  name={key.charAt(0).toUpperCase() + key.slice(1)} // Форматиране за легендата
-                  stroke={colors[index % colors.length]}
-                  strokeWidth={3}
-                  dot={{
-                    fill: colors[index % colors.length],
-                    strokeWidth: 2,
-                    r: 4,
-                  }}
-                />
-              ))}
-            </LineChart>
-          </ResponsiveContainer>
-        );
+      case "line": {
+        const xAxisData = data.map((item) => item[xAxisKey]);
+        const series = finalDataKeys.map((key, index) => ({
+          name: key.charAt(0).toUpperCase() + key.slice(1),
+          type: "line" as const,
+          data: data.map((item) => item[key]),
+          smooth: true,
+          lineStyle: {
+            width: 3,
+          },
+          itemStyle: {
+            color: colors[index % colors.length],
+          },
+          emphasis: {
+            focus: "series" as const,
+          },
+        }));
 
-      case "bar":
-        return (
-          <ResponsiveContainer
-            width="100%"
-            height={300}
-            className="focus-visible:outline-none"
-            style={{ outline: "none" }}
-          >
-            <BarChart
-              data={data}
-              margin={{ top: 24, right: 24, left: 16, bottom: 24 }}
-              barCategoryGap={12}
-              barGap={4}
-            >
-              <CartesianGrid
-                strokeDasharray="3 3"
-                stroke="rgba(50, 50, 50, 0.5)"
-              />
-              <XAxis
-                dataKey={xAxisKey}
-                stroke="#666"
-                fontSize={14}
-                tickMargin={8}
-                axisLine={false}
-                tickLine={false}
-              />
-              <YAxis
-                stroke="#666"
-                fontSize={14}
-                tickMargin={8}
-                axisLine={false}
-                tickLine={false}
-              />
-              <Tooltip
-                contentStyle={{
-                  backgroundColor: "rgba(30, 30, 60, 0.9)",
-                  border: "1px solid rgba(255,255,255,0.2)",
-                  borderRadius: "8px",
-                  backdropFilter: "blur(10px)",
-                }}
-              />
-              <Legend />
-              {/* Рендиране на множество стълбове */}
-              {finalDataKeys.map((key, index) => (
-                <Bar
-                  key={key}
-                  dataKey={key}
-                  name={key.charAt(0).toUpperCase() + key.slice(1)}
-                  fill={colors[index % colors.length]}
-                  radius={[4, 4, 0, 0]}
-                />
-              ))}
-            </BarChart>
-          </ResponsiveContainer>
-        );
+        return {
+          tooltip: {
+            trigger: "axis",
+            backgroundColor: "rgba(30, 30, 60, 0.9)",
+            borderColor: "rgba(255,255,255,0.2)",
+            borderWidth: 1,
+            textStyle: {
+              color: "#fff",
+            },
+          },
+          legend: {
+            data: finalDataKeys.map(
+              (key) => key.charAt(0).toUpperCase() + key.slice(1)
+            ),
+            textStyle: {
+              color: "#999",
+            },
+            bottom: 0,
+          },
+          grid: {
+            left: "3%",
+            right: "4%",
+            bottom: "15%",
+            top: "10%",
+            containLabel: true,
+          },
+          xAxis: {
+            type: "category",
+            data: xAxisData,
+            axisLine: {
+              lineStyle: {
+                color: "#666",
+              },
+            },
+            axisLabel: {
+              color: "#666",
+              fontSize: 12,
+            },
+          },
+          yAxis: {
+            type: "value",
+            axisLine: {
+              lineStyle: {
+                color: "#666",
+              },
+            },
+            axisLabel: {
+              color: "#666",
+              fontSize: 12,
+            },
+            splitLine: {
+              lineStyle: {
+                color: "rgba(50, 50, 50, 0.5)",
+                type: "dashed",
+              },
+            },
+          },
+          series,
+        };
+      }
 
-      case "pie":
-        // Премахнат е дублираният case "pie"
-        return (
-          <ResponsiveContainer width="100%" height={300}>
-            <PieChart>
-              <Pie
-                data={data}
-                cx="50%"
-                cy="50%"
-                labelLine={false}
-                label={({ name, percent }) => {
-                  if (typeof percent === "number") {
-                    // При PieChart dataKey остава единичен (value)
-                    return `${name} ${(percent * 100).toFixed(0)}%`;
-                  }
-                  return name;
-                }}
-                outerRadius={80}
-                fill="#8884d8"
-                dataKey={dataKey}
-              >
-                {data.map((entry, index) => (
-                  <Cell
-                    key={`cell-${index}`}
-                    fill={colors[index % colors.length]}
-                  />
-                ))}
-              </Pie>
-              <Tooltip
-                contentStyle={{
-                  backgroundColor: "rgba(30, 30, 60, 0.9)",
-                  border: "1px solid rgba(255,255,255,0.2)",
-                  borderRadius: "8px",
-                  backdropFilter: "blur(10px)",
-                }}
-              />
-              <Legend />
-            </PieChart>
-          </ResponsiveContainer>
-        );
+      case "bar": {
+        const xAxisData = data.map((item) => item[xAxisKey]);
+        const series = finalDataKeys.map((key, index) => ({
+          name: key.charAt(0).toUpperCase() + key.slice(1),
+          type: "bar" as const,
+          data: data.map((item) => item[key]),
+          itemStyle: {
+            color: colors[index % colors.length],
+            borderRadius: [4, 4, 0, 0],
+          },
+          emphasis: {
+            focus: "series" as const,
+          },
+        }));
+
+        return {
+          tooltip: {
+            trigger: "axis",
+            backgroundColor: "rgba(30, 30, 60, 0.9)",
+            borderColor: "rgba(255,255,255,0.2)",
+            borderWidth: 1,
+            textStyle: {
+              color: "#fff",
+            },
+            axisPointer: {
+              type: "shadow",
+            },
+          },
+          legend: {
+            data: finalDataKeys.map(
+              (key) => key.charAt(0).toUpperCase() + key.slice(1)
+            ),
+            textStyle: {
+              color: "#999",
+            },
+            bottom: 0,
+          },
+          grid: {
+            left: "3%",
+            right: "4%",
+            bottom: "15%",
+            top: "10%",
+            containLabel: true,
+          },
+          xAxis: {
+            type: "category",
+            data: xAxisData,
+            axisLine: {
+              lineStyle: {
+                color: "#666",
+              },
+            },
+            axisLabel: {
+              color: "#666",
+              fontSize: 12,
+            },
+          },
+          yAxis: {
+            type: "value",
+            axisLine: {
+              lineStyle: {
+                color: "#666",
+              },
+            },
+            axisLabel: {
+              color: "#666",
+              fontSize: 12,
+            },
+            splitLine: {
+              lineStyle: {
+                color: "rgba(50, 50, 50, 0.5)",
+                type: "dashed",
+              },
+            },
+          },
+          series,
+        };
+      }
+
+      case "pie": {
+        const pieData = data.map((item, index) => ({
+          name: item[xAxisKey],
+          value: item[dataKey],
+          itemStyle: {
+            color: colors[index % colors.length],
+          },
+        }));
+
+        return {
+          tooltip: {
+            trigger: "item",
+            backgroundColor: "rgba(30, 30, 60, 0.9)",
+            borderColor: "rgba(255,255,255,0.2)",
+            borderWidth: 1,
+            textStyle: {
+              color: "#fff",
+            },
+            formatter: "{b}: {c} ({d}%)",
+          },
+          legend: {
+            orient: "horizontal",
+            bottom: 0,
+            textStyle: {
+              color: "#999",
+            },
+          },
+          series: [
+            {
+              type: "pie",
+              radius: ["40%", "70%"],
+              center: ["50%", "50%"],
+              avoidLabelOverlap: true,
+              itemStyle: {
+                borderRadius: 8,
+                borderColor: "transparent",
+                borderWidth: 2,
+              },
+              label: {
+                show: true,
+                formatter: "{b}: {d}%",
+                color: "#666",
+              },
+              emphasis: {
+                label: {
+                  show: true,
+                  fontSize: 14,
+                  fontWeight: "bold",
+                },
+                itemStyle: {
+                  shadowBlur: 10,
+                  shadowOffsetX: 0,
+                  shadowColor: "rgba(0, 0, 0, 0.5)",
+                },
+              },
+              data: pieData,
+            },
+          ],
+        };
+      }
+
       default:
-        return null;
+        return {};
     }
-  };
+  }, [data, type, dataKey, finalDataKeys, xAxisKey, colors]);
 
   return (
     <Card
@@ -220,7 +274,15 @@ export function PerformanceChart({
       <CardHeader>
         <CardTitle className="theme-text-gradient py-2">{title}</CardTitle>
       </CardHeader>
-      <CardContent>{renderChart()}</CardContent>
+      <CardContent>
+        <ReactECharts
+          option={option}
+          style={{ height: "300px", width: "100%" }}
+          opts={{ renderer: "canvas" }}
+          notMerge={true}
+          lazyUpdate={true}
+        />
+      </CardContent>
     </Card>
   );
 }
