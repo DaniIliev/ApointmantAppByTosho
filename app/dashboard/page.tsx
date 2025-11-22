@@ -2,6 +2,7 @@
 import { SetStateAction, useEffect, useState } from "react";
 import { Plus } from "lucide-react";
 import { usePageTitle } from "@/context/PageTitleContext";
+import ProtectedRoute from "@/components/guards/ProtectedRoute";
 import { useRightNav } from "@/context/RightNavContext";
 import {
   Appointment,
@@ -33,12 +34,17 @@ type CreateNewDashboardMenuProps = {
 const CreateNewDashboardMenu = ({
   onOpenModal,
 }: CreateNewDashboardMenuProps) => {
+  const { t } = useTranslation();
   return (
-    <CustomTooltip onClick={onOpenModal} tooltipText="Add" icon={<Plus />} />
+    <CustomTooltip
+      onClick={onOpenModal}
+      tooltipText={t("Add")}
+      icon={<Plus />}
+    />
   );
 };
 
-export default function DashboardPage() {
+function DashboardPageContent() {
   const { t } = useTranslation();
   const { user } = useAuthContext();
 
@@ -163,7 +169,7 @@ export default function DashboardPage() {
       (s) => s._id === appointmentData.appointmentTypeId
     );
     if (!service) {
-      toast.error("Invalid service selected.");
+      toast.error(t("Invalid service selected."));
       return;
     }
 
@@ -199,10 +205,10 @@ export default function DashboardPage() {
         notes: "",
         staff: { _id: "", name: "" },
       });
-      toast.success("Appointment created successfully!");
+      toast.success(t("Appointment created successfully!"));
     } catch (error) {
       console.error("Failed to create appointment:", error);
-      toast.error("Failed to create appointment. Please try again.");
+      toast.error(t("Failed to create appointment. Please try again."));
     }
   };
 
@@ -345,5 +351,13 @@ export default function DashboardPage() {
         />
       </Modal>
     </div>
+  );
+}
+
+export default function DashboardPage() {
+  return (
+    <ProtectedRoute requiredRoles={["business", "staff"]}>
+      <DashboardPageContent />
+    </ProtectedRoute>
   );
 }

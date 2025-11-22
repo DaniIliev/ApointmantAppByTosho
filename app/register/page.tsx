@@ -31,7 +31,7 @@ export default function RegisterPage() {
             />
           </div>
           <h1 className="text-4xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent tracking-tight">
-            {t("Join our Team")}
+            {t("Join Our Team")}
           </h1>
         </div>
 

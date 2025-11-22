@@ -26,7 +26,7 @@ const ChatMessage = ({ message, isUser }: ChatMessageProps) => (
   </div>
 );
 
-export default function Chatbot() {
+export default function Chatbot({ businessId }: { businessId?: string }) {
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const [messages, setMessages] = useState<ChatMessageProps[]>([
     { message: "Здравейте! Как мога да ви помогна?", isUser: false }, // Коригирано на message
@@ -50,7 +50,7 @@ export default function Chatbot() {
         {
           message: input,
           userId: user?._id,
-          businessId: "68caf1e6820a832fdbb39b25", // Предаваме businessId
+          businessId: "69199d041d10b3922e2091e8", // Предаваме businessId
         }
       );
 

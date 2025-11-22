@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
+import ProtectedRoute from "@/components/guards/ProtectedRoute";
 import { TimeFilter } from "@/components/performance/TimeFilter";
 import { PerformanceChart } from "@/components/performance/PerformanceChart";
 import { ExportButton } from "@/components/performance/ExportButton";
@@ -179,7 +180,7 @@ const NoDataPlaceholder = ({ t }: { t: any }) => (
   </div>
 );
 
-export default function PerformancePage() {
+function PerformancePageContent() {
   const { t } = useTranslation();
   const [selectedPeriod, setSelectedPeriod] = useState("last30days");
   const [customDateRange, setCustomDateRange] = useState<{
@@ -251,7 +252,7 @@ export default function PerformancePage() {
   }, [setPageTitle, setExtraRightNavMenu, setIsRightNavVisible, t]);
 
   const handleExport = (format: "csv" | "pdf" | "png") => {
-    console.log(t(`Exporting as ${format}`));
+    console.log(t("Exporting as {{format}}", { format }));
   };
 
   const handlePeriodChange = (period: string) => {
@@ -270,7 +271,7 @@ export default function PerformancePage() {
 
   if (isLoading) {
     return (
-      <div className="text-center py-20 text-xl">
+      <div className="text-center py-20 text-xl" aria-live="polite">
         {t("Loading performance data...")}
       </div>
     );
@@ -443,3 +444,14 @@ export default function PerformancePage() {
 //     </>
 //   );
 // };
+
+export default function PerformancePage() {
+  return (
+    <ProtectedRoute
+      requiredRoles={["business"]}
+      requiredPlan={["starter", "professional", "enterprise"]}
+    >
+      <PerformancePageContent />
+    </ProtectedRoute>
+  );
+}

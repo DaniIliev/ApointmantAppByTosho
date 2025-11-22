@@ -19,21 +19,14 @@ export default function ClientLayoutWrapper({
 }>) {
   const pathname = usePathname();
   const { user } = useAuthContext();
+  // Apply persisted language once on mount (avoid overriding manual selections on navigation)
   useEffect(() => {
-    const parts = pathname.split("/");
-    const localeFromPath = parts[1];
-
-    if (i18n.languages.includes(localeFromPath)) {
-      i18n.changeLanguage(localeFromPath);
-    } else {
-      const fallbackLocale = Array.isArray(i18n.options.fallbackLng)
-        ? i18n.options.fallbackLng[0]
-        : i18n.options.fallbackLng;
-      if (fallbackLocale) {
-        i18n.changeLanguage(fallbackLocale);
-      }
+    const stored =
+      typeof window !== "undefined" ? localStorage.getItem("appLocale") : null;
+    if (stored && stored !== i18n.language) {
+      i18n.changeLanguage(stored);
     }
-  }, [pathname]);
+  }, []);
 
   return (
     <I18nextProvider i18n={i18n}>

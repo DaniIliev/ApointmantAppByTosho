@@ -84,8 +84,15 @@ export default function TopNav({
 
   const changeLanguage = (lng: string) => {
     i18n.changeLanguage(lng);
-    const newPathname = pathname.replace(`/${i18n.language}`, `/${lng}`);
-    router.push(newPathname);
+    // Persist selection so it survives navigation
+    try {
+      if (typeof window !== "undefined") {
+        localStorage.setItem("appLocale", lng);
+      }
+    } catch (e) {
+      // Ignore persistence errors (private mode, etc.)
+    }
+    // Keep current path (no locale prefixes in routes structure)
     setIsLanguagesOpen(false);
   };
 

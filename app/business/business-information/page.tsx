@@ -4,6 +4,7 @@ import { LabeledInput } from "@/components/customUIComponents/LabeledInput";
 import { LabeledSelect } from "@/components/customUIComponents/LabeledSelect";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import ProtectedRoute from "@/components/guards/ProtectedRoute";
 import { useAuthContext } from "@/context/AuthContext";
 import { usePageTitle } from "@/context/PageTitleContext";
 import { getBusinessCategories } from "@/Global/Types/types";
@@ -53,13 +54,17 @@ const SectionHeader = ({
   icon: React.ElementType;
   title: string;
 }) => (
-  <div className="flex items-center space-x-3 mb-4 mt-6">
-    <Icon className="h-6 w-6 text-blue-400" />
-    <h2 className="text-xl font-semibold text-white">{title}</h2>
+  <div className="flex items-center gap-3 mb-1">
+    <div className="p-2 rounded-lg bg-blue-50 dark:bg-blue-500/10">
+      <Icon className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+    </div>
+    <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
+      {title}
+    </h2>
   </div>
 );
 
-export default function BusinessFormPage() {
+function BusinessInformationPageContent() {
   const [imagePreview, setImagePreview] = useState<string | ArrayBuffer | null>(
     null
   );
@@ -206,6 +211,17 @@ export default function BusinessFormPage() {
     // else if (initialFormData.businessImageUrl && imagePreview === null) {
     //   payload.businessImageUrl = "";
     //   payload.businessImageUrl = formData.businessImageUrl;
+    if (isLoading) {
+      return (
+        <div
+          className="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#0f1419] via-[#1a1f2e] to-[#0f1419] text-white"
+          aria-live="polite"
+        >
+          <p>{t("Loading business information...")}</p>
+        </div>
+      );
+    }
+
     // }
 
     const url = `/api/business/${user?.businessId}`;
@@ -252,45 +268,56 @@ export default function BusinessFormPage() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#0f1419] via-[#1a1f2e] to-[#0f1419] text-white">
-        <p>{t("Loading business information...")}</p>
+      <div
+        className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-50 via-blue-50/30 to-gray-50 dark:from-[#0f1419] dark:via-[#1a1f2e] dark:to-[#0f1419]"
+        aria-live="polite"
+      >
+        <div className="text-center">
+          <div className="w-12 h-12 border-4 border-blue-500/30 border-t-blue-500 rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-gray-600 dark:text-gray-300 font-medium">
+            {t("Loading business information...")}
+          </p>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#0f1419] via-[#1a1f2e] to-[#0f1419] text-white p-4 md:px-8 py-1 font-[Inter]">
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50/30 to-gray-50 dark:from-[#0f1419] dark:via-[#1a1f2e] dark:to-[#0f1419] py-8 px-4 md:px-6 lg:px-8">
       <div className="max-w-7xl mx-auto">
-        <div className="grid lg:grid-cols-[1fr,1.2fr] gap-8 lg:gap-12">
-          <div className="space-y-3">
-            <SectionHeader icon={Upload} title={t("1. Business Photo")} />
-            <Card className="bg-gradient-to-br from-[#2a3142] to-[#1f2533] border border-white/10 overflow-hidden aspect-[1/0.7] shadow-xl">
-              {currentImageSource ? ( // Използваме currentImageSource
-                <div className="relative w-full h-full">
+        <div className="grid lg:grid-cols-[1fr,1.5fr] gap-6 lg:gap-8">
+          {/* Left Column - Business Photo */}
+          <div className="space-y-4">
+            <SectionHeader icon={Upload} title={t("Business Photo")} />
+            <Card className="bg-white dark:bg-gradient-to-br dark:from-[#1f2533] dark:to-[#2a3142] border border-gray-200 dark:border-white/10 overflow-hidden shadow-lg hover:shadow-xl transition-shadow duration-300">
+              {currentImageSource ? (
+                <div className="relative w-full aspect-[16/10] group">
                   <img
                     src={currentImageSource}
                     alt={t("Business preview")}
                     style={{ objectFit: "cover" }}
                     className="w-full h-full"
                   />
-                  <Button
-                    onClick={removeImage}
-                    size="icon"
-                    variant="destructive"
-                    className="absolute top-3 right-3 shadow-lg rounded-full"
-                  >
-                    <X className="h-4 w-4" />
-                  </Button>
+                  <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex items-center justify-center">
+                    <Button
+                      onClick={removeImage}
+                      size="icon"
+                      variant="destructive"
+                      className="shadow-2xl rounded-full scale-90 group-hover:scale-100 transition-transform"
+                    >
+                      <X className="h-5 w-5" />
+                    </Button>
+                  </div>
                 </div>
               ) : (
-                <label className="flex flex-col items-center justify-center w-full h-full cursor-pointer hover:bg-white/5 transition-colors group">
-                  <div className="p-4 rounded-full bg-white/5 mb-4 group-hover:bg-white/10 transition-colors">
-                    <Upload className="h-8 w-8 text-blue-400" />
+                <label className="flex flex-col items-center justify-center w-full aspect-[16/10] cursor-pointer hover:bg-gray-50 dark:hover:bg-white/5 transition-all duration-200 group">
+                  <div className="p-6 rounded-full bg-blue-50 dark:bg-blue-500/10 mb-4 group-hover:bg-blue-100 dark:group-hover:bg-blue-500/20 transition-all duration-200 group-hover:scale-110">
+                    <Upload className="h-10 w-10 text-blue-500 dark:text-blue-400" />
                   </div>
-                  <span className="text-white/70 font-medium">
+                  <span className="text-gray-700 dark:text-white/80 font-semibold text-lg">
                     {t("Click to upload a photo")}
                   </span>
-                  <span className="text-white/40 text-sm mt-1">
+                  <span className="text-gray-500 dark:text-white/50 text-sm mt-2">
                     {t("PNG, JPG up to 10MB")}
                   </span>
                   <input
@@ -302,126 +329,163 @@ export default function BusinessFormPage() {
                 </label>
               )}
             </Card>
+
+            {/* Info Card */}
+            <Card className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-500/30 p-4">
+              <div className="flex items-start gap-3">
+                <Info className="h-5 w-5 text-blue-600 dark:text-blue-400 mt-0.5 flex-shrink-0" />
+                <div>
+                  <h3 className="font-semibold text-blue-900 dark:text-blue-300 mb-1">
+                    {t("Photo Tips")}
+                  </h3>
+                  <p className="text-sm text-blue-700 dark:text-blue-400/80">
+                    {t(
+                      "Use a high-quality image that represents your business. A good photo helps customers recognize and trust your brand."
+                    )}
+                  </p>
+                </div>
+              </div>
+            </Card>
           </div>
 
+          {/* Right Column - Form Sections */}
           <div className="space-y-6">
-            <SectionHeader icon={Info} title={t("2. General Information")} />
-            <div className="grid grid-cols-2 gap-3">
-              <LabeledSelect<string>
-                id="category"
-                label={t("Category")}
-                placeholder={t("e.g. Hair and Beauty")}
-                value={formData.category}
-                onValueChange={(e) => handleInputChange("category", e)}
-                options={BUSINESS_CATEGORIES}
-              />
+            {/* General Information Section */}
+            <Card className="bg-white dark:bg-gradient-to-br dark:from-[#1f2533] dark:to-[#2a3142] border border-gray-200 dark:border-white/10 p-6 shadow-lg">
+              <SectionHeader icon={Info} title={t("General Information")} />
+              <div className="mt-5 space-y-4">
+                <div className="grid md:grid-cols-2 gap-4">
+                  <LabeledSelect<string>
+                    id="category"
+                    label={t("Category")}
+                    placeholder={t("e.g. Hair and Beauty")}
+                    value={formData.category}
+                    onValueChange={(e) => handleInputChange("category", e)}
+                    options={BUSINESS_CATEGORIES}
+                  />
 
-              <LabeledInput
-                id="businessName"
-                label={t("Business Name")}
-                placeholder={t("e.g. Luxe Hair Salon")}
-                value={formData.businessName}
-                onChange={(e) => handleInputChange("businessName", e)}
-              />
-            </div>
-            <LabeledInput
-              label={t("About us")}
-              id="aboutUs"
-              value={formData.aboutUs}
-              onChange={(e) => handleInputChange("aboutUs", e)}
-              placeholder={t(
-                "Add any additional information about your Business..."
-              )}
-              rows={2}
-            />
-            <SectionHeader icon={Contact} title={t("3. Contact Details")} />
-            <div className="grid grid-cols-3 gap-3">
-              <LabeledInput
-                id="phone"
-                type="tel"
-                label={t("Phone")}
-                placeholder="(555) 123-4567"
-                value={formData.phone}
-                onChange={(e) => handleInputChange("phone", e)}
-              />
+                  <LabeledInput
+                    id="businessName"
+                    label={t("Business Name")}
+                    placeholder={t("e.g. Luxe Hair Salon")}
+                    value={formData.businessName}
+                    onChange={(e) => handleInputChange("businessName", e)}
+                  />
+                </div>
+                <LabeledInput
+                  label={t("About us")}
+                  id="aboutUs"
+                  value={formData.aboutUs}
+                  onChange={(e) => handleInputChange("aboutUs", e)}
+                  placeholder={t(
+                    "Tell customers about your business, services, and what makes you unique..."
+                  )}
+                  rows={3}
+                />
+              </div>
+            </Card>
 
-              <LabeledInput
-                id="email"
-                type="email"
-                label={t("Email")}
-                placeholder="info@luxehairsalon.com"
-                value={formData.email}
-                onChange={(e) => handleInputChange("email", e)}
-              />
-              <LabeledInput
-                id="website"
-                type="url"
-                label={t("Website")}
-                placeholder="www.luxehairsalon.com"
-                value={formData.website}
-                onChange={(e) => handleInputChange("website", e)}
-              />
-            </div>
+            {/* Contact Details Section */}
+            <Card className="bg-white dark:bg-gradient-to-br dark:from-[#1f2533] dark:to-[#2a3142] border border-gray-200 dark:border-white/10 p-6 shadow-lg">
+              <SectionHeader icon={Contact} title={t("Contact Details")} />
+              <div className="mt-5 space-y-4">
+                <div className="grid md:grid-cols-3 gap-4">
+                  <LabeledInput
+                    id="phone"
+                    type="tel"
+                    label={t("Phone")}
+                    placeholder="(555) 123-4567"
+                    value={formData.phone}
+                    onChange={(e) => handleInputChange("phone", e)}
+                  />
 
-            <SectionHeader icon={MapPin} title={t("4. Addresses")} />
-            <div className="grid grid-cols-2 gap-3">
-              <LabeledInput
-                id="country"
-                label={t("Country")}
-                placeholder={t("Select country")}
-                value={formData.country}
-                onChange={(value) => handleInputChange("country", value)}
-              />
-              <LabeledInput
-                id="city"
-                label={t("City")}
-                placeholder={t("Select city")}
-                value={formData.city}
-                onChange={(value) => handleInputChange("city", value)}
-              />
-            </div>
-            <div
-              className={`grid grid-cols-3 gap-3 ${
-                hasChanges ? "p-1" : "pb-3"
-              }`}
-            >
-              <LabeledInput
-                id="address"
-                label={t("Street and Number")}
-                placeholder={t("Street and Number")}
-                value={formData.address}
-                onChange={(e) => handleInputChange("address", e)}
-                className="col-span-2"
-              />
+                  <LabeledInput
+                    id="email"
+                    type="email"
+                    label={t("Email")}
+                    placeholder="info@business.com"
+                    value={formData.email}
+                    onChange={(e) => handleInputChange("email", e)}
+                  />
+                  <LabeledInput
+                    id="website"
+                    type="url"
+                    label={t("Website")}
+                    placeholder="www.business.com"
+                    value={formData.website}
+                    onChange={(e) => handleInputChange("website", e)}
+                  />
+                </div>
+              </div>
+            </Card>
 
-              <LabeledInput
-                id="postalCode"
-                label={t("Postal Code")}
-                placeholder={t("Postal Code")}
-                value={formData.postalCode}
-                onChange={(e) => handleInputChange("postalCode", e)}
-              />
+            {/* Address Section */}
+            <Card className="bg-white dark:bg-gradient-to-br dark:from-[#1f2533] dark:to-[#2a3142] border border-gray-200 dark:border-white/10 p-6 shadow-lg">
+              <SectionHeader icon={MapPin} title={t("Business Address")} />
+              <div className="mt-5 space-y-4">
+                <div className="grid md:grid-cols-2 gap-4">
+                  <LabeledInput
+                    id="country"
+                    label={t("Country")}
+                    placeholder={t("Select country")}
+                    value={formData.country}
+                    onChange={(value) => handleInputChange("country", value)}
+                  />
+                  <LabeledInput
+                    id="city"
+                    label={t("City")}
+                    placeholder={t("Select city")}
+                    value={formData.city}
+                    onChange={(value) => handleInputChange("city", value)}
+                  />
+                </div>
+                <div className="grid md:grid-cols-2 gap-4">
+                  <LabeledInput
+                    id="address"
+                    label={t("Street and Number")}
+                    placeholder={t("123 Main Street")}
+                    value={formData.address}
+                    onChange={(e) => handleInputChange("address", e)}
+                    className="md:col-span-2"
+                  />
 
-              <LabeledInput
-                id="addressLine2"
-                label={t("Apartment, floor, etc. (optional)")}
-                placeholder={t("Apartment, floor, etc. (optional)")}
-                value={formData.addressLine2}
-                onChange={(e) => handleInputChange("addressLine2", e)}
-                className="col-span-3"
-              />
-            </div>
+                  <LabeledInput
+                    id="postalCode"
+                    label={t("Postal Code")}
+                    placeholder={t("12345")}
+                    value={formData.postalCode}
+                    onChange={(e) => handleInputChange("postalCode", e)}
+                  />
+                </div>
 
+                <LabeledInput
+                  id="addressLine2"
+                  label={t("Apartment, floor, etc. (optional)")}
+                  placeholder={t("Suite 100, 2nd Floor...")}
+                  value={formData.addressLine2}
+                  onChange={(e) => handleInputChange("addressLine2", e)}
+                />
+              </div>
+            </Card>
+
+            {/* Save Button */}
             {hasChanges && (
-              <div className="flex align-center justify-center w-full ">
+              <div className="sticky bottom-4 z-10 flex justify-center pt-2">
                 <Button
-                  className="bg-primary hover:bg-primary-dark mb-4"
+                  className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 dark:from-blue-500 dark:to-blue-600 dark:hover:from-blue-600 dark:hover:to-blue-700 text-white shadow-lg hover:shadow-xl transition-all duration-200 min-w-[200px]"
                   size="lg"
                   iconType="save"
                   onClick={handleSubmit}
                   disabled={isSaving || isLoading}
                 >
-                  {isSaving ? t("Saving...") : t("Save")}
+                  {isSaving ? (
+                    <span className="flex items-center gap-2">
+                      <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                      {t("Saving...")}
+                    </span>
+                  ) : (
+                    t("Save Changes")
+                  )}
                 </Button>
               </div>
             )}
@@ -429,5 +493,13 @@ export default function BusinessFormPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function BusinessInformationPage() {
+  return (
+    <ProtectedRoute requiredRoles={["business"]}>
+      <BusinessInformationPageContent />
+    </ProtectedRoute>
   );
 }

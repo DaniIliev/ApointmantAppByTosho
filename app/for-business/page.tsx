@@ -50,12 +50,13 @@ export default function BusinessLandingPage() {
         <div className="container mx-auto px-4 py-20 md:py-32 relative z-20">
           <div className="max-w-4xl mx-auto text-center space-y-6">
             <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold tracking-tight text-balance text-white drop-shadow-lg">
-              Transform Your Business with AppointDI
+              {t("Transform Your Business with AppointDI")}
             </h1>
 
             <p className="text-base sm:text-lg md:text-xl text-white/95 text-balance max-w-3xl mx-auto drop-shadow-md">
-              Schedule faster, empower your team, and grow with our all-in-one
-              platform.
+              {t(
+                "Schedule faster, empower your team, and grow with our all-in-one platform."
+              )}
             </p>
 
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
@@ -63,7 +64,7 @@ export default function BusinessLandingPage() {
                 size="lg"
                 className="text-base sm:text-lg px-7 py-6 shadow-xl hover:shadow-2xl hover:scale-[1.02] transition-transform theme-gradient-primary text-white ring-1 ring-white/20"
               >
-                <span className="mr-2">Join Us</span>
+                <span className="mr-2">{t("Join Us")}</span>
                 <ArrowRight className="h-5 w-5" />
               </Button>
               <Button
@@ -72,7 +73,7 @@ export default function BusinessLandingPage() {
                 className="text-base sm:text-lg px-7 py-6 bg-white/10 text-white border-primary/30 hover:bg-white/20 hover:scale-[1.02] transition-all backdrop-blur-md shadow-xl"
               >
                 <PlayCircle className="h-5 w-5 mr-2" />
-                Watch Demo
+                {t("Watch Demo")}
               </Button>
             </div>
           </div>
@@ -88,7 +89,7 @@ export default function BusinessLandingPage() {
             <div className="grid lg:grid-cols-2 gap-12 items-center">
               <div className="space-y-8">
                 <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-balance">
-                  Why Businesses Choose AppointDI
+                  {t("Why Businesses Choose AppointDI")}
                 </h2>
                 <div className="space-y-6">
                   <div className="flex gap-4">
@@ -97,11 +98,12 @@ export default function BusinessLandingPage() {
                     </div>
                     <div>
                       <h3 className="text-lg md:text-xl font-semibold mb-2">
-                        Save Time & Reduce No-Shows
+                        {t("Save Time & Reduce No-Shows")}
                       </h3>
                       <p className="text-sm sm:text-base text-muted-foreground">
-                        Automated notifications and confirmations reduce
-                        no-shows by up to 60%, saving you time and money.
+                        {t(
+                          "Automated notifications and confirmations reduce no-shows by up to 60%, saving you time and money."
+                        )}
                       </p>
                     </div>
                   </div>
@@ -111,11 +113,12 @@ export default function BusinessLandingPage() {
                     </div>
                     <div>
                       <h3 className="text-lg md:text-xl font-semibold mb-2">
-                        Increase Revenue
+                        {t("Increase Revenue")}
                       </h3>
                       <p className="text-sm sm:text-base text-muted-foreground">
-                        Fill more appointment slots, track popular services, and
-                        optimize pricing based on real performance data.
+                        {t(
+                          "Fill more appointment slots, track popular services, and optimize pricing based on real performance data."
+                        )}
                       </p>
                     </div>
                   </div>
@@ -125,11 +128,12 @@ export default function BusinessLandingPage() {
                     </div>
                     <div>
                       <h3 className="text-lg md:text-xl font-semibold mb-2">
-                        Empower Your Team
+                        {t("Empower Your Team")}
                       </h3>
                       <p className="text-sm sm:text-base text-muted-foreground">
-                        Give staff members control over their schedules and
-                        appointments while maintaining business oversight.
+                        {t(
+                          "Give staff members control over their schedules and appointments while maintaining business oversight."
+                        )}
                       </p>
                     </div>
                   </div>
@@ -139,11 +143,12 @@ export default function BusinessLandingPage() {
                     </div>
                     <div>
                       <h3 className="text-lg md:text-xl font-semibold mb-2">
-                        Professional & Reliable
+                        {t("Professional & Reliable")}
                       </h3>
                       <p className="text-sm sm:text-base text-muted-foreground">
-                        Provide clients with a seamless booking experience that
-                        reflects your business&apos;s professionalism.
+                        {t(
+                          "Provide clients with a seamless booking experience that reflects your business's professionalism."
+                        )}
                       </p>
                     </div>
                   </div>
@@ -173,32 +178,32 @@ export default function BusinessLandingPage() {
           {/* Header */}
           <div className="text-center">
             <h2 className="text-3xl sm:text-4xl md:text-5xl font-extrabold text-primary text-balance">
-              Отключете Силата на Данните 🚀
+              {t("Unlock the Power of Data 🚀")}
             </h2>
             <p className="text-base sm:text-lg text-muted-foreground text-balance max-w-3xl mx-auto mt-6">
-              Преобразете операциите си с прецизни данни за приходи, популярност
-              на услугите и ангажираност на клиентите – всичко в един интуитивен
-              дашборд.
+              {t(
+                "Transform your operations with precise insights into revenue, service popularity, and client engagement – all in one intuitive dashboard."
+              )}
             </p>
           </div>
 
           <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-6 mt-6 md:mt-8 mb-6 md:mb-10">
             <KPICard
-              title="Общ Брой Записани Часове"
+              title={t("Total Appointments")}
               value={mockPerformanceData.kpiData.totalAppointments}
               change={mockPerformanceData.kpiData.changes.totalAppointments}
               icon={<Calendar />}
               className="shadow-xl"
             />
             <KPICard
-              title="Общи Приходи"
+              title={t("Total Revenue")}
               value={`$${mockPerformanceData.kpiData.totalRevenue.toLocaleString()}`}
               change={mockPerformanceData.kpiData.changes.totalRevenue}
               icon={<DollarSign />}
               className="shadow-xl"
             />
             <KPICard
-              title="Процент Задържане на Клиенти"
+              title={t("Client Retention Rate")}
               value={`${mockPerformanceData.kpiData.clientRetentionRate.toFixed(
                 1
               )}%`}
@@ -206,7 +211,7 @@ export default function BusinessLandingPage() {
               className="shadow-xl"
             />
             <KPICard
-              title="Намаляване на Неявилите се"
+              title={t("No-Show Reduction")}
               value={`60%`}
               icon={<CheckCircle />}
               className="shadow-xl"
@@ -215,7 +220,7 @@ export default function BusinessLandingPage() {
           <div className="space-y-8">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
               <PerformanceChart
-                title="Записани Часове по Време"
+                title={t("Appointments Over Time")}
                 data={mockPerformanceData.appointmentsOverTime}
                 type="line"
                 dataKeys={["total", "completed", "cancelled"]}
@@ -223,7 +228,7 @@ export default function BusinessLandingPage() {
                 colors={["#3b61c0", "#22c55e", "#ef4444"]}
               />
               <PerformanceChart
-                title="Тенденции в Приходите"
+                title={t("Revenue Trends")}
                 data={mockPerformanceData.revenueOverTime}
                 type="line"
                 dataKey="value"
@@ -233,14 +238,14 @@ export default function BusinessLandingPage() {
             </div>
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
               <PerformanceChart
-                title="Популярност на Услугите"
+                title={t("Service Popularity")}
                 data={mockPerformanceData.servicePopularity}
                 type="bar"
                 dataKey="value"
                 xAxisKey="name"
               />
               <PerformanceChart
-                title="Приходи по Категории Услуги"
+                title={t("Revenue by Service Category")}
                 data={mockPerformanceData.revenueByService}
                 type="bar"
                 dataKey="value"
@@ -272,18 +277,19 @@ export default function BusinessLandingPage() {
         <div className="container mx-auto px-4 text-center">
           <div className="max-w-3xl mx-auto space-y-4">
             <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-text-primary">
-              Ready to Transform Your Business?
+              {t("Ready to Transform Your Business?")}
             </h2>
             <p className="text-base sm:text-lg text-primary-foreground/90 text-balance">
-              Join thousands of businesses that have streamlined their
-              operations and increased revenue with AppointFlow
+              {t(
+                "Join thousands of businesses that have streamlined their operations and increased revenue with AppointFlow"
+              )}
             </p>
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4">
               <Button
                 size="lg"
                 className="text-base sm:text-lg px-7 py-6 shadow-xl hover:shadow-2xl hover:scale-[1.02] transition-transform theme-gradient-primary text-white ring-1 ring-white/20"
               >
-                <span className="mr-2">Join Us</span>
+                <span className="mr-2">{t("Join Us")}</span>
                 <ArrowRight className="h-5 w-5" />
               </Button>
               <Button
@@ -292,7 +298,7 @@ export default function BusinessLandingPage() {
                 className="text-base sm:text-lg px-7 py-6 bg-white/10 text-white border-primary/30 hover:bg-white/20 hover:scale-[1.02] transition-all backdrop-blur-md shadow-xl"
               >
                 <PlayCircle className="h-5 w-5 mr-2" />
-                Watch Demo
+                {t("Watch Demo")}
               </Button>
             </div>
           </div>

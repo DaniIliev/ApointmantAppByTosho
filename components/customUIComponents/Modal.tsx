@@ -142,15 +142,15 @@ export const Modal = ({
     <>
       <Dialog open={open} onOpenChange={handleOpenChange}>
         <DialogContent
-          className={`${widthClass} max-h-[90vh] flex flex-col !important bg-card/95 backdrop-blur-lg border-2 border-primary/20 [&>button]:hidden`}
+          className={`${widthClass} md:max-h-[90vh] h-full md:h-auto max-h-screen flex flex-col !important bg-card/95 backdrop-blur-lg border-2 border-primary/20 [&>button]:hidden md:rounded-lg rounded-none p-0 md:p-6`}
         >
-          <DialogHeader className="flex-shrink-0">
-            <DialogTitle className="text-2xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
+          <DialogHeader className="flex-shrink-0 p-4 md:p-0 border-b md:border-b-0 border-border/50">
+            <DialogTitle className="text-xl md:text-2xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
               {label}
             </DialogTitle>
           </DialogHeader>
 
-          <div className="absolute top-4 right-4 z-10">
+          <div className="absolute top-3 md:top-4 right-3 md:right-4 z-10">
             <CustomTooltip
               onClick={() => handleOpenChange(false)}
               icon={<X />}
@@ -159,7 +159,7 @@ export const Modal = ({
 
           <div
             ref={contentRef}
-            className="flex-1 overflow-y-auto overflow-x-hidden pr-2"
+            className="flex-1 overflow-y-auto overflow-x-hidden px-4 md:px-0 md:pr-2 pb-4 md:pb-0"
           >
             {children}
           </div>
@@ -168,20 +168,20 @@ export const Modal = ({
 
       {/* Unsaved changes confirmation dialog */}
       <Dialog open={unsavedOpen} onOpenChange={setUnsavedOpen}>
-        <DialogContent className="sm:max-w-md">
+        <DialogContent className="sm:max-w-md mx-4">
           <DialogHeader>
             <DialogTitle>{texts.title}</DialogTitle>
           </DialogHeader>
           <div className="text-sm text-muted-foreground">{texts.message}</div>
-          <div className="flex items-center justify-center gap-2 pt-2">
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-center gap-2 pt-2">
             <button
-              className="px-3 py-2 text-sm rounded border"
+              className="px-3 py-2 text-sm rounded border hover:bg-accent transition-colors"
               onClick={() => setUnsavedOpen(false)}
             >
               {texts.continueEditing}
             </button>
             <button
-              className="px-3 py-2 text-sm rounded border"
+              className="px-3 py-2 text-sm rounded border hover:bg-destructive/10 hover:text-destructive transition-colors"
               onClick={() => {
                 setUnsavedOpen(false);
                 onOpenChange(false);
@@ -190,7 +190,7 @@ export const Modal = ({
               {texts.discard}
             </button>
             <button
-              className="px-3 py-2 text-sm rounded bg-primary text-primary-foreground"
+              className="px-3 py-2 text-sm rounded bg-primary text-primary-foreground hover:bg-primary/90 transition-colors"
               onClick={async () => {
                 setUnsavedOpen(false);
                 if (onConfirmSave) await onConfirmSave();
