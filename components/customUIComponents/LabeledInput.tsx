@@ -57,14 +57,9 @@ export const LabeledInput = forwardRef<
     // Проверка дали бутонът за изчистване трябва да се покаже
     const isClearable = onClear && hasValue;
 
-    // Логика за Date Input (прилага се само ако не е textarea)
-    const inputType =
-      !isTextarea &&
-      (type === "date" || type === "time") &&
-      !isFocused &&
-      !hasValue
-        ? "text"
-        : type;
+    // За date/time/datetime-local винаги запазваме оригиналния тип
+    // за да работи нативният picker на мобилни устройства
+    const inputType = type;
 
     const baseClasses = cn(
       "peer w-full bg-card/80 focus:bg-card/90 rounded-t-md transition-all duration-300 px-4 pt-4 pb-1",
