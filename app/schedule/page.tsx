@@ -21,12 +21,12 @@ import { jwtDecode } from "jwt-decode";
 import { ScheduleModal } from "./ScheduleModal";
 
 // Types
-type TimeRange = {
+export type TimeRange = {
   start: string | null;
   end: string | null;
 };
 
-type Schedule = {
+export type Schedule = {
   _id: string;
   startDate: string;
   endDate: string;
