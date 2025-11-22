@@ -1,12 +1,14 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import PricingSection from "@/components/Pricing/PricingSection";
 import BusinessSetupModal from "@/components/BusinessSetup/BusinessSetupModal";
 import { useSearchParams } from "next/navigation";
 import { useAuthContext } from "@/context/AuthContext";
 
 export default function PricingPage() {
+  const { t } = useTranslation();
   const params = useSearchParams();
   const onboarding = params.get("onboarding") === "1";
   const [openSetup, setOpenSetup] = useState(false);
@@ -17,7 +19,7 @@ export default function PricingPage() {
   }, [onboarding]);
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background" aria-label={t("Pricing Page")}>
       <PricingSection />
       <BusinessSetupModal
         open={openSetup}

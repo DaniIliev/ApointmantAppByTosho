@@ -3,6 +3,8 @@
 import { useEffect, useState } from "react";
 import type React from "react";
 import { Plus } from "lucide-react";
+import ProtectedRoute from "@/components/guards/ProtectedRoute";
+import { useTranslation } from "react-i18next";
 import { usePageTitle } from "@/context/PageTitleContext";
 import { useRightNav } from "@/context/RightNavContext";
 
@@ -20,12 +22,18 @@ type CreateNewDashboardMenuProps = {
   onOpenModal: () => void;
 };
 const CreateNewTypeMenu = ({ onOpenModal }: CreateNewDashboardMenuProps) => {
+  const { t } = useTranslation();
   return (
-    <CustomTooltip onClick={onOpenModal} tooltipText="Add" icon={<Plus />} />
+    <CustomTooltip
+      onClick={onOpenModal}
+      tooltipText={t("Add")}
+      icon={<Plus />}
+    />
   );
 };
 
-export default function AppointmentTypesPage() {
+function AppointmentTypesPageContent() {
+  const { t } = useTranslation();
   const { user } = useAuthContext();
   const [appointmentTypes, setAppointmentTypes] = useState<AppointmentType[]>(
     []
@@ -77,7 +85,7 @@ export default function AppointmentTypesPage() {
   };
 
   useEffect(() => {
-    setPageTitle("Appointment Types");
+    setPageTitle(t("Appointment Types"));
     setExtraRightNavMenu(<CreateNewTypeMenu onOpenModal={() => openModal()} />);
     setIsRightNavVisible(true);
     fetchServices();
@@ -186,7 +194,6 @@ export default function AppointmentTypesPage() {
       ? `${hours}h ${remainingMinutes}m`
       : `${hours}h`;
   };
-
   return (
     <div>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -227,9 +234,20 @@ export default function AppointmentTypesPage() {
         isOpen={isDeleteDialogOpen}
         onClose={() => setIsDeleteDialogOpen(false)}
         onConfirm={handleDeleteConfirm}
-        title="Delete Appointment Type"
-        message={`Are you sure you want to delete "${typeToDelete?.name}"? This action cannot be undone.`}
+        title={t("Delete Appointment Type")}
+        message={t(
+          'Are you sure you want to delete "{{name}}"? This action cannot be undone.',
+          { name: typeToDelete?.name || "" }
+        )}
       />
     </div>
+  );
+}
+
+export default function AppointmentTypesPage() {
+  return (
+    <ProtectedRoute requiredRoles={["business"]}>
+      <AppointmentTypesPageContent />
+    </ProtectedRoute>
   );
 }

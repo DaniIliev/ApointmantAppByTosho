@@ -60,7 +60,7 @@ export function SignInForm({ onBack, onSuccess }: SignInFormProps) {
           <div className="flex justify-center mb-4">
             <div className="flex items-baseline gap-1">
               <span className="text-xl font-bold theme-text-gradient">
-                AppointDI®
+                {t("AppointDI®")}
               </span>
             </div>
           </div>
@@ -142,12 +142,12 @@ export function SignInForm({ onBack, onSuccess }: SignInFormProps) {
               </a>
             </div>
             <div className="mt-4 text-center text-sm text-muted-foreground">
-              <span>Don&apos;t have an account? </span>
+              <span>{t("Don't have an account?")} </span>
               <a
                 href="/register"
                 className="text-primary hover:text-accent font-semibold hover:underline transition-colors"
               >
-                Create one here
+                {t("Create one here")}
               </a>
             </div>
           </form>

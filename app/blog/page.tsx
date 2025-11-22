@@ -1,27 +1,36 @@
+import { useTranslation } from "react-i18next";
+
 export default function BlogPage() {
+  const { t } = useTranslation();
   const blogPosts = [
     {
       id: 1,
-      title: "5 Tips for Better Appointment Management",
-      excerpt: "Learn how to optimize your appointment scheduling process and reduce no-shows.",
+      title: t("5 Tips for Better Appointment Management"),
+      excerpt: t(
+        "Learn how to optimize your appointment scheduling process and reduce no-shows."
+      ),
       date: "2024-01-15",
-      readTime: "5 min read",
+      readTime: t("5 min read"),
     },
     {
       id: 2,
-      title: "The Future of Digital Scheduling",
-      excerpt: "Explore upcoming trends in appointment management and digital transformation.",
+      title: t("The Future of Digital Scheduling"),
+      excerpt: t(
+        "Explore upcoming trends in appointment management and digital transformation."
+      ),
       date: "2024-01-10",
-      readTime: "7 min read",
+      readTime: t("7 min read"),
     },
     {
       id: 3,
-      title: "Customer Experience in Service Industries",
-      excerpt: "How modern appointment systems can enhance customer satisfaction and loyalty.",
+      title: t("Customer Experience in Service Industries"),
+      excerpt: t(
+        "How modern appointment systems can enhance customer satisfaction and loyalty."
+      ),
       date: "2024-01-05",
-      readTime: "6 min read",
+      readTime: t("6 min read"),
     },
-  ]
+  ];
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 p-6">
@@ -34,7 +43,7 @@ export default function BlogPage() {
       <div className="relative max-w-4xl mx-auto">
         <div className="bg-slate-900/40 backdrop-blur-xl border border-white/20 rounded-2xl p-8 shadow-2xl">
           <h1 className="text-4xl font-bold bg-gradient-to-r from-purple-400 to-blue-400 bg-clip-text text-transparent mb-8">
-            Blog & Insights
+            {t("Blog & Insights")}
           </h1>
 
           <div className="space-y-6">
@@ -47,9 +56,13 @@ export default function BlogPage() {
                   <h2 className="text-xl font-semibold text-white hover:text-purple-400 transition-colors">
                     {post.title}
                   </h2>
-                  <span className="text-sm text-white/60 whitespace-nowrap ml-4">{post.readTime}</span>
+                  <span className="text-sm text-white/60 whitespace-nowrap ml-4">
+                    {post.readTime}
+                  </span>
                 </div>
-                <p className="text-white/70 mb-4 leading-relaxed">{post.excerpt}</p>
+                <p className="text-white/70 mb-4 leading-relaxed">
+                  {post.excerpt}
+                </p>
                 <div className="flex justify-between items-center">
                   <span className="text-sm text-white/60">
                     {new Date(post.date).toLocaleDateString("en-US", {
@@ -59,7 +72,7 @@ export default function BlogPage() {
                     })}
                   </span>
                   <button className="text-purple-400 hover:text-purple-300 transition-colors text-sm font-medium">
-                    Read More →
+                    {t("Read More")} →
                   </button>
                 </div>
               </article>
@@ -68,5 +81,5 @@ export default function BlogPage() {
         </div>
       </div>
     </div>
-  )
+  );
 }

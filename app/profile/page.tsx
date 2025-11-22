@@ -92,7 +92,7 @@ export default function SettingsPage() {
         };
       }
     } catch (error) {
-      toast.error("Failed to load profile data.");
+      toast.error(t("Failed to load profile data."));
     } finally {
       setIsLoading(false);
       setIsInitialLoad(false);
@@ -124,7 +124,7 @@ export default function SettingsPage() {
 
     try {
       if (!user?._id) {
-        toast.error("User not authenticated.");
+        toast.error(t("User not authenticated."));
         return;
       }
 
@@ -149,12 +149,17 @@ export default function SettingsPage() {
       };
       setIsDirty(false);
 
-      toast.success("Your profile settings have been updated successfully. 💾");
+      toast.success(
+        t("Your profile settings have been updated successfully. 💾")
+      );
     } catch (error) {
       toast.error(
-        `Error saving changes: ${
-          error instanceof Error ? error.message : "An unknown error occurred"
-        }`
+        t("Error saving changes: {{message}}", {
+          message:
+            error instanceof Error
+              ? error.message
+              : t("An unknown error occurred"),
+        })
       );
     }
   };
@@ -205,7 +210,7 @@ export default function SettingsPage() {
 
     try {
       if (!user?._id) {
-        toast.error("User not authenticated.");
+        toast.error(t("User not authenticated."));
         return;
       }
 
@@ -220,12 +225,15 @@ export default function SettingsPage() {
         ...userData,
         profilePictureUrl: updatedData.profilePictureUrl,
       });
-      toast.success("Profile picture uploaded successfully! 🖼️");
+      toast.success(t("Profile picture uploaded successfully! 🖼️"));
     } catch (error) {
       toast.error(
-        `Image upload failed: ${
-          error instanceof Error ? error.message : "An unknown error occurred"
-        }`
+        t("Image upload failed: {{message}}", {
+          message:
+            error instanceof Error
+              ? error.message
+              : t("An unknown error occurred"),
+        })
       );
     }
   };
@@ -233,7 +241,7 @@ export default function SettingsPage() {
   // Показваме loading, докато данните се зареждат ИЛИ докато mounted е false
   if (isLoading) {
     // Можем да махнем !mounted от тук, за да покажем съдържанието, докато се монтира.
-    return <div className="p-8 text-center">Loading settings...</div>;
+    return <div className="p-8 text-center">{t("Loading settings...")}</div>;
   }
 
   // Добавяме проверка за mounted тук, за да избегнем неактивни контроли, когато nextTheme е undefined
@@ -248,10 +256,10 @@ export default function SettingsPage() {
         <Card>
           <CardHeader>
             <CardTitle className="text-primary text-2xl">
-              Profile Information
+              {t("Profile Information")}
             </CardTitle>
             <CardDescription>
-              Update your personal information and profile picture
+              {t("Update your personal information and profile picture")}
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-6 pt-4 pb-4">
@@ -291,10 +299,10 @@ export default function SettingsPage() {
               <div className="flex-1">
                 <p className="text-lg font-semibold text-text-primary">{`${userData.firstName} ${userData.lastName}`}</p>
                 <p className="mt-1 text-sm text-text-primary/30">
-                  Кликнете върху снимката, за да я промените.
+                  {t("Click on the photo to change it.")}
                 </p>
                 <p className="mt-2 text-xs text-text-primary/30">
-                  JPG, PNG или GIF. Макс. размер 2MB.
+                  {t("JPG, PNG or GIF. Max size 2MB.")}
                 </p>
               </div>
             </div>
@@ -305,43 +313,43 @@ export default function SettingsPage() {
             <div className="grid gap-4 sm:grid-cols-2">
               <LabeledInput
                 id="firstName"
-                label={"First Name"}
+                label={t("First Name")}
                 value={userData.firstName || ""}
                 onChange={(e) =>
                   setUserData({ ...userData, firstName: e.target.value })
                 }
-                placeholder={"Enter your first name"}
+                placeholder={t("Enter your first name")}
               />
               <LabeledInput
                 id="lastName"
-                label={"Last Name"}
+                label={t("Last Name")}
                 value={userData.lastName || ""}
                 onChange={(e) =>
                   setUserData({ ...userData, lastName: e.target.value })
                 }
-                placeholder={"Enter your last name"}
+                placeholder={t("Enter your last name")}
               />
             </div>
             {/* Полета за Email и Телефон */}
             <div className="grid gap-4 sm:grid-cols-2">
               <LabeledInput
                 id="email"
-                label={"Email"}
+                label={t("Email")}
                 type="email"
                 value={userData.email}
                 className="opacity-70 cursor-not-allowed"
-                placeholder={"Enter your email address"}
+                placeholder={t("Enter your email address")}
                 onChange={() => {}}
               />
               <LabeledInput
                 id="phone"
-                label={"Phone"}
+                label={t("Phone")}
                 type="tel"
                 value={userData.phone || ""}
                 onChange={(e) =>
                   setUserData({ ...userData, phone: e.target.value })
                 }
-                placeholder={"Enter your phone number"}
+                placeholder={t("Enter your phone number")}
               />
             </div>
           </CardContent>
@@ -351,10 +359,10 @@ export default function SettingsPage() {
         <Card>
           <CardHeader>
             <CardTitle className="font-serif text-primary text-2xl">
-              Appearance
+              {t("Appearance")}
             </CardTitle>
             <CardDescription>
-              Customize the look and feel of your application
+              {t("Customize the look and feel of your application")}
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-6 pt-4 pb-4">
@@ -365,10 +373,10 @@ export default function SettingsPage() {
                   htmlFor="dark-mode"
                   className="text-primary text-base font-medium"
                 >
-                  Dark Mode
+                  {t("Dark Mode")}
                 </label>
                 <p className="text-sm text-muted-foreground">
-                  Switch between light and dark themes
+                  {t("Switch between light and dark themes")}
                 </p>
               </div>
 
@@ -392,10 +400,10 @@ export default function SettingsPage() {
             <div className="space-y-4">
               <div className="space-y-0.5">
                 <label className="text-primary font-medium">
-                  Color Palette
+                  {t("Color Palette")}
                 </label>
                 <p className="text-sm text-muted-foreground">
-                  Select a predefined color palette for the application
+                  {t("Select a predefined color palette for the application")}
                 </p>
               </div>
               <div className="flex items-center gap-4">
@@ -422,10 +430,10 @@ export default function SettingsPage() {
         {isDirty && (
           <div className="flex justify-center gap-4">
             <Button iconType="cancel" variant="outline" onClick={handleCancel}>
-              Cancel
+              {t("Cancel")}
             </Button>
             <Button iconType="save" onClick={handleSave}>
-              Save
+              {t("Save")}
             </Button>
           </div>
         )}

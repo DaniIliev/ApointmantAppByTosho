@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, useRef } from "react";
+import ProtectedRoute from "@/components/guards/ProtectedRoute";
 import { useAuthContext } from "@/context/AuthContext";
 import callApi from "@/app/Api/callApi";
 import { useTranslation } from "react-i18next";
@@ -10,7 +11,7 @@ import { Button } from "@/components/ui/button";
 import { Download, Share2, Printer, QrCode, Copy, Check } from "lucide-react";
 import { toast } from "sonner";
 
-export default function QRCodePage() {
+function QRCodePageContent() {
   const { t } = useTranslation();
   const { setPageTitle } = usePageTitle();
   const { user } = useAuthContext();
@@ -40,7 +41,7 @@ export default function QRCodePage() {
         setQrCodeUrl(response.qrCodeUrl || "");
         setBusinessName(response.businessName || "");
       } catch (error) {
-        toast.error("Failed to load QR code");
+        toast.error(t("Failed to load QR code"));
         console.error(error);
       } finally {
         setIsLoading(false);
@@ -67,7 +68,7 @@ export default function QRCodePage() {
 
     const printWindow = window.open("", "_blank");
     if (!printWindow) {
-      toast.error("Please allow popups to print");
+      toast.error(t("Please allow popups to print"));
       return;
     }
 
@@ -75,7 +76,7 @@ export default function QRCodePage() {
       <!DOCTYPE html>
       <html>
         <head>
-          <title>${businessName} - QR Code</title>
+          <title>${businessName} - ${t("QR Code")}</title>
           <style>
             body {
               margin: 0;
@@ -115,7 +116,7 @@ export default function QRCodePage() {
           <h1>${businessName}</h1>
           <img src="${qrCodeUrl}" alt="QR Code" />
           <div class="instructions">
-            <p>Scan this QR code to book an appointment</p>
+            <p>${t("Scan this QR code to book an appointment")}</p>
           </div>
         </body>
       </html>
@@ -143,7 +144,7 @@ export default function QRCodePage() {
         toast.success(t("Shared successfully"));
       } catch (error: any) {
         if (error.name !== "AbortError") {
-          toast.error("Failed to share");
+          toast.error(t("Failed to share"));
         }
       }
     } else {
@@ -154,7 +155,7 @@ export default function QRCodePage() {
         toast.success(t("Link copied to clipboard"));
         setTimeout(() => setCopied(false), 2000);
       } catch {
-        toast.error("Failed to copy link");
+        toast.error(t("Failed to copy link"));
       }
     }
   };
@@ -170,11 +171,11 @@ export default function QRCodePage() {
         await navigator.clipboard.write([item]);
         toast.success(t("QR code copied to clipboard"));
       } else {
-        toast.error("Cannot copy this image format");
+        toast.error(t("Cannot copy this image format"));
       }
     } catch (error) {
       console.error("Copy failed:", error);
-      toast.error("Failed to copy QR code");
+      toast.error(t("Failed to copy QR code"));
     }
   };
 
@@ -285,5 +286,13 @@ export default function QRCodePage() {
         </Card>
       </div>
     </div>
+  );
+}
+
+export default function QRCodePage() {
+  return (
+    <ProtectedRoute requiredRoles={["business"]}>
+      <QRCodePageContent />
+    </ProtectedRoute>
   );
 }

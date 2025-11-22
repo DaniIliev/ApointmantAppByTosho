@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, use } from "react";
+import React, { useState, useEffect } from "react";
 import Image from "next/image";
 import { useSearchParams, useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
@@ -119,7 +119,7 @@ export default function RegisterFormPage() {
             <div className="flex justify-center mb-4">
               <div className="flex items-baseline gap-1">
                 <span className="text-xl font-bold theme-text-gradient">
-                  AppointDI®
+                  {t("AppointDI®")}
                 </span>
               </div>
             </div>

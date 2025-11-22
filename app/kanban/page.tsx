@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import { usePageTitle } from "@/context/PageTitleContext";
+import ProtectedRoute from "@/components/guards/ProtectedRoute";
 import { useTranslation } from "react-i18next";
 import { useAuthContext } from "@/context/AuthContext";
 import { KanbanBoard as KanbanBoardComponent } from "./components/KanbanBoard";
@@ -13,7 +14,7 @@ import { BoardSelector } from "./components/BoardSelector";
 import callApi from "@/app/Api/callApi";
 import LoadingBackdrop from "@/components/ui/LoadingBackdrop";
 
-export default function KanbanPage() {
+function KanbanPageContent() {
   const { t } = useTranslation();
   const { setPageTitle } = usePageTitle();
   const { user } = useAuthContext();
@@ -53,7 +54,7 @@ export default function KanbanPage() {
 
   const loadKanbanData = async () => {
     if (!user?.businessId) {
-      toast.error("Business context not found");
+      toast.error(t("Business context not found"));
       setLoading(false);
       return;
     }
@@ -80,7 +81,7 @@ export default function KanbanPage() {
       } else {
         // No boards exist, create a default one
         const newBoard = await callApi("/api/kanban/boards", "POST", {
-          title: "My Board",
+          title: t("My Board"),
           description: "",
           businessId: user.businessId,
         });
@@ -97,7 +98,7 @@ export default function KanbanPage() {
       setAvailableUsers(members);
     } catch (error) {
       console.error("Failed to load kanban data:", error);
-      toast.error("Failed to load kanban board");
+      toast.error(t("Failed to load kanban board"));
     } finally {
       setLoading(false);
     }
@@ -123,7 +124,7 @@ export default function KanbanPage() {
     try {
       if (mode === "create") {
         if (!selectedBoardId) {
-          toast.error("No board selected");
+          toast.error(t("No board selected"));
           return;
         }
 
@@ -139,7 +140,7 @@ export default function KanbanPage() {
         );
 
         setColumns((prev) => [...prev, { ...newColumn, cards: [] }]);
-        toast.success("Column created successfully");
+        toast.success(t("Column created successfully"));
       } else {
         const updatedColumn: KanbanColumn = await callApi(
           `/api/kanban/columns/${columnData._id}`,
@@ -156,11 +157,11 @@ export default function KanbanPage() {
             col._id === updatedColumn._id ? { ...col, ...updatedColumn } : col
           )
         );
-        toast.success("Column updated successfully");
+        toast.success(t("Column updated successfully"));
       }
     } catch (error) {
       console.error("Failed to save column:", error);
-      toast.error("Failed to save column");
+      toast.error(t("Failed to save column"));
     }
   };
 
@@ -168,10 +169,10 @@ export default function KanbanPage() {
     try {
       await callApi(`/api/kanban/columns/${columnId}`, "DELETE");
       setColumns((prev) => prev.filter((col) => col._id !== columnId));
-      toast.success("Column deleted successfully");
+      toast.success(t("Column deleted successfully"));
     } catch (error) {
       console.error("Failed to delete column:", error);
-      toast.error("Failed to delete column");
+      toast.error(t("Failed to delete column"));
     }
   };
 
@@ -214,7 +215,7 @@ export default function KanbanPage() {
               : col
           )
         );
-        toast.success("Card created successfully");
+        toast.success(t("Card created successfully"));
       } else {
         const updatedCard: KanbanCard = await callApi(
           `/api/kanban/cards/${cardData._id}`,
@@ -239,11 +240,11 @@ export default function KanbanPage() {
             ),
           }))
         );
-        toast.success("Card updated successfully");
+        toast.success(t("Card updated successfully"));
       }
     } catch (error) {
       console.error("Failed to save card:", error);
-      toast.error("Failed to save card");
+      toast.error(t("Failed to save card"));
     }
   };
 
@@ -256,10 +257,10 @@ export default function KanbanPage() {
           cards: col.cards.filter((card) => card._id !== cardId),
         }))
       );
-      toast.success("Card deleted successfully");
+      toast.success(t("Card deleted successfully"));
     } catch (error) {
       console.error("Failed to delete card:", error);
-      toast.error("Failed to delete card");
+      toast.error(t("Failed to delete card"));
     }
   };
 
@@ -308,7 +309,7 @@ export default function KanbanPage() {
         ]);
       } catch (error) {
         console.error("Failed to save reorder:", error);
-        toast.error("Failed to save changes");
+        toast.error(t("Failed to save changes"));
       }
     }, 800);
   };
@@ -321,7 +322,7 @@ export default function KanbanPage() {
       setColumns(fullBoard.columns || []);
     } catch (error) {
       console.error("Failed to load board:", error);
-      toast.error("Failed to load board");
+      toast.error(t("Failed to load board"));
       setColumns([]);
     } finally {
       setLoading(false);
@@ -330,7 +331,7 @@ export default function KanbanPage() {
 
   const handleCreateBoard = async (title: string) => {
     if (!user?.businessId) {
-      toast.error("Business context not found");
+      toast.error(t("Business context not found"));
       return;
     }
 
@@ -348,10 +349,10 @@ export default function KanbanPage() {
       setBoards((prev) => [newBoard, ...prev]);
       setSelectedBoardId(newBoard._id);
       setColumns([]);
-      toast.success("Board created successfully");
+      toast.success(t("Board created successfully"));
     } catch (error) {
       console.error("Failed to create board:", error);
-      toast.error("Failed to create board");
+      toast.error(t("Failed to create board"));
     }
   };
 
@@ -409,5 +410,16 @@ export default function KanbanPage() {
         onDelete={handleDeleteColumn}
       />
     </div>
+  );
+}
+
+export default function KanbanPage() {
+  return (
+    <ProtectedRoute
+      requiredRoles={["business", "staff"]}
+      requiredPlan={["starter", "professional", "enterprise"]}
+    >
+      <KanbanPageContent />
+    </ProtectedRoute>
   );
 }

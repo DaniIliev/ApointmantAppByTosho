@@ -17,9 +17,21 @@ const resources = {
   },
 };
 
+// Determine initial language (persisted in localStorage if available)
+const initialLanguage =
+  typeof window !== "undefined" &&
+  (localStorage.getItem("appLocale") || navigator.language?.slice(0, 2))
+    ? localStorage.getItem("appLocale") || navigator.language?.slice(0, 2)
+    : "en";
+
+// Fallback to 'en' if detected language not part of resources
+const safeInitialLanguage = Object.keys(resources).includes(initialLanguage)
+  ? initialLanguage
+  : "en";
+
 i18n.use(initReactI18next).init({
   resources,
-  lng: "en",
+  lng: safeInitialLanguage,
   fallbackLng: "en",
   interpolation: {
     escapeValue: false,

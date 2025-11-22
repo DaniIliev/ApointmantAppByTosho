@@ -212,7 +212,7 @@ export default function LeftNav({ isOpen }: LeftNavProps) {
               // },
 
               {
-                href: "/business/page",
+                href: "/business/" + (user?.businessId || ""),
                 label: t("My Public Page"),
                 icon: Users,
               },

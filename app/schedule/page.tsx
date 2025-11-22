@@ -1,9 +1,8 @@
-// staffSchedulePage.js
-
 "use client";
 
 import { useEffect, useState } from "react";
 import { usePageTitle } from "@/context/PageTitleContext";
+import ProtectedRoute from "@/components/guards/ProtectedRoute";
 import { useRightNav } from "@/context/RightNavContext";
 import { Button } from "@/components/ui/button";
 import { Plus, Trash2, Pencil, Eye } from "lucide-react";
@@ -21,12 +20,13 @@ import callApi from "../Api/callApi";
 import { jwtDecode } from "jwt-decode";
 import { ScheduleModal } from "./ScheduleModal";
 
-export type TimeRange = {
+// Types
+type TimeRange = {
   start: string | null;
   end: string | null;
 };
 
-export type Schedule = {
+type Schedule = {
   _id: string;
   startDate: string;
   endDate: string;
@@ -45,17 +45,22 @@ export type Schedule = {
   break3: TimeRange;
 };
 
-type CreateNewDashboardMenuProps = {
-  onOpenModal: () => void;
-};
+function StaffSchedulePageContent() {
+  type CreateNewDashboardMenuProps = {
+    onOpenModal: () => void;
+  };
 
-const CreateNewSchedule = ({ onOpenModal }: CreateNewDashboardMenuProps) => {
-  return (
-    <CustomTooltip onClick={onOpenModal} tooltipText="Add" icon={<Plus />} />
-  );
-};
+  const CreateNewSchedule = ({ onOpenModal }: CreateNewDashboardMenuProps) => {
+    const { t } = useTranslation();
+    return (
+      <CustomTooltip
+        onClick={onOpenModal}
+        tooltipText={t("Add")}
+        icon={<Plus />}
+      />
+    );
+  };
 
-export default function StaffSchedulePage() {
   const { t } = useTranslation();
   const { setPageTitle } = usePageTitle();
   const { setExtraRightNavMenu, setIsRightNavVisible } = useRightNav();
@@ -96,7 +101,7 @@ export default function StaffSchedulePage() {
         const data = await callApi("/api/staff-schedules", "GET");
         setSchedules(data);
       } catch (error) {
-        toast.error("Неуспешно зареждане на графици.");
+        toast.error(t("Failed to load schedules."));
       }
     };
     fetchSchedules();
@@ -122,9 +127,9 @@ export default function StaffSchedulePage() {
       }
 
       setSchedules(updatedData);
-      toast.success("Графикът е запазен успешно!");
+      toast.success(t("Schedule saved successfully!"));
     } catch (error) {
-      toast.error("Неуспешно запазване на графика.");
+      toast.error(t("Failed to save schedule."));
     }
   };
 
@@ -134,9 +139,9 @@ export default function StaffSchedulePage() {
       setSchedules((prev) =>
         prev.filter((schedule) => schedule._id !== scheduleId)
       );
-      toast.success("Графикът е изтрит успешно!");
+      toast.success(t("Schedule deleted successfully!"));
     } catch (error) {
-      toast.error("Неуспешно изтриване на графика.");
+      toast.error(t("Failed to delete schedule."));
     }
   };
 
@@ -177,7 +182,11 @@ export default function StaffSchedulePage() {
       }
     } catch (error) {
       toast.error(
-        `Неуспешно ${isEditing ? "редактиране" : "създаване"} на графика.`
+        t(
+          isEditing
+            ? "Failed to update schedule."
+            : "Failed to create schedule."
+        )
       );
     } finally {
       setIsModalOpen(false);
@@ -195,7 +204,7 @@ export default function StaffSchedulePage() {
         toast.success(t("Schedule applied to all staff successfully!"));
       }
     } catch (error) {
-      toast.error("Неуспешно прилагане на графика към всички служители.");
+      toast.error(t("Failed to apply schedule to all staff."));
     }
     setIsApplyToAllModalOpen(false);
   };
@@ -204,13 +213,13 @@ export default function StaffSchedulePage() {
     // ... (Оставяме колоните както са, но добавяме бутон за редактиране)
     {
       accessorKey: "period",
-      header: "Период на графика",
+      header: t("Schedule Period"),
       cell: ({ row }) => (
         <div className="min-w-[200px]">
           {row.original.startDate
             ? format(new Date(row.original.startDate), "dd.MM.yyyy")
             : "-"}{" "}
-          до{" "}
+          {t("to")}{" "}
           {row.original.endDate
             ? format(new Date(row.original.endDate), "dd.MM.yyyy")
             : "-"}
@@ -237,7 +246,7 @@ export default function StaffSchedulePage() {
     },
     {
       accessorKey: "workTime",
-      header: "Работно време",
+      header: t("Work Time"),
       cell: ({ row }) => (
         <span>
           {row.original.workTime.start} - {row.original.workTime.end}
@@ -274,10 +283,10 @@ export default function StaffSchedulePage() {
     },
     {
       accessorKey: "isDayOff.monday",
-      header: "Пон",
+      header: t("Mon"),
       cell: ({ row }) => (
         <span className="font-medium">
-          {row.original.isDayOff.monday ? "Почивен" : "Работен"}
+          {row.original.isDayOff.monday ? t("Day Off") : t("Working")}
         </span>
       ),
       editableCell: ({ row }, onUpdate) => (
@@ -291,10 +300,10 @@ export default function StaffSchedulePage() {
     },
     {
       accessorKey: "isDayOff.tuesday",
-      header: "Втор",
+      header: t("Tue"),
       cell: ({ row }) => (
         <span className="font-medium">
-          {row.original.isDayOff.tuesday ? "Почивен" : "Работен"}
+          {row.original.isDayOff.tuesday ? t("Day Off") : t("Working")}
         </span>
       ),
       editableCell: ({ row }, onUpdate) => (
@@ -311,10 +320,10 @@ export default function StaffSchedulePage() {
     },
     {
       accessorKey: "isDayOff.wednesday",
-      header: "Сря",
+      header: t("Wed"),
       cell: ({ row }) => (
         <span className="font-medium">
-          {row.original.isDayOff.wednesday ? "Почивен" : "Работен"}
+          {row.original.isDayOff.wednesday ? t("Day Off") : t("Working")}
         </span>
       ),
       editableCell: ({ row }, onUpdate) => (
@@ -331,10 +340,10 @@ export default function StaffSchedulePage() {
     },
     {
       accessorKey: "isDayOff.thursday",
-      header: "Четв",
+      header: t("Thu"),
       cell: ({ row }) => (
         <span className="font-medium">
-          {row.original.isDayOff.thursday ? "Почивен" : "Работен"}
+          {row.original.isDayOff.thursday ? t("Day Off") : t("Working")}
         </span>
       ),
       editableCell: ({ row }, onUpdate) => (
@@ -351,10 +360,10 @@ export default function StaffSchedulePage() {
     },
     {
       accessorKey: "isDayOff.friday",
-      header: "Пет",
+      header: t("Fri"),
       cell: ({ row }) => (
         <span className="font-medium">
-          {row.original.isDayOff.friday ? "Почивен" : "Работен"}
+          {row.original.isDayOff.friday ? t("Day Off") : t("Working")}
         </span>
       ),
       editableCell: ({ row }, onUpdate) => (
@@ -368,10 +377,10 @@ export default function StaffSchedulePage() {
     },
     {
       accessorKey: "isDayOff.saturday",
-      header: "Съб",
+      header: t("Sat"),
       cell: ({ row }) => (
         <span className="font-medium">
-          {row.original.isDayOff.saturday ? "Почивен" : "Работен"}
+          {row.original.isDayOff.saturday ? t("Day Off") : t("Working")}
         </span>
       ),
       editableCell: ({ row }, onUpdate) => (
@@ -388,10 +397,10 @@ export default function StaffSchedulePage() {
     },
     {
       accessorKey: "isDayOff.sunday",
-      header: "Нед",
+      header: t("Sun"),
       cell: ({ row }) => (
         <span className="font-medium">
-          {row.original.isDayOff.sunday ? "Почивен" : "Работен"}
+          {row.original.isDayOff.sunday ? t("Day Off") : t("Working")}
         </span>
       ),
       editableCell: ({ row }, onUpdate) => (
@@ -405,7 +414,7 @@ export default function StaffSchedulePage() {
     },
     {
       accessorKey: "break1",
-      header: "Почивка 1",
+      header: t("Break 1"),
       cell: ({ row }) => (
         <span>
           {row.original.break1?.start} - {row.original.break1?.end}
@@ -442,7 +451,7 @@ export default function StaffSchedulePage() {
     },
     {
       accessorKey: "break2",
-      header: "Почивка 2",
+      header: t("Break 2"),
       cell: ({ row }) => (
         <span>
           {row.original.break2?.start} - {row.original.break2?.end}
@@ -479,7 +488,7 @@ export default function StaffSchedulePage() {
     },
     {
       accessorKey: "break3",
-      header: "Почивка 3",
+      header: t("Break 3"),
       cell: ({ row }) => (
         <span>
           {row.original.break3?.start} - {row.original.break3?.end}
@@ -516,7 +525,7 @@ export default function StaffSchedulePage() {
     },
     {
       accessorKey: "actions",
-      header: "Действия",
+      header: t("Actions"),
       cell: ({ row }) => (
         <div className="flex items-center gap-0.5 mobile-actions">
           <CustomTooltip
@@ -557,17 +566,21 @@ export default function StaffSchedulePage() {
       />
 
       <Modal
-        label="Apply Schedule to All"
+        label={t("Apply Schedule to All")}
         open={isApplyToAllModalOpen}
         onOpenChange={setIsApplyToAllModalOpen}
       >
         <div className="p-4 text-center">
           <h2 className="text-xl font-bold mb-2">
-            Apply schedule to the whole business?
+            {t("Apply schedule to the whole business?")}
           </h2>
           <p className="text-sm text-gray-600 mb-4">
-            Do you want to apply this schedule to all staff in the business?
-            Staff members will be able to edit it individually afterwards.
+            {t(
+              "Do you want to apply this schedule to all staff in the business?"
+            )}
+            {t(
+              "Staff members will be able to edit it individually afterwards."
+            )}
           </p>
           <div className="flex justify-center gap-4">
             <Button
@@ -576,14 +589,22 @@ export default function StaffSchedulePage() {
                 applyScheduleToAll(false);
               }}
             >
-              No, for me only
+              {t("No, for me only")}
             </Button>
             <Button onClick={() => applyScheduleToAll(true)}>
-              Yes, apply to all
+              {t("Yes, apply to all")}
             </Button>
           </div>
         </div>
       </Modal>
     </>
+  );
+}
+
+export default function StaffSchedulePage() {
+  return (
+    <ProtectedRoute requiredRoles={["business", "staff"]}>
+      <StaffSchedulePageContent />
+    </ProtectedRoute>
   );
 }

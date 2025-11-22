@@ -3,6 +3,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { useParams, useRouter } from "next/navigation";
 import { usePageTitle } from "@/context/PageTitleContext";
 import { useRightNav } from "@/context/RightNavContext";
@@ -37,6 +38,7 @@ type WorkHours = {
 export default function StaffDailySchedulePage() {
   const router = useRouter();
   const params = useParams();
+  const { t } = useTranslation();
 
   const scheduleId = params.id;
   const [dailyData, setDailyData] = useState<WorkHours[]>([]);
@@ -66,7 +68,7 @@ export default function StaffDailySchedulePage() {
       const index = dailyData.findIndex((d) => d._id === updatedDayData._id);
 
       if (index === -1) {
-        toast.error("Грешка: Денят за редактиране не е намерен.");
+        toast.error(t("Error: Day not found for editing."));
         return;
       }
 
@@ -83,9 +85,9 @@ export default function StaffDailySchedulePage() {
       });
       setDailyData(newDailyData);
       closeModal();
-      toast.success("Денят от графика е запазен успешно!");
+      toast.success(t("Schedule day saved successfully!"));
     } catch (error) {
-      toast.error("Неуспешно запазване на деня от графика.");
+      toast.error(t("Failed to save schedule day."));
     }
   };
 
@@ -117,12 +119,17 @@ export default function StaffDailySchedulePage() {
             sortedData[sortedData.length - 1].date,
             "dd.MM.yyyy"
           );
-          setPageTitle(`График за период: ${startDate} - ${endDate}`);
+          setPageTitle(
+            t("Schedule for period: {{start}} - {{end}}", {
+              start: startDate,
+              end: endDate,
+            })
+          );
         } else {
-          setPageTitle("График");
+          setPageTitle(t("Schedule"));
         }
       } catch (error) {
-        toast.error("Неуспешно зареждане на детайлния график.");
+        toast.error(t("Failed to load detailed schedule."));
       }
     };
     if (scheduleId) {
@@ -135,7 +142,7 @@ export default function StaffDailySchedulePage() {
       <div className="absolute top-2 right-4  hidden md:block">
         <CustomTooltip
           onClick={() => router.back()}
-          tooltipText="Go Back"
+          tooltipText={t("Go Back")}
           icon={<ArrowLeft />}
         />
       </div>

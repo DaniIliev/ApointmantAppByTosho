@@ -1,5 +1,6 @@
 "use client";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
+import ProtectedRoute from "@/components/guards/ProtectedRoute";
 // import Alert from "../../Components/MaterialUI/Alert";
 // import { useOutletContext } from "react-router-dom";
 // import { AppRouterProps } from "../../Layout/layoutVariables";
@@ -80,7 +81,7 @@ import {
   getMockKanbanBoardsList,
 } from "@/components/InteractiveKanbanBoard/lib/mockData";
 
-const page: React.FC = () => {
+const TaskManagerPageContent: React.FC = () => {
   const { t } = useTranslation();
   const [pageLoading, setPageLoading] = useState<boolean>(true);
 
@@ -141,7 +142,7 @@ const page: React.FC = () => {
   const { setExtraRightNavMenu, setIsRightNavVisible } = useRightNav();
 
   useEffect(() => {
-    setPageTitle(t("Dashboard"));
+    setPageTitle(t("Task Manager"));
     setExtraRightNavMenu(
       <KanbanBoardMenu
         setBoardFormMode={setBoardFormMode}
@@ -824,4 +825,14 @@ const page: React.FC = () => {
     </div>
   );
 };
-export default page;
+
+export default function TaskManagerPage() {
+  return (
+    <ProtectedRoute
+      requiredRoles={["business", "staff"]}
+      requiredPlan={["starter", "professional", "enterprise"]}
+    >
+      <TaskManagerPageContent />
+    </ProtectedRoute>
+  );
+}

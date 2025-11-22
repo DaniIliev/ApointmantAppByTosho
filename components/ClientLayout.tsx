@@ -6,7 +6,6 @@ import TopNav from "@/components/navigation/top-nav";
 import LeftNav from "@/components/navigation/left-nav";
 import RightNavigation from "./navigation/right-nav";
 import { useRightNav } from "@/context/RightNavContext";
-import Chatbot from "./chatBot/Chatbot";
 import Footer from "./Footer/Footer";
 import { usePaddingControl } from "@/context/PaddingContext";
 
@@ -59,8 +58,6 @@ export default function ClientLayout({
         <RightNavigation />
       </div>
       {/* <Footer /> */}
-
-      <Chatbot />
       {/* <div
         className={`   
                       transition-all duration-300         ${

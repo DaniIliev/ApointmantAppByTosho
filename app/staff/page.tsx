@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { usePageTitle } from "@/context/PageTitleContext";
+import ProtectedRoute from "@/components/guards/ProtectedRoute";
 import { useRightNav } from "@/context/RightNavContext";
 import { Button } from "@/components/ui/button";
 import { Plus, Eye, Pencil, Trash2 } from "lucide-react";
@@ -21,16 +22,17 @@ type AddStaffNavProps = {
 };
 
 const AddStaffNav = ({ onOpenModal }: AddStaffNavProps) => {
+  const { t } = useTranslation();
   return (
     <CustomTooltip
       onClick={onOpenModal}
-      tooltipText="Add Staff"
+      tooltipText={t("Add Staff")}
       icon={<Plus />}
     />
   );
 };
 
-export default function StaffPage() {
+function StaffPageContent() {
   const { t } = useTranslation();
   const { setPageTitle } = usePageTitle();
   const { setExtraRightNavMenu, setIsRightNavVisible } = useRightNav();
@@ -66,7 +68,7 @@ export default function StaffPage() {
         const data = await callApi("/api/staff/staff-list", "GET");
         setStaff(data);
       } catch (error) {
-        toast.error("Неуспешно зареждане на персонала.");
+        toast.error(t("Failed to load staff"));
       }
     };
     fetchStaff();
@@ -123,7 +125,9 @@ export default function StaffPage() {
 
       setIsModalOpen(false);
       toast.success(
-        "Служителят е поканен успешно! Изпратен е имейл с временна парола."
+        t(
+          "Staff member invited successfully! An email with a temporary password has been sent"
+        )
       );
 
       // Изчистване на формата
@@ -134,39 +138,39 @@ export default function StaffPage() {
         phone: "",
       });
     } catch (error) {
-      toast.error("Неуспешна покана на служителя.");
+      toast.error(t("Failed to invite staff member"));
     }
   };
 
   const columns: Column<StaffMember>[] = [
     {
       accessorKey: "firstName",
-      header: "First Name",
+      header: t("First Name"),
       cell: ({ row }) => <span>{row.original.firstName}</span>,
     },
     {
       accessorKey: "lastName",
-      header: "Last Name",
+      header: t("Last Name"),
       cell: ({ row }) => <span>{row.original.lastName}</span>,
     },
     {
       accessorKey: "email",
-      header: "Email",
+      header: t("Email"),
       cell: ({ row }) => <span>{row.original.email}</span>,
     },
     {
       accessorKey: "phone",
-      header: "Phone",
+      header: t("Phone"),
       cell: ({ row }) => <span>{row.original.phone}</span>,
     },
     {
       accessorKey: "role",
-      header: "Role",
+      header: t("Role"),
       cell: ({ row }) => <span>{row.original.role}</span>,
     },
     {
       accessorKey: "actions",
-      header: "Действия",
+      header: t("Actions"),
       cell: ({ row }) => (
         <div className="flex items-center gap-0.5 mobile-actions">
           <CustomTooltip
@@ -195,7 +199,7 @@ export default function StaffPage() {
       <GenericTable data={staff} columns={columns} editable={false} />
 
       <Modal
-        label="Add New Staff Member"
+        label={t("Add New Staff Member")}
         open={isModalOpen}
         onOpenChange={setIsModalOpen}
       >
@@ -209,7 +213,7 @@ export default function StaffPage() {
                 firstName: e.target.value,
               })
             }
-            label="First Name"
+            label={t("First Name")}
             id="firstName"
           />
           <LabeledInput
@@ -218,7 +222,7 @@ export default function StaffPage() {
             onChange={(e) =>
               setNewStaffMember({ ...newStaffMember, lastName: e.target.value })
             }
-            label="Last Name"
+            label={t("Last Name")}
             id="lastName"
           />
           <LabeledInput
@@ -227,7 +231,7 @@ export default function StaffPage() {
             onChange={(e) =>
               setNewStaffMember({ ...newStaffMember, email: e.target.value })
             }
-            label="Email"
+            label={t("Email")}
             id="email"
           />
           <LabeledInput
@@ -236,15 +240,15 @@ export default function StaffPage() {
             onChange={(e) =>
               setNewStaffMember({ ...newStaffMember, phone: e.target.value })
             }
-            label="Phone"
+            label={t("Phone")}
             id="phone"
           />
 
           <div className="flex justify-end gap-2 pt-4">
             <Button variant="outline" onClick={() => setIsModalOpen(false)}>
-              Cancel
+              {t("Cancel")}
             </Button>
-            <Button onClick={handleInviteStaff}>Invite Staff</Button>
+            <Button onClick={handleInviteStaff}>{t("Invite Staff")}</Button>
           </div>
         </div>
       </Modal>
@@ -262,5 +266,13 @@ export default function StaffPage() {
         onStaffUpdated={handleStaffUpdated}
       />
     </>
+  );
+}
+
+export default function StaffPage() {
+  return (
+    <ProtectedRoute requiredRoles={["business"]}>
+      <StaffPageContent />
+    </ProtectedRoute>
   );
 }
