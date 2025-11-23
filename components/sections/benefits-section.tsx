@@ -1,3 +1,5 @@
+"use client";
+
 import { Card, CardContent } from "@/components/ui/card";
 import {
   Clock,
@@ -9,72 +11,86 @@ import {
   BarChart3,
   Palette,
 } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
-const benefits = [
-  {
-    icon: Clock,
-    title: "Save Time",
-    description:
-      "Book appointments 24/7 without phone calls or waiting on hold",
-  },
-  {
-    icon: Calendar,
-    title: "Easy Scheduling",
-    description:
-      "View real-time availability and choose times that work for you",
-  },
-  {
-    icon: Shield,
-    title: "Verified Businesses",
-    description:
-      "All businesses are verified with real reviews from actual clients",
-  },
-  {
-    icon: Zap,
-    title: "Instant Confirmation",
-    description:
-      "Get immediate booking confirmation and reminders via email or SMS",
-  },
-];
-const featureData = [
-  {
-    icon: Calendar,
-    title: "Flexible Scheduling", // Flexible Scheduling
-    description:
-      "Configure business hours and let each staff member create their own personalized schedule. Multiple view options including calendar and table views.",
-  },
-  {
-    icon: Users,
-    title: "Staff Management", // Staff Management
-    description:
-      "Add unlimited staff members, assign services to specific team members, and let each staff track their own appointments independently.",
-  },
-  {
-    icon: Bell,
-    title: "Real-Time Notifications", // Real-Time Notifications
-    description:
-      "Staff receive instant notifications when clients book appointments. Confirm or reschedule with one click, and clients get immediate responses.",
-  },
-  {
-    icon: Zap,
-    title: "Service Configuration", // Service Configuration
-    description:
-      "Create unlimited services with custom durations and pricing. Assign services to specific staff members for specialized expertise.",
-  },
-  {
-    icon: BarChart3,
-    title: "Performance Analytics", // Performance Analytics
-    description:
-      "Track revenue, appointments, client retention, and service popularity. Make data-driven decisions to grow your business.",
-  },
-  {
-    icon: Palette,
-    title: "Customizable Interface", // Customizable Interface
-    description:
-      "Every user can personalize their experience with dark mode and multiple color palettes. Make the app truly yours.",
-  },
-];
 export function BenefitsSection({ type }: { type: string }) {
+  const { t } = useTranslation();
+
+  const benefits = [
+    {
+      icon: Clock,
+      title: t("Save Time"),
+      description: t(
+        "Book appointments 24/7 without phone calls or waiting on hold"
+      ),
+    },
+    {
+      icon: Calendar,
+      title: t("Easy Scheduling"),
+      description: t(
+        "View real-time availability and choose times that work for you"
+      ),
+    },
+    {
+      icon: Shield,
+      title: t("Verified Businesses"),
+      description: t(
+        "All businesses are verified with real reviews from actual clients"
+      ),
+    },
+    {
+      icon: Zap,
+      title: t("Instant Confirmation"),
+      description: t(
+        "Get immediate booking confirmation and reminders via email or SMS"
+      ),
+    },
+  ];
+  const featureData = [
+    {
+      icon: Calendar,
+      title: t("Flexible Scheduling"),
+      description: t(
+        "Configure business hours and let each staff member create their own personalized schedule. Multiple view options including calendar and table views."
+      ),
+    },
+    {
+      icon: Users,
+      title: t("Staff Management"),
+      description: t(
+        "Add unlimited staff members, assign services to specific team members, and let each staff track their own appointments independently."
+      ),
+    },
+    {
+      icon: Bell,
+      title: t("Real-Time Notifications"),
+      description: t(
+        "Staff receive instant notifications when clients book appointments. Confirm or reschedule with one click, and clients get immediate responses."
+      ),
+    },
+    {
+      icon: Zap,
+      title: t("Service Configuration"),
+      description: t(
+        "Create unlimited services with custom durations and pricing. Assign services to specific staff members for specialized expertise."
+      ),
+    },
+    {
+      icon: BarChart3,
+      title: t("Performance Analytics"),
+      description: t(
+        "Track revenue, appointments, client retention, and service popularity. Make data-driven decisions to grow your business."
+      ),
+    },
+    {
+      icon: Palette,
+      title: t("Customizable Interface"),
+      description: t(
+        "Every user can personalize their experience with dark mode and multiple color palettes. Make the app truly yours."
+      ),
+    },
+  ];
+
   const list = type == "feature" ? featureData : benefits;
 
   // Определяне на класовете за grid-а динамично
@@ -95,10 +111,10 @@ export function BenefitsSection({ type }: { type: string }) {
       <div className="container mx-auto px-4">
         <div className="text-center mb-16">
           <h2 className="text-4xl md:text-5xl font-extrabold font-sans text-gray-900 dark:text-white">
-            A great way to save time
+            {t("A great way to save time")}
           </h2>
           <p className="text-xl text-gray-600 dark:text-gray-400 max-w-3xl mx-auto pt-2">
-            Experience the convenience of modern appointment booking
+            {t("Experience the convenience of modern appointment booking")}
           </p>
         </div>
 
