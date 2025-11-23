@@ -12,8 +12,19 @@ interface BusinessInfoProps {
 export function BusinessInfo({ business }: BusinessInfoProps) {
   const { t } = useTranslation();
 
-  // Day keys of the week in order (starting with Monday)
-  const days: string[] = [
+  // Day keys in English (matching backend keys)
+  const dayKeys = [
+    "monday",
+    "tuesday",
+    "wednesday",
+    "thursday",
+    "friday",
+    "saturday",
+    "sunday",
+  ];
+
+  // Translated day names for display
+  const dayNames = [
     t("Monday"),
     t("Tuesday"),
     t("Wednesday"),
@@ -65,17 +76,20 @@ export function BusinessInfo({ business }: BusinessInfoProps) {
             )}
 
             {isScheduleObject &&
-              days.map((day) => {
-                // Get daily hours from business.schedule
-                const dayToLowerCase = day.toLocaleLowerCase();
+              dayKeys.map((dayKey, index) => {
+                // Get daily hours from business.schedule using English key
                 const dayHours =
-                  business.schedule[
-                    dayToLowerCase as keyof typeof business.schedule
-                  ];
-                const isToday = dayToLowerCase === todayKey;
+                  business.schedule[dayKey as keyof typeof business.schedule];
+                const dayName = dayNames[index]; // Get translated day name
+                const isToday = dayKey === todayKey;
                 const isDayOff =
-                  dayHours === t("Почивен Ден") || dayHours === t("Затворено");
-                const isNotSet = dayHours === t("Не е зададено");
+                  dayHours === t("Почивен Ден") ||
+                  dayHours === t("Затворено") ||
+                  dayHours === "Почивен Ден" ||
+                  dayHours === "Затворено";
+                const isNotSet =
+                  dayHours === t("Не е зададено") ||
+                  dayHours === "Не е зададено";
 
                 // Determine display status (e.g., "08:00-17:00" or "Day Off")
                 let displayStatus;
@@ -95,7 +109,7 @@ export function BusinessInfo({ business }: BusinessInfoProps) {
 
                 return (
                   <div
-                    key={day}
+                    key={dayKey}
                     className={`flex justify-between items-center py-1 border-b border-border/50 last:border-b-0 transition-colors ${
                       isToday
                         ? "font-bold text-foreground bg-primary/5 rounded-md px-2 -mx-2 shadow-sm"
@@ -103,7 +117,7 @@ export function BusinessInfo({ business }: BusinessInfoProps) {
                     }`}
                   >
                     {/* Day Name (Translated) */}
-                    <span className="text-base">{day}</span>
+                    <span className="text-base">{dayName}</span>
 
                     <div className={`flex items-center gap-2 ${statusClass}`}>
                       {isToday && (isDayOff || isNotSet) && (
