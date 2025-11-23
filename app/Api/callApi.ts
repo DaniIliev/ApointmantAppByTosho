@@ -36,8 +36,13 @@ const callApi = async (
       }
     }
   }
-  // const url = "http://localhost:8080";
-  const url = "https://apointmantappservice-production.up.railway.app";
+
+  // Dynamically set API URL based on environment
+  const url =
+    process.env.NODE_ENV === "production"
+      ? "https://apointmantappservice-production.up.railway.app"
+      : "http://localhost:8080";
+
   const result: any = await fetch(`${url}${endpoint}`, {
     method: method,
     headers: headers,

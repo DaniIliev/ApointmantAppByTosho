@@ -50,7 +50,7 @@ export default function Chatbot({ businessId }: { businessId?: string }) {
         {
           message: input,
           userId: user?._id,
-          businessId: "69199d041d10b3922e2091e8", // Предаваме businessId
+          businessId: businessId, // Предаваме businessId
         }
       );
 
