@@ -20,16 +20,13 @@ interface ProtectedRouteProps {
   featureName?: string;
 }
 
-/**
- * ProtectedRoute Component
- * Wraps routes that require authentication, specific roles, or plan access
- */
 export default function ProtectedRoute({
   children,
   requiredRoles,
   requiredPlan,
   featureName,
 }: ProtectedRouteProps) {
+  const { t } = useTranslations();
   const { user } = useAuthContext();
   const router = useRouter();
   const pathname = usePathname();
@@ -37,12 +34,10 @@ export default function ProtectedRoute({
   const [shouldRedirect, setShouldRedirect] = useState<string | null>(null);
 
   useEffect(() => {
-    // Small delay to avoid flash
     const timer = setTimeout(() => setIsChecking(false), 100);
     return () => clearTimeout(timer);
   }, []);
 
-  // Handle redirects in useEffect to avoid setState during render
   useEffect(() => {
     if (shouldRedirect) {
       router.push(shouldRedirect);
@@ -57,7 +52,6 @@ export default function ProtectedRoute({
     );
   }
 
-  // Check authentication
   if (!user) {
     if (!shouldRedirect) {
       setShouldRedirect(`/login?redirect=${encodeURIComponent(pathname)}`);
@@ -69,7 +63,6 @@ export default function ProtectedRoute({
     );
   }
 
-  // Check role access
   if (requiredRoles && !requiredRoles.includes(user.role)) {
     return (
       <div className="flex items-center justify-center min-h-screen px-4">
@@ -81,21 +74,25 @@ export default function ProtectedRoute({
                   <Lock className="h-6 w-6 text-red-600" />
                 </div>
               </div>
-              <h2 className="text-2xl font-bold text-primary">Access Denied</h2>
+              <h2 className="text-2xl font-bold text-primary">
+                {t("Access Denied")}
+              </h2>
               <p className="text-muted-foreground">
-                This page is only available to{" "}
-                {requiredRoles.join(", ").replace(/,([^,]*)$/, " and$1")}{" "}
-                accounts.
+                {t(
+                  `This page is only available to ${requiredRoles
+                    .join(", ")
+                    .replace(/,([^,]*)$/, " and$1")} accounts.`
+                )}
               </p>
               <p className="text-sm text-muted-foreground">
-                Your account type: <strong>{user.role}</strong>
+                {t("Your account type:")} <strong>{user.role}</strong>
               </p>
               <div className="flex gap-2 justify-center pt-2">
                 <Button variant="outline" onClick={() => router.back()}>
-                  Go Back
+                  {t("Go Back")}
                 </Button>
                 <Link href="/dashboard">
-                  <Button>Go to Dashboard</Button>
+                  <Button>{t("Go to Dashboard")}</Button>
                 </Link>
               </div>
             </div>
@@ -105,10 +102,8 @@ export default function ProtectedRoute({
     );
   }
 
-  // Check plan access
   const userPlanType = getPlanFromName(user.subscriptionPlan || user.plan);
 
-  // Business accounts need active subscription to access features
   if (
     user.role === "business" &&
     user.subscriptionStatus !== "active" &&
@@ -127,26 +122,24 @@ export default function ProtectedRoute({
                 </div>
               </div>
               <h2 className="text-2xl font-bold text-primary">
-                Subscription Required
+                {t("Subscription Required")}
               </h2>
               <p className="text-muted-foreground">
-                Business accounts need an active subscription to access this
-                feature. Choose a plan to get started.
+                {t(
+                  "Business accounts need an active subscription to access this feature. Choose a plan to get started."
+                )}
               </p>
               <p className="text-sm text-muted-foreground">
-                Subscription status:{" "}
-                <strong className="capitalize">
-                  {user.subscriptionStatus || "none"}
-                </strong>
+                {t("Subscription status:")}{" "}
+                <strong>{user.subscriptionStatus || "none"}</strong>
               </p>
-              <div className="flex gap-2 justify-center pt-2">
+              <div className="flex gap-2 justify-center pt-2 pb-4">
                 <Button variant="outline" onClick={() => router.back()}>
-                  Go Back
+                  {t("Go Back")}
                 </Button>
                 <Link href="/pricing">
-                  <Button className="bg-primary hover:bg-primary-dark">
-                    View Plans
-                    <ArrowRight className="ml-2 h-4 w-4" />
+                  <Button>
+                    {t("View Plans")} <ArrowRight className="ml-2 h-4 w-4" />
                   </Button>
                 </Link>
               </div>
@@ -169,43 +162,32 @@ export default function ProtectedRoute({
                 </div>
               </div>
               <h2 className="text-2xl font-bold text-primary">
-                Upgrade Required
+                {t("Upgrade Required")}
               </h2>
               <p className="text-muted-foreground">
-                {featureName || "This feature"} is available on{" "}
-                {requiredPlan.join(", ").replace(/,([^,]*)$/, " and$1")} plans.
+                {t(
+                  `${
+                    featureName || "This feature"
+                  } is available on ${requiredPlan
+                    .join(", ")
+                    .replace(/,([^,]*)$/, " and$1")} plans.`
+                )}
               </p>
-              <div className="bg-muted/50 rounded-lg  space-y-2">
-                <p className="text-sm text-text-primary font-medium">
-                  Your current plan:{" "}
+              <div className="bg-muted/50 rounded-lg space-y-2">
+                <p className="text-sm font-medium">
+                  {t("Your current plan:")}{" "}
                   <span className="text-primary capitalize">
                     {userPlanType}
                   </span>
                 </p>
-                {requiredPlan[0] === "starter" && (
-                  <ul className="text-sm text-left space-y-1 text-muted-foreground">
-                    <li>✓ Up to 3 staff members</li>
-                    <li>✓ Basic analytics</li>
-                    <li>✓ Kanban & Task Manager</li>
-                  </ul>
-                )}
-                {requiredPlan[0] === "professional" && (
-                  <ul className="text-sm text-left space-y-1 text-muted-foreground">
-                    <li>✓ Up to 10 staff members</li>
-                    <li>✓ Advanced analytics</li>
-                    <li>✓ SMS notifications</li>
-                    <li>✓ Priority support</li>
-                  </ul>
-                )}
               </div>
               <div className="flex gap-2 justify-center pb-4">
                 <Button variant="outline" onClick={() => router.back()}>
-                  Go Back
+                  {t("Go Back")}
                 </Button>
                 <Link href="/pricing">
-                  <Button className="bg-primary hover:bg-primary-dark">
-                    View Plans
-                    <ArrowRight className="ml-2 h-4 w-4" />
+                  <Button>
+                    {t("View Plans")} <ArrowRight className="ml-2 h-4 w-4" />
                   </Button>
                 </Link>
               </div>
@@ -216,7 +198,6 @@ export default function ProtectedRoute({
     );
   }
 
-  // Check general route access via permissions
   const access = hasRouteAccess(
     pathname,
     user.role,
@@ -238,17 +219,17 @@ export default function ProtectedRoute({
                   </div>
                 </div>
                 <h2 className="text-2xl font-bold text-primary">
-                  Active Subscription Required
+                  {t("Active Subscription Required")}
                 </h2>
                 <p className="text-muted-foreground">
-                  Please subscribe to a plan to access business features.
+                  {t("Please subscribe to a plan to access business features.")}
                 </p>
                 <div className="flex gap-2 justify-center pt-2">
                   <Button variant="outline" onClick={() => router.back()}>
-                    Go Back
+                    {t("Go Back")}
                   </Button>
                   <Link href="/pricing">
-                    <Button>View Plans</Button>
+                    <Button>{t("View Plans")}</Button>
                   </Link>
                 </div>
               </div>
@@ -273,17 +254,17 @@ export default function ProtectedRoute({
                   </div>
                 </div>
                 <h2 className="text-2xl font-bold text-primary">
-                  Premium Feature
+                  {t("Premium Feature")}
                 </h2>
                 <p className="text-muted-foreground">
-                  This feature requires a plan upgrade.
+                  {t("This feature requires a plan upgrade.")}
                 </p>
                 <div className="flex gap-2 justify-center pt-2">
                   <Button variant="outline" onClick={() => router.back()}>
-                    Go Back
+                    {t("Go Back")}
                   </Button>
                   <Link href="/pricing">
-                    <Button>Upgrade Plan</Button>
+                    <Button>{t("Upgrade Plan")}</Button>
                   </Link>
                 </div>
               </div>
@@ -293,7 +274,6 @@ export default function ProtectedRoute({
       );
     }
 
-    // Fallback for other access denials
     if (!shouldRedirect) {
       setShouldRedirect("/dashboard");
     }
@@ -304,6 +284,8 @@ export default function ProtectedRoute({
     );
   }
 
-  // Access granted
   return <>{children}</>;
+}
+function useTranslations(): { t: any } {
+  throw new Error("Function not implemented.");
 }

@@ -1,5 +1,6 @@
 "use client";
 import React, { useCallback, useState, useMemo, ReactNode } from "react";
+import { useTranslation } from "react-i18next";
 import { Badge, Check, Loader2 } from "lucide-react";
 import { useAuthContext } from "@/context/AuthContext";
 import callApi from "@/app/Api/callApi";
@@ -22,13 +23,14 @@ interface Plan {
 /** Интерфейс за данните, върнати от getPriceData */
 interface PriceData {
   price: string;
-  cycleDisplay: "/месец" | "/година";
+  cycleDisplay: "/month" | "/year";
   checkoutName: string;
   discountNote: string | null;
 }
 
 const PricingSection = () => {
   const { user } = useAuthContext();
+  const { t } = useTranslation();
   const [loadingPlan, setLoadingPlan] = useState<string | null>(null);
   const [billingCycle, setBillingCycle] = useState<"monthly" | "annual">(
     "monthly"
@@ -39,7 +41,7 @@ const PricingSection = () => {
     async (checkoutPlanName: string) => {
       console.log("user", user);
       if (!user?.businessId) {
-        console.error("Грешка: businessId липсва. Моля, логнете се.");
+        console.error(t("Error: businessId missing. Please log in."));
         return;
       }
 
@@ -59,10 +61,10 @@ const PricingSection = () => {
         if (data.url) {
           window.location.href = data.url;
         } else {
-          console.error("URL адресът за Stripe Checkout липсва в отговора.");
+          console.error(t("Stripe Checkout URL missing in response."));
         }
       } catch (error) {
-        console.error("Мрежова грешка:", error);
+        console.error(t("Network error:"), error);
       } finally {
         setLoadingPlan(null); // Деактивира зареждащия индикатор
       }
@@ -81,19 +83,20 @@ const PricingSection = () => {
 
     return (
       <Button
-        className={`w-full bg-primary hover:bg-primary-dark text-text-primary mt-6`}
+        className={`w-full bg-primary hover:bg-primary-dark mt-6 text-white ${
+          !isPrimary ? "border-primary text-white hover:text-white" : ""
+        }`}
         variant={isPrimary ? "default" : "outline"}
         onClick={() => handleCheckout(checkoutPlanName)}
-        // Преобразуваме businessId в boolean за disabled props
         disabled={isLoading}
       >
         {isLoading ? (
           <span className="flex items-center justify-center">
             <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-            Зареждане...
+            {t("Loading...")}
           </span>
         ) : (
-          "Купи План / Започни Тест"
+          t("Purchase Plan / Start Trial")
         )}
       </Button>
     );
@@ -105,11 +108,11 @@ const PricingSection = () => {
         name: "Starter",
         monthlyPrice: 10,
         annualPrice: 110, // €10 * 11 месеца
-        description: "Идеален за малки и стартиращи бизнеси.",
+        description: t("Ideal for small and emerging businesses."),
         features: [
-          "До 3 служители",
-          "Неограничен брой срещи",
-          "Основна аналитика",
+          t("Up to 3 staff"),
+          t("Unlimited appointments"),
+          t("Basic analytics"),
         ],
         isPopular: false,
       },
@@ -117,13 +120,13 @@ const PricingSection = () => {
         name: "Professional",
         monthlyPrice: 15,
         annualPrice: 165, // €15 * 11 месеца
-        description: "За растящи бизнеси, нуждаещи се от повече инструменти.",
+        description: t("For growing businesses needing more tools."),
         features: [
-          "До 10 служители",
-          "Всички Starter функции",
-          "SMS & email нотификации",
-          "Разширена аналитика",
-          "Приоритетна поддръжка",
+          t("Up to 10 staff"),
+          t("All Starter features"),
+          t("SMS & email notifications"),
+          t("Advanced analytics"),
+          t("Priority support"),
         ],
         isPopular: true,
       },
@@ -131,14 +134,14 @@ const PricingSection = () => {
         name: "Enterprise",
         monthlyPrice: 20,
         annualPrice: 220, // €20 * 11 месеца
-        description: "За големи организации, изискващи мащабируемост.",
+        description: t("For large organizations requiring scalability."),
         features: [
-          "Неограничен брой служители",
-          "Всички Professional функции",
-          "Multi-location поддръжка",
-          "Пълен API достъп",
-          "24/7 телефонна поддръжка",
-          "Персонализирани интеграции",
+          t("Unlimited staff"),
+          t("All Professional features"),
+          t("Multi-location support"),
+          t("Full API access"),
+          t("24/7 phone support"),
+          t("Custom integrations"),
         ],
         isPopular: false,
       },
@@ -151,7 +154,7 @@ const PricingSection = () => {
     if (billingCycle === "monthly") {
       return {
         price: `€${plan.monthlyPrice}`,
-        cycleDisplay: "/месец",
+        cycleDisplay: "/month",
         checkoutName: `${plan.name}_Monthly`,
         discountNote: null,
       };
@@ -159,9 +162,11 @@ const PricingSection = () => {
       const savingAmount: number = plan.monthlyPrice * 1; // 1 месец спестен
       return {
         price: `€${plan.annualPrice}`,
-        cycleDisplay: "/година",
+        cycleDisplay: "/year",
         checkoutName: `${plan.name}_Annual`,
-        discountNote: `Спестете €${savingAmount} (1 месец безплатно!)`,
+        discountNote: t("Save €{{amount}} (1 month free!)", {
+          amount: savingAmount,
+        }),
       };
     }
   };
@@ -174,11 +179,12 @@ const PricingSection = () => {
           <div className="text-center">
             <ScrollReveal>
               <h2 className="text-4xl md:text-5xl font-extrabold mb-4 text-primary">
-                Ценообразуване в Евро (€)
+                {t("Pricing in Euro (€)")}
               </h2>
               <p className="text-xl sm:text-lg text-text-primary text-balance max-w-3xl mx-auto pt-2">
-                Изберете перфектния план за вашия бизнес. Годишните планове ви
-                дават 1 месец безплатно!
+                {t(
+                  "Choose the perfect plan for your business. Annual plans give you 1 month free!"
+                )}
               </p>
             </ScrollReveal>
           </div>
@@ -194,7 +200,7 @@ const PricingSection = () => {
                     : "text-text-primary hover:bg-primary-dark"
                 }`}
               >
-                Месечно
+                {t("Monthly")}
               </button>
               <button
                 onClick={() => setBillingCycle("annual")}
@@ -204,7 +210,7 @@ const PricingSection = () => {
                     : "text-text-primary hover:bg-primary-dark"
                 }`}
               >
-                Годишно
+                {t("Annual")}
                 <Badge className="bg-red-500 text-white text-xs absolute -top-2 -right-4 rotate-3 px-2 py-0.5">
                   -8%
                 </Badge>
@@ -231,7 +237,7 @@ const PricingSection = () => {
                   >
                     {plan.isPopular && (
                       <div className="absolute -top-4 left-1/2 -translate-x-1/2 text-text-primary bg-accent rounded-full px-4 py-1 shadow-md">
-                        Най-популярен
+                        {t("Most Popular")}
                       </div>
                     )}
                     <CardContent className="flex-grow flex flex-col p-8">
@@ -287,8 +293,9 @@ const PricingSection = () => {
           {/* Индикатор за логнат потребител */}
           <div className="text-center mt-12 text-sm text-gray-500">
             <p className="mt-2 text-primary font-semibold">
-              ВАЖНО: За първи път ще видите 50% отстъпка в Stripe Checkout
-              страницата.
+              {t(
+                "IMPORTANT: The first time you will see a 50% discount on the Stripe Checkout page."
+              )}
             </p>
           </div>
         </div>

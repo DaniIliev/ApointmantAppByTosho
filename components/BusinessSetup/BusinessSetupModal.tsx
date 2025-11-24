@@ -4,8 +4,24 @@ import React, { useEffect, useMemo, useState } from "react";
 import { Modal } from "@/components/customUIComponents/Modal";
 import { Button } from "@/components/ui/button";
 import { LabeledInput } from "@/components/customUIComponents/LabeledInput";
+import { DateRangePicker } from "@/components/customUIComponents/DateRangePicker";
 import { LabeledSelect } from "@/components/customUIComponents/LabeledSelect";
-import { Upload, Trash2, Plus, Trash } from "lucide-react";
+import {
+  Upload,
+  Trash2,
+  Plus,
+  Trash,
+  Image,
+  Info,
+  Building2,
+  Phone,
+  MapPin,
+  Users,
+  Calendar,
+  Briefcase,
+  AlertCircle,
+  CheckCircle2,
+} from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { getBusinessCategories } from "@/Global/Types/types";
 import { useAuthContext } from "@/context/AuthContext";
@@ -92,8 +108,8 @@ interface StaffMember {
 type TimeRange = { start: string | null; end: string | null };
 interface ScheduleState {
   _id?: string;
-  startDate: string;
-  endDate: string;
+  startDate: string | null;
+  endDate: string | null;
   workTime: TimeRange;
   isDayOff: {
     monday: boolean;
@@ -110,8 +126,8 @@ interface ScheduleState {
 }
 
 const initialSchedule: ScheduleState = {
-  startDate: "",
-  endDate: "",
+  startDate: null,
+  endDate: null,
   workTime: { start: null, end: null },
   isDayOff: {
     monday: false,
@@ -183,6 +199,58 @@ export default function BusinessSetupModal({
     "Schedule",
     "Services",
   ];
+
+  const stepInfo = {
+    0: {
+      icon: Image,
+      title: "Business Photo",
+      description:
+        "Upload a professional photo of your business. This helps customers recognize your brand.",
+      hint: "Tip: Use a high-quality image (min 800x600px) showing your storefront or logo.",
+    },
+    1: {
+      icon: Building2,
+      title: "Business Details",
+      description:
+        "Tell us about your business. This information will be visible to your customers.",
+      hint: "Choose a category that best describes your business type.",
+    },
+    2: {
+      icon: Phone,
+      title: "Contact Information",
+      description:
+        "How can customers reach you? Add your phone, email, and website.",
+      hint: "Optional: All fields are optional, but providing more contact options builds trust.",
+    },
+    3: {
+      icon: MapPin,
+      title: "Business Location",
+      description:
+        "Where is your business located? This helps customers find you easily.",
+      hint: "Optional: You can skip this if you operate online or provide mobile services.",
+    },
+    4: {
+      icon: Users,
+      title: "Your Team",
+      description:
+        "Add your staff members who will be providing services to customers.",
+      hint: "Optional: You can add staff members later from the Staff page.",
+    },
+    5: {
+      icon: Calendar,
+      title: "Working Hours",
+      description:
+        "Define your business hours and breaks. Customers can only book during these times.",
+      hint: "Optional: Set your default schedule. You can customize individual staff schedules later.",
+    },
+    6: {
+      icon: Briefcase,
+      title: "Services Offered",
+      description:
+        "What services do you provide? Add appointment types with duration and pricing.",
+      hint: "Optional: Start with your most popular services. You can add more anytime.",
+    },
+  };
   const next = () => setStep((s) => Math.min(s + 1, stepLabels.length - 1));
   const back = () => setStep((s) => Math.max(s - 1, 0));
 
@@ -398,20 +466,55 @@ export default function BusinessSetupModal({
     >
       <div className="space-y-4 w-full">
         <StepsHeader />
+
+        {/* Step Info Card */}
+        <div className="bg-primary/5 border border-primary/20 rounded-lg p-4 mb-6">
+          <div className="flex items-start gap-3">
+            <div className="p-2 bg-primary/10 rounded-lg">
+              {React.createElement(
+                stepInfo[step as keyof typeof stepInfo].icon,
+                {
+                  className: "h-5 w-5 text-primary",
+                }
+              )}
+            </div>
+            <div className="flex-1">
+              <h3 className="font-semibold text-lg mb-1">
+                {t(stepInfo[step as keyof typeof stepInfo].title)}
+              </h3>
+              <p className="text-sm text-muted-foreground mb-2">
+                {t(stepInfo[step as keyof typeof stepInfo].description)}
+              </p>
+              <div className="flex items-start gap-2 text-xs text-primary/80 bg-primary/5 rounded px-2 py-1.5">
+                <Info className="h-3.5 w-3.5 mt-0.5 flex-shrink-0" />
+                <span>{t(stepInfo[step as keyof typeof stepInfo].hint)}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
         {step === 0 && (
           <div className="space-y-4">
             <div className="flex flex-col items-center justify-center w-full">
               {imagePreview ? (
-                <img
-                  src={imagePreview}
-                  alt="preview"
-                  className="w-48 h-36 object-cover rounded-xl border border-white/10"
-                />
+                <div className="relative">
+                  <img
+                    src={imagePreview}
+                    alt={t("Preview") as string}
+                    className="w-48 h-36 object-cover rounded-xl border border-white/10"
+                  />
+                  <div className="absolute -top-2 -right-2 p-1 bg-green-500 rounded-full">
+                    <CheckCircle2 className="h-4 w-4 text-white" />
+                  </div>
+                </div>
               ) : (
-                <label className="flex flex-col items-center justify-center w-full h-24 border-2 border-dashed border-input rounded-xl cursor-pointer bg-input/20 hover:bg-input/40 transition-colors duration-300">
-                  <Upload className="h-6 w-6 text-gray-500 mb-1" />
-                  <span className="text-sm text-gray-600">
+                <label className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-input rounded-xl cursor-pointer bg-input/20 hover:bg-input/40 transition-colors duration-300">
+                  <Upload className="h-8 w-8 text-primary mb-2" />
+                  <span className="text-sm font-medium text-foreground mb-1">
                     {t("Click to upload or drag & drop")}
+                  </span>
+                  <span className="text-xs text-muted-foreground">
+                    {t("PNG, JPG or WEBP (MAX. 5MB)")}
                   </span>
                   <input
                     type="file"
@@ -438,18 +541,23 @@ export default function BusinessSetupModal({
                 onValueChange={(v) => setBiz((p) => ({ ...p, category: v }))}
                 options={categories}
               />
-              <LabeledInput
-                id="businessName"
-                label={t("Business Name") as string}
-                placeholder={t("e.g. Luxe Hair Salon") as string}
-                value={biz.businessName}
-                onChange={(e) =>
-                  setBiz((p) => ({ ...p, businessName: e.target.value }))
-                }
-                required
-                errorText={t("Business name is required") as string}
-                showError={showStepErrors}
-              />
+              <div className="relative">
+                <LabeledInput
+                  id="businessName"
+                  label={t("Business Name") as string}
+                  placeholder={t("e.g. Luxe Hair Salon") as string}
+                  value={biz.businessName}
+                  onChange={(e) =>
+                    setBiz((p) => ({ ...p, businessName: e.target.value }))
+                  }
+                  required
+                  errorText={t("Business name is required") as string}
+                  showError={showStepErrors}
+                />
+                <span className="absolute top-0 right-0 text-xs text-red-500 font-semibold">
+                  {t("* Required")}
+                </span>
+              </div>
             </div>
             <LabeledInput
               label={t("About us") as string}
@@ -463,48 +571,74 @@ export default function BusinessSetupModal({
                   "Add any additional information about your Business..."
                 ) as string
               }
-              rows={2}
+              rows={3}
               showError={showStepErrors}
             />
           </div>
         )}
 
         {step === 2 && (
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-            <LabeledInput
-              id="phone"
-              type="tel"
-              label={t("Phone") as string}
-              placeholder="(555) 123-4567"
-              value={biz.phone}
-              onChange={(e) => setBiz((p) => ({ ...p, phone: e.target.value }))}
-              showError={showStepErrors}
-            />
-            <LabeledInput
-              id="email"
-              type="email"
-              label={t("Email") as string}
-              placeholder="info@company.com"
-              value={biz.email}
-              onChange={(e) => setBiz((p) => ({ ...p, email: e.target.value }))}
-              showError={showStepErrors}
-            />
-            <LabeledInput
-              id="website"
-              type="url"
-              label={t("Website") as string}
-              placeholder="www.company.com"
-              value={biz.website}
-              onChange={(e) =>
-                setBiz((p) => ({ ...p, website: e.target.value }))
-              }
-              showError={showStepErrors}
-            />
+          <div className="space-y-3">
+            <div className="bg-blue-50 dark:bg-blue-950/20 border border-blue-200 dark:border-blue-800 rounded-lg p-3 mb-3">
+              <div className="flex items-center gap-2 text-sm text-blue-800 dark:text-blue-300">
+                <AlertCircle className="h-4 w-4" />
+                <span>
+                  {t(
+                    "All contact fields are optional, but recommended for customer trust"
+                  )}
+                </span>
+              </div>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+              <LabeledInput
+                id="phone"
+                type="tel"
+                label={t("Phone") as string}
+                placeholder="(555) 123-4567"
+                value={biz.phone}
+                onChange={(e) =>
+                  setBiz((p) => ({ ...p, phone: e.target.value }))
+                }
+                showError={showStepErrors}
+              />
+              <LabeledInput
+                id="email"
+                type="email"
+                label={t("Email") as string}
+                placeholder="info@company.com"
+                value={biz.email}
+                onChange={(e) =>
+                  setBiz((p) => ({ ...p, email: e.target.value }))
+                }
+                showError={showStepErrors}
+              />
+              <LabeledInput
+                id="website"
+                type="url"
+                label={t("Website") as string}
+                placeholder="www.company.com"
+                value={biz.website}
+                onChange={(e) =>
+                  setBiz((p) => ({ ...p, website: e.target.value }))
+                }
+                showError={showStepErrors}
+              />
+            </div>
           </div>
         )}
 
         {step === 3 && (
           <div className="space-y-3">
+            <div className="bg-blue-50 dark:bg-blue-950/20 border border-blue-200 dark:border-blue-800 rounded-lg p-3 mb-3">
+              <div className="flex items-center gap-2 text-sm text-blue-800 dark:text-blue-300">
+                <AlertCircle className="h-4 w-4" />
+                <span>
+                  {t(
+                    "Address is optional if you provide online or mobile services"
+                  )}
+                </span>
+              </div>
+            </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <LabeledInput
                 id="country"
@@ -564,37 +698,51 @@ export default function BusinessSetupModal({
         )}
 
         {step === 4 && (
-          <div className="space-y-3">
+          <div className="space-y-4">
             <div className="flex items-center justify-between">
-              <h4 className="font-semibold">{t("Team")}</h4>
+              <h4 className="font-semibold text-lg">{t("Team Members")}</h4>
               <Button
                 size="sm"
-                variant="outline"
+                className="gap-2"
                 onClick={() => setInviteOpen(true)}
               >
-                <Plus className="h-4 w-4" /> {t("Invite staff")}
+                <Plus className="h-4 w-4" /> {t("Invite Staff")}
               </Button>
             </div>
             {staffList.length === 0 ? (
-              <p className="text-sm text-muted-foreground">
-                {t("No staff yet. Invite your first team member.")}
-              </p>
+              <div className="text-center py-8 border-2 border-dashed rounded-lg border-muted">
+                <Users className="h-12 w-12 text-muted-foreground mx-auto mb-3 opacity-50" />
+                <p className="text-sm text-muted-foreground mb-1 font-medium">
+                  {t("No team members yet")}
+                </p>
+                <p className="text-xs text-muted-foreground">
+                  {t("Invite your first team member to get started")}
+                </p>
+              </div>
             ) : (
               <ul className="space-y-2">
                 {staffList.map((s) => (
                   <li
                     key={s._id}
-                    className="flex items-center justify-between rounded-md border border-input p-2"
+                    className="flex items-center justify-between rounded-lg border border-input p-3 bg-card hover:bg-accent/50 transition-colors"
                   >
-                    <div className="text-sm">
-                      <div className="font-medium">
-                        {s.firstName} {s.lastName}
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
+                        <span className="text-primary font-semibold text-sm">
+                          {s.firstName.charAt(0)}
+                          {s.lastName.charAt(0)}
+                        </span>
                       </div>
-                      <div className="text-muted-foreground">
-                        {s.email} · {s.phone}
+                      <div className="text-sm">
+                        <div className="font-medium">
+                          {s.firstName} {s.lastName}
+                        </div>
+                        <div className="text-muted-foreground text-xs">
+                          {s.email} · {s.phone}
+                        </div>
                       </div>
                     </div>
-                    <span className="text-xs text-muted-foreground">
+                    <span className="text-xs px-2 py-1 bg-primary/10 text-primary rounded-full font-medium">
                       {s.role}
                     </span>
                   </li>
@@ -605,27 +753,31 @@ export default function BusinessSetupModal({
         )}
 
         {step === 5 && (
-          <div className="space-y-3">
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              <LabeledInput
-                type="date"
-                value={schedule.startDate}
-                onChange={(e) =>
-                  setSchedule((p) => ({ ...p, startDate: e.target.value }))
+          <div className="space-y-4">
+            <div className="bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-800 rounded-lg p-3 mb-3">
+              <div className="flex items-center gap-2 text-sm text-amber-800 dark:text-amber-300">
+                <Calendar className="h-4 w-4" />
+                <span>
+                  {t(
+                    "This schedule will be your default. You can customize individual staff schedules later."
+                  )}
+                </span>
+              </div>
+            </div>
+            <div>
+              <DateRangePicker
+                value={{
+                  startDate: schedule.startDate || null,
+                  endDate: schedule.endDate || null,
+                }}
+                onChange={(r) =>
+                  setSchedule((p) => ({
+                    ...p,
+                    startDate: r.startDate,
+                    endDate: r.endDate,
+                  }))
                 }
-                label={t("Start Date") as string}
-                id="startDate"
-                showError={showStepErrors}
-              />
-              <LabeledInput
-                type="date"
-                value={schedule.endDate}
-                onChange={(e) =>
-                  setSchedule((p) => ({ ...p, endDate: e.target.value }))
-                }
-                label={t("End Date") as string}
-                id="endDate"
-                showError={showStepErrors}
+                disablePast={true}
               />
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -647,8 +799,11 @@ export default function BusinessSetupModal({
               />
             </div>
             <div>
-              <label className="text-sm font-medium leading-none block pt-2">
-                {t("Breaks (Max 3)")}
+              <label className="text-sm font-medium leading-none flex items-center gap-2 pt-2 mb-2">
+                <span>{t("Breaks (Max 3)")}</span>
+                <span className="text-xs text-muted-foreground font-normal">
+                  — {t("Optional")}
+                </span>
               </label>
               {breaks.map((br, idx) => (
                 <div key={idx} className="flex items-end gap-3 mt-2">
@@ -679,13 +834,13 @@ export default function BusinessSetupModal({
                   <div className="basis-[10%] flex items-center justify-end gap-2">
                     <CustomTooltip
                       onClick={() => removeBreak(idx)}
-                      tooltipText={t("Delete Brake")}
+                      tooltipText={t("Delete Break")}
                       icon={<Trash color="red" />}
                     />
                     {idx === breaks.length - 1 && breaks.length < 3 && (
                       <CustomTooltip
                         onClick={() => addBreak()}
-                        tooltipText={t("Add Brake")}
+                        tooltipText={t("Add Break")}
                         icon={<Plus />}
                       />
                     )}
@@ -694,12 +849,15 @@ export default function BusinessSetupModal({
               ))}
             </div>
             <div>
-              <label className="text-sm font-medium leading-none block pt-2">
+              <label className="text-sm font-medium leading-none block pt-2 mb-2">
                 {t("Days Off")}
               </label>
               <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
                 {Object.keys(schedule.isDayOff).map((day) => (
-                  <label key={day} className="flex items-center gap-2">
+                  <label
+                    key={day}
+                    className="flex items-center gap-2 cursor-pointer hover:bg-accent/50 rounded p-1.5 transition-colors"
+                  >
                     <Checkbox
                       checked={
                         schedule.isDayOff[day as keyof typeof schedule.isDayOff]
@@ -714,17 +872,19 @@ export default function BusinessSetupModal({
                         }))
                       }
                     />
-                    <span>{t(day.charAt(0).toUpperCase() + day.slice(1))}</span>
+                    <span className="text-sm">
+                      {t(day.charAt(0).toUpperCase() + day.slice(1))}
+                    </span>
                   </label>
                 ))}
               </div>
             </div>
-            <div className="flex items-center gap-2 pt-2">
+            <div className="flex items-center gap-2 pt-2 bg-primary/5 border border-primary/20 rounded-lg p-3">
               <Checkbox
                 checked={applyScheduleToAll}
                 onCheckedChange={(c) => setApplyScheduleToAll(Boolean(c))}
               />
-              <span className="text-sm text-muted-foreground">
+              <span className="text-sm">
                 {t("Apply this schedule to all staff")}
               </span>
             </div>
@@ -732,38 +892,56 @@ export default function BusinessSetupModal({
         )}
 
         {step === 6 && (
-          <div className="space-y-6">
-            {/* Appointment Types */}
+          <div className="space-y-4">
             <div>
-              <div className="flex items-center justify-between mb-2">
-                <h4 className="font-semibold">{t("Appointment Types")}</h4>
+              <div className="flex items-center justify-between mb-3">
+                <h4 className="font-semibold text-lg">{t("Your Services")}</h4>
                 <Button
                   size="sm"
-                  variant="outline"
+                  className="gap-2"
                   onClick={() => setCreateTypeOpen(true)}
                 >
-                  {t("Add type")}
+                  <Plus className="h-4 w-4" /> {t("Add Service")}
                 </Button>
               </div>
               {types.length === 0 ? (
-                <p className="text-sm text-muted-foreground">
-                  {t("No types added yet.")}
-                </p>
+                <div className="text-center py-8 border-2 border-dashed rounded-lg border-muted">
+                  <Briefcase className="h-12 w-12 text-muted-foreground mx-auto mb-3 opacity-50" />
+                  <p className="text-sm text-muted-foreground mb-1 font-medium">
+                    {t("No services added yet")}
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    {t("Add your first service to start accepting bookings")}
+                  </p>
+                </div>
               ) : (
                 <ul className="space-y-2">
                   {types.map((tp, idx) => (
                     <li
                       key={idx}
-                      className="flex items-center justify-between rounded-md border border-input p-2"
+                      className="flex items-center justify-between rounded-lg border border-input p-3 bg-card hover:bg-accent/50 transition-colors"
                     >
-                      <div className="text-sm">
-                        <div className="font-medium">{tp.name}</div>
-                        <div className="text-muted-foreground">
-                          {tp.duration}m · €{tp.price}
+                      <div className="text-sm flex-1">
+                        <div className="font-medium text-base mb-1">
+                          {tp.name}
+                        </div>
+                        <div className="text-muted-foreground text-xs flex items-center gap-3">
+                          <span className="flex items-center gap-1">
+                            <Calendar className="h-3 w-3" />
+                            {tp.duration}m
+                          </span>
+                          <span className="flex items-center gap-1 font-semibold text-primary">
+                            €{tp.price}
+                          </span>
+                          {tp.category && (
+                            <span className="px-2 py-0.5 bg-primary/10 text-primary rounded-full text-[10px]">
+                              {tp.category}
+                            </span>
+                          )}
                         </div>
                       </div>
                       <button
-                        className="text-red-500 hover:text-red-600"
+                        className="text-red-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-950/20 p-2 rounded transition-colors"
                         onClick={() => removeType(idx)}
                       >
                         <Trash2 className="h-4 w-4" />

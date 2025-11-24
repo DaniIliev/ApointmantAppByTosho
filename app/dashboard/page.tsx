@@ -39,7 +39,7 @@ const CreateNewDashboardMenu = ({
     <CustomTooltip
       onClick={onOpenModal}
       tooltipText={t("Add")}
-      icon={<Plus />}
+      icon={<Plus color="white" />}
     />
   );
 };

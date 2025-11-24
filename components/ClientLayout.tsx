@@ -11,8 +11,6 @@ import { usePaddingControl } from "@/context/PaddingContext";
 
 const LEFT_NAV_OPEN_WIDTH_CLASS = "ml-0 lg:ml-64";
 const LEFT_NAV_CLOSED_WIDTH_CLASS = "ml-0 lg:ml-20";
-const RIGHT_NAV_OPEN_WIDTH_CLASS = "md:mr-10";
-const RIGHT_NAV_CLOSED_WIDTH_CLASS = "mr-0";
 
 export default function ClientLayout({
   children,
@@ -43,11 +41,6 @@ export default function ClientLayout({
               isLeftNavOpen
                 ? LEFT_NAV_OPEN_WIDTH_CLASS
                 : LEFT_NAV_CLOSED_WIDTH_CLASS
-            }
-            ${
-              isRightNavVisible
-                ? RIGHT_NAV_OPEN_WIDTH_CLASS
-                : RIGHT_NAV_CLOSED_WIDTH_CLASS
             }
                min-h-[87vh] 
               ${!removePadding ? "p-2 md:p-7" : ""} relative overflow-hidden

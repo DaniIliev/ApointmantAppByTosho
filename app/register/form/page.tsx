@@ -59,11 +59,11 @@ export default function RegisterFormPage() {
         role: accountType,
         firstName: formData.firstName,
         lastName: formData.lastName,
-        phone:
-          accountType === "business" ? formData.businessPhone : formData.phone,
-        ...(accountType === "business" && {
-          businessName: formData.businessName,
-        }),
+        // phone:
+        //   accountType === "business" ? formData.businessPhone : formData.phone,
+        // ...(accountType === "business" && {
+        //   businessName: formData.businessName,
+        // }),
       };
 
       await callApi("/api/auth/register", "POST", payload);
@@ -149,7 +149,32 @@ export default function RegisterFormPage() {
                 className="!bg-transparent"
                 required
               />
-
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <LabeledInput
+                  id="firstName"
+                  label={t("First Name")}
+                  value={formData.firstName}
+                  onChange={(e) =>
+                    handleInputChange("firstName", e.target.value)
+                  }
+                  placeholder={t("First name")}
+                  onClear={() => handleInputChange("firstName", "")}
+                  className="!bg-transparent"
+                  required
+                />
+                <LabeledInput
+                  id="lastName"
+                  label={t("Last Name")}
+                  value={formData.lastName}
+                  onChange={(e) =>
+                    handleInputChange("lastName", e.target.value)
+                  }
+                  placeholder={t("Last name")}
+                  onClear={() => handleInputChange("lastName", "")}
+                  className="!bg-transparent"
+                  required
+                />
+              </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="relative">
                   <LabeledInput
@@ -212,33 +237,6 @@ export default function RegisterFormPage() {
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <LabeledInput
-                  id="firstName"
-                  label={t("First Name")}
-                  value={formData.firstName}
-                  onChange={(e) =>
-                    handleInputChange("firstName", e.target.value)
-                  }
-                  placeholder={t("First name")}
-                  onClear={() => handleInputChange("firstName", "")}
-                  className="!bg-transparent"
-                  required
-                />
-                <LabeledInput
-                  id="lastName"
-                  label={t("Last Name")}
-                  value={formData.lastName}
-                  onChange={(e) =>
-                    handleInputChange("lastName", e.target.value)
-                  }
-                  placeholder={t("Last name")}
-                  onClear={() => handleInputChange("lastName", "")}
-                  className="!bg-transparent"
-                  required
-                />
-              </div>
-
               {accountType === "personal" && (
                 <LabeledInput
                   id="phone"
@@ -251,61 +249,6 @@ export default function RegisterFormPage() {
                   className="!bg-transparent"
                 />
               )}
-
-              {accountType === "business" && (
-                <>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <LabeledInput
-                      id="businessName"
-                      label={t("Business Name")}
-                      value={formData.businessName}
-                      onChange={(e) =>
-                        handleInputChange("businessName", e.target.value)
-                      }
-                      placeholder={t("Your business name")}
-                      onClear={() => handleInputChange("businessName", "")}
-                      className="!bg-transparent"
-                      required
-                    />
-                    <LabeledInput
-                      id="businessPhone"
-                      label={t("Business Phone")}
-                      type="tel"
-                      value={formData.businessPhone}
-                      onChange={(e) =>
-                        handleInputChange("businessPhone", e.target.value)
-                      }
-                      placeholder={t("Business phone")}
-                      onClear={() => handleInputChange("businessPhone", "")}
-                      className="!bg-transparent"
-                      required
-                    />
-                  </div>
-
-                  <LabeledInput
-                    id="businessAddress"
-                    label={t("Business Address")}
-                    value={formData.businessAddress}
-                    onChange={(e) =>
-                      handleInputChange("businessAddress", e.target.value)
-                    }
-                    placeholder={t("Business address")}
-                    onClear={() => handleInputChange("businessAddress", "")}
-                    className="!bg-transparent"
-                  />
-
-                  <LabeledInput
-                    id="taxId"
-                    label={t("Tax ID")}
-                    value={formData.taxId}
-                    onChange={(e) => handleInputChange("taxId", e.target.value)}
-                    placeholder={t("Tax ID number")}
-                    onClear={() => handleInputChange("taxId", "")}
-                    className="!bg-transparent"
-                  />
-                </>
-              )}
-
               {error && (
                 <div className="text-xs text-red-500 font-medium">{error}</div>
               )}

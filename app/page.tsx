@@ -41,7 +41,7 @@ import { useTranslation } from "react-i18next";
 
 export default function Home() {
   const { t } = useTranslation();
-  redirect("/home");
+  redirect("/for-businesses");
   return (
     <div className="container mx-auto py-8">
       <h1 className="text-3xl font-bold mb-6">{t("Appointment Schedule")}</h1>

@@ -3,72 +3,20 @@
 import React, { useEffect, useRef, useState } from "react";
 import { cn } from "@/lib/utils";
 import { useRightNav } from "@/context/RightNavContext";
-import { ChevronLeft, ChevronRight, MoreVertical } from "lucide-react";
-
-const RIGHT_NAV_CLOSED_WIDTH = "w-0";
-const RIGHT_NAV_OPEN_WIDTH = "w-10";
-// const RIGHT_NAV_OFFSET_CLASS = "top-16";
+import { ChevronRight, MoreVertical } from "lucide-react";
 
 export default function RightNavigation() {
-  const { extraRightNavMenu, isRightNavVisible, setIsRightNavVisible } =
-    useRightNav();
-
-  const toggleRightNav = () => {
-    setIsRightNavVisible(!isRightNavVisible);
-  };
-
-  return (
-    <>
-      {extraRightNavMenu && (
-        <aside
-          className={cn(
-            "fixed right-0 z-10 hidden md:flex flex-col justify-start",
-            "bg-primary-foreground shadow-lg",
-            "h-[calc(100vh-4rem)]",
-            "transition-all duration-300 ease-in-out",
-            isRightNavVisible ? RIGHT_NAV_OPEN_WIDTH : RIGHT_NAV_CLOSED_WIDTH
-          )}
-        >
-          <button
-            onClick={toggleRightNav}
-            className={cn(
-              "absolute -left-7 top-1/2 -translate-y-1/2",
-              "p-1 bg-background border border-border rounded-full shadow-md",
-              "transition-transform duration-300 ease-in-out",
-              "hover:bg-primary/20 hover:border-primary/10"
-            )}
-          >
-            {isRightNavVisible ? (
-              <ChevronRight className="h-4 w-4 text-muted-foreground" />
-            ) : (
-              <ChevronLeft className="h-4 w-4 text-muted-foreground" />
-            )}
-          </button>
-
-          <div
-            className={cn(
-              "flex flex-col gap-4 overflow-hidden",
-              "transition-opacity duration-300",
-              isRightNavVisible ? "opacity-100" : "opacity-0"
-            )}
-          >
-            {extraRightNavMenu}
-          </div>
-        </aside>
-      )}
-
-      {/* Mobile: Draggable bubble on the right side */}
-      {extraRightNavMenu && <MobileRightBubbles content={extraRightNavMenu} />}
-    </>
-  );
+  const { extraRightNavMenu } = useRightNav();
+  return extraRightNavMenu ? (
+    <RightNavBubbles content={extraRightNavMenu} />
+  ) : null;
 }
 
-function MobileRightBubbles({ content }: { content: React.ReactNode }) {
-  // Only render on mobile (hidden on md+ via CSS)
+function RightNavBubbles({ content }: { content: React.ReactNode }) {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const hiddenHostRef = useRef<HTMLDivElement | null>(null);
   const [top, setTop] = useState<number>(
-    typeof window !== "undefined" ? window.innerHeight * 0.2 : 300
+    typeof window !== "undefined" ? window.innerHeight * 0.12 : 300
   );
   const [isDragging, setIsDragging] = useState(false);
   const [open, setOpen] = useState(false);
@@ -130,8 +78,7 @@ function MobileRightBubbles({ content }: { content: React.ReactNode }) {
   };
 
   return (
-    <div className="md:hidden">
-      {/* Draggable main bubble */}
+    <div>
       <div
         ref={containerRef}
         style={{ top, right: 4 }}
@@ -163,32 +110,29 @@ function MobileRightBubbles({ content }: { content: React.ReactNode }) {
           }}
         >
           {React.Children.count(content) === 1 ? (
-            <div className="pointer-events-none flex items-center justify-center h-full w-full scale-90">
+            <div className="pointer-events-none flex items-center justify-center h-full w-full scale-90 text-white">
               {content}
             </div>
           ) : open ? (
-            <ChevronRight className="h-5 w-5" />
+            <ChevronRight className="h-5 w-5 text-white" />
           ) : (
-            <MoreVertical className="h-5 w-5" />
+            <MoreVertical className="h-5 w-5 text-white" />
           )}
         </div>
 
-        {/* Hidden host to invoke single action programmatically */}
         <div ref={hiddenHostRef} className="hidden">
           {content}
         </div>
-
-        {/* Bubble panel */}
         {open && (
           <div
             className={cn(
               "absolute right-16 top-1/2 -translate-y-1/2",
               "bg-primary-foreground border border-border rounded-2xl shadow-xl",
-              "p-2 max-w-[70vw]"
+              "p-2 max-w-[70vw] text-white"
             )}
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="flex items-center gap-2">{content}</div>
+            <div className="flex items-center gap-2 text-white">{content}</div>
           </div>
         )}
       </div>
