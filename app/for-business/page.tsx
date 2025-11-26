@@ -272,6 +272,66 @@ export default function BusinessLandingPage() {
         </div>
       </section>
       <PricingSection />
+
+      {/* Kanban Board (Task Manager) Section */}
+      <section className="bg-gray-50 dark:bg-gray-900 py-16">
+        <div className="container mx-auto px-4">
+          <div className="max-w-5xl mx-auto text-center space-y-6">
+            <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-balance mb-4">
+              {t("Organize Work Effortlessly with Our Kanban Board")}
+            </h2>
+            {/* Kanban Board Visual Image */}
+            <div className="flex justify-center mb-6">
+              <img
+                src="/kanban-preview.png"
+                alt={t("Kanban Board Example") as string}
+                className="rounded-xl shadow-lg border w-full max-w-3xl object-cover"
+                style={{ maxHeight: 340 }}
+              />
+            </div>
+            <p className="text-base sm:text-lg md:text-xl text-muted-foreground max-w-3xl mx-auto">
+              {t(
+                "Stay on top of every task, deadline, and project with our intuitive Kanban Board. Designed for teams and individuals, it helps you visualize work, track progress, and boost productivity—all in one place."
+              )}
+            </p>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mt-8">
+              <div className="flex flex-col items-center">
+                <Check className="h-10 w-10 text-primary mb-2" />
+                <h3 className="font-semibold text-lg mb-1">
+                  {t("Drag & Drop Tasks")}
+                </h3>
+                <p className="text-sm text-muted-foreground">
+                  {t(
+                    "Easily move tasks between columns to reflect their status. Simple, fast, and visual."
+                  )}
+                </p>
+              </div>
+              <div className="flex flex-col items-center">
+                <BarChart3 className="h-10 w-10 text-primary mb-2" />
+                <h3 className="font-semibold text-lg mb-1">
+                  {t("Track Progress")}
+                </h3>
+                <p className="text-sm text-muted-foreground">
+                  {t(
+                    "See what’s in progress, completed, or overdue at a glance. Perfect for managing team workloads."
+                  )}
+                </p>
+              </div>
+              <div className="flex flex-col items-center">
+                <Users className="h-10 w-10 text-primary mb-2" />
+                <h3 className="font-semibold text-lg mb-1">
+                  {t("Collaborate in Real Time")}
+                </h3>
+                <p className="text-sm text-muted-foreground">
+                  {t(
+                    "Assign tasks, add comments, and keep everyone in sync—no matter where you work from."
+                  )}
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
       {/* CTA Section */}
       <section className="bg-primary text-primary-foreground py-10 md:py-10">
         <div className="container mx-auto px-4 text-center">

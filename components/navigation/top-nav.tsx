@@ -353,7 +353,7 @@ export default function TopNav({
             </div>
 
             {/* Language Button: show only on md+ when authorized */}
-            <div className="relative hidden md:block" ref={languagesRef}>
+            <div className="relative block" ref={languagesRef}>
               <button
                 onClick={toggleLanguages}
                 className="flex flex-col items-center justify-center p-2 rounded-lg hover:bg-white/10 transition-colors duration-200"

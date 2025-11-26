@@ -77,7 +77,7 @@ export function BusinessHeader({ business }: BusinessHeaderProps) {
             {/* Contacts and Location - Стилизираме малко по-добре */}
             <div className="space-y-4 text-base text-muted-foreground">
               {/* Работно време - Новото добавяне */}
-              <div className="flex flex-col md:flex-row md:items-center gap-2 font-semibold">
+              <div className="flex flex-col gap-2 font-semibold">
                 <div className="flex items-center gap-2">
                   <Clock
                     className="h-5 w-5 flex-shrink-0"

@@ -17,7 +17,6 @@ export default function ClientLayoutWrapper({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const pathname = usePathname();
   const { user } = useAuthContext();
   // Apply persisted language once on mount (avoid overriding manual selections on navigation)
   useEffect(() => {

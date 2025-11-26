@@ -26,7 +26,7 @@ export default function ClientLayout({
   const { removePadding } = usePaddingControl();
 
   return (
-    <div className=" flex flex-col min-h-[70vh]">
+    <div className="flex flex-col min-h-screen ">
       <div className="fixed top-0 left-0 right-0 z-50">
         <TopNav onToggleLeftNav={toggleLeftNav} isLeftNavOpen={isLeftNavOpen} />
       </div>
@@ -42,7 +42,6 @@ export default function ClientLayout({
                 ? LEFT_NAV_OPEN_WIDTH_CLASS
                 : LEFT_NAV_CLOSED_WIDTH_CLASS
             }
-               min-h-[87vh] 
               ${!removePadding ? "p-2 md:p-7" : ""} relative overflow-hidden
           `}
         >
@@ -50,22 +49,16 @@ export default function ClientLayout({
         </main>
         <RightNavigation />
       </div>
-      {/* <Footer /> */}
-      {/* <div
-        className={`   
+      <div
+        className={`
                       transition-all duration-300         ${
                         isLeftNavOpen
                           ? LEFT_NAV_OPEN_WIDTH_CLASS
                           : LEFT_NAV_CLOSED_WIDTH_CLASS
-                      }
-            ${
-              isRightNavVisible
-                ? RIGHT_NAV_OPEN_WIDTH_CLASS
-                : RIGHT_NAV_CLOSED_WIDTH_CLASS
-            }`}
-      > */}
-      {/* <Footer /> */}
-      {/* </div> */}
+                      }`}
+      >
+        <Footer />
+      </div>
     </div>
   );
 }

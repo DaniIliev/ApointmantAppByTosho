@@ -12,6 +12,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Lock, TrendingUp, ArrowRight } from "lucide-react";
 import Link from "next/link";
+import { useTranslation } from "react-i18next";
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
@@ -26,7 +27,7 @@ export default function ProtectedRoute({
   requiredPlan,
   featureName,
 }: ProtectedRouteProps) {
-  const { t } = useTranslations();
+  const { t } = useTranslation();
   const { user } = useAuthContext();
   const router = useRouter();
   const pathname = usePathname();
@@ -65,7 +66,7 @@ export default function ProtectedRoute({
 
   if (requiredRoles && !requiredRoles.includes(user.role)) {
     return (
-      <div className="flex items-center justify-center min-h-screen px-4">
+      <div className="flex items-center justify-center min-h-full px-4">
         <Card className="max-w-md w-full">
           <CardContent className="pt-6">
             <div className="text-center space-y-4">
@@ -112,7 +113,7 @@ export default function ProtectedRoute({
     pathname !== "/profile"
   ) {
     return (
-      <div className="flex items-center justify-center min-h-screen px-4">
+      <div className="flex items-center justify-center min-h-full px-4">
         <Card className="max-w-md w-full">
           <CardContent className="pt-6">
             <div className="text-center space-y-4">
@@ -209,7 +210,7 @@ export default function ProtectedRoute({
   if (!access.allowed) {
     if (access.reason === "subscription_required") {
       return (
-        <div className="flex items-center justify-center min-h-screen px-4">
+        <div className="flex items-center justify-center min-h-full px-4">
           <Card className="max-w-md w-full">
             <CardContent className="pt-6">
               <div className="text-center space-y-4">
@@ -244,7 +245,7 @@ export default function ProtectedRoute({
       access.reason === "feature_not_available"
     ) {
       return (
-        <div className="flex items-center justify-center min-h-screen px-4">
+        <div className="flex items-center justify-center min-h-full px-4">
           <Card className="max-w-md w-full">
             <CardContent className="pt-6">
               <div className="text-center space-y-4">
@@ -278,14 +279,11 @@ export default function ProtectedRoute({
       setShouldRedirect("/dashboard");
     }
     return (
-      <div className="flex items-center justify-center min-h-screen">
+      <div className="flex items-center justify-center min-h-full">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
       </div>
     );
   }
 
   return <>{children}</>;
-}
-function useTranslations(): { t: any } {
-  throw new Error("Function not implemented.");
 }
