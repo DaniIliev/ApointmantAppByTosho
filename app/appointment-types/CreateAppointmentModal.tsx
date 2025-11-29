@@ -28,6 +28,7 @@ import callApi from "../Api/callApi";
 import { getCategoryOptions, SelectOption } from "@/Global/Types/types";
 import { useTranslation } from "react-i18next";
 import { MultiSelectCombobox } from "@/components/customUIComponents/MultiSelectCombobox";
+import { useAuthContext } from "@/context/AuthContext";
 
 // --- Type Definitions ---
 
@@ -40,15 +41,6 @@ type CreateAppointmentModalProps = {
   handleSubmit: (e: React.FormEvent) => void;
   isLoading: boolean;
   colorOptions: string[];
-};
-
-type StaffItem = {
-  _id: string; // Оригиналният ID от API/DB
-  id: string; // ID, който се изисква от MultiSelectCombobox
-  firstName: string;
-  lastName: string;
-  role: string; // Добавихме 'role', за да можем да го покажем в getLabel
-  [key: string]: any; // Запазваме гъвкавостта
 };
 
 type StaffMember = {
@@ -108,6 +100,7 @@ const CreateAppointmentModal = ({
   colorOptions,
 }: CreateAppointmentModalProps) => {
   const { t } = useTranslation();
+  const { user } = useAuthContext();
   const [staffMembers, setStaffMembers] = useState<StaffMember[]>([]);
   const [open, setOpen] = useState(false); // State for Popover visibility
   const [selectedCategory, setSelectedCategory] = useState<string>(
@@ -119,9 +112,10 @@ const CreateAppointmentModal = ({
     if (isModalOpen) {
       const fetchStaff = async () => {
         try {
-          // You might want to consider memoizing the fetch or using a global state management solution
-          const staffList = await callApi("/api/staff/staff-list", "GET");
-          console.log("stafflist", staffList);
+          const staffList = await callApi(
+            `/api/staff/staff-list?businessId=${user?.businessId}`,
+            "GET"
+          );
           setStaffMembers(staffList);
         } catch (error) {
           console.error("Failed to fetch staff members:", error);
@@ -129,7 +123,7 @@ const CreateAppointmentModal = ({
       };
       fetchStaff();
     }
-  }, [isModalOpen]);
+  }, [isModalOpen, user?.businessId]);
 
   // Handle category change and reset subcategory if needed
   const handleCategoryChange = (newCategory: string) => {

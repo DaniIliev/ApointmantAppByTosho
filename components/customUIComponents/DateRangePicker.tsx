@@ -78,7 +78,7 @@ export const DateRangePicker: React.FC<DateRangePickerProps> = ({
       ? `${format(startDate, "MM/dd/yyyy")} – ${format(endDate, "MM/dd/yyyy")}`
       : startDate
       ? `${format(startDate, "MM/dd/yyyy")} – …`
-      : t("Select date range");
+      : null;
 
   const buildMonthDays = useCallback(
     (month: Date) => {
@@ -225,27 +225,77 @@ export const DateRangePicker: React.FC<DateRangePickerProps> = ({
 
   return (
     <Popover.Root open={open} onOpenChange={setOpen}>
-      <Popover.Trigger asChild>
-        <button
-          type="button"
+      <div className="relative group/labeled-input w-full">
+        {/* Floating label */}
+        <label
           className={cn(
-            "w-full h-12 px-4 rounded-md border border-input flex items-center justify-between text-sm bg-background hover:border-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/50",
-            className
+            "absolute left-4 transition-all duration-300 transform pointer-events-none z-10",
+            open || startDate || endDate ? "text-primary" : "text-gray-500",
+            open || startDate || endDate
+              ? "-top-0.5 text-xs"
+              : "top-1/2 -translate-y-1/2 text-sm"
           )}
         >
-          <span
+          {t("Select date range")}
+        </label>
+        <Popover.Trigger asChild>
+          <button
+            type="button"
             className={cn(
-              !startDate || !endDate ? "text-muted-foreground" : undefined
+              "peer w-full h-12 px-4 rounded-t-md border-b-2 border-transparent bg-card/80 focus:bg-card/90 transition-all duration-300 flex items-center justify-between text-sm outline-none placeholder-transparent focus:placeholder-gray-400 pr-8",
+              open ? "border-primary" : "border-transparent",
+              className
             )}
+            tabIndex={0}
+            style={{ position: "relative" }}
           >
-            {rangeLabel}
-          </span>
-          <CalendarIcon className="h-4 w-4 text-muted-foreground" />
-        </button>
-      </Popover.Trigger>
+            <span
+              className={cn(
+                !startDate || !endDate
+                  ? "text-muted-foreground"
+                  : "text-foreground"
+              )}
+            >
+              {rangeLabel}
+            </span>
+            {/* Clear button */}
+            {(startDate || endDate) && (
+              <button
+                type="button"
+                onClick={() => onChange({ startDate: null, endDate: null })}
+                aria-label={t("Clear") as string}
+                className="absolute right-8 top-1/2 -translate-y-1/2 h-5 w-5 rounded-full text-muted-foreground hover:text-primary/80 flex items-center justify-center z-20"
+                tabIndex={-1}
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="18"
+                  height="18"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <line x1="18" y1="6" x2="6" y2="18" />
+                  <line x1="6" y1="6" x2="18" y2="18" />
+                </svg>
+              </button>
+            )}
+            <CalendarIcon className="h-4 w-4 text-muted-foreground absolute right-2 top-1/2 -translate-y-1/2" />
+            <span
+              className={cn(
+                "absolute bottom-0 left-0 h-[2px] bg-primary transition-all duration-300",
+                open || startDate || endDate ? "w-full" : "w-0"
+              )}
+            />
+          </button>
+        </Popover.Trigger>
+      </div>
       <Popover.Content
         sideOffset={8}
-        className="rounded-xl border border-border bg-popover p-4 shadow-xl w-[560px]"
+        className="rounded-xl border border-border bg-popover p-4 shadow-xl w-[560px] z-[1200]"
         align="start"
       >
         <div className="flex items-center justify-between mb-2">

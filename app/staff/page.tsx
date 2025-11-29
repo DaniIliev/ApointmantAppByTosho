@@ -16,6 +16,7 @@ import callApi from "../Api/callApi";
 import { StaffMember } from "./types";
 import { StaffViewModal } from "./StaffViewModal";
 import { StaffEditModal } from "./StaffEditModal";
+import { useAuthContext } from "@/context/AuthContext";
 
 type AddStaffNavProps = {
   onOpenModal: () => void;
@@ -36,7 +37,7 @@ function StaffPageContent() {
   const { t } = useTranslation();
   const { setPageTitle } = usePageTitle();
   const { setExtraRightNavMenu, setIsRightNavVisible } = useRightNav();
-
+  const { user } = useAuthContext();
   const [staff, setStaff] = useState<StaffMember[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isViewModalOpen, setIsViewModalOpen] = useState(false);
@@ -65,7 +66,10 @@ function StaffPageContent() {
   useEffect(() => {
     const fetchStaff = async () => {
       try {
-        const data = await callApi("/api/staff/staff-list", "GET");
+        const data = await callApi(
+          `/api/staff/staff-list?businessId=${user?.businessId}`,
+          "GET"
+        );
         setStaff(data);
       } catch (error) {
         toast.error(t("Failed to load staff"));

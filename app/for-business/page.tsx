@@ -26,6 +26,11 @@ import { useEffect } from "react";
 import { BenefitsSection } from "@/components/sections/benefits-section";
 import PricingSection from "@/components/Pricing/PricingSection";
 import { useTranslation } from "react-i18next";
+import {
+  LEFT_NAV_CLOSED_WIDTH_CLASS,
+  LEFT_NAV_OPEN_WIDTH_CLASS,
+} from "@/components/ClientLayout";
+import { Footer } from "react-day-picker";
 
 export default function BusinessLandingPage() {
   const { t } = useTranslation();
@@ -364,6 +369,16 @@ export default function BusinessLandingPage() {
           </div>
         </div>
       </section>
+      {/* <div
+        className={`
+                            transition-all duration-300         ${
+                              isLeftNavOpen
+                                ? LEFT_NAV_OPEN_WIDTH_CLASS
+                                : LEFT_NAV_CLOSED_WIDTH_CLASS
+                            }`}
+      > */}
+      {/* <Footer /> */}
+      {/* </div> */}
     </div>
   );
 }

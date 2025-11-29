@@ -19,7 +19,6 @@ import {
   Users,
   Calendar,
   Briefcase,
-  AlertCircle,
   CheckCircle2,
 } from "lucide-react";
 import { useTranslation } from "react-i18next";
@@ -29,6 +28,8 @@ import callApi from "@/app/Api/callApi";
 import CreateAppointmentModal from "@/app/appointment-types/CreateAppointmentModal";
 import { Checkbox } from "@/components/ui/checkbox";
 import { CustomTooltip } from "../customUIComponents/CustomTooltip";
+import { TimeRangePicker } from "@/components/customUIComponents/TimeRangePicker";
+import { cn } from "@/lib/utils";
 
 type ModalWidth =
   | "sm"
@@ -203,52 +204,69 @@ export default function BusinessSetupModal({
   const stepInfo = {
     0: {
       icon: Image,
-      title: "Business Photo",
-      description:
-        "Upload a professional photo of your business. This helps customers recognize your brand.",
-      hint: "Tip: Use a high-quality image (min 800x600px) showing your storefront or logo.",
+      title: t("Business Photo"),
+      description: t(
+        "Upload a professional photo of your business. This helps customers recognize your brand."
+      ),
+      hint: t(
+        "Tip: Use a high-quality image (min 800x600px) showing your storefront or logo."
+      ),
     },
     1: {
       icon: Building2,
-      title: "Business Details",
-      description:
-        "Tell us about your business. This information will be visible to your customers.",
-      hint: "Choose a category that best describes your business type.",
+      title: t("Business Details"),
+      description: t(
+        "Tell us about your business. This information will be visible to your customers."
+      ),
+      hint: t("Choose a category that best describes your business type."),
     },
     2: {
       icon: Phone,
-      title: "Contact Information",
-      description:
-        "How can customers reach you? Add your phone, email, and website.",
-      hint: "Optional: All fields are optional, but providing more contact options builds trust.",
+      title: t("Contact Information"),
+      description: t(
+        "How can customers reach you? Add your phone, email, and website."
+      ),
+      hint: t(
+        "Optional: All fields are optional, but providing more contact options builds trust."
+      ),
     },
     3: {
       icon: MapPin,
-      title: "Business Location",
-      description:
-        "Where is your business located? This helps customers find you easily.",
-      hint: "Optional: You can skip this if you operate online or provide mobile services.",
+      title: t("Business Location"),
+      description: t(
+        "Where is your business located? This helps customers find you easily."
+      ),
+      hint: t(
+        "Optional: You can skip this if you operate online or provide mobile services."
+      ),
     },
     4: {
       icon: Users,
-      title: "Your Team",
-      description:
-        "Add your staff members who will be providing services to customers.",
-      hint: "Optional: You can add staff members later from the Staff page.",
+      title: t("Your Team"),
+      description: t(
+        "Add your staff members who will be providing services to customers."
+      ),
+      hint: t("Optional: You can add staff members later from the Staff page."),
     },
     5: {
       icon: Calendar,
-      title: "Working Hours",
-      description:
-        "Define your business hours and breaks. Customers can only book during these times.",
-      hint: "Optional: Set your default schedule. You can customize individual staff schedules later.",
+      title: t("Working Hours"),
+      description: t(
+        "Define your business hours and breaks. Customers can only book during these times."
+      ),
+      hint: t(
+        "Optional: Set your default schedule. You can customize individual staff schedules later."
+      ),
     },
     6: {
       icon: Briefcase,
-      title: "Services Offered",
-      description:
-        "What services do you provide? Add appointment types with duration and pricing.",
-      hint: "Optional: Start with your most popular services. You can add more anytime.",
+      title: t("Services Offered"),
+      description: t(
+        "What services do you provide? Add appointment types with duration and pricing."
+      ),
+      hint: t(
+        "Optional: Start with your most popular services. You can add more anytime."
+      ),
     },
   };
   const next = () => setStep((s) => Math.min(s + 1, stepLabels.length - 1));
@@ -313,19 +331,14 @@ export default function BusinessSetupModal({
   useEffect(() => {
     if (!open) return;
     if (step === 4) {
-      callApi("/api/staff/staff-list", "GET")
+      callApi(`/api/staff/staff-list?businessId=${user?.businessId}`, "GET")
         .then((data) => setStaffList(data))
         .catch(() => {});
     }
   }, [step, open]);
 
   // Schedule helpers similar to ScheduleModal
-  const handleWorkTimeChange = (type: "start" | "end", value: string) => {
-    setSchedule((prev) => ({
-      ...prev,
-      workTime: { ...prev.workTime, [type]: value },
-    }));
-  };
+  // handleWorkTimeChange is unused (replaced by TimeRangePicker)
   const handleBreakChange = (
     index: number,
     type: "start" | "end",
@@ -579,16 +592,6 @@ export default function BusinessSetupModal({
 
         {step === 2 && (
           <div className="space-y-3">
-            <div className="bg-blue-50 dark:bg-blue-950/20 border border-blue-200 dark:border-blue-800 rounded-lg p-3 mb-3">
-              <div className="flex items-center gap-2 text-sm text-blue-800 dark:text-blue-300">
-                <AlertCircle className="h-4 w-4" />
-                <span>
-                  {t(
-                    "All contact fields are optional, but recommended for customer trust"
-                  )}
-                </span>
-              </div>
-            </div>
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
               <LabeledInput
                 id="phone"
@@ -629,16 +632,6 @@ export default function BusinessSetupModal({
 
         {step === 3 && (
           <div className="space-y-3">
-            <div className="bg-blue-50 dark:bg-blue-950/20 border border-blue-200 dark:border-blue-800 rounded-lg p-3 mb-3">
-              <div className="flex items-center gap-2 text-sm text-blue-800 dark:text-blue-300">
-                <AlertCircle className="h-4 w-4" />
-                <span>
-                  {t(
-                    "Address is optional if you provide online or mobile services"
-                  )}
-                </span>
-              </div>
-            </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <LabeledInput
                 id="country"
@@ -754,17 +747,7 @@ export default function BusinessSetupModal({
 
         {step === 5 && (
           <div className="space-y-4">
-            <div className="bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-800 rounded-lg p-3 mb-3">
-              <div className="flex items-center gap-2 text-sm text-amber-800 dark:text-amber-300">
-                <Calendar className="h-4 w-4" />
-                <span>
-                  {t(
-                    "This schedule will be your default. You can customize individual staff schedules later."
-                  )}
-                </span>
-              </div>
-            </div>
-            <div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <DateRangePicker
                 value={{
                   startDate: schedule.startDate || null,
@@ -779,23 +762,18 @@ export default function BusinessSetupModal({
                 }
                 disablePast={true}
               />
-            </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              <LabeledInput
-                type="time"
-                value={schedule.workTime.start || ""}
-                onChange={(e) => handleWorkTimeChange("start", e.target.value)}
-                label={t("Work Start") as string}
-                id="workStart"
-                showError={showStepErrors}
-              />
-              <LabeledInput
-                type="time"
-                value={schedule.workTime.end || ""}
-                onChange={(e) => handleWorkTimeChange("end", e.target.value)}
-                label={t("Work End") as string}
-                id="workEnd"
-                showError={showStepErrors}
+              <TimeRangePicker
+                value={{
+                  startTime: schedule.workTime.start,
+                  endTime: schedule.workTime.end,
+                }}
+                onChange={(val) =>
+                  setSchedule((p) => ({
+                    ...p,
+                    workTime: { start: val.startTime, end: val.endTime },
+                  }))
+                }
+                label={t("Work Time") as string}
               />
             </div>
             <div>
@@ -805,77 +783,78 @@ export default function BusinessSetupModal({
                   — {t("Optional")}
                 </span>
               </label>
-              {breaks.map((br, idx) => (
-                <div key={idx} className="flex items-end gap-3 mt-2">
-                  <div className="basis-[61%]">
-                    <LabeledInput
-                      type="time"
-                      value={br.start || ""}
-                      onChange={(e) =>
-                        handleBreakChange(idx, "start", e.target.value)
-                      }
-                      label={t(`Break ${idx + 1} Start`) as string}
-                      id={`break${idx + 1}Start`}
-                      showError={showStepErrors}
-                    />
-                  </div>
-                  <div className="basis-[50%]">
-                    <LabeledInput
-                      type="time"
-                      value={br.end || ""}
-                      onChange={(e) =>
-                        handleBreakChange(idx, "end", e.target.value)
-                      }
-                      label={t(`Break ${idx + 1} End`) as string}
-                      id={`break${idx + 1}End`}
-                      showError={showStepErrors}
-                    />
-                  </div>
-                  <div className="basis-[10%] flex items-center justify-end gap-2">
-                    <CustomTooltip
-                      onClick={() => removeBreak(idx)}
-                      tooltipText={t("Delete Break")}
-                      icon={<Trash color="red" />}
-                    />
-                    {idx === breaks.length - 1 && breaks.length < 3 && (
-                      <CustomTooltip
-                        onClick={() => addBreak()}
-                        tooltipText={t("Add Break")}
-                        icon={<Plus />}
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                {breaks.map((br, idx) => (
+                  <div key={idx} className="flex items-end gap-3 mt-2">
+                    <div className="basis-[80%]">
+                      <TimeRangePicker
+                        value={{
+                          startTime: br.start,
+                          endTime: br.end,
+                        }}
+                        onChange={(val) => {
+                          handleBreakChange(idx, "start", val.startTime || "");
+                          handleBreakChange(idx, "end", val.endTime || "");
+                        }}
+                        label={t(`Break ${idx + 1}`) as string}
                       />
-                    )}
+                    </div>
+                    <div className="basis-[10%] flex items-center justify-end gap-2">
+                      <CustomTooltip
+                        onClick={() => removeBreak(idx)}
+                        tooltipText={t("Delete Break")}
+                        icon={<Trash color="red" />}
+                      />
+                      {idx === breaks.length - 1 && breaks.length < 3 && (
+                        <CustomTooltip
+                          onClick={() => addBreak()}
+                          tooltipText={t("Add Break")}
+                          icon={<Plus />}
+                        />
+                      )}
+                    </div>
                   </div>
-                </div>
-              ))}
+                ))}
+              </div>
             </div>
             <div>
               <label className="text-sm font-medium leading-none block pt-2 mb-2">
                 {t("Days Off")}
               </label>
-              <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-                {Object.keys(schedule.isDayOff).map((day) => (
-                  <label
-                    key={day}
-                    className="flex items-center gap-2 cursor-pointer hover:bg-accent/50 rounded p-1.5 transition-colors"
+              <div className="flex items-center justify-center gap-0.5 border border-primary rounded-lg overflow-hidden bg-white dark:bg-background">
+                {(
+                  [
+                    "monday",
+                    "tuesday",
+                    "wednesday",
+                    "thursday",
+                    "friday",
+                    "saturday",
+                    "sunday",
+                  ] as Array<keyof typeof schedule.isDayOff>
+                ).map((key) => (
+                  <button
+                    key={key}
+                    type="button"
+                    className={cn(
+                      "flex-1 px-3 py-2 text-sm font-semibold transition-colors focus:outline-none",
+                      schedule.isDayOff[key]
+                        ? "bg-primary text-white"
+                        : "bg-transparent text-foreground hover:bg-primary/10"
+                    )}
+                    onClick={() =>
+                      setSchedule((prev) => ({
+                        ...prev,
+                        isDayOff: {
+                          ...prev.isDayOff,
+                          [key]: !prev.isDayOff[key],
+                        },
+                      }))
+                    }
                   >
-                    <Checkbox
-                      checked={
-                        schedule.isDayOff[day as keyof typeof schedule.isDayOff]
-                      }
-                      onCheckedChange={(checked) =>
-                        setSchedule((prev) => ({
-                          ...prev,
-                          isDayOff: {
-                            ...prev.isDayOff,
-                            [day]: Boolean(checked),
-                          },
-                        }))
-                      }
-                    />
-                    <span className="text-sm">
-                      {t(day.charAt(0).toUpperCase() + day.slice(1))}
-                    </span>
-                  </label>
+                    {t(key.charAt(0).toUpperCase() + key.slice(1, 2)) +
+                      key.slice(2, 3)}
+                  </button>
                 ))}
               </div>
             </div>

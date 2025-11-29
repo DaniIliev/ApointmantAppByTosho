@@ -9,8 +9,8 @@ import { useRightNav } from "@/context/RightNavContext";
 import Footer from "./Footer/Footer";
 import { usePaddingControl } from "@/context/PaddingContext";
 
-const LEFT_NAV_OPEN_WIDTH_CLASS = "ml-0 lg:ml-64";
-const LEFT_NAV_CLOSED_WIDTH_CLASS = "ml-0 lg:ml-20";
+export const LEFT_NAV_OPEN_WIDTH_CLASS = "ml-0 lg:ml-64";
+export const LEFT_NAV_CLOSED_WIDTH_CLASS = "ml-0 lg:ml-20";
 
 export default function ClientLayout({
   children,
@@ -18,7 +18,6 @@ export default function ClientLayout({
   children: React.ReactNode;
 }>) {
   const [isLeftNavOpen, setIsLeftNavOpen] = useState(false);
-  const { isRightNavVisible } = useRightNav();
 
   const toggleLeftNav = () => {
     setIsLeftNavOpen(!isLeftNavOpen);
@@ -48,16 +47,6 @@ export default function ClientLayout({
           {children}
         </main>
         <RightNavigation />
-      </div>
-      <div
-        className={`
-                      transition-all duration-300         ${
-                        isLeftNavOpen
-                          ? LEFT_NAV_OPEN_WIDTH_CLASS
-                          : LEFT_NAV_CLOSED_WIDTH_CLASS
-                      }`}
-      >
-        <Footer />
       </div>
     </div>
   );

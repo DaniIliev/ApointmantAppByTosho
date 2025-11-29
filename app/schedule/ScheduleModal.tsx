@@ -3,10 +3,12 @@
 import React, { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { Modal } from "@/components/customUIComponents/Modal";
-import { LabeledInput } from "@/components/customUIComponents/LabeledInput";
-import { Checkbox } from "@/components/ui/checkbox";
+// import { LabeledInput } from "@/components/customUIComponents/LabeledInput";
+import { DateRangePicker } from "@/components/customUIComponents/DateRangePicker";
+import { TimeRangePicker } from "@/components/customUIComponents/TimeRangePicker";
+// import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
-import { Plus, Minus, Trash } from "lucide-react";
+import { Plus, Trash } from "lucide-react";
 import { Schedule, TimeRange } from "./page";
 import { CustomTooltip } from "@/components/customUIComponents/CustomTooltip";
 
@@ -79,19 +81,9 @@ export const ScheduleModal = ({
     }
   }, [isOpen, schedule]);
 
-  const handleInputChange = (field: keyof Schedule, value: any) => {
-    setLocalSchedule((prev) => ({
-      ...prev,
-      [field]: value,
-    }));
-  };
+  // Removed unused handleInputChange
 
-  const handleWorkTimeChange = (type: "start" | "end", value: string) => {
-    setLocalSchedule((prev) => ({
-      ...prev,
-      workTime: { ...prev.workTime, [type]: value },
-    }));
-  };
+  // Removed unused handleWorkTimeChange
 
   const handleBreakChange = (
     index: number,
@@ -138,10 +130,7 @@ export const ScheduleModal = ({
     let scheduleToSend;
 
     if (!isEditMode) {
-      // При създаване: Използваме деструктуриране, за да премахнем _id.
-      // 'rest' ще съдържа всички свойства на fullSchedule освен _id.
-      const { _id, ...rest } = fullSchedule;
-      scheduleToSend = rest;
+      scheduleToSend = (({ _id, ...rest }) => rest)(fullSchedule);
     } else {
       // При редактиране: Изпращаме целия обект, включително _id.
       scheduleToSend = fullSchedule;
@@ -159,39 +148,35 @@ export const ScheduleModal = ({
       onConfirmSave={handleLocalSave}
     >
       <div className="space-y-3 p-2">
-        {/* Date Period */}
-        <div className="flex space-x-2">
-          <LabeledInput
-            type="date"
-            value={localSchedule.startDate}
-            onChange={(e) => handleInputChange("startDate", e.target.value)}
-            label={t("Start Date")}
-            id="startDate"
+        {/* <div className="flex flex-col gap-2">
+         */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <DateRangePicker
+            value={{
+              startDate: localSchedule.startDate,
+              endDate: localSchedule.endDate,
+            }}
+            onChange={({ startDate, endDate }) =>
+              setLocalSchedule((prev) => ({
+                ...prev,
+                startDate: startDate || "",
+                endDate: endDate || "",
+              }))
+            }
           />
-          <LabeledInput
-            type="date"
-            value={localSchedule.endDate}
-            onChange={(e) => handleInputChange("endDate", e.target.value)}
-            label={t("End Date")}
-            id="endDate"
-          />
-        </div>
 
-        {/* Work Time */}
-        <div className="flex space-x-2">
-          <LabeledInput
-            type="time"
-            value={localSchedule.workTime.start || ""}
-            onChange={(e) => handleWorkTimeChange("start", e.target.value)}
-            label={t("Work Start")}
-            id="workStart"
-          />
-          <LabeledInput
-            type="time"
-            value={localSchedule.workTime.end || ""}
-            onChange={(e) => handleWorkTimeChange("end", e.target.value)}
-            label={t("Work End")}
-            id="workEnd"
+          {/* Work Time */}
+          <TimeRangePicker
+            value={{
+              startTime: localSchedule.workTime.start,
+              endTime: localSchedule.workTime.end,
+            }}
+            onChange={({ startTime, endTime }) =>
+              setLocalSchedule((prev) => ({
+                ...prev,
+                workTime: { start: startTime, end: endTime },
+              }))
+            }
           />
         </div>
 
@@ -199,38 +184,30 @@ export const ScheduleModal = ({
         <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 block pt-2">
           {t("Breaks (Max 3)")}
         </label>
-        {breaks.map((_break, index) => (
-          <div key={index} className="flex space-x-2 items-end">
-            <LabeledInput
-              type="time"
-              value={_break.start || ""}
-              onChange={(e) =>
-                handleBreakChange(index, "start", e.target.value)
-              }
-              label={t(`Break ${index + 1} Start`)}
-              id={`break${index + 1}Start`}
-              className="flex-grow"
-            />
-            <LabeledInput
-              type="time"
-              value={_break.end || ""}
-              onChange={(e) => handleBreakChange(index, "end", e.target.value)}
-              label={t(`Break ${index + 1} End`)}
-              id={`break${index + 1}End`}
-              className="flex-grow"
-            />
-            <CustomTooltip
-              onClick={() => removeBreak(index)}
-              tooltipText={t("Delete Brake")}
-              icon={<Trash color="red" />}
-            />
-            <CustomTooltip
-              onClick={() => addBreak()}
-              tooltipText={t("Add Brake")}
-              icon={<Plus />}
-            />
-          </div>
-        ))}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          {breaks.map((_break, index) => (
+            <div key={index} className="flex flex-row gap-2 items-end">
+              <TimeRangePicker
+                value={{ startTime: _break.start, endTime: _break.end }}
+                onChange={({ startTime }) =>
+                  handleBreakChange(index, "start", startTime || "")
+                }
+              />
+              <div className="flex gap-2">
+                <CustomTooltip
+                  onClick={() => removeBreak(index)}
+                  tooltipText={t("Delete Brake")}
+                  icon={<Trash color="red" />}
+                />
+                <CustomTooltip
+                  onClick={() => addBreak()}
+                  tooltipText={t("Add Brake")}
+                  icon={<Plus />}
+                />
+              </div>
+            </div>
+          ))}
+        </div>
 
         {breaks.length == 0 && (
           <div className="flex justify-center">
@@ -250,27 +227,41 @@ export const ScheduleModal = ({
         <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 block pt-2">
           {t("Days Off")}
         </label>
-        <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-          {Object.keys(localSchedule.isDayOff).map((day) => (
-            <label key={day} className="flex items-center space-x-2">
-              <Checkbox
-                checked={
-                  localSchedule.isDayOff[
-                    day as keyof typeof localSchedule.isDayOff
-                  ]
-                }
-                onCheckedChange={(checked) =>
-                  setLocalSchedule({
-                    ...localSchedule,
-                    isDayOff: {
-                      ...localSchedule.isDayOff,
-                      [day]: Boolean(checked),
-                    },
-                  })
-                }
-              />
-              <span>{t(day.charAt(0).toUpperCase() + day.slice(1))}</span>
-            </label>
+        <div className="flex items-center justify-center gap-0.5 border border-primary rounded-lg overflow-hidden bg-white dark:bg-background mb-2">
+          {(
+            [
+              "monday",
+              "tuesday",
+              "wednesday",
+              "thursday",
+              "friday",
+              "saturday",
+              "sunday",
+            ] as Array<keyof typeof localSchedule.isDayOff>
+          ).map((key) => (
+            <button
+              key={key}
+              type="button"
+              className={[
+                "flex-1 px-3 py-2 text-sm font-semibold transition-colors focus:outline-none",
+                localSchedule.isDayOff[key]
+                  ? "bg-primary text-white"
+                  : "bg-transparent text-foreground hover:bg-primary/10",
+                4,
+              ].join(" ")}
+              onClick={() =>
+                setLocalSchedule((prev) => ({
+                  ...prev,
+                  isDayOff: {
+                    ...prev.isDayOff,
+                    [key]: !prev.isDayOff[key],
+                  },
+                }))
+              }
+            >
+              {t(key.charAt(0).toUpperCase() + key.slice(1, 2)) +
+                key.slice(2, 3)}
+            </button>
           ))}
         </div>
 

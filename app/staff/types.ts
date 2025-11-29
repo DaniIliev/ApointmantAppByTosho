@@ -5,6 +5,7 @@ export type StaffMember = {
   email: string;
   phone: string;
   role: string;
+  profilePictureUrl?: string;
 };
 
 export type NewStaffMember = {

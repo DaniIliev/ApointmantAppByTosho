@@ -1,20 +1,9 @@
 "use client";
-
 import { useState, useRef, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useTranslation } from "react-i18next";
-import { usePathname, useRouter } from "next/navigation";
-import {
-  User,
-  Menu,
-  X,
-  Info,
-  Bell,
-  Globe,
-  LogIn,
-  UserPlus,
-} from "lucide-react";
+import { User, Menu, X, Info, Bell, Globe } from "lucide-react";
 import { usePageTitle } from "@/context/PageTitleContext";
 import useClickOutside from "@/Global/Hooks/useClickOutside";
 import { useAuthContext } from "@/context/AuthContext";
@@ -73,9 +62,6 @@ export default function TopNav({
   useClickOutside(helpRef, () => setIsHelpOpen(false));
   useClickOutside(alertsRef, () => setIsAlertsOpen(false));
   useClickOutside(languagesRef, () => setIsLanguagesOpen(false));
-
-  const router = useRouter();
-  const pathname = usePathname();
 
   const handleSignOut = () => {
     logout();
@@ -369,10 +355,12 @@ export default function TopNav({
                     onClick={() => changeLanguage("bg")}
                     className="flex items-center w-full text-left px-4 py-3 text-white/80 hover:text-white hover:bg-white/10"
                   >
-                    <img
+                    <Image
                       src="/Flag_of_Bulgaria.png"
                       alt="Bulgarian Flag"
                       className="w-5 h-4 mr-2"
+                      width={32}
+                      height={32}
                     />
                     {t("Bulgarian")}
                   </button>
@@ -380,10 +368,12 @@ export default function TopNav({
                     onClick={() => changeLanguage("en")}
                     className="flex items-center w-full text-left px-4 py-3 text-white/80 hover:text-white hover:bg-white/10"
                   >
-                    <img
+                    <Image
                       src="/Flag_of_the_United_Kingdom.png"
                       alt="British Flag"
                       className="w-5 h-4 mr-2"
+                      width={32}
+                      height={32}
                     />
                     {t("English")}
                   </button>
@@ -391,10 +381,12 @@ export default function TopNav({
                     onClick={() => changeLanguage("de")}
                     className="flex items-center w-full text-left px-4 py-3 text-white/80 hover:text-white hover:bg-white/10"
                   >
-                    <img
+                    <Image
                       src="/Flag_of_Germany.png"
                       alt="German Flag"
                       className="w-5 h-4 mr-2"
+                      width={32}
+                      height={32}
                     />
                     {t("German")}
                   </button>
@@ -432,13 +424,29 @@ export default function TopNav({
 
             {/* Profile Button with Text (hidden on mobile) */}
             <div className="relative hidden md:block" ref={profileRef}>
-              <button
-                onClick={toggleProfile}
-                aria-label={t("User Profile Menu")}
-                className="p-2 rounded-full bg-primary hover:bg-primary-dark transition-all duration-200 border-2 border-primary/50 focus:outline-none focus:ring-2 focus:ring-accent"
-              >
-                <User className="w-5 h-5 text-white" />
-              </button>
+              {user?.profilePictureUrl ? (
+                <button
+                  onClick={toggleProfile}
+                  aria-label={t("User Profile Menu")}
+                  className="rounded-full bg-primary hover:bg-primary-dark transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-accent"
+                >
+                  <Image
+                    src={user.profilePictureUrl}
+                    alt="Profile Picture"
+                    width={36}
+                    height={36}
+                    className="rounded-full object-cover w-9 h-9"
+                  />
+                </button>
+              ) : (
+                <button
+                  onClick={toggleProfile}
+                  aria-label={t("User Profile Menu")}
+                  className="p-2 rounded-full bg-primary hover:bg-primary-dark transition-all duration-200 border-2 border-primary/50 focus:outline-none focus:ring-2 focus:ring-accent"
+                >
+                  <User className="w-5 h-5 text-white" />
+                </button>
+              )}
               {isProfileOpen && (
                 <div className="absolute right-0 mt-2 w-48 bg-slate-900/90 backdrop-blur-xl border border-white/20 rounded-xl shadow-2xl">
                   <Link
@@ -476,7 +484,7 @@ export default function TopNav({
                     onClick={() => changeLanguage("bg")}
                     className="flex items-center w-full text-left px-4 py-3 text-white/80 hover:text-white hover:bg-white/10"
                   >
-                    <img
+                    <Image
                       src="/Flag_of_Bulgaria.png"
                       alt="Bulgarian Flag"
                       className="w-5 h-4 mr-2"
@@ -487,7 +495,7 @@ export default function TopNav({
                     onClick={() => changeLanguage("en")}
                     className="flex items-center w-full text-left px-4 py-3 text-white/80 hover:text-white hover:bg-white/10"
                   >
-                    <img
+                    <Image
                       src="/Flag_of_the_United_Kingdom.png"
                       alt="British Flag"
                       className="w-5 h-4 mr-2"
@@ -498,7 +506,7 @@ export default function TopNav({
                     onClick={() => changeLanguage("de")}
                     className="flex items-center w-full text-left px-4 py-3 text-white/80 hover:text-white hover:bg-white/10"
                   >
-                    <img
+                    <Image
                       src="/Flag_of_Germany.png"
                       alt="German Flag"
                       className="w-5 h-4 mr-2"

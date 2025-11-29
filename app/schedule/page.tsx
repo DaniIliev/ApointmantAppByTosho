@@ -174,7 +174,10 @@ function StaffSchedulePageContent() {
         const decodedUser = jwtDecode<any>(storedToken!);
 
         if (decodedUser.role === "business") {
-          const data = await callApi("/api/staff/staff-list", "GET");
+          const data = await callApi(
+            `/api/staff/staff-list?businessId=${decodedUser.businessId}`,
+            "GET"
+          );
           if (data.length > 1) {
             setIsApplyToAllModalOpen(true);
           }
