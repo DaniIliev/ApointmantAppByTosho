@@ -14,6 +14,7 @@ import {
   monthNames,
 } from "@/Global/Utils/commonFn";
 import MobileCalendar from "./MobileCalendar";
+import { LabeledInput } from "../customUIComponents/LabeledInput";
 
 interface CalendarProps {
   appointments: Appointment[];
@@ -117,7 +118,7 @@ export default function Calendar({
     <>
       <Card className="border-2 shadow-2xl bg-card backdrop-blur-lg border-primary/20 mb-8 overflow-hidden transition-all duration-500 ease-in-out">
         <CardContent className="p-6">
-          <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-6 gap-4">
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-6 gap-2">
             <h2 className="text-2xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
               {calendarView === "week"
                 ? t("Week of {{month}} {{day}}, {{year}}", {
@@ -132,15 +133,39 @@ export default function Calendar({
                     translatedMonthNames[currentDate.getMonth()]
                   } ${currentDate.getFullYear()}`}
             </h2>
+            <div className="flex items-center gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() =>
+                  calendarView === "week"
+                    ? navigateWeek("prev")
+                    : navigateMonth("prev")
+                }
+              >
+                <ChevronLeft className="h-4 w-4" />
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() =>
+                  calendarView === "week"
+                    ? navigateWeek("next")
+                    : navigateMonth("next")
+                }
+              >
+                <ChevronRight className="h-4 w-4" />
+              </Button>
+            </div>
             <div className="flex flex-wrap items-center gap-2">
               <div className="relative flex-grow">
-                <Search className="h-4 w-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
-                <Input
-                  type="text"
-                  placeholder={t("Search appointments...")}
+                <Search className="h-4 w-4 absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+                <LabeledInput
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-9 h-10 text-sm border-2 focus:border-primary transition-all duration-300 bg-input/80 backdrop-blur-sm rounded-xl"
+                  label={t("Search appointments...")}
+                  id={"search-appointments"}
+                  className="w-5"
                 />
               </div>
               {/* Detail Level Slider */}
@@ -183,28 +208,6 @@ export default function Calendar({
                   className="h-10 text-sm text-text-primary focus:border-primary transition-all duration-300 bg-input/80 backdrop-blur-sm rounded-xl"
                 />
               </div>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() =>
-                  calendarView === "week"
-                    ? navigateWeek("prev")
-                    : navigateMonth("prev")
-                }
-              >
-                <ChevronLeft className="h-4 w-4" />
-              </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() =>
-                  calendarView === "week"
-                    ? navigateWeek("next")
-                    : navigateMonth("next")
-                }
-              >
-                <ChevronRight className="h-4 w-4" />
-              </Button>
             </div>
           </div>
 

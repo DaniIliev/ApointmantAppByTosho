@@ -4,7 +4,7 @@
  */
 
 export type PlanType = "none" | "starter" | "professional" | "enterprise";
-export type UserRole = "personal" | "business" | "staff";
+export type UserRole = "personal" | "business" | "staff" | "admin";
 
 export interface PlanLimits {
   maxStaff: number;
@@ -210,6 +210,11 @@ export const ROUTE_PERMISSIONS: RoutePermission[] = [
     allowedRoles: ["personal", "business", "staff"],
     requiresAuth: true,
   },
+  {
+    path: "/admin/grant-access",
+    allowedRoles: ["admin"],
+    requiresAuth: true,
+  },
 ];
 
 /**
@@ -223,12 +228,14 @@ export function hasRouteAccess(
   subscriptionStatus?: string
 ): { allowed: boolean; reason?: string } {
   // Find matching route permission
+  if (userRole === "admin") {
+    return { allowed: true };
+  }
   const routePermission = ROUTE_PERMISSIONS.find((r) =>
     path.startsWith(r.path)
   );
 
   if (!routePermission) {
-    // Default: allow if no specific permission defined
     return { allowed: true };
   }
 
@@ -244,7 +251,7 @@ export function hasRouteAccess(
 
   // Business accounts must have an active subscription for business-only routes
   if (
-    userRole === "business" &&
+    (userRole === "business" || userRole === "staff") &&
     routePermission.requiresAuth &&
     !routePermission.path.startsWith("/profile") &&
     !routePermission.path.startsWith("/pricing") &&
@@ -252,7 +259,6 @@ export function hasRouteAccess(
   ) {
     return { allowed: false, reason: "subscription_required" };
   }
-
   // Check plan requirement
   if (
     routePermission.requiredPlan &&

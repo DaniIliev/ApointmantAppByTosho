@@ -16,7 +16,7 @@ import { useTranslation } from "react-i18next";
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
-  requiredRoles?: ("personal" | "business" | "staff")[];
+  requiredRoles?: ("personal" | "business" | "staff" | "admin")[];
   requiredPlan?: PlanType[];
   featureName?: string;
 }
@@ -88,7 +88,7 @@ export default function ProtectedRoute({
               <p className="text-sm text-muted-foreground">
                 {t("Your account type:")} <strong>{user.role}</strong>
               </p>
-              <div className="flex gap-2 justify-center pt-2">
+              <div className="flex gap-2 justify-center pt-2 pb-4">
                 <Button variant="outline" onClick={() => router.back()}>
                   {t("Go Back")}
                 </Button>

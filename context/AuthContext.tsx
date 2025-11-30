@@ -65,6 +65,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       if (storedToken) {
         try {
           const decodedUser = jwtDecode<any>(storedToken);
+          console.log("decodedUser", decodedUser);
           if (decodedUser && decodedUser.id) {
             const fetchedUser: User = await findUserByID(decodedUser.id);
             setUser(fetchedUser);

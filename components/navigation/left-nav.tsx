@@ -22,15 +22,13 @@ import {
   // New Icons for better context
   Info, // For Business Information
   BarChart3, // For Performance
-  BookOpen, // For Appointments
   CircleDollarSign, // For Types (Services/Pricing)
-  CalendarCheck, // For Appointments/Calendar
-  Globe,
   Info as InfoIcon,
   User as UserIcon,
   QrCode,
   LogOut,
-  LayoutList, // For QR Code page
+  LayoutList,
+  ShieldCheck, // For QR Code page
 } from "lucide-react";
 
 import { useAuthContext } from "@/context/AuthContext";
@@ -195,7 +193,9 @@ export default function LeftNav({ isOpen }: LeftNavProps) {
   };
 
   const navItems: NavItem[] =
-    user?.role === "business" || user?.role === "staff"
+    user?.role === "business" ||
+    user?.role === "staff" ||
+    user?.role === "admin"
       ? [
           // { href: "/home", label: t("Home"), icon: House },
           { href: "/for-business", label: t("Home"), icon: House },
@@ -245,7 +245,16 @@ export default function LeftNav({ isOpen }: LeftNavProps) {
               },
             ],
           },
-
+          ...(user?.role === "admin"
+            ? [
+                // Array to be spread if true
+                {
+                  href: "/admin/grant-access",
+                  label: t("Grant Access"),
+                  icon: ShieldCheck,
+                },
+              ]
+            : []),
           {
             href: "/performance",
             label: t("Performance"),

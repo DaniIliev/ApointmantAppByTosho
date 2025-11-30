@@ -1,7 +1,9 @@
+import { UserRole } from "@/lib/permissions";
+
 export type User = {
   _id: string;
   email: string;
-  role: "personal" | "business" | "staff";
+  role: UserRole;
   firstName?: string;
   lastName?: string;
   phone?: string;

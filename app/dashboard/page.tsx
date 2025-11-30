@@ -1,5 +1,5 @@
 "use client";
-import { SetStateAction, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { Plus } from "lucide-react";
 import { usePageTitle } from "@/context/PageTitleContext";
 import ProtectedRoute from "@/components/guards/ProtectedRoute";
