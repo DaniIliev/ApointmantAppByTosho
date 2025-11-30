@@ -106,7 +106,7 @@ export default function ProtectedRoute({
   const userPlanType = getPlanFromName(user.subscriptionPlan || user.plan);
 
   if (
-    user.role === "business" &&
+    (user.role === "business" || user.role === "staff") &&
     user.subscriptionStatus !== "active" &&
     userPlanType === "none" &&
     pathname !== "/pricing" &&

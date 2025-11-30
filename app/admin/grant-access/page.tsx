@@ -44,7 +44,7 @@ export default function GrantAccessPage() {
   const handleGrantAccess = async () => {
     setLoading(true);
     try {
-      await callApi("api/admin/grant-plan", "POST", {
+      await callApi("/api/admin/grant-plan", "POST", {
         businessId: selectedBusiness,
         plan: selectedPlan,
         duration,
