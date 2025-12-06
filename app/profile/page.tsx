@@ -62,6 +62,7 @@ export default function SettingsPage() {
     primaryColor: "",
     businessId: "",
     role: "personal",
+    mustChangePassword: false,
   });
 
   const fetchUserData = useCallback(async () => {
