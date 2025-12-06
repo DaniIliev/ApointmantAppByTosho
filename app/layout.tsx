@@ -10,8 +10,8 @@ import { ThemeProvider as NextThemesProvider } from "next-themes";
 
 export const metadata: Metadata = {
   title: "AppointDI",
-  description: "Created with v0",
-  generator: "v0.app",
+  description: "AppointDI - Smart Appointment Scheduling",
+  generator: "Next.js",
 };
 
 export default function RootLayout({
