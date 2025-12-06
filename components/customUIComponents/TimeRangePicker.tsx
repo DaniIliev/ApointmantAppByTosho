@@ -20,9 +20,10 @@ interface TimeRangePickerProps {
 const hoursAM = Array.from({ length: 12 }, (_, i) =>
   (i + 1).toString().padStart(2, "0")
 );
-const hoursPM = ["12"].concat(
-  Array.from({ length: 11 }, (_, i) => (13 + i).toString().padStart(2, "0"))
-);
+const hoursPM = Array.from({ length: 12 }, (_, i) => {
+  const hour = i === 0 ? 12 : i + 12;
+  return hour.toString().padStart(2, "0");
+});
 const minutes = Array.from({ length: 12 }, (_, i) =>
   (i * 5).toString().padStart(2, "0")
 );
@@ -45,6 +46,11 @@ function parseTime12(str: string | null) {
 
 function to24(hour: string, minute: string, ampmVal: string) {
   let h = parseInt(hour, 10);
+  // If hour is already in 24-hour format (>12), just use it as-is
+  if (h > 12) {
+    return `${h.toString().padStart(2, "0")}:${minute}`;
+  }
+  // Otherwise, handle 12-hour to 24-hour conversion
   if (ampmVal === "AM" && h === 12) h = 0;
   else if (ampmVal === "PM" && h !== 12) h += 12;
   return `${h.toString().padStart(2, "0")}:${minute}`;
@@ -268,10 +274,10 @@ export const TimeRangePicker: React.FC<TimeRangePickerProps> = ({
               <Picker
                 value={tempStart.ampm}
                 setValue={(v) => {
+                  // Don't do anything if clicking the same AM/PM
                   const next = {
                     ...tempStart,
                     ampm: v,
-                    hour: v === "AM" ? hoursAM[0] : hoursPM[0],
                   };
                   setTempStart(next);
                   handleImmediate("start", next);
@@ -303,10 +309,10 @@ export const TimeRangePicker: React.FC<TimeRangePickerProps> = ({
               <Picker
                 value={tempEnd.ampm}
                 setValue={(v) => {
+                  // Don't do anything if clicking the same AM/PM
                   const next = {
                     ...tempEnd,
                     ampm: v,
-                    hour: v === "AM" ? hoursAM[0] : hoursPM[0],
                   };
                   setTempEnd(next);
                   handleImmediate("end", next);

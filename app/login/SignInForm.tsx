@@ -3,18 +3,19 @@
 import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { LabeledInput } from "@/components/customUIComponents/LabeledInput";
-import { Eye, EyeOff, ArrowLeft } from "lucide-react";
+import { Eye, EyeOff } from "lucide-react";
 import Image from "next/image";
 import callApi from "../Api/callApi";
 import { useAuthContext } from "@/context/AuthContext";
 import { useTranslation } from "react-i18next";
+import ForgotPasswordModal from "./ForgotPasswordModal";
 
 interface SignInFormProps {
   onBack?: () => void;
   onSuccess?: (user: any) => void;
 }
 
-export function SignInForm({ onBack, onSuccess }: SignInFormProps) {
+export function SignInForm({ onSuccess }: SignInFormProps) {
   const { t } = useTranslation();
   const { login } = useAuthContext();
   const [showPassword, setShowPassword] = useState(false);
@@ -22,23 +23,49 @@ export function SignInForm({ onBack, onSuccess }: SignInFormProps) {
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [forgotOpen, setForgotOpen] = useState(false);
+  const [forgotLoading, setForgotLoading] = useState(false);
+  const [forgotError, setForgotError] = useState<string | null>(null);
+  const [forgotSent, setForgotSent] = useState(false);
+  const [otpMode, setOtpMode] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
     setLoading(true);
     try {
-      const payload = { email, password };
-      const authedUser: any = await callApi("/api/auth/login", "POST", payload);
-      login(payload);
-      if (authedUser?.token) {
-        localStorage.setItem("token", authedUser.token);
+      if (otpMode) {
+        // OTP login
+        const payload = { email, otp: password };
+        login(payload);
+      } else {
+        // Normal login
+        const payload = { email, password };
+        login(payload);
       }
-      onSuccess?.(authedUser);
     } catch (err: any) {
       setError(err?.message || t("Authentication failed"));
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleForgotSend = async (forgotEmail: string) => {
+    setForgotLoading(true);
+    setForgotError(null);
+    try {
+      await callApi("/api/auth/forgot-password", "POST", {
+        email: forgotEmail,
+      });
+      setForgotSent(true);
+      setOtpMode(true);
+      setEmail(forgotEmail);
+      setPassword("");
+      setForgotOpen(false);
+    } catch (err: any) {
+      setForgotError(err?.message || t("Failed to send email"));
+    } finally {
+      setForgotLoading(false);
     }
   };
 
@@ -92,11 +119,15 @@ export function SignInForm({ onBack, onSuccess }: SignInFormProps) {
             <div className="relative">
               <LabeledInput
                 id="password"
-                label={t("Password")}
+                label={otpMode ? t("One-time Password") : t("Password")}
                 type={showPassword ? "text" : "password"}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                placeholder={t("Password") || "Password"}
+                placeholder={
+                  otpMode
+                    ? t("Enter one-time password") || "One-time Password"
+                    : t("Password") || "Password"
+                }
                 className="!bg-transparent"
                 required
               />
@@ -134,12 +165,17 @@ export function SignInForm({ onBack, onSuccess }: SignInFormProps) {
             </div>
 
             <div className="text-center">
-              <a
-                href="/forgot-password"
-                className="text-sm text-foreground hover:text-primary transition-colors"
+              <button
+                type="button"
+                className="text-sm text-foreground hover:text-primary transition-colors underline"
+                onClick={() => {
+                  setForgotOpen(true);
+                  setForgotSent(false);
+                  setForgotError(null);
+                }}
               >
                 {t("Forgot password?")}
-              </a>
+              </button>
             </div>
             <div className="mt-4 text-center text-sm text-muted-foreground">
               <span>{t("Don't have an account?")} </span>
@@ -153,6 +189,14 @@ export function SignInForm({ onBack, onSuccess }: SignInFormProps) {
           </form>
         </div>
       </div>
+      <ForgotPasswordModal
+        open={forgotOpen}
+        onClose={() => setForgotOpen(false)}
+        onSend={handleForgotSend}
+        loading={forgotLoading}
+        error={forgotError}
+        sent={forgotSent}
+      />
     </div>
   );
 }

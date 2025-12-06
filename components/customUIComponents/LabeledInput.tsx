@@ -1,4 +1,5 @@
 import React, { useState, forwardRef } from "react";
+import { Eye, EyeOff } from "lucide-react";
 
 // Simple utility function to merge Tailwind classes
 const cn = (...classes: (string | boolean | undefined | null)[]): string => {
@@ -59,7 +60,9 @@ export const LabeledInput = forwardRef<
 
     // За date/time/datetime-local винаги запазваме оригиналния тип
     // за да работи нативният picker на мобилни устройства
-    const inputType = type;
+    const [showPassword, setShowPassword] = useState(false);
+    const isPassword = type === "password";
+    const inputType = isPassword ? (showPassword ? "text" : "password") : type;
 
     const baseClasses = cn(
       "peer w-full bg-card/80 focus:bg-card/90 rounded-t-md transition-all duration-300 px-4 pt-4 pb-1",
@@ -144,27 +147,39 @@ export const LabeledInput = forwardRef<
               {...props}
             />
           ) : (
-            <input
-              id={id}
-              // Ref cast за input
-              ref={ref as React.Ref<HTMLInputElement>}
-              type={inputType}
-              value={value}
-              // onChange cast за input
-              onChange={onChange as React.ChangeEventHandler<HTMLInputElement>}
-              onFocus={() => setIsFocused(true)}
-              onBlur={() => setIsFocused(false)}
-              className={elementClasses}
-              // Placeholder логика за type="text"
-              placeholder={
-                inputType === "text" && (!isFocused || !hasValue)
-                  ? placeholder
-                  : ""
-              }
-              required={required}
-              aria-invalid={isErroredEmpty}
-              {...props}
-            />
+            <div className="relative">
+              <input
+                id={id}
+                ref={ref as React.Ref<HTMLInputElement>}
+                type={inputType}
+                value={value}
+                onChange={
+                  onChange as React.ChangeEventHandler<HTMLInputElement>
+                }
+                onFocus={() => setIsFocused(true)}
+                onBlur={() => setIsFocused(false)}
+                className={elementClasses}
+                placeholder={
+                  inputType === "text" && (!isFocused || !hasValue)
+                    ? placeholder
+                    : ""
+                }
+                required={required}
+                aria-invalid={isErroredEmpty}
+                {...props}
+              />
+              {isPassword && (
+                <button
+                  type="button"
+                  tabIndex={-1}
+                  onClick={() => setShowPassword((v) => !v)}
+                  className="absolute right-2 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground hover:text-primary/80 z-20"
+                  aria-label={showPassword ? "Hide password" : "Show password"}
+                >
+                  {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                </button>
+              )}
+            </div>
           )}
 
           {/* 👈 НОВ ЕЛЕМЕНТ: Бутон за изчистване (рачка) */}

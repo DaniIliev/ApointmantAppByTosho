@@ -1,13 +1,12 @@
 "use client";
-
-import { useEffect } from "react";
-import { usePathname } from "next/navigation";
 import { I18nextProvider } from "react-i18next";
 import ClientLayout from "@/components/ClientLayout";
 import { PageTitleProvider } from "@/context/PageTitleContext";
 import { RightNavProvider } from "@/context/RightNavContext";
 import i18n from "@/i18n";
-import { AuthProvider, useAuthContext } from "@/context/AuthContext";
+import { useAuthContext } from "@/context/AuthContext";
+import { useState, useEffect } from "react";
+import ChangePasswordModal from "@/components/customUIComponents/ChangePasswordModal";
 import GuestLayout from "./GuestLayout";
 import { Toaster } from "sonner";
 import { PaddingProvider } from "@/context/PaddingContext";
@@ -18,6 +17,14 @@ export default function ClientLayoutWrapper({
   children: React.ReactNode;
 }>) {
   const { user } = useAuthContext();
+  const [showChangePassword, setShowChangePassword] = useState(false);
+
+  useEffect(() => {
+    if (user && user.mustChangePassword) {
+      setShowChangePassword(true);
+    }
+  }, [user]);
+
   // Apply persisted language once on mount (avoid overriding manual selections on navigation)
   useEffect(() => {
     const stored =
@@ -36,6 +43,10 @@ export default function ClientLayoutWrapper({
               <ClientLayout>
                 <Toaster />
                 {children}
+                <ChangePasswordModal
+                  open={showChangePassword}
+                  onClose={() => {}}
+                />
               </ClientLayout>
             ) : (
               <GuestLayout>{children}</GuestLayout>

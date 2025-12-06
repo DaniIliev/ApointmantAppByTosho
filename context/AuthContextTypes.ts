@@ -11,7 +11,7 @@ export type User = {
   profilePictureUrl?: string;
   primaryColor?: string;
   theme?: "light" | "dark";
-
+  mustChangePassword: boolean;
   // Subscription fields from database
   subscriptionPlan?: string; // "Starter_Monthly", "Professional_Annual", "Enterprise_Monthly", "none"
   subscriptionStatus?:
@@ -33,7 +33,11 @@ export type User = {
 export type AuthContextType = {
   user: User | null;
   token: string | null;
-  login: (formData: { email: string; password: string }) => Promise<void>;
+  login: (formData: {
+    email: string;
+    password?: string;
+    otp?: string;
+  }) => Promise<void>;
   logout: () => void;
   setUser: React.Dispatch<React.SetStateAction<User | null>>;
   // updateUser: (updatedData: Partial<User>) => void;

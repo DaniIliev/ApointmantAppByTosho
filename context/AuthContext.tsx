@@ -22,20 +22,34 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     }
   }, [shouldRedirect]);
 
-  const login = async (formData: { email: string; password: string }) => {
+  const login = async (formData: {
+    email: string;
+    password?: string;
+    otp?: string;
+  }) => {
     try {
-      const payload = {
-        email: formData.email,
-        password: formData.password,
-      };
-      const authedUser: any = await callApi("/api/auth/login", "POST", payload);
+      let authedUser: any;
+      if (formData.otp) {
+        // OTP login
+        authedUser = await callApi("/api/auth/otp-login", "POST", {
+          email: formData.email,
+          otp: formData.otp,
+        });
+      } else {
+        // Normal login
+        authedUser = await callApi("/api/auth/login", "POST", {
+          email: formData.email,
+          password: formData.password,
+        });
+      }
 
       setToken(authedUser.token);
       localStorage.setItem("token", authedUser.token);
 
       const decodedUser = jwtDecode<any>(authedUser.token);
-      if (decodedUser && decodedUser._id) {
-        findUserByID(decodedUser._id)
+      const userId = decodedUser._id || decodedUser.id;
+      if (userId) {
+        findUserByID(userId)
           .then((fetchedUser) => {
             setUser(fetchedUser);
           })
@@ -65,7 +79,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       if (storedToken) {
         try {
           const decodedUser = jwtDecode<any>(storedToken);
-          console.log("decodedUser", decodedUser);
           if (decodedUser && decodedUser.id) {
             const fetchedUser: User = await findUserByID(decodedUser.id);
             setUser(fetchedUser);

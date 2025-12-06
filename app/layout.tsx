@@ -52,7 +52,7 @@ html {
         <AuthProvider>
           <NextThemesProvider
             attribute="class"
-            defaultTheme="light"
+            defaultTheme="dark"
             enableSystem={false}
           >
             <ThemeProvider>

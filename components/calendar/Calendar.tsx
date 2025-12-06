@@ -133,30 +133,6 @@ export default function Calendar({
                     translatedMonthNames[currentDate.getMonth()]
                   } ${currentDate.getFullYear()}`}
             </h2>
-            <div className="flex items-center gap-2">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() =>
-                  calendarView === "week"
-                    ? navigateWeek("prev")
-                    : navigateMonth("prev")
-                }
-              >
-                <ChevronLeft className="h-4 w-4" />
-              </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() =>
-                  calendarView === "week"
-                    ? navigateWeek("next")
-                    : navigateMonth("next")
-                }
-              >
-                <ChevronRight className="h-4 w-4" />
-              </Button>
-            </div>
             <div className="flex flex-wrap items-center gap-2">
               <div className="relative flex-grow">
                 <Search className="h-4 w-4 absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
@@ -207,6 +183,30 @@ export default function Calendar({
                   onChange={handleDateChange}
                   className="h-10 text-sm text-text-primary focus:border-primary transition-all duration-300 bg-input/80 backdrop-blur-sm rounded-xl"
                 />
+              </div>
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() =>
+                    calendarView === "week"
+                      ? navigateWeek("prev")
+                      : navigateMonth("prev")
+                  }
+                >
+                  <ChevronLeft className="h-4 w-4" />
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() =>
+                    calendarView === "week"
+                      ? navigateWeek("next")
+                      : navigateMonth("next")
+                  }
+                >
+                  <ChevronRight className="h-4 w-4" />
+                </Button>
               </div>
             </div>
           </div>

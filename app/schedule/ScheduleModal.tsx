@@ -189,9 +189,11 @@ export const ScheduleModal = ({
             <div key={index} className="flex flex-row gap-2 items-end">
               <TimeRangePicker
                 value={{ startTime: _break.start, endTime: _break.end }}
-                onChange={({ startTime }) =>
-                  handleBreakChange(index, "start", startTime || "")
-                }
+                onChange={({ startTime, endTime }) => {
+                  const newBreaks = [...breaks];
+                  newBreaks[index] = { start: startTime, end: endTime };
+                  setBreaks(newBreaks);
+                }}
               />
               <div className="flex gap-2">
                 <CustomTooltip
