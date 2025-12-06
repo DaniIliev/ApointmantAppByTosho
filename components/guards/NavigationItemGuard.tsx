@@ -4,6 +4,7 @@ import { usePermissions } from "@/hooks/usePermissions";
 import { Badge } from "@/components/ui/badge";
 import { Lock, Crown } from "lucide-react";
 import { ReactNode } from "react";
+import { UserRole } from "@/lib/permissions";
 
 interface NavigationItemGuardProps {
   feature?:
@@ -18,7 +19,7 @@ interface NavigationItemGuardProps {
     | "customIntegrations"
     | "prioritySupport"
     | "phoneSupport";
-  requiredRoles?: ("personal" | "business" | "staff")[];
+  requiredRoles?: UserRole[];
   children: ReactNode;
   showBadge?: boolean;
 }
