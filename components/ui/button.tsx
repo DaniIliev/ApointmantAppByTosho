@@ -137,6 +137,10 @@ const buttonVariants = cva(
         lg: "h-10 rounded-md px-6 has-[>svg]:px-4",
         icon: "size-9",
       },
+      tone: {
+        error:
+          "bg-red-500 text-white border border-red-600 shadow-xs hover:bg-red-600 focus-visible:ring-red-500/30 dark:bg-red-600 dark:hover:bg-red-500",
+      },
     },
     defaultVariants: {
       variant: "default",
@@ -149,6 +153,7 @@ function Button({
   className,
   variant,
   size,
+  tone,
   asChild = false,
   iconType,
   children,
@@ -157,6 +162,7 @@ function Button({
   VariantProps<typeof buttonVariants> & {
     asChild?: boolean;
     iconType?: IconType;
+    tone?: "error";
   }) {
   const Comp = asChild ? Slot : "button";
 
@@ -165,7 +171,7 @@ function Button({
   return (
     <Comp
       data-slot="button"
-      className={cn(buttonVariants({ variant, size, className }))}
+      className={cn(buttonVariants({ variant, size, tone, className }))}
       {...props}
     >
       {!asChild && IconComponent && <IconComponent />}

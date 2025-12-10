@@ -32,6 +32,8 @@ interface ModalProps {
   hasUnsavedChanges?: boolean; // parent decides if content is dirty
   onConfirmSave?: () => Promise<void> | void; // optional save when user chooses Save and close
   autoDetectDirty?: boolean; // automatically detect input changes inside modal content
+  scrollableContent?: boolean; // allow disabling internal scroll when content is small
+  centerContentOnMobile?: boolean; // center dialog content on small screens
   confirmTexts?: {
     title?: string;
     message?: string;
@@ -52,6 +54,8 @@ export const Modal = ({
   hasUnsavedChanges,
   onConfirmSave,
   autoDetectDirty,
+  scrollableContent = true,
+  centerContentOnMobile = true,
   confirmTexts,
 }: ModalProps) => {
   const contentRef = useRef<HTMLDivElement | null>(null);
@@ -142,10 +146,20 @@ export const Modal = ({
     <>
       <Dialog open={open} onOpenChange={handleOpenChange}>
         <DialogContent
-          className={`${widthClass} md:max-h-[90vh] h-full md:h-auto max-h-screen flex flex-col !important bg-card/95 backdrop-blur-lg border-2 border-primary/20 [&>button]:hidden md:rounded-lg rounded-none p-0 md:p-6`}
+          className={`${widthClass} md:max-h-[90vh] h-full md:h-auto max-h-screen flex flex-col ${
+            centerContentOnMobile ? "items-center md:items-stretch" : ""
+          } overflow-visible !important bg-card/95 backdrop-blur-lg border-2 border-primary/20 [&>button]:hidden md:rounded-lg rounded-none p-0 md:p-6`}
         >
-          <DialogHeader className="flex-shrink-0 p-4 md:p-0 border-b md:border-b-0 border-border/50">
-            <DialogTitle className="text-xl md:text-2xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
+          <DialogHeader
+            className={`flex-shrink-0 p-4 md:p-0 border-b md:border-b-0 border-border/50 ${
+              centerContentOnMobile ? "text-center md:text-left" : ""
+            }`}
+          >
+            <DialogTitle
+              className={`text-xl md:text-2xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent ${
+                centerContentOnMobile ? "w-full" : ""
+              }`}
+            >
               {label}
             </DialogTitle>
           </DialogHeader>
@@ -159,7 +173,11 @@ export const Modal = ({
 
           <div
             ref={contentRef}
-            className="flex-1 overflow-y-auto overflow-x-hidden px-4 md:px-0 md:pr-2 pb-4 md:pb-0"
+            className={
+              scrollableContent
+                ? "flex-1 overflow-y-auto overflow-x-hidden px-4 md:px-0 md:pr-2 pb-4 md:pb-0"
+                : "flex-1 overflow-visible px-4 md:px-0 md:pr-2 pb-4 md:pb-0"
+            }
           >
             {children}
           </div>

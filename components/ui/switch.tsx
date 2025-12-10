@@ -11,11 +11,11 @@ const Switch = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <SwitchPrimitive.Root
     className={cn(
-      "peer inline-flex h-6 w-11 shrink-0 cursor-pointer items-center rounded-full border-2 border-transparent transition-colors",
+      "peer inline-flex h-6 w-11 shrink-0 cursor-pointer items-center rounded-full border-2 transition-colors",
       "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background",
-      // ВАЖНО: Махаме 'disabled:cursor-not-allowed disabled:opacity-50' от тук,
-      // ако се прилага от родителски елемент или ако имаш глобален стил
-      "data-[state=checked]:bg-primary data-[state=unchecked]:bg-input",
+      "data-[state=checked]:bg-primary data-[state=checked]:border-primary",
+      "data-[state=unchecked]:bg-slate-300 data-[state=unchecked]:border-primary/20",
+      "dark:data-[state=unchecked]:bg-slate-600 dark:data-[state=unchecked]:border-slate-500",
       className
     )}
     {...props}
@@ -23,7 +23,8 @@ const Switch = React.forwardRef<
   >
     <SwitchPrimitive.Thumb
       className={cn(
-        "pointer-events-none block h-5 w-5 rounded-full bg-background shadow-lg ring-0 transition-transform",
+        "pointer-events-none block h-5 w-5 rounded-full bg-white shadow-lg ring-0 transition-transform",
+        "dark:bg-slate-900",
         "data-[state=checked]:translate-x-5 data-[state=unchecked]:translate-x-0"
       )}
     />

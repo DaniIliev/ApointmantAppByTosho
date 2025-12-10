@@ -1,12 +1,6 @@
 "use client";
 import React from "react";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogFooter,
-} from "@/components/ui/dialog";
+import { Modal } from "@/components/customUIComponents/Modal";
 import { Button } from "../ui/button";
 
 interface DeleteConfirmationDialogProps {
@@ -24,33 +18,31 @@ const DeleteConfirmationDialog: React.FC<DeleteConfirmationDialogProps> = ({
   title,
   message,
 }) => {
+  const handleOpenChange = (nextOpen: boolean) => {
+    if (!nextOpen) onClose();
+  };
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-sm rounded-lg shadow-lg">
-        <DialogHeader>
-          <DialogTitle>{title}</DialogTitle>
-        </DialogHeader>
-        <div className="py-4 text-center">
-          <p>{message}</p>
-        </div>
-        <DialogFooter className="flex-col-reverse sm:flex-row sm:justify-between sm:space-x-2 space-y-2 sm:space-y-0">
-          <Button
-            variant="outline"
-            onClick={onClose}
-            className="flex-1 rounded-xl"
-          >
+    <Modal
+      label={title}
+      open={isOpen}
+      onOpenChange={handleOpenChange}
+      width="md"
+      confirmClose={false}
+      scrollableContent={false}
+      centerContentOnMobile
+    >
+      <div className="flex flex-1 min-h-[50vh] flex-col items-center justify-center gap-6 py-4 text-center">
+        <p className="text-lg md:text-base leading-relaxed">{message}</p>
+        <div className="flex flex-col-reverse sm:flex-row sm:justify-center sm:space-x-2 space-y-2 sm:space-y-0 pt-2">
+          <Button variant="outline" onClick={onClose}>
             Cancel
           </Button>
-          <Button
-            variant="destructive"
-            onClick={onConfirm}
-            className="flex-1 rounded-xl"
-          >
+          <Button onClick={onConfirm} tone="error">
             Delete
           </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
+        </div>
+      </div>
+    </Modal>
   );
 };
 
