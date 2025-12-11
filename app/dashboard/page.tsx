@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { Plus } from "lucide-react";
 import { usePageTitle } from "@/context/PageTitleContext";
 import ProtectedRoute from "@/components/guards/ProtectedRoute";
@@ -77,25 +77,7 @@ function DashboardPageContent() {
   const { setPageTitle } = usePageTitle();
   const { setExtraRightNavMenu, setIsRightNavVisible } = useRightNav();
 
-  useEffect(() => {
-    getDashboardData();
-    fetchServices();
-  }, []);
-
-  useEffect(() => {
-    setPageTitle(t("Dashboard"));
-    setExtraRightNavMenu(
-      <CreateNewDashboardMenu onOpenModal={() => setIsCreateModalOpen(true)} />
-    );
-    setIsRightNavVisible(true);
-    return () => {
-      setPageTitle(null);
-      setExtraRightNavMenu(null);
-      setIsRightNavVisible(false);
-    };
-  }, [setPageTitle, setExtraRightNavMenu, setIsRightNavVisible, t]);
-
-  const fetchServices = async () => {
+  const fetchServices = useCallback(async () => {
     try {
       const services: AppointmentType[] = await callApi(
         `/api/service?businessId=${user?.businessId}`,
@@ -112,12 +94,30 @@ function DashboardPageContent() {
     } catch (error) {
       console.error("Failed to fetch services:", error);
     }
-  };
+  }, [user?.businessId]);
 
-  const getDashboardData = async () => {
+  const getDashboardData = useCallback(async () => {
     const data = await callApi("/api/appointment/dashboard", "GET");
     setAppointments(data);
-  };
+  }, []);
+
+  useEffect(() => {
+    getDashboardData();
+    fetchServices();
+  }, [fetchServices, getDashboardData]);
+
+  useEffect(() => {
+    setPageTitle(t("Dashboard"));
+    setExtraRightNavMenu(
+      <CreateNewDashboardMenu onOpenModal={() => setIsCreateModalOpen(true)} />
+    );
+    setIsRightNavVisible(true);
+    return () => {
+      setPageTitle(null);
+      setExtraRightNavMenu(null);
+      setIsRightNavVisible(false);
+    };
+  }, [setPageTitle, setExtraRightNavMenu, setIsRightNavVisible, t]);
 
   const openViewModal = (appointment: Appointment) => {
     setSelectedAppointment(appointment);

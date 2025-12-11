@@ -18,7 +18,7 @@ import {
   ArrowRight,
   PlayCircle,
 } from "lucide-react";
-import { KPICard } from "@/components/performance/KPICard";
+// import { KPICard } from "@/components/performance/KPICard";
 import { PerformanceChart } from "@/components/performance/PerformanceChart";
 import { PerformanceData } from "../performance/page";
 import { usePaddingControl } from "@/context/PaddingContext";
@@ -175,12 +175,11 @@ export default function BusinessLandingPage() {
           </div>
         </div>
       </section>
-      <section
+      {/* <section
         id="analytics"
         className="bg-gray-50 dark:bg-gray-900 py-8 md:py-12  "
       >
         <div className="max-w-7xl mx-auto px-4">
-          {/* Header */}
           <div className="text-center">
             <h2 className="text-3xl sm:text-4xl md:text-5xl font-extrabold text-primary text-balance">
               {t("Unlock the Power of Data 🚀")}
@@ -264,7 +263,7 @@ export default function BusinessLandingPage() {
                 data={mockPerformanceData.appointmentStatus}
                 type="pie"
                 dataKey="value"
-                colors={["#22c55e", "#ef4444"]} // Зелено за Completed, Червено за Cancelled
+                colors={["#22c55e", "#ef4444"]}
               />
               <PerformanceChart
                 title={t("Client Types Distribution")}
@@ -275,7 +274,7 @@ export default function BusinessLandingPage() {
             </div>
           </div>
         </div>
-      </section>
+      </section> */}
       <PricingSection />
 
       {/* Kanban Board (Task Manager) Section */}
