@@ -26,6 +26,7 @@ import {
   UserPlus,
 } from "lucide-react";
 import type { KPIConfig } from "./types";
+import { useStaffOptions } from "./useStaffOptions";
 
 interface KPIConfigFormProps {
   open: boolean;
@@ -80,6 +81,8 @@ export function KPIConfigForm({
   mockPerformanceData,
 }: KPIConfigFormProps) {
   const [selectedKPI, setSelectedKPI] = useState<string>("totalAppointments");
+  const [staffId, setStaffId] = useState<string>("");
+  const { staffOptions, loadingStaff } = useStaffOptions();
 
   const handleSave = () => {
     const kpiOption = kpiOptions.find((opt) => opt.id === selectedKPI);
@@ -110,6 +113,7 @@ export function KPIConfigForm({
       title: kpiOption.label,
       value: formattedValue,
       change: changeData[selectedKPI as string],
+      configuration: staffId ? { staffId } : undefined,
       layout: {
         x: 0,
         y: 0,
@@ -142,6 +146,33 @@ export function KPIConfigForm({
                 {kpiOptions.map((option) => (
                   <SelectItem key={option.id} value={option.id}>
                     {option.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="staff-id" className="text-slate-300">
+              Staff (optional)
+            </Label>
+            <Select
+              value={staffId || "all"}
+              onValueChange={(value) =>
+                setStaffId(value === "all" ? "" : value)
+              }
+              disabled={loadingStaff}
+            >
+              <SelectTrigger id="staff-id">
+                <SelectValue
+                  placeholder={loadingStaff ? "Loading..." : "All staff"}
+                />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All staff</SelectItem>
+                {staffOptions.map((s) => (
+                  <SelectItem key={s._id} value={s._id}>
+                    {`${s.firstName} ${s.lastName}`.trim() || s._id}
                   </SelectItem>
                 ))}
               </SelectContent>

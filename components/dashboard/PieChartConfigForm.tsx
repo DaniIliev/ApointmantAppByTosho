@@ -21,6 +21,7 @@ import type { ChartConfig } from "./types";
 import { getDashboardData } from "./mockDashboardData";
 import { PerformanceChart } from "@/components/performance/PerformanceChart";
 import { useDashboardDate } from "@/context/DashboardDateContext";
+import { useStaffOptions } from "./useStaffOptions";
 
 interface PieChartConfigFormProps {
   open: boolean;
@@ -34,10 +35,11 @@ type PieMetric =
   | "by_service"
   | "by_source"
   | "popularity"
-  | "client_distribution";
+  | "client_distribution"
+  | "count";
 
 const dataSourceMetrics: Record<PieDataSource, PieMetric[]> = {
-  appointments: ["by_service"],
+  appointments: ["by_service", "count"],
   clients: ["by_source"],
   revenue: ["by_service"],
   services: ["popularity"],
@@ -48,6 +50,7 @@ interface PieConfig {
   dataSource: PieDataSource;
   metric: PieMetric;
   showLegend: boolean;
+  staffId?: string;
 }
 
 export function PieChartConfigForm({
@@ -61,10 +64,12 @@ export function PieChartConfigForm({
     dataSource: "appointments",
     metric: "by_service",
     showLegend: true,
+    staffId: "",
   });
 
   const [previewData, setPreviewData] = useState<Record<string, unknown>[]>([]);
   const { startDate, endDate, groupBy } = useDashboardDate();
+  const { staffOptions, loadingStaff } = useStaffOptions();
 
   const availableMetrics = dataSourceMetrics[config.dataSource] || [
     "by_service",
@@ -138,8 +143,8 @@ export function PieChartConfigForm({
       },
       configuration: {
         dataSource: config.dataSource,
-        timeRange: "month",
         metric: config.metric,
+        staffId: config.staffId?.trim() || undefined,
       },
     };
 
@@ -222,6 +227,37 @@ export function PieChartConfigForm({
                           (word) => word.charAt(0).toUpperCase() + word.slice(1)
                         )
                         .join(" ")}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            {/* Staff filter */}
+            <div className="space-y-2">
+              <Label htmlFor="staff-id" className="text-slate-700">
+                Staff (optional)
+              </Label>
+              <Select
+                value={config.staffId || "all"}
+                onValueChange={(value) =>
+                  setConfig({
+                    ...config,
+                    staffId: value === "all" ? "" : value,
+                  })
+                }
+                disabled={loadingStaff}
+              >
+                <SelectTrigger id="staff-id">
+                  <SelectValue
+                    placeholder={loadingStaff ? "Loading..." : "All staff"}
+                  />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All staff</SelectItem>
+                  {staffOptions.map((s) => (
+                    <SelectItem key={s._id} value={s._id}>
+                      {`${s.firstName} ${s.lastName}`.trim() || s._id}
                     </SelectItem>
                   ))}
                 </SelectContent>

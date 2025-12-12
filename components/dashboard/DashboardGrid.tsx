@@ -39,9 +39,9 @@ export function DashboardGrid({
   const [openMenu, setOpenMenu] = useState<string | null>(null);
   const [showSlider, setShowSlider] = useState<{ [key: string]: boolean }>(
     () => {
-      // Initialize slider visibility - true by default for line and bar charts
+      // Initialize slider visibility hidden by default for all charts
       return items.reduce((acc, item) => {
-        acc[item.id] = item.type !== "kpi" && item.type !== "pie";
+        acc[item.id] = false;
         return acc;
       }, {} as { [key: string]: boolean });
     }

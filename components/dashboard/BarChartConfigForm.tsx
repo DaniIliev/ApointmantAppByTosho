@@ -20,6 +20,7 @@ import type { ChartConfig } from "./types";
 import { getDashboardData } from "./mockDashboardData";
 import { PerformanceChart } from "@/components/performance/PerformanceChart";
 import { useDashboardDate } from "@/context/DashboardDateContext";
+import { useStaffOptions } from "./useStaffOptions";
 
 interface BarChartConfigFormProps {
   open: boolean;
@@ -39,27 +40,22 @@ type BarMetric =
   | "by_service"
   | "by_source"
   | "popularity"
-  | "appointments_count";
+  | "appointments_count"
+  | "by_staff";
 
 const dataSourceMetrics: Record<BarDataSource, BarMetric[]> = {
   appointments: ["count", "by_service"],
   clients: ["by_source"],
-  revenue: ["by_service"],
+  revenue: ["by_service", "by_staff"],
   services: ["popularity"],
   staff: ["appointments_count"],
 };
 
-const timeRanges = [
-  { id: "week", label: "This Week" },
-  { id: "month", label: "This Month" },
-  { id: "year", label: "This Year" },
-];
-
 interface BarConfig {
   title: string;
-  timeRange: "week" | "month" | "year";
   dataSource: BarDataSource;
   metric: BarMetric;
+  staffId?: string;
   showValues: boolean;
 }
 
@@ -70,12 +66,13 @@ export function BarChartConfigForm({
   editingChart,
 }: BarChartConfigFormProps) {
   const { startDate, endDate, groupBy } = useDashboardDate();
+  const { staffOptions, loadingStaff } = useStaffOptions();
 
   const [config, setConfig] = useState<BarConfig>({
     title: "Appointments by Status",
-    timeRange: "week",
     dataSource: "appointments",
     metric: "count",
+    staffId: "",
     showValues: true,
   });
 
@@ -111,6 +108,9 @@ export function BarChartConfigForm({
     if (config.dataSource === "revenue" && config.metric === "by_service") {
       return ["revenue"];
     }
+    if (config.dataSource === "revenue" && config.metric === "by_staff") {
+      return ["revenue"];
+    }
     if (config.dataSource === "services" && config.metric === "popularity") {
       return ["bookings"];
     }
@@ -118,7 +118,7 @@ export function BarChartConfigForm({
       config.dataSource === "staff" &&
       config.metric === "appointments_count"
     ) {
-      return ["appointments", "revenue"];
+      return ["count", "completed", "cancelled"];
     }
     return ["count"];
   };
@@ -156,8 +156,8 @@ export function BarChartConfigForm({
       },
       configuration: {
         dataSource: config.dataSource,
-        timeRange: config.timeRange,
         metric: config.metric,
+        staffId: config.staffId?.trim() || undefined,
       },
     };
 
@@ -190,34 +190,6 @@ export function BarChartConfigForm({
               />
             </div>
 
-            {/* Data Source */}
-            <div className="space-y-2">
-              <Label htmlFor="data-source" className="text-slate-700">
-                Data Source
-              </Label>
-              <Select
-                value={config.dataSource}
-                onValueChange={(value) =>
-                  setConfig({
-                    ...config,
-                    dataSource: value as BarDataSource,
-                    metric: dataSourceMetrics[value as BarDataSource][0],
-                  })
-                }
-              >
-                <SelectTrigger id="data-source">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="appointments">Appointments</SelectItem>
-                  <SelectItem value="clients">Clients</SelectItem>
-                  <SelectItem value="revenue">Revenue</SelectItem>
-                  <SelectItem value="services">Services</SelectItem>
-                  <SelectItem value="staff">Staff</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
             {/* Metric */}
             <div className="space-y-2">
               <Label htmlFor="metric" className="text-slate-700">
@@ -247,27 +219,31 @@ export function BarChartConfigForm({
               </Select>
             </div>
 
-            {/* Time Range */}
+            {/* Staff filter */}
             <div className="space-y-2">
-              <Label htmlFor="time-range" className="text-slate-700">
-                Time Range
+              <Label htmlFor="staff-id" className="text-slate-700">
+                Staff (optional)
               </Label>
               <Select
-                value={config.timeRange}
+                value={config.staffId || "all"}
                 onValueChange={(value) =>
                   setConfig({
                     ...config,
-                    timeRange: value as "week" | "month" | "year",
+                    staffId: value === "all" ? "" : value,
                   })
                 }
+                disabled={loadingStaff}
               >
-                <SelectTrigger id="time-range">
-                  <SelectValue />
+                <SelectTrigger id="staff-id">
+                  <SelectValue
+                    placeholder={loadingStaff ? "Loading..." : "All staff"}
+                  />
                 </SelectTrigger>
                 <SelectContent>
-                  {timeRanges.map((range) => (
-                    <SelectItem key={range.id} value={range.id}>
-                      {range.label}
+                  <SelectItem value="all">All staff</SelectItem>
+                  {staffOptions.map((s) => (
+                    <SelectItem key={s._id} value={s._id}>
+                      {`${s.firstName} ${s.lastName}`.trim() || s._id}
                     </SelectItem>
                   ))}
                 </SelectContent>

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import ProtectedRoute from "@/components/guards/ProtectedRoute";
 import { Plus } from "lucide-react";
@@ -26,6 +26,8 @@ import {
 import { usePaddingControl } from "@/context/PaddingContext";
 import { DashboardDateProvider } from "@/context/DashboardDateContext";
 import { DateRangeSelector } from "@/components/dashboard/DateRangeSelector";
+import { useDashboardDate } from "@/context/DashboardDateContext";
+import callApi from "@/app/Api/callApi";
 
 interface ChangeMetric {
   value: number;
@@ -172,6 +174,7 @@ const getDateFromPeriod = (period: string) => {
 
 function PerformancePageContent() {
   const { t } = useTranslation();
+  const { startDate, endDate, groupBy } = useDashboardDate();
   const [selectedPeriod, setSelectedPeriod] = useState("last30days");
   const [customDateRange, setCustomDateRange] = useState<{
     from: Date | undefined;
@@ -188,6 +191,10 @@ function PerformancePageContent() {
   const [editingChart, setEditingChart] = useState<ChartConfig | undefined>(
     undefined
   );
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const itemsRef = useRef<DashboardItem[]>([]);
+  const layoutSaveTimer = useRef<NodeJS.Timeout | null>(null);
 
   const { setPageTitle } = usePageTitle();
   const { setExtraRightNavMenu, setIsRightNavVisible } = useRightNav();
@@ -199,6 +206,287 @@ function PerformancePageContent() {
     setIsCreateModalOpen(false);
   }, []);
 
+  // Guess analytics dimension based on saved config
+  const inferDimension = useCallback(
+    (source?: string, metric?: string, type?: string) => {
+      // For pie charts, never return time_series - default to by_service for categorical breakdown
+      const isPieChart = type === "pie";
+
+      if (source === "appointments") {
+        if (metric === "by_service") return "by_service";
+        if (metric === "by_staff" || metric === "appointments_count")
+          return "by_staff";
+        if (metric === "by_status") return "by_status";
+        if (metric === "by_category") return "by_category";
+        if (metric === "count") return isPieChart ? "by_status" : "time_series";
+        return isPieChart ? "by_service" : "time_series";
+      }
+      if (source === "staff") {
+        if (metric === "appointments_count" || metric === "by_staff")
+          return "by_staff";
+        return "by_staff";
+      }
+      if (source === "revenue") {
+        if (metric === "by_service") return "by_service";
+        if (metric === "by_staff") return "by_staff";
+        if (metric === "count")
+          return isPieChart ? "by_service" : "time_series";
+        return isPieChart ? "by_service" : "time_series";
+      }
+      if (source === "services") {
+        if (metric === "metrics") return "metrics";
+        return "popularity";
+      }
+      return isPieChart ? "by_service" : "time_series";
+    },
+    []
+  );
+
+  const transformAnalyticsData = useCallback(
+    (
+      source: string,
+      dimension: string,
+      rows: Array<Record<string, unknown>>
+    ) => {
+      let data: Array<Record<string, string | number>> = [];
+      let dataKeys: string[] = [];
+      const xAxisKey = "name";
+
+      if (source === "appointments") {
+        if (dimension === "time_series") {
+          data = rows.map((r) => ({
+            name: (r.name as string) || "",
+            count: Number(r.total ?? 0),
+            completed: Number((r as Record<string, unknown>).completed ?? 0),
+            cancelled: Number((r as Record<string, unknown>).cancelled ?? 0),
+          }));
+          dataKeys = ["count", "completed", "cancelled"];
+        } else if (dimension === "by_service" || dimension === "by_category") {
+          data = rows.map((r) => ({
+            name: (r.name as string) || (r._id as string) || "",
+            count: Number((r.value as number) ?? (r.count as number) ?? 0),
+          }));
+          dataKeys = ["count"];
+        } else if (dimension === "by_status") {
+          data = rows.map((r) => ({
+            name: (r.name as string) || (r._id as string) || "",
+            count: Number((r.value as number) ?? 0),
+          }));
+          dataKeys = ["count"];
+        } else if (dimension === "by_staff") {
+          data = rows.map((r) => ({
+            name: (r.name as string) || "",
+            count: Number((r.total as number) ?? 0),
+            completed: Number((r.completed as number) ?? 0),
+            cancelled: Number((r.cancelled as number) ?? 0),
+          }));
+          dataKeys = ["count", "completed", "cancelled"];
+        }
+      } else if (source === "staff") {
+        // Treat staff analytics the same as appointments by staff
+        if (dimension === "by_staff" || dimension === "time_series") {
+          data = rows.map((r) => ({
+            name: (r.name as string) || "",
+            count: Number((r.total as number) ?? 0),
+            completed: Number((r.completed as number) ?? 0),
+            cancelled: Number((r.cancelled as number) ?? 0),
+          }));
+          dataKeys = ["count", "completed", "cancelled"];
+        }
+      } else if (source === "revenue") {
+        if (dimension === "time_series") {
+          data = rows.map((r) => ({
+            name: (r.name as string) || "",
+            revenue: Number((r.revenue as number) ?? (r.value as number) ?? 0),
+          }));
+          dataKeys = ["revenue"];
+        } else if (dimension === "by_service" || dimension === "by_staff") {
+          data = rows.map((r) => ({
+            name: (r.name as string) || "",
+            revenue: Number((r.value as number) ?? 0),
+          }));
+          dataKeys = ["revenue"];
+        }
+      } else if (source === "services") {
+        if (dimension === "metrics") {
+          data = rows.map((r) => ({
+            name: (r.name as string) || "",
+            duration: Number((r as Record<string, unknown>).duration ?? 0),
+            price: Number((r as Record<string, unknown>).price ?? 0),
+            bookings: Number((r as Record<string, unknown>).bookings ?? 0),
+          }));
+          dataKeys = ["duration", "price", "bookings"];
+        } else {
+          data = rows.map((r) => ({
+            name: (r.name as string) || "",
+            bookings: Number(
+              (r.value as number) ?? (r.bookings as number) ?? 0
+            ),
+          }));
+          dataKeys = ["bookings"];
+        }
+      } else {
+        data = rows.map((r) => ({
+          name: (r.name as string) || "",
+          value: Number((r.value as number) ?? 0),
+        }));
+        dataKeys = ["value"];
+      }
+
+      return { data, dataKeys, xAxisKey };
+    },
+    []
+  );
+
+  const fetchKpiValue = useCallback(
+    async (kpiType: string, staffId?: string): Promise<string | number> => {
+      try {
+        if (
+          kpiType === "totalAppointments" ||
+          kpiType === "completedAppointments" ||
+          kpiType === "cancelledAppointments"
+        ) {
+          const params = new URLSearchParams({
+            source: "appointments",
+            dimension: "time_series",
+            groupBy: "day",
+            period: "custom",
+            from: startDate,
+            to: endDate,
+          });
+          if (staffId) params.set("staffId", staffId);
+          const url = `/api/analytics?${params.toString()}&t=${Date.now()}`;
+          const rows = await callApi(url, "GET");
+          const totals = (rows as Array<Record<string, unknown>>).reduce(
+            (
+              acc: { total: number; completed: number; cancelled: number },
+              cur
+            ) => {
+              acc.total += Number(cur.total ?? 0);
+              acc.completed += Number(cur.completed ?? 0);
+              acc.cancelled += Number(cur.cancelled ?? 0);
+              return acc;
+            },
+            { total: 0, completed: 0, cancelled: 0 }
+          );
+          if (kpiType === "totalAppointments") return totals.total;
+          if (kpiType === "completedAppointments") return totals.completed;
+          return totals.cancelled;
+        }
+
+        if (kpiType === "totalRevenue") {
+          const params = new URLSearchParams({
+            source: "revenue",
+            dimension: "time_series",
+            groupBy: "day",
+            period: "custom",
+            from: startDate,
+            to: endDate,
+          });
+          if (staffId) params.set("staffId", staffId);
+          const url = `/api/analytics?${params.toString()}&t=${Date.now()}`;
+          const rows = await callApi(url, "GET");
+          return (rows as Array<Record<string, unknown>>).reduce(
+            (sum, cur) => sum + Number(cur.revenue ?? cur.value ?? 0),
+            0
+          );
+        }
+
+        if (kpiType === "averageServicePrice") {
+          const params = new URLSearchParams({
+            source: "services",
+            dimension: "metrics",
+          });
+          const url = `/api/analytics?${params.toString()}&t=${Date.now()}`;
+          const rows = await callApi(url, "GET");
+          const list = rows as Array<Record<string, unknown>>;
+          if (!list.length) return "N/A";
+          const total = list.reduce((sum, r) => sum + Number(r.price ?? 0), 0);
+          return Number(total / list.length).toFixed(2);
+        }
+
+        if (
+          kpiType === "clientRetentionRate" ||
+          kpiType === "newClientsAcquired"
+        ) {
+          return "N/A";
+        }
+      } catch (err) {
+        console.error("Failed to load KPI", err);
+        return "N/A";
+      }
+
+      return "N/A";
+    },
+    [startDate, endDate]
+  );
+
+  const fetchChartData = useCallback(
+    async (item: DashboardItem): Promise<DashboardItem> => {
+      if (item.type === "kpi") {
+        const value = await fetchKpiValue(
+          item.kpiType,
+          (item as DashboardItem & { configuration?: { staffId?: string } })
+            .configuration?.staffId
+        );
+        return { ...item, value };
+      }
+
+      const config: Partial<ChartConfig["configuration"]> =
+        item.configuration || {};
+      const source = config.dataSource || "appointments";
+      const dimension =
+        config.dimension || inferDimension(source, config.metric, item.type);
+
+      // Map UI "staff" source to analytics API expectations (appointments by staff)
+      const apiSource = source === "staff" ? "appointments" : source;
+      const apiDimension = source === "staff" ? "by_staff" : dimension;
+
+      const params = new URLSearchParams({
+        source: apiSource,
+        dimension: apiDimension,
+        groupBy: config.groupBy || groupBy,
+        period: "custom",
+        from: config.from || startDate,
+        to: config.to || endDate,
+      });
+
+      if (config.staffId) params.set("staffId", config.staffId);
+      if (config.serviceId) params.set("serviceId", config.serviceId);
+      if (config.status) params.set("status", config.status);
+
+      const url = `/api/analytics?${params.toString()}&t=${Date.now()}`;
+      const rows = await callApi(url, "GET");
+      const { data, dataKeys, xAxisKey } = transformAnalyticsData(
+        apiSource,
+        apiDimension,
+        rows as Array<Record<string, unknown>>
+      );
+
+      return {
+        ...item,
+        data,
+        dataKeys: dataKeys,
+        xAxisKey: xAxisKey,
+        configuration: {
+          ...config,
+          dataSource: source,
+          dimension: apiDimension,
+          from: config.from || startDate,
+          to: config.to || endDate,
+        },
+      } as DashboardItem;
+    },
+    [
+      fetchKpiValue,
+      groupBy,
+      inferDimension,
+      startDate,
+      endDate,
+      transformAnalyticsData,
+    ]
+  );
+
   const { setRemovePadding } = usePaddingControl();
   useEffect(() => {
     setRemovePadding(true);
@@ -207,37 +495,118 @@ function PerformancePageContent() {
     };
   }, [setRemovePadding]);
 
-  const handleSaveChart = useCallback((config: DashboardItem) => {
-    setItems((prev) => {
-      // Find the maximum Y position currently in use
-      let maxY = 0;
-      prev.forEach((item) => {
-        if (item.layout) {
-          maxY = Math.max(maxY, item.layout.y + item.layout.h);
-        }
-      });
+  const loadDashboard = useCallback(async () => {
+    setIsLoading(true);
+    setError(null);
+    try {
+      const dash = await callApi("/api/dashboard", "GET");
+      const fetchedItems = (dash?.items as DashboardItem[]) || [];
+      const hydrated = await Promise.all(
+        fetchedItems.map(async (item) => {
+          try {
+            return await fetchChartData(item);
+          } catch (err) {
+            console.error("Failed to hydrate item", item.id, err);
+            return item;
+          }
+        })
+      );
+      setItems(hydrated);
+    } catch (err) {
+      console.error("Failed to load dashboard", err);
+      setError("Failed to load dashboard");
+    } finally {
+      setIsLoading(false);
+    }
+  }, [fetchChartData]);
 
-      // Set position for new item below existing items
+  useEffect(() => {
+    loadDashboard();
+  }, [loadDashboard]);
+
+  useEffect(() => {
+    itemsRef.current = items;
+  }, [items]);
+
+  useEffect(() => {
+    const refreshData = async () => {
+      if (!itemsRef.current.length) return;
+      try {
+        const updated = await Promise.all(
+          itemsRef.current.map((item) => fetchChartData(item))
+        );
+        setItems(updated);
+      } catch (err) {
+        console.error("Failed to refresh analytics", err);
+      }
+    };
+
+    refreshData();
+  }, [startDate, endDate, groupBy, fetchChartData]);
+
+  const handleSaveChart = useCallback(
+    async (config: DashboardItem) => {
+      setError(null);
+
       const isKPI = config.type === "kpi";
-      const newConfig = {
-        ...config,
-        layout: config.layout || {
+      let layout = config.layout;
+
+      if (!layout) {
+        let maxY = 0;
+        items.forEach((item) => {
+          if (item.layout) {
+            maxY = Math.max(maxY, item.layout.y + item.layout.h);
+          }
+        });
+
+        layout = {
           x: 0,
           y: maxY,
           w: isKPI ? 3 : 6,
           h: isKPI ? 2 : 4,
-        },
-      };
+        };
+      }
 
-      return [...prev, newConfig];
-    });
-    setShowConfigForm(false);
-    setSelectedChartType(null);
-    setEditingChart(undefined);
-  }, []);
+      const payload = { ...config, layout } as DashboardItem;
 
-  const handleRemoveItem = useCallback((itemId: string) => {
-    setItems((prev) => prev.filter((item) => item.id !== itemId));
+      try {
+        const exists = items.some((i) => i.id === payload.id);
+        if (exists) {
+          await callApi(`/api/dashboard/items/${payload.id}`, "PUT", payload);
+        } else {
+          await callApi("/api/dashboard/items", "POST", payload);
+        }
+
+        const hydrated = await fetchChartData(payload);
+        setItems((prev) => {
+          if (exists) {
+            return prev.map((item) =>
+              item.id === payload.id ? hydrated : item
+            );
+          }
+          return [...prev, hydrated];
+        });
+      } catch (err) {
+        console.error("Failed to save chart", err);
+        setError("Failed to save chart");
+      }
+
+      setShowConfigForm(false);
+      setSelectedChartType(null);
+      setEditingChart(undefined);
+    },
+    [fetchChartData, items]
+  );
+
+  const handleRemoveItem = useCallback(async (itemId: string) => {
+    setError(null);
+    try {
+      await callApi(`/api/dashboard/items/${itemId}`, "DELETE");
+      setItems((prev) => prev.filter((item) => item.id !== itemId));
+    } catch (err) {
+      console.error("Failed to remove item", err);
+      setError("Failed to remove item");
+    }
   }, []);
 
   const handleUpdateItem = useCallback(
@@ -245,6 +614,54 @@ function PerformancePageContent() {
       setItems((prev) =>
         prev.map((item) => (item.id === itemId ? config : item))
       );
+    },
+    []
+  );
+
+  const handleLayoutChange = useCallback(
+    async (
+      device: "desktop" | "mobile",
+      layout: {
+        x: number;
+        y: number;
+        w: number;
+        h: number;
+        i: string;
+        static?: boolean;
+      }[]
+    ) => {
+      setItems((prev) =>
+        prev.map((item) => {
+          const match = layout.find((l) => l.i === item.id);
+          if (!match) return item;
+          const layoutConfig = {
+            x: match.x,
+            y: match.y,
+            w: match.w,
+            h: match.h,
+          };
+          const responsiveLayout = { ...(item.responsiveLayout || {}) };
+          responsiveLayout[device] = layoutConfig;
+          return {
+            ...item,
+            layout: layoutConfig,
+            responsiveLayout,
+          } as DashboardItem;
+        })
+      );
+
+      if (layoutSaveTimer.current) {
+        clearTimeout(layoutSaveTimer.current);
+      }
+
+      layoutSaveTimer.current = setTimeout(async () => {
+        try {
+          await callApi("/api/dashboard/layout", "PUT", { device, layout });
+        } catch (err) {
+          console.error("Failed to save layout", err);
+          setError("Failed to save layout");
+        }
+      }, 500);
     },
     []
   );
@@ -371,12 +788,23 @@ function PerformancePageContent() {
 
         {/* Dashboard Grid Section */}
         <div className="flex-1 overflow-auto">
+          {isLoading && (
+            <div className="flex items-center justify-center py-4 text-slate-400 text-sm">
+              {t("Loading dashboard...")}
+            </div>
+          )}
+          {error && (
+            <div className="flex items-center justify-center py-2 text-red-400 text-sm">
+              {error}
+            </div>
+          )}
           {items.length > 0 ? (
             <DashboardGrid
               items={items}
               onRemoveItem={handleRemoveItem}
               onItemUpdate={handleUpdateItem}
               onEditChart={handleEditChart}
+              onLayoutChange={handleLayoutChange}
               dateFrom={
                 customDateRange.from
                   ? customDateRange.from.toLocaleDateString()

@@ -31,6 +31,9 @@ export interface KPIConfig {
     type: "increase" | "decrease" | "neutral";
   };
   icon?: React.ReactNode;
+  configuration?: {
+    staffId?: string;
+  };
   layout?: GridLayoutConfig;
   responsiveLayout?: ResponsiveLayout;
 }

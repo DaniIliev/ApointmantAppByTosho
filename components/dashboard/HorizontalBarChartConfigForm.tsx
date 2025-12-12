@@ -21,6 +21,7 @@ import type { ChartConfig } from "./types";
 import { getDashboardData } from "./mockDashboardData";
 import { PerformanceChart } from "@/components/performance/PerformanceChart";
 import { useDashboardDate } from "@/context/DashboardDateContext";
+import { useStaffOptions } from "./useStaffOptions";
 
 interface HorizontalBarChartConfigFormProps {
   open: boolean;
@@ -65,12 +66,14 @@ export function HorizontalBarChartConfigForm({
       configuration: {
         dataSource: "appointments",
         metric: "byService",
+        staffId: "",
       },
     } as ChartConfig;
   });
 
   const [previewData, setPreviewData] = useState<Record<string, unknown>[]>([]);
   const { startDate, endDate, groupBy } = useDashboardDate();
+  const { staffOptions, loadingStaff } = useStaffOptions();
 
   // Generate preview data
   useEffect(() => {
@@ -103,6 +106,14 @@ export function HorizontalBarChartConfigForm({
     const updatedConfig: ChartConfig = {
       ...config,
       data: previewData,
+      configuration: {
+        dataSource:
+          (config.configuration?.dataSource as string) || "appointments",
+        metric: (config.configuration?.metric as string) || "byService",
+        staffId:
+          (config.configuration as any)?.staffId?.toString()?.trim() ||
+          undefined,
+      },
     };
     onSave(updatedConfig);
     onOpenChange(false);
@@ -177,6 +188,38 @@ export function HorizontalBarChartConfigForm({
                 {barOptions.map((option) => (
                   <SelectItem key={option.id} value={option.id}>
                     {option.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          {/* Staff filter */}
+          <div className="space-y-2">
+            <Label>Staff (optional)</Label>
+            <Select
+              value={(config.configuration as any)?.staffId || "all"}
+              onValueChange={(value) =>
+                setConfig({
+                  ...config,
+                  configuration: {
+                    ...config.configuration,
+                    staffId: value === "all" ? "" : value,
+                  } as ChartConfig["configuration"],
+                })
+              }
+              disabled={loadingStaff}
+            >
+              <SelectTrigger>
+                <SelectValue
+                  placeholder={loadingStaff ? "Loading..." : "All staff"}
+                />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All staff</SelectItem>
+                {staffOptions.map((s) => (
+                  <SelectItem key={s._id} value={s._id}>
+                    {`${s.firstName} ${s.lastName}`.trim() || s._id}
                   </SelectItem>
                 ))}
               </SelectContent>

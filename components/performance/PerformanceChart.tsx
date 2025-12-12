@@ -56,9 +56,11 @@ export function PerformanceChart({
     const finalDataKeys =
       dataKeys && dataKeys.length > 0 ? dataKeys : [dataKey];
 
+    const finalXAxisKey = xAxisKey || "name";
+
     switch (type) {
       case "line": {
-        const xAxisData = data.map((item) => item[xAxisKey]);
+        const xAxisData = data.map((item) => item[finalXAxisKey]);
         const series = finalDataKeys.map((key, index) => ({
           name: key.charAt(0).toUpperCase() + key.slice(1),
           type: "line" as const,
@@ -156,7 +158,7 @@ export function PerformanceChart({
       }
 
       case "bar": {
-        const xAxisData = data.map((item) => item[xAxisKey]);
+        const xAxisData = data.map((item) => item[finalXAxisKey]);
         const series = finalDataKeys.map((key, index) => ({
           name: key.charAt(0).toUpperCase() + key.slice(1),
           type: "bar" as const,
@@ -262,7 +264,7 @@ export function PerformanceChart({
 
       case "hbar": {
         // Horizontal bar chart
-        const categoryData = data.map((item) => item[xAxisKey]);
+        const categoryData = data.map((item) => item[finalXAxisKey]);
         const series = finalDataKeys.map((key, index) => ({
           name: key.charAt(0).toUpperCase() + key.slice(1),
           type: "bar" as const,
@@ -368,7 +370,7 @@ export function PerformanceChart({
 
       case "column": {
         // Column chart is the same as bar chart
-        const xAxisData = data.map((item) => item[xAxisKey]);
+        const xAxisData = data.map((item) => item[finalXAxisKey]);
         const series = finalDataKeys.map((key, index) => ({
           name: key.charAt(0).toUpperCase() + key.slice(1),
           type: "bar" as const,
@@ -473,9 +475,10 @@ export function PerformanceChart({
       }
 
       case "pie": {
+        const valueKey = finalDataKeys[0] || dataKey || "value";
         const pieData = data.map((item, index) => ({
-          name: item[xAxisKey],
-          value: item[dataKey],
+          name: item[finalXAxisKey],
+          value: item[valueKey],
           itemStyle: {
             color: colors[index % colors.length],
           },

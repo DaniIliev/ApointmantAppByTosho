@@ -22,6 +22,7 @@ import type { ChartConfig } from "./types";
 import { getDashboardData } from "./mockDashboardData";
 import { PerformanceChart } from "@/components/performance/PerformanceChart";
 import { useDashboardDate } from "@/context/DashboardDateContext";
+import { useStaffOptions } from "./useStaffOptions";
 
 interface LineBarChartConfigFormProps {
   open: boolean;
@@ -47,6 +48,7 @@ interface LineBarConfig {
   showLine: boolean;
   showBar: boolean;
   compareMode: "week" | "standard"; // week comparison or standard view
+  staffId?: string;
 }
 
 export function LineBarChartConfigForm({
@@ -56,6 +58,7 @@ export function LineBarChartConfigForm({
   editingChart,
 }: LineBarChartConfigFormProps) {
   const { startDate, endDate, groupBy } = useDashboardDate();
+  const { staffOptions, loadingStaff } = useStaffOptions();
 
   const [config, setConfig] = useState<LineBarConfig>({
     title: "Appointments vs Target",
@@ -64,6 +67,7 @@ export function LineBarChartConfigForm({
     showLine: true,
     showBar: true,
     compareMode: "week",
+    staffId: "",
   });
 
   const [previewData, setPreviewData] = useState<Record<string, unknown>[]>([]);
@@ -122,6 +126,7 @@ export function LineBarChartConfigForm({
       configuration: {
         dataSource: config.dataSource,
         metric: config.metric,
+        staffId: config.staffId?.trim() || undefined,
       },
     };
 
@@ -232,6 +237,37 @@ export function LineBarChartConfigForm({
                   </Label>
                 </div>
               </div>
+            </div>
+
+            {/* Staff filter */}
+            <div className="space-y-2">
+              <Label htmlFor="staff-id" className="text-slate-700">
+                Staff (optional)
+              </Label>
+              <Select
+                value={config.staffId || "all"}
+                onValueChange={(value) =>
+                  setConfig({
+                    ...config,
+                    staffId: value === "all" ? "" : value,
+                  })
+                }
+                disabled={loadingStaff}
+              >
+                <SelectTrigger id="staff-id">
+                  <SelectValue
+                    placeholder={loadingStaff ? "Loading..." : "All staff"}
+                  />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All staff</SelectItem>
+                  {staffOptions.map((s) => (
+                    <SelectItem key={s._id} value={s._id}>
+                      {`${s.firstName} ${s.lastName}`.trim() || s._id}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
           </div>
 

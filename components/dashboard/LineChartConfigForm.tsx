@@ -17,12 +17,11 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Plus, X } from "lucide-react";
 import type { ChartConfig } from "./types";
 import { getDashboardData } from "./mockDashboardData";
 import { PerformanceChart } from "@/components/performance/PerformanceChart";
 import { useDashboardDate } from "@/context/DashboardDateContext";
+import { useStaffOptions } from "./useStaffOptions";
 
 interface LineChartConfigFormProps {
   open: boolean;
@@ -31,25 +30,25 @@ interface LineChartConfigFormProps {
   editingChart?: ChartConfig;
 }
 
-type LineDataSource = "appointments" | "clients" | "revenue" | "staff";
-
-const staffMembers = ["Daniel", "Sarah", "John", "Emma"];
-const timeRanges = [
-  { id: "week", label: "This Week" },
-  { id: "month", label: "This Month" },
-  { id: "year", label: "This Year" },
-];
+type LineDataSource =
+  | "appointments"
+  | "clients"
+  | "revenue"
+  | "staff"
+  | "services";
+const dataSourceMetrics: Record<LineDataSource, string[]> = {
+  appointments: ["count", "by_service", "by_status", "by_staff"],
+  clients: ["by_source"],
+  revenue: ["by_service", "by_staff"],
+  services: ["popularity"],
+  staff: ["appointments_count"],
+};
 
 interface LineConfig {
   title: string;
-  timeRange: "week" | "month" | "year";
   dataSource: LineDataSource;
-  lines: Array<{
-    id: string;
-    label: string;
-    filter?: string;
-    visible: boolean;
-  }>;
+  metric: string;
+  staffId?: string;
 }
 
 export function LineChartConfigForm({
@@ -62,153 +61,91 @@ export function LineChartConfigForm({
     if (editingChart && editingChart.type === "line") {
       return {
         title: editingChart.title,
-        timeRange:
-          (editingChart.configuration?.timeRange as
-            | "week"
-            | "month"
-            | "year") || "week",
         dataSource:
           (editingChart.configuration?.dataSource as LineDataSource) ||
           "appointments",
-        lines: editingChart.dataKeys?.map((label, idx) => ({
-          id: `line-${idx}`,
-          label,
-          filter: label === "All Appointments" ? "all" : label,
-          visible: true,
-        })) || [
-          {
-            id: "line-1",
-            label: "All Appointments",
-            filter: "all",
-            visible: true,
-          },
-        ],
+        metric: editingChart.configuration?.metric || "count",
+        staffId: editingChart.configuration?.staffId || "",
       };
     }
     return {
       title: "Appointments Trend",
-      timeRange: "week",
       dataSource: "appointments",
-      lines: [
-        {
-          id: "line-1",
-          label: "All Appointments",
-          filter: "all",
-          visible: true,
-        },
-      ],
+      metric: "count",
+      staffId: "",
     };
   });
 
   const [previewData, setPreviewData] = useState<Record<string, unknown>[]>([]);
   const { startDate, endDate, groupBy } = useDashboardDate();
+  const availableMetrics = dataSourceMetrics[config.dataSource] || ["count"];
+  const { staffOptions, loadingStaff } = useStaffOptions();
 
-  // Generate preview data
-  useMemo(() => {
-    if (config.dataSource === "appointments") {
-      // Get all unique dates from all selected lines
-      const allDates = new Set<string>();
-      const lineDataMap: Record<string, Record<string, unknown>[]> = {};
-      // Fetch data for each line based on its filter
-      config.lines.forEach((line) => {
-        let data: Record<string, unknown>[];
-
-        if (line.filter === "all") {
-          // Get all appointments time series
-          data = getDashboardData(
-            "appointments",
-            "time_series",
-            startDate,
-            endDate,
-            groupBy
-          ) as Record<string, unknown>[];
-        } else if (staffMembers.includes(line.filter || "")) {
-          // Get staff-specific appointments using by_staff metric
-          data = getDashboardData(
-            "appointments",
-            "by_staff",
-            line.filter
-          ) as Record<string, unknown>[];
-        } else {
-          data = [];
-        }
-
-        lineDataMap[line.label] = data;
-        data.forEach((item: Record<string, unknown>) => {
-          allDates.add((item.date as string) || "");
-        });
-      });
-
-      // Build transformed data with all dates
-      const transformedData = Array.from(allDates)
-        .sort()
-        .map((date) => {
-          const newItem: Record<string, string | number | boolean> = {
-            date,
-          };
-
-          config.lines.forEach((line) => {
-            const lineData = lineDataMap[line.label] || [];
-            const dataItem = (lineData as Array<Record<string, unknown>>).find(
-              (d: Record<string, unknown>) => d.date === date
-            );
-            newItem[line.label] = (dataItem?.count as number) || 0;
-          });
-
-          return newItem;
-        });
-
-      setPreviewData(transformedData);
+  const getDataKeys = () => {
+    if (config.dataSource === "appointments" && config.metric === "count") {
+      return ["count", "completed", "cancelled"];
     }
+    if (
+      config.dataSource === "appointments" &&
+      (config.metric === "by_service" || config.metric === "by_status")
+    ) {
+      return ["count"];
+    }
+    if (config.dataSource === "appointments" && config.metric === "by_staff") {
+      return ["count", "completed", "cancelled"];
+    }
+    if (config.dataSource === "clients" && config.metric === "by_source") {
+      return ["count"];
+    }
+    if (config.dataSource === "revenue") {
+      return ["revenue"];
+    }
+    if (config.dataSource === "services" && config.metric === "popularity") {
+      return ["bookings"];
+    }
+    if (
+      config.dataSource === "staff" &&
+      config.metric === "appointments_count"
+    ) {
+      return ["count", "completed", "cancelled"];
+    }
+    return ["count"];
+  };
+
+  const getXAxisKey = () => {
+    if (
+      config.metric === "by_service" ||
+      config.metric === "by_status" ||
+      config.metric === "by_source" ||
+      config.metric === "popularity" ||
+      config.metric === "by_staff"
+    ) {
+      return "name";
+    }
+    return "name";
+  };
+
+  // Generate preview data using mock API helper
+  useMemo(() => {
+    const mockData = getDashboardData(
+      config.dataSource,
+      config.metric,
+      startDate,
+      endDate,
+      groupBy
+    ) as Record<string, unknown>[];
+    setPreviewData(mockData);
   }, [config, startDate, endDate, groupBy]);
 
-  const handleAddLine = () => {
-    const newLineId = `line-${Date.now()}`;
-    setConfig({
-      ...config,
-      lines: [
-        ...config.lines,
-        {
-          id: newLineId,
-          label: `Series ${config.lines.length + 1}`,
-          filter: "all",
-          visible: true,
-        },
-      ],
-    });
-  };
-
-  const handleRemoveLine = (lineId: string) => {
-    setConfig({
-      ...config,
-      lines: config.lines.filter((line) => line.id !== lineId),
-    });
-  };
-
-  const handleUpdateLine = (
-    lineId: string,
-    updates: Partial<(typeof config.lines)[0]>
-  ) => {
-    setConfig({
-      ...config,
-      lines: config.lines.map((line) =>
-        line.id === lineId ? { ...line, ...updates } : line
-      ),
-    });
-  };
-
   const handleSave = () => {
-    const dataKeys = config.lines
-      .filter((line) => line.visible)
-      .map((line) => line.label);
-
+    const dataKeys = getDataKeys();
     const chartConfig: ChartConfig = {
       id: editingChart?.id || `chart-${Date.now()}`,
       title: config.title,
       type: "line",
       dataKey: config.dataSource,
       dataKeys,
-      xAxisKey: "date",
+      xAxisKey: getXAxisKey(),
       colors: ["#3b61c0", "#00bfff", "#f59e0b", "#dc2626", "#1f2937"],
       data: previewData,
       layout: editingChart?.layout || {
@@ -219,8 +156,8 @@ export function LineChartConfigForm({
       },
       configuration: {
         dataSource: config.dataSource,
-        timeRange: config.timeRange,
-        metric: "count",
+        metric: config.metric,
+        staffId: config.staffId?.trim() || undefined,
       },
     };
 
@@ -253,99 +190,92 @@ export function LineChartConfigForm({
               />
             </div>
 
-            {/* Time Range */}
+            {/* Data Source */}
             <div className="space-y-2">
-              <Label htmlFor="time-range" className="text-slate-700">
-                Time Range
+              <Label htmlFor="data-source" className="text-slate-700">
+                Data Source
               </Label>
               <Select
-                value={config.timeRange}
+                value={config.dataSource}
                 onValueChange={(value) =>
                   setConfig({
                     ...config,
-                    timeRange: value as "week" | "month" | "year",
+                    dataSource: value as LineDataSource,
+                    metric: dataSourceMetrics[value as LineDataSource][0],
                   })
                 }
               >
-                <SelectTrigger id="time-range">
+                <SelectTrigger id="data-source">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  {timeRanges.map((range) => (
-                    <SelectItem key={range.id} value={range.id}>
-                      {range.label}
+                  <SelectItem value="appointments">Appointments</SelectItem>
+                  <SelectItem value="clients">Clients</SelectItem>
+                  <SelectItem value="revenue">Revenue</SelectItem>
+                  <SelectItem value="services">Services</SelectItem>
+                  <SelectItem value="staff">Staff</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            {/* Metric */}
+            <div className="space-y-2">
+              <Label htmlFor="metric" className="text-slate-700">
+                Metric
+              </Label>
+              <Select
+                value={config.metric}
+                onValueChange={(value) =>
+                  setConfig({ ...config, metric: value })
+                }
+              >
+                <SelectTrigger id="metric">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {availableMetrics.map((metric) => (
+                    <SelectItem key={metric} value={metric}>
+                      {metric
+                        .split("_")
+                        .map(
+                          (word) => word.charAt(0).toUpperCase() + word.slice(1)
+                        )
+                        .join(" ")}
                     </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
             </div>
 
-            {/* Lines Configuration */}
-            <div className="space-y-3">
-              <Label className="text-slate-700">Data Lines</Label>
-              <div className="space-y-2 max-h-40 overflow-y-auto">
-                {config.lines.map((line) => (
-                  <div
-                    key={line.id}
-                    className="p-3 border border-slate-200 rounded-lg space-y-2"
-                  >
-                    <div className="flex items-center gap-2">
-                      <Checkbox
-                        checked={line.visible}
-                        onCheckedChange={(checked) =>
-                          handleUpdateLine(line.id, {
-                            visible: checked as boolean,
-                          })
-                        }
-                      />
-                      <Input
-                        value={line.label}
-                        onChange={(e) =>
-                          handleUpdateLine(line.id, { label: e.target.value })
-                        }
-                        placeholder="Line label"
-                        className="flex-1 h-8 text-sm"
-                      />
-                      <button
-                        onClick={() => handleRemoveLine(line.id)}
-                        className="p-1 hover:bg-red-100 rounded"
-                      >
-                        <X className="w-4 h-4 text-red-600" />
-                      </button>
-                    </div>
-
-                    <Select
-                      value={line.filter || "all"}
-                      onValueChange={(value) =>
-                        handleUpdateLine(line.id, {
-                          filter: value === "all" ? "all" : value,
-                        })
-                      }
-                    >
-                      <SelectTrigger className="h-8 text-sm">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="all">All Appointments</SelectItem>
-                        {staffMembers.map((staff) => (
-                          <SelectItem key={staff} value={staff}>
-                            {staff}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                ))}
-              </div>
-
-              <Button
-                onClick={handleAddLine}
-                variant="outline"
-                className="w-full"
-                size="sm"
+            {/* Staff filter */}
+            <div className="space-y-2">
+              <Label htmlFor="staff-id" className="text-slate-700">
+                Staff (optional)
+              </Label>
+              <Select
+                value={config.staffId || "all"}
+                onValueChange={(value) =>
+                  setConfig({
+                    ...config,
+                    staffId: value === "all" ? "" : value,
+                  })
+                }
+                disabled={loadingStaff}
               >
-                <Plus className="w-4 h-4 mr-2" /> Add Line
-              </Button>
+                <SelectTrigger id="staff-id">
+                  <SelectValue
+                    placeholder={loadingStaff ? "Loading..." : "All staff"}
+                  />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All staff</SelectItem>
+                  {staffOptions.map((s) => (
+                    <SelectItem key={s._id} value={s._id}>
+                      {`${s.firstName} ${s.lastName}`.trim() || s._id}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
           </div>
 
@@ -362,10 +292,8 @@ export function LineChartConfigForm({
                     }>
                   }
                   type="line"
-                  dataKeys={config.lines
-                    .filter((l) => l.visible)
-                    .map((l) => l.label)}
-                  xAxisKey="date"
+                  dataKeys={getDataKeys()}
+                  xAxisKey={getXAxisKey()}
                   colors={[
                     "#3b61c0",
                     "#00bfff",
