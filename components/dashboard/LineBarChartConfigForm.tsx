@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useMemo } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Dialog,
   DialogContent,
@@ -8,21 +8,15 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import type { ChartConfig } from "./types";
-import { getDashboardData } from "./mockDashboardData";
 import { PerformanceChart } from "@/components/performance/PerformanceChart";
 import { useDashboardDate } from "@/context/DashboardDateContext";
 import { useStaffOptions } from "./useStaffOptions";
+import { fetchPreviewData } from "./analyticsPreview";
+import { LabeledInput } from "@/components/customUIComponents/LabeledInput";
+import { LabeledSelect } from "@/components/customUIComponents/LabeledSelect";
 
 interface LineBarChartConfigFormProps {
   open: boolean;
@@ -71,44 +65,55 @@ export function LineBarChartConfigForm({
   });
 
   const [previewData, setPreviewData] = useState<Record<string, unknown>[]>([]);
+  const [previewDataKeys, setPreviewDataKeys] = useState<string[]>([]);
+  const [previewSeries, setPreviewSeries] = useState<Record<string, unknown>>({
+    barSeries: [],
+    lineSeries: [],
+  });
+  const [loadingPreview, setLoadingPreview] = useState(true);
 
-  // Generate preview data using global date range with week comparison
-  useMemo(() => {
-    const mockData = getDashboardData(
-      config.dataSource,
-      "time_series",
-      startDate,
-      endDate,
-      groupBy
-    ) as Record<string, unknown>[];
-
-    // Transform to include previous week data for line visualization
-    const transformedData = mockData.map((item, idx) => {
-      // Simulate previous week data (slightly lower values)
-      const factor = 0.85;
-      return {
-        name: item.name,
-        // Current week (bars)
-        ...(config.dataSource === "appointments" && {
-          count: Number(item.total ?? 0),
-          completed: Number((item as Record<string, unknown>).completed ?? 0),
-          // Previous week (lines)
-          prevCount: Math.round(Number(item.total ?? 0) * factor),
-          prevCompleted: Math.round(
-            Number((item as Record<string, unknown>).completed ?? 0) * factor
-          ),
-        }),
-        ...(config.dataSource === "revenue" && {
-          revenue: Number((item as Record<string, unknown>).revenue ?? 0),
-          prevRevenue: Math.round(
-            Number((item as Record<string, unknown>).revenue ?? 0) * factor
-          ),
-        }),
-      };
-    });
-
-    setPreviewData(transformedData);
-  }, [config, startDate, endDate, groupBy]);
+  useEffect(() => {
+    let isCancelled = false;
+    const loadPreview = async () => {
+      setLoadingPreview(true);
+      try {
+        const result = await fetchPreviewData({
+          chartType: "linebar",
+          dataSource: config.dataSource,
+          metric: config.metric,
+          staffId: config.staffId || undefined,
+          groupBy,
+          startDate,
+          endDate,
+        });
+        if (isCancelled) return;
+        setPreviewData(result.data);
+        setPreviewDataKeys(result.dataKeys || []);
+        setPreviewSeries(
+          result.seriesConfig || { barSeries: [], lineSeries: [] }
+        );
+      } catch (err) {
+        if (!isCancelled) {
+          setPreviewData([]);
+          setPreviewDataKeys([]);
+          setPreviewSeries({ barSeries: [], lineSeries: [] });
+        }
+      } finally {
+        if (!isCancelled) setLoadingPreview(false);
+      }
+    };
+    loadPreview();
+    return () => {
+      isCancelled = true;
+    };
+  }, [
+    config.dataSource,
+    config.metric,
+    config.staffId,
+    groupBy,
+    startDate,
+    endDate,
+  ]);
 
   const getDataKeys = () => {
     if (config.dataSource === "appointments" && config.metric === "count") {
@@ -123,7 +128,9 @@ export function LineBarChartConfigForm({
   const handleSave = () => {
     // Week-over-week comparison: current week as bars, previous week as lines
     const seriesConfig =
-      config.dataSource === "appointments"
+      previewSeries && Object.keys(previewSeries).length
+        ? previewSeries
+        : config.dataSource === "appointments"
         ? {
             barSeries: ["count", "completed"],
             lineSeries: ["prevCount", "prevCompleted"],
@@ -135,7 +142,7 @@ export function LineBarChartConfigForm({
       title: config.title,
       type: "linebar",
       dataKey: config.dataSource,
-      dataKeys: getDataKeys(),
+      dataKeys: previewDataKeys.length ? previewDataKeys : getDataKeys(),
       xAxisKey: "name",
       colors: ["#3b61c0", "#00bfff", "#f59e0b", "#dc2626", "#1f2937"],
       data: previewData,
@@ -167,45 +174,31 @@ export function LineBarChartConfigForm({
         <div className="grid grid-cols-2 gap-6">
           {/* Configuration Panel */}
           <div className="space-y-4">
-            {/* Title */}
-            <div className="space-y-2">
-              <Label htmlFor="chart-title" className="text-slate-700">
-                Chart Title
-              </Label>
-              <Input
-                id="chart-title"
-                value={config.title}
-                onChange={(e) =>
-                  setConfig({ ...config, title: e.target.value })
-                }
-                className="border-slate-300"
-              />
-            </div>
+            <LabeledInput
+              id="chart-title"
+              label="Chart Title"
+              placeholder="Enter chart title"
+              value={config.title}
+              onChange={(e) => setConfig({ ...config, title: e.target.value })}
+            />
 
-            {/* Data Source */}
-            <div className="space-y-2">
-              <Label htmlFor="data-source" className="text-slate-700">
-                Data Source
-              </Label>
-              <Select
-                value={config.dataSource}
-                onValueChange={(value) =>
-                  setConfig({
-                    ...config,
-                    dataSource: value as LineBarDataSource,
-                    metric: dataSourceMetrics[value as LineBarDataSource][0],
-                  })
-                }
-              >
-                <SelectTrigger id="data-source">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="appointments">Appointments</SelectItem>
-                  <SelectItem value="revenue">Revenue</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
+            <LabeledSelect<LineBarDataSource>
+              id="data-source"
+              label="Data Source"
+              placeholder="Select data source"
+              value={config.dataSource}
+              onValueChange={(value) =>
+                setConfig({
+                  ...config,
+                  dataSource: value as LineBarDataSource,
+                  metric: dataSourceMetrics[value as LineBarDataSource][0],
+                })
+              }
+              options={[
+                { id: "appointments", name: "Appointments" },
+                { id: "revenue", name: "Revenue" },
+              ]}
+            />
 
             {/* Time Range removed; using global date selector */}
 
@@ -262,43 +255,37 @@ export function LineBarChartConfigForm({
               </div>
             </div>
 
-            {/* Staff filter */}
-            <div className="space-y-2">
-              <Label htmlFor="staff-id" className="text-slate-700">
-                Staff (optional)
-              </Label>
-              <Select
-                value={config.staffId || "all"}
-                onValueChange={(value) =>
-                  setConfig({
-                    ...config,
-                    staffId: value === "all" ? "" : value,
-                  })
-                }
-                disabled={loadingStaff}
-              >
-                <SelectTrigger id="staff-id">
-                  <SelectValue
-                    placeholder={loadingStaff ? "Loading..." : "All staff"}
-                  />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All staff</SelectItem>
-                  {staffOptions.map((s) => (
-                    <SelectItem key={s._id} value={s._id}>
-                      {`${s.firstName} ${s.lastName}`.trim() || s._id}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
+            <LabeledSelect<string>
+              id="staff-id"
+              label="Staff (optional)"
+              placeholder={loadingStaff ? "Loading..." : "All staff"}
+              value={(config.staffId as string) || "all"}
+              onValueChange={(value) =>
+                setConfig({
+                  ...config,
+                  staffId: value === "all" ? "" : value,
+                })
+              }
+              options={[
+                { id: "all", name: "All staff" },
+                ...staffOptions.map((s) => ({
+                  id: s._id as string,
+                  name:
+                    `${s.firstName} ${s.lastName}`.trim() || (s._id as string),
+                })),
+              ]}
+            />
           </div>
 
           {/* Preview Panel */}
           <div className="space-y-2">
             <Label className="text-slate-700">Preview</Label>
-            <div className="border border-slate-200 rounded-lg p-2 bg-slate-50">
-              {previewData.length > 0 ? (
+            <div className="border border-slate-200 rounded-lg p-0 bg-slate-50">
+              {loadingPreview ? (
+                <div className="h-48 flex items-center justify-center text-slate-400">
+                  Loading preview...
+                </div>
+              ) : previewData.length > 0 ? (
                 <PerformanceChart
                   title=""
                   data={
@@ -307,7 +294,9 @@ export function LineBarChartConfigForm({
                     }>
                   }
                   type="linebar"
-                  dataKeys={getDataKeys()}
+                  dataKeys={
+                    previewDataKeys.length ? previewDataKeys : getDataKeys()
+                  }
                   xAxisKey="name"
                   colors={[
                     "#3b61c0",
@@ -316,14 +305,7 @@ export function LineBarChartConfigForm({
                     "#dc2626",
                     "#1f2937",
                   ]}
-                  seriesConfig={
-                    config.dataSource === "appointments"
-                      ? {
-                          barSeries: ["count", "completed"],
-                          lineSeries: ["prevCount", "prevCompleted"],
-                        }
-                      : { barSeries: ["revenue"], lineSeries: ["prevRevenue"] }
-                  }
+                  seriesConfig={previewSeries}
                 />
               ) : (
                 <div className="h-48 flex items-center justify-center text-slate-400">

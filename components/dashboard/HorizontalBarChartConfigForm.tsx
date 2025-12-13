@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Dialog,
   DialogContent,
@@ -8,20 +8,14 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
 import type { ChartConfig } from "./types";
-import { getDashboardData } from "./mockDashboardData";
 import { PerformanceChart } from "@/components/performance/PerformanceChart";
 import { useDashboardDate } from "@/context/DashboardDateContext";
 import { useStaffOptions } from "./useStaffOptions";
+import { fetchPreviewData } from "./analyticsPreview";
+import { LabeledInput } from "@/components/customUIComponents/LabeledInput";
+import { LabeledSelect } from "@/components/customUIComponents/LabeledSelect";
 
 interface HorizontalBarChartConfigFormProps {
   open: boolean;
@@ -31,8 +25,8 @@ interface HorizontalBarChartConfigFormProps {
 }
 
 const barOptions = [
-  { id: "byService", label: "By Service" },
-  { id: "byStaff", label: "By Staff" },
+  { id: "by_service", label: "By Service" },
+  { id: "by_staff", label: "By Staff" },
 ];
 
 const colors = [
@@ -65,41 +59,58 @@ export function HorizontalBarChartConfigForm({
       colors: [colors[0]],
       configuration: {
         dataSource: "appointments",
-        metric: "byService",
+        metric: "by_service",
         staffId: "",
       },
     } as ChartConfig;
   });
 
   const [previewData, setPreviewData] = useState<Record<string, unknown>[]>([]);
+  const [previewDataKeys, setPreviewDataKeys] = useState<string[]>([]);
+  const [previewXAxisKey, setPreviewXAxisKey] = useState<string>("name");
+  const [loadingPreview, setLoadingPreview] = useState(true);
   const { startDate, endDate, groupBy } = useDashboardDate();
   const { staffOptions, loadingStaff } = useStaffOptions();
 
-  // Generate preview data
   useEffect(() => {
-    if (config.configuration?.dataSource === "appointments") {
-      const data = getDashboardData(
-        "appointments",
-        config.configuration?.metric || "by_service",
-        startDate,
-        endDate,
-        groupBy
-      ) as Record<string, unknown>[];
-
-      // Transform data to use 'name' instead of 'service'
-      const transformedData = data.map((item: Record<string, unknown>) => ({
-        name: (item.service as string) || (item.date as string) || "",
-        count: item.count,
-      }));
-
-      setPreviewData(transformedData);
-    }
+    let isCancelled = false;
+    const loadPreview = async () => {
+      setLoadingPreview(true);
+      try {
+        const result = await fetchPreviewData({
+          chartType: "hbar",
+          dataSource:
+            (config.configuration?.dataSource as string) || "appointments",
+          metric: (config.configuration?.metric as string) || "by_service",
+          staffId: (config.configuration as any)?.staffId || undefined,
+          groupBy,
+          startDate,
+          endDate,
+        });
+        if (isCancelled) return;
+        setPreviewData(result.data);
+        setPreviewDataKeys(result.dataKeys || []);
+        setPreviewXAxisKey(result.xAxisKey || "name");
+      } catch (err) {
+        if (!isCancelled) {
+          setPreviewData([]);
+          setPreviewDataKeys([]);
+        }
+      } finally {
+        if (!isCancelled) setLoadingPreview(false);
+      }
+    };
+    loadPreview();
+    return () => {
+      isCancelled = true;
+    };
   }, [
     config.configuration?.dataSource,
     config.configuration?.metric,
+    (config.configuration as any)?.staffId,
+    groupBy,
     startDate,
     endDate,
-    groupBy,
   ]);
 
   const handleSave = () => {
@@ -109,7 +120,7 @@ export function HorizontalBarChartConfigForm({
       configuration: {
         dataSource:
           (config.configuration?.dataSource as string) || "appointments",
-        metric: (config.configuration?.metric as string) || "byService",
+        metric: (config.configuration?.metric as string) || "by_service",
         staffId:
           (config.configuration as any)?.staffId?.toString()?.trim() ||
           undefined,
@@ -127,118 +138,100 @@ export function HorizontalBarChartConfigForm({
         </DialogHeader>
 
         <div className="space-y-6">
-          {/* Title */}
-          <div className="space-y-2">
-            <Label>Chart Title</Label>
-            <Input
-              value={config.title}
-              onChange={(e) => setConfig({ ...config, title: e.target.value })}
-              placeholder="Enter chart title"
-            />
-          </div>
+          <LabeledInput
+            id="chart-title"
+            label="Chart Title"
+            placeholder="Enter chart title"
+            value={config.title}
+            onChange={(e) => setConfig({ ...config, title: e.target.value })}
+          />
 
-          {/* Data Source */}
-          <div className="space-y-2">
-            <Label>Data Source</Label>
-            <Select
-              value={
-                (config.configuration?.dataSource as string) || "appointments"
-              }
-              onValueChange={(value) =>
-                setConfig({
-                  ...config,
-                  configuration: {
-                    ...config.configuration,
-                    dataSource: value,
-                    metric:
-                      value === "appointments" ? "byService" : "byService",
-                  } as ChartConfig["configuration"],
-                })
-              }
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Select data source" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="appointments">Appointments</SelectItem>
-                <SelectItem value="revenue">Revenue</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
+          <LabeledSelect<string>
+            id="data-source"
+            label="Data Source"
+            placeholder="Select data source"
+            value={
+              (config.configuration?.dataSource as string) || "appointments"
+            }
+            onValueChange={(value) =>
+              setConfig({
+                ...config,
+                configuration: {
+                  ...config.configuration,
+                  dataSource: value,
+                  metric:
+                    value === "appointments" ? "by_service" : "by_service",
+                } as ChartConfig["configuration"],
+              })
+            }
+            options={[
+              { id: "appointments", name: "Appointments" },
+              { id: "revenue", name: "Revenue" },
+            ]}
+          />
 
-          {/* Metric */}
-          <div className="space-y-2">
-            <Label>Metric</Label>
-            <Select
-              value={(config.configuration?.metric as string) || "byService"}
-              onValueChange={(value) =>
-                setConfig({
-                  ...config,
-                  configuration: {
-                    ...config.configuration,
-                    metric: value,
-                  } as ChartConfig["configuration"],
-                })
-              }
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Select metric" />
-              </SelectTrigger>
-              <SelectContent>
-                {barOptions.map((option) => (
-                  <SelectItem key={option.id} value={option.id}>
-                    {option.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
+          <LabeledSelect<string>
+            id="metric"
+            label="Metric"
+            placeholder="Select metric"
+            value={(config.configuration?.metric as string) || "by_service"}
+            onValueChange={(value) =>
+              setConfig({
+                ...config,
+                configuration: {
+                  ...config.configuration,
+                  metric: value,
+                } as ChartConfig["configuration"],
+              })
+            }
+            options={barOptions.map((option) => ({
+              id: option.id,
+              name: option.label,
+            }))}
+          />
 
-          {/* Staff filter */}
-          <div className="space-y-2">
-            <Label>Staff (optional)</Label>
-            <Select
-              value={(config.configuration as any)?.staffId || "all"}
-              onValueChange={(value) =>
-                setConfig({
-                  ...config,
-                  configuration: {
-                    ...config.configuration,
-                    staffId: value === "all" ? "" : value,
-                  } as ChartConfig["configuration"],
-                })
-              }
-              disabled={loadingStaff}
-            >
-              <SelectTrigger>
-                <SelectValue
-                  placeholder={loadingStaff ? "Loading..." : "All staff"}
-                />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All staff</SelectItem>
-                {staffOptions.map((s) => (
-                  <SelectItem key={s._id} value={s._id}>
-                    {`${s.firstName} ${s.lastName}`.trim() || s._id}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
+          <LabeledSelect<string>
+            id="staff-id"
+            label="Staff (optional)"
+            placeholder={loadingStaff ? "Loading..." : "All staff"}
+            value={(config.configuration as any)?.staffId || "all"}
+            onValueChange={(value) =>
+              setConfig({
+                ...config,
+                configuration: {
+                  ...config.configuration,
+                  staffId: value === "all" ? "" : value,
+                } as ChartConfig["configuration"],
+              })
+            }
+            options={[
+              { id: "all", name: "All staff" },
+              ...staffOptions.map((s) => ({
+                id: s._id as string,
+                name:
+                  `${s.firstName} ${s.lastName}`.trim() || (s._id as string),
+              })),
+            ]}
+            disabled={loadingStaff}
+          />
 
           {/* Preview */}
           <div className="space-y-2">
             <Label>Preview</Label>
-            <div className="border rounded-lg p-4 h-96 bg-slate-50">
-              {previewData && previewData.length > 0 ? (
+            <div className="border rounded-lg p-0 h-96 bg-slate-50">
+              {loadingPreview ? (
+                <div className="flex items-center justify-center h-full text-slate-500">
+                  Loading preview...
+                </div>
+              ) : previewData && previewData.length > 0 ? (
                 <PerformanceChart
                   title={config.title}
-                  data={previewData.map((item) => ({
-                    ...item,
-                  }))}
+                  data={previewData.map((item) => ({ ...item }))}
                   type="hbar"
-                  xAxisKey="name"
-                  dataKeys={["count"]}
+                  xAxisKey={previewXAxisKey || "name"}
+                  dataKeys={
+                    previewDataKeys.length ? previewDataKeys : ["count"]
+                  }
                   colors={config.colors}
                 />
               ) : (

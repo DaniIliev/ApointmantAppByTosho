@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useMemo } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Dialog,
   DialogContent,
@@ -7,20 +7,14 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
+import { LabeledInput } from "@/components/customUIComponents/LabeledInput";
+import { LabeledSelect } from "@/components/customUIComponents/LabeledSelect";
 import type { ChartConfig } from "./types";
-import { getDashboardData } from "./mockDashboardData";
 import { PerformanceChart } from "@/components/performance/PerformanceChart";
 import { useDashboardDate } from "@/context/DashboardDateContext";
 import { useStaffOptions } from "./useStaffOptions";
+import { fetchPreviewData } from "./analyticsPreview";
 
 interface BarChartConfigFormProps {
   open: boolean;
@@ -77,20 +71,52 @@ export function BarChartConfigForm({
   });
 
   const [previewData, setPreviewData] = useState<Record<string, unknown>[]>([]);
+  const [previewDataKeys, setPreviewDataKeys] = useState<string[]>([]);
+  const [previewXAxisKey, setPreviewXAxisKey] = useState<string>("name");
+  const [loadingPreview, setLoadingPreview] = useState(true);
   const availableMetrics = dataSourceMetrics[config.dataSource] || ["count"];
 
-  // Generate preview data
-  useMemo(() => {
-    const mockData = getDashboardData(
-      config.dataSource,
-      config.metric,
-      startDate,
-      endDate,
-      groupBy
-    ) as Record<string, unknown>[];
-
-    setPreviewData(mockData);
-  }, [config, startDate, endDate, groupBy]);
+  useEffect(() => {
+    let isCancelled = false;
+    const loadPreview = async () => {
+      setLoadingPreview(true);
+      try {
+        const result = await fetchPreviewData({
+          chartType: "bar",
+          dataSource: config.dataSource,
+          metric: config.metric,
+          staffId: config.staffId || undefined,
+          groupBy,
+          startDate,
+          endDate,
+        });
+        if (isCancelled) return;
+        setPreviewData(result.data);
+        setPreviewDataKeys(
+          result.dataKeys?.length ? result.dataKeys : getDataKeys()
+        );
+        setPreviewXAxisKey(result.xAxisKey || getXAxisKey());
+      } catch (err) {
+        if (!isCancelled) {
+          setPreviewData([]);
+          setPreviewDataKeys([]);
+        }
+      } finally {
+        if (!isCancelled) setLoadingPreview(false);
+      }
+    };
+    loadPreview();
+    return () => {
+      isCancelled = true;
+    };
+  }, [
+    config.dataSource,
+    config.metric,
+    config.staffId,
+    groupBy,
+    startDate,
+    endDate,
+  ]);
 
   const getDataKeys = () => {
     if (config.dataSource === "appointments" && config.metric === "count") {
@@ -144,8 +170,8 @@ export function BarChartConfigForm({
       title: config.title,
       type: "bar",
       dataKey: config.dataSource,
-      dataKeys: getDataKeys(),
-      xAxisKey: getXAxisKey(),
+      dataKeys: previewDataKeys.length ? previewDataKeys : getDataKeys(),
+      xAxisKey: previewXAxisKey || getXAxisKey(),
       colors: ["#3b61c0", "#00bfff", "#f59e0b", "#dc2626", "#1f2937"],
       data: previewData,
       layout: editingChart?.layout || {
@@ -175,87 +201,62 @@ export function BarChartConfigForm({
         <div className="grid grid-cols-2 gap-6">
           {/* Configuration Panel */}
           <div className="space-y-4">
-            {/* Title */}
-            <div className="space-y-2">
-              <Label htmlFor="chart-title" className="text-slate-700">
-                Chart Title
-              </Label>
-              <Input
-                id="chart-title"
-                value={config.title}
-                onChange={(e) =>
-                  setConfig({ ...config, title: e.target.value })
-                }
-                className="border-slate-300"
-              />
-            </div>
+            <LabeledInput
+              id="chart-title"
+              label="Chart Title"
+              placeholder="Enter chart title"
+              value={config.title}
+              onChange={(e) => setConfig({ ...config, title: e.target.value })}
+            />
 
-            {/* Metric */}
-            <div className="space-y-2">
-              <Label htmlFor="metric" className="text-slate-700">
-                Metric
-              </Label>
-              <Select
-                value={config.metric}
-                onValueChange={(value) =>
-                  setConfig({ ...config, metric: value as BarMetric })
-                }
-              >
-                <SelectTrigger id="metric">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {availableMetrics.map((metric) => (
-                    <SelectItem key={metric} value={metric}>
-                      {metric
-                        .split("_")
-                        .map(
-                          (word) => word.charAt(0).toUpperCase() + word.slice(1)
-                        )
-                        .join(" ")}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
+            <LabeledSelect<BarMetric>
+              id="metric"
+              label="Metric"
+              placeholder="Select metric"
+              value={config.metric}
+              onValueChange={(value) =>
+                setConfig({ ...config, metric: value as BarMetric })
+              }
+              options={availableMetrics.map((metric) => ({
+                id: metric,
+                name: metric
+                  .split("_")
+                  .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+                  .join(" "),
+              }))}
+            />
 
-            {/* Staff filter */}
-            <div className="space-y-2">
-              <Label htmlFor="staff-id" className="text-slate-700">
-                Staff (optional)
-              </Label>
-              <Select
-                value={config.staffId || "all"}
-                onValueChange={(value) =>
-                  setConfig({
-                    ...config,
-                    staffId: value === "all" ? "" : value,
-                  })
-                }
-                disabled={loadingStaff}
-              >
-                <SelectTrigger id="staff-id">
-                  <SelectValue
-                    placeholder={loadingStaff ? "Loading..." : "All staff"}
-                  />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All staff</SelectItem>
-                  {staffOptions.map((s) => (
-                    <SelectItem key={s._id} value={s._id}>
-                      {`${s.firstName} ${s.lastName}`.trim() || s._id}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
+            <LabeledSelect<string>
+              id="staff-id"
+              label="Staff (optional)"
+              placeholder={loadingStaff ? "Loading..." : "All staff"}
+              value={(config.staffId as string) || "all"}
+              onValueChange={(value) =>
+                setConfig({
+                  ...config,
+                  staffId: value === "all" ? "" : value,
+                })
+              }
+              options={[
+                { id: "all", name: "All staff" },
+                ...staffOptions.map((s) => ({
+                  id: s._id as string,
+                  name:
+                    `${s.firstName} ${s.lastName}`.trim() || (s._id as string),
+                })),
+              ]}
+            />
           </div>
 
           {/* Preview Panel */}
           <div className="space-y-2">
             <Label className="text-slate-700">Preview</Label>
-            <div className="border border-slate-200 rounded-lg p-2 bg-slate-50">
-              {previewData.length > 0 ? (
+            <div className="border border-slate-200 rounded-lg p-0 bg-slate-50">
+              {loadingPreview ? (
+                <div className="h-48 flex items-center justify-center text-slate-400">
+                  Loading preview...
+                </div>
+              ) : previewData.length > 0 ? (
                 <PerformanceChart
                   title=""
                   data={
@@ -264,8 +265,10 @@ export function BarChartConfigForm({
                     }>
                   }
                   type="bar"
-                  dataKeys={getDataKeys()}
-                  xAxisKey={getXAxisKey()}
+                  dataKeys={
+                    previewDataKeys.length ? previewDataKeys : getDataKeys()
+                  }
+                  xAxisKey={previewXAxisKey || getXAxisKey()}
                   colors={[
                     "#3b61c0",
                     "#00bfff",
