@@ -34,6 +34,13 @@ interface DateRangePickerProps {
   maxDate?: Date;
   disablePast?: boolean;
   className?: string;
+  renderTrigger?: (args: {
+    open: boolean;
+    rangeLabel: string | null;
+    startDate: Date | null;
+    endDate: Date | null;
+    clear: () => void;
+  }) => React.ReactNode;
 }
 
 // Map i18n language to date-fns locale
@@ -58,6 +65,7 @@ export const DateRangePicker: React.FC<DateRangePickerProps> = ({
   maxDate,
   disablePast,
   className,
+  renderTrigger,
 }) => {
   const { t } = useTranslation();
   const locale = useLocale();
@@ -72,12 +80,16 @@ export const DateRangePicker: React.FC<DateRangePickerProps> = ({
   });
   const startDate = value.startDate ? new Date(value.startDate) : null;
   const endDate = value.endDate ? new Date(value.endDate) : null;
+  const clearSelection = () => onChange({ startDate: null, endDate: null });
 
   const rangeLabel =
     startDate && endDate
-      ? `${format(startDate, "MM/dd/yyyy")} – ${format(endDate, "MM/dd/yyyy")}`
+      ? `${format(startDate, "MMM d, yyyy")} – ${format(
+          endDate,
+          "MMM d, yyyy"
+        )}`
       : startDate
-      ? `${format(startDate, "MM/dd/yyyy")} – …`
+      ? `${format(startDate, "MMM d, yyyy")} – …`
       : null;
 
   const buildMonthDays = useCallback(
@@ -225,29 +237,36 @@ export const DateRangePicker: React.FC<DateRangePickerProps> = ({
 
   return (
     <Popover.Root open={open} onOpenChange={setOpen}>
-      <div className="relative group/labeled-input w-full">
-        {/* Floating label */}
-        <label
-          className={cn(
-            "absolute left-4 transition-all duration-300 transform pointer-events-none z-10",
-            open || startDate || endDate ? "text-primary" : "text-gray-500",
-            open || startDate || endDate
-              ? "-top-0.5 text-xs"
-              : "top-1/2 -translate-y-1/2 text-sm"
-          )}
-        >
-          {t("Select date range")}
-        </label>
+      {renderTrigger ? (
         <Popover.Trigger asChild>
-          <button
-            type="button"
+          {renderTrigger({
+            open,
+            rangeLabel,
+            startDate,
+            endDate,
+            clear: clearSelection,
+          })}
+        </Popover.Trigger>
+      ) : (
+        <div className="relative group/labeled-input w-full">
+          {/* Floating label */}
+          <label
+            className={cn(
+              "absolute left-4 transition-all duration-300 transform pointer-events-none z-10",
+              open || startDate || endDate ? "text-primary" : "text-gray-500",
+              open || startDate || endDate
+                ? "-top-0.5 text-xs"
+                : "top-1/2 -translate-y-1/2 text-sm"
+            )}
+          >
+            {t("Select date range")}
+          </label>
+          <Popover.Trigger
             className={cn(
               "peer w-full h-12 px-4 rounded-t-md border-b-2 border-transparent bg-card/80 focus:bg-card/90 transition-all duration-300 flex items-center justify-between text-sm outline-none placeholder-transparent focus:placeholder-gray-400 pr-8",
               open ? "border-primary" : "border-transparent",
               className
             )}
-            tabIndex={0}
-            style={{ position: "relative" }}
           >
             <span
               className={cn(
@@ -258,13 +277,16 @@ export const DateRangePicker: React.FC<DateRangePickerProps> = ({
             >
               {rangeLabel}
             </span>
-            {/* Clear button */}
+            {/* Clear control (avoid nested button inside trigger) */}
             {(startDate || endDate) && (
-              <button
-                type="button"
-                onClick={() => onChange({ startDate: null, endDate: null })}
+              <span
+                role="button"
                 aria-label={t("Clear") as string}
-                className="absolute right-8 top-1/2 -translate-y-1/2 h-5 w-5 rounded-full text-muted-foreground hover:text-primary/80 flex items-center justify-center z-20"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  clearSelection();
+                }}
+                className="absolute right-8 top-1/2 -translate-y-1/2 h-5 w-5 rounded-full text-muted-foreground hover:text-primary/80 flex items-center justify-center z-20 cursor-pointer"
                 tabIndex={-1}
               >
                 <svg
@@ -281,7 +303,7 @@ export const DateRangePicker: React.FC<DateRangePickerProps> = ({
                   <line x1="18" y1="6" x2="6" y2="18" />
                   <line x1="6" y1="6" x2="18" y2="18" />
                 </svg>
-              </button>
+              </span>
             )}
             <CalendarIcon className="h-4 w-4 text-muted-foreground absolute right-2 top-1/2 -translate-y-1/2" />
             <span
@@ -290,78 +312,80 @@ export const DateRangePicker: React.FC<DateRangePickerProps> = ({
                 open || startDate || endDate ? "w-full" : "w-0"
               )}
             />
-          </button>
-        </Popover.Trigger>
-      </div>
-      <Popover.Content
-        sideOffset={8}
-        className="rounded-xl border border-border bg-popover p-4 shadow-xl w-[560px] z-[1200]"
-        align="start"
-      >
-        <div className="flex items-center justify-between mb-2">
-          <button
-            type="button"
-            className="h-8 w-8 flex items-center justify-center rounded-md hover:bg-primary/20"
-            onClick={() => setAnchorMonth(addMonths(anchorMonth, -1))}
-          >
-            <ChevronLeft className="h-4 w-4" />
-          </button>
-          <div className="flex gap-2 text-xs text-muted-foreground">
-            {startDate && endDate && (
-              <span>
-                {t("Start date")}: {format(startDate, "MMM d", { locale })} ·{" "}
-                {t("End date")}: {format(endDate, "MMM d", { locale })}
-              </span>
-            )}
+          </Popover.Trigger>
+        </div>
+      )}
+      <Popover.Portal>
+        <Popover.Content
+          sideOffset={8}
+          className="rounded-xl border border-border bg-popover p-4 shadow-xl w-full max-w-[360px] sm:max-w-[560px] z-[40000]"
+          align="start"
+        >
+          <div className="flex items-center justify-between mb-2">
+            <button
+              type="button"
+              className="h-8 w-8 flex items-center justify-center rounded-md hover:bg-primary/20"
+              onClick={() => setAnchorMonth(addMonths(anchorMonth, -1))}
+            >
+              <ChevronLeft className="h-4 w-4" />
+            </button>
+            <div className="flex gap-2 text-xs text-muted-foreground">
+              {startDate && endDate && (
+                <span>
+                  {t("Start date")}: {format(startDate, "MMM d", { locale })} ·{" "}
+                  {t("End date")}: {format(endDate, "MMM d", { locale })}
+                </span>
+              )}
+            </div>
+            <div className="flex gap-1">
+              {startDate && (
+                <button
+                  type="button"
+                  onClick={() =>
+                    onChange({
+                      startDate: format(new Date(), "yyyy-MM-dd"),
+                      endDate: null,
+                    })
+                  }
+                  className="px-2 h-8 text-xs rounded-md border border-input hover:bg-accent"
+                >
+                  {t("Today")}
+                </button>
+              )}
+              {(startDate || endDate) && (
+                <button
+                  type="button"
+                  onClick={() => onChange({ startDate: null, endDate: null })}
+                  className="h-8 w-8 flex items-center justify-center rounded-md hover:bg-red-500/10"
+                  aria-label={t("Clear") as string}
+                >
+                  <X className="h-4 w-4" />
+                </button>
+              )}
+            </div>
+            <button
+              type="button"
+              className="h-8 w-8 flex items-center justify-center rounded-md hover:bg-primary/20"
+              onClick={() => setAnchorMonth(addMonths(anchorMonth, 1))}
+            >
+              <ChevronRight className="h-4 w-4" />
+            </button>
           </div>
-          <div className="flex gap-1">
-            {startDate && (
-              <button
-                type="button"
-                onClick={() =>
-                  onChange({
-                    startDate: format(new Date(), "yyyy-MM-dd"),
-                    endDate: null,
-                  })
-                }
-                className="px-2 h-8 text-xs rounded-md border border-input hover:bg-accent"
-              >
-                {t("Today")}
-              </button>
-            )}
-            {(startDate || endDate) && (
-              <button
-                type="button"
-                onClick={() => onChange({ startDate: null, endDate: null })}
-                className="h-8 w-8 flex items-center justify-center rounded-md hover:bg-red-500/10"
-                aria-label={t("Clear") as string}
-              >
-                <X className="h-4 w-4" />
-              </button>
-            )}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+            {renderMonth(anchorMonth, leftMonthWeeks)}
+            {renderMonth(rightMonth, rightMonthWeeks)}
           </div>
-          <button
-            type="button"
-            className="h-8 w-8 flex items-center justify-center rounded-md hover:bg-primary/20"
-            onClick={() => setAnchorMonth(addMonths(anchorMonth, 1))}
-          >
-            <ChevronRight className="h-4 w-4" />
-          </button>
-        </div>
-        <div className="grid grid-cols-2 gap-6">
-          {renderMonth(anchorMonth, leftMonthWeeks)}
-          {renderMonth(rightMonth, rightMonthWeeks)}
-        </div>
-        <div className="mt-4 flex justify-end gap-2">
-          <button
-            type="button"
-            onClick={() => setOpen(false)}
-            className="px-3 py-2 text-xs rounded-md border border-input hover:bg-accent"
-          >
-            {t("Close")}
-          </button>
-        </div>
-      </Popover.Content>
+          <div className="mt-4 flex justify-end gap-2">
+            <button
+              type="button"
+              onClick={() => setOpen(false)}
+              className="px-3 py-2 text-xs rounded-md border border-input hover:bg-accent"
+            >
+              {t("Close")}
+            </button>
+          </div>
+        </Popover.Content>
+      </Popover.Portal>
     </Popover.Root>
   );
 };

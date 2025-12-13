@@ -537,29 +537,27 @@ export function PerformanceChart({
       }
 
       case "linebar": {
-        // Combined line and bar chart
+        // Combined line and bar chart with single shared Y-axis
         const xAxisData = data.map((item) => item[xAxisKey]);
 
         // Determine which keys are lines and which are bars using seriesConfig
         let lineKeys: string[] = [];
         let barKeys: string[] = [];
-        let colorOffset = 0;
 
         if (seriesConfig?.lineSeries && seriesConfig?.barSeries) {
-          // Use seriesConfig to determine series types - preserve the exact order from config
+          // Use seriesConfig to determine series types
           barKeys = seriesConfig.barSeries;
           lineKeys = seriesConfig.lineSeries;
-          colorOffset = barKeys.length; // Bars come first in color order
         } else {
           // Fallback: split by half if no seriesConfig
           const halfLength = Math.ceil(finalDataKeys.length / 2);
-          lineKeys = finalDataKeys.slice(0, halfLength);
-          barKeys = finalDataKeys.slice(halfLength);
-          colorOffset = halfLength;
+          barKeys = finalDataKeys.slice(0, halfLength);
+          lineKeys = finalDataKeys.slice(halfLength);
         }
 
+        // Create bar series (Current Week data)
         const barSeries = barKeys.map((key, index) => ({
-          name: key.charAt(0).toUpperCase() + key.slice(1),
+          name: `${key.charAt(0).toUpperCase() + key.slice(1)} (Current)`,
           type: "bar" as const,
           data: data.map((item) => item[key]),
           itemStyle: {
@@ -570,31 +568,39 @@ export function PerformanceChart({
             show: true,
             position: "inside",
             color: "#fff",
-            fontSize: 10,
+            fontSize: 11,
             fontWeight: "bold",
           },
           emphasis: {
             focus: "series" as const,
           },
-          yAxisIndex: 1,
         }));
 
-        const lineSeries = lineKeys.map((key, index) => ({
-          name: key.charAt(0).toUpperCase() + key.slice(1),
-          type: "line" as const,
-          data: data.map((item) => item[key]),
-          smooth: true,
-          lineStyle: {
-            width: 3,
-          },
-          itemStyle: {
-            color: colors[(index + colorOffset) % colors.length],
-          },
-          emphasis: {
-            focus: "series" as const,
-          },
-          yAxisIndex: 0,
-        }));
+        // Create line series (Previous Week data) with distinct styling
+        const lineSeries = lineKeys.map((key, index) => {
+          // Extract base name (remove 'prev' prefix if it exists)
+          const baseName = key.replace(/^prev/, "");
+          return {
+            name: `${
+              baseName.charAt(0).toUpperCase() + baseName.slice(1)
+            } (Previous)`,
+            type: "line" as const,
+            data: data.map((item) => item[key]),
+            smooth: true,
+            lineStyle: {
+              width: 2,
+              type: "dashed" as const,
+            },
+            itemStyle: {
+              color: colors[index % colors.length],
+            },
+            symbolSize: 4,
+            z: 1000,
+            emphasis: {
+              focus: "series" as const,
+            },
+          };
+        });
 
         return {
           tooltip: {
@@ -605,11 +611,32 @@ export function PerformanceChart({
             textStyle: {
               color: "#fff",
             },
+            formatter: (
+              params: Record<string, unknown>[] | Record<string, unknown>
+            ) => {
+              if (!Array.isArray(params)) return "";
+              let result = `<strong>${
+                (params[0] as Record<string, unknown>)?.axisValue
+              }</strong><br/>`;
+              params.forEach((param: Record<string, unknown>) => {
+                result += `${param.marker} ${param.seriesName}: <strong>${param.value}</strong><br/>`;
+              });
+              return result;
+            },
           },
           legend: {
-            data: finalDataKeys.map(
-              (key) => key.charAt(0).toUpperCase() + key.slice(1)
-            ),
+            data: [
+              ...barKeys.map(
+                (key) =>
+                  `${key.charAt(0).toUpperCase() + key.slice(1)} (Current)`
+              ),
+              ...lineKeys.map((key) => {
+                const baseName = key.replace(/^prev/, "");
+                return `${
+                  baseName.charAt(0).toUpperCase() + baseName.slice(1)
+                } (Previous)`;
+              }),
+            ],
             textStyle: {
               color: "#999",
             },
@@ -635,46 +662,24 @@ export function PerformanceChart({
               fontSize: 12,
             },
           },
-          yAxis: [
-            {
-              type: "value",
-              position: "left",
-              axisLine: {
-                lineStyle: {
-                  color: "#666",
-                },
-              },
-              axisLabel: {
+          yAxis: {
+            type: "value",
+            axisLine: {
+              lineStyle: {
                 color: "#666",
-                fontSize: 12,
-              },
-              splitLine: {
-                lineStyle: {
-                  color: "rgba(50, 50, 50, 0.5)",
-                  type: "dashed",
-                },
               },
             },
-            {
-              type: "value",
-              position: "right",
-              axisLine: {
-                lineStyle: {
-                  color: "#666",
-                },
-              },
-              axisLabel: {
-                color: "#666",
-                fontSize: 12,
-              },
-              splitLine: {
-                lineStyle: {
-                  color: "rgba(50, 50, 50, 0.5)",
-                  type: "dashed",
-                },
+            axisLabel: {
+              color: "#666",
+              fontSize: 12,
+            },
+            splitLine: {
+              lineStyle: {
+                color: "rgba(50, 50, 50, 0.5)",
+                type: "dashed",
               },
             },
-          ],
+          },
           ...(showSlider && {
             dataZoom: [
               {

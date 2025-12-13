@@ -39,7 +39,7 @@ export function CustomTooltip({
         </TooltipTrigger>
         {tooltipText && (
           <TooltipContent>
-            <p className="text-text-primary">{tooltipText}</p>
+            <p className="text-white">{tooltipText}</p>
           </TooltipContent>
         )}
       </Tooltip>

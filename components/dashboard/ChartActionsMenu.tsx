@@ -19,7 +19,6 @@ interface ChartActionsMenuProps {
   onEdit: (chart: ChartConfig) => void;
   onDelete: (id: string) => void;
   onToggleSlider: (id: string, show: boolean) => void;
-  onPrint: (id: string) => void;
   showSlider: boolean;
   item: DashboardItem;
 }
@@ -31,7 +30,6 @@ export function ChartActionsMenu({
   onEdit,
   onDelete,
   onToggleSlider,
-  onPrint,
   showSlider,
   item,
 }: ChartActionsMenuProps) {
@@ -111,22 +109,6 @@ export function ChartActionsMenu({
             )}
             <span className="text-xs text-gray-700 dark:text-gray-300">
               {showSlider ? "Hide" : "Show"}
-            </span>
-          </button>
-
-          {/* Print */}
-          <button
-            onClick={(e) => {
-              e.stopPropagation();
-              onPrint(itemId);
-              onToggle(itemId);
-            }}
-            className="flex flex-col items-center gap-1 hover:opacity-70 transition-opacity"
-            title="Print"
-          >
-            <Printer className="w-5 h-5 text-gray-700 dark:text-gray-300" />
-            <span className="text-xs text-gray-700 dark:text-gray-300">
-              Print
             </span>
           </button>
 

@@ -339,26 +339,77 @@ function PerformancePageContent() {
     []
   );
 
+  // Helper function to calculate week boundaries
+  const getWeekBoundaries = (date: Date) => {
+    const d = new Date(date);
+    const day = d.getDay();
+    const diff = d.getDate() - day + (day === 0 ? -6 : 1); // Adjust to Monday
+    const monday = new Date(d.setDate(diff));
+    const sunday = new Date(monday);
+    sunday.setDate(sunday.getDate() + 6);
+    return {
+      start: monday.toISOString().split("T")[0],
+      end: sunday.toISOString().split("T")[0],
+    };
+  };
+
+  // Helper to calculate percentage change
+  const calculatePercentageChange = (
+    current: number,
+    previous: number
+  ): { value: number; type: "increase" | "decrease" | "neutral" } => {
+    if (previous === 0) {
+      return {
+        value: current > 0 ? 100 : 0,
+        type: current > 0 ? "increase" : "neutral",
+      };
+    }
+    const change = ((current - previous) / previous) * 100;
+    return {
+      value: Math.abs(change),
+      type: change > 0.1 ? "increase" : change < -0.1 ? "decrease" : "neutral",
+    };
+  };
+
   const fetchKpiValue = useCallback(
-    async (kpiType: string, staffId?: string): Promise<string | number> => {
+    async (
+      kpiType: string,
+      staffId?: string
+    ): Promise<{ value: string | number; change?: ChangeMetric }> => {
       try {
+        // Calculate previous period dates based on selected date range
+        const startDateObj = new Date(startDate);
+        const endDateObj = new Date(endDate);
+        const durationMs = endDateObj.getTime() - startDateObj.getTime();
+
+        const prevEndDate = new Date(startDateObj);
+        prevEndDate.setDate(prevEndDate.getDate() - 1);
+        const prevStartDate = new Date(prevEndDate);
+        prevStartDate.setTime(prevStartDate.getTime() - durationMs);
+
+        const prevStartStr = prevStartDate.toISOString().split("T")[0];
+        const prevEndStr = prevEndDate.toISOString().split("T")[0];
+
         if (
           kpiType === "totalAppointments" ||
           kpiType === "completedAppointments" ||
           kpiType === "cancelledAppointments"
         ) {
-          const params = new URLSearchParams({
+          // Fetch current period data
+          const currentParams = new URLSearchParams({
             source: "appointments",
             dimension: "time_series",
-            groupBy: "day",
+            groupBy: groupBy,
             period: "custom",
             from: startDate,
             to: endDate,
           });
-          if (staffId) params.set("staffId", staffId);
-          const url = `/api/analytics?${params.toString()}&t=${Date.now()}`;
-          const rows = await callApi(url, "GET");
-          const totals = (rows as Array<Record<string, unknown>>).reduce(
+          if (staffId) currentParams.set("staffId", staffId);
+          const currentUrl = `/api/analytics?${currentParams.toString()}&t=${Date.now()}`;
+          const currentRows = (await callApi(currentUrl, "GET")) as Array<
+            Record<string, unknown>
+          >;
+          const currentTotals = currentRows.reduce(
             (
               acc: { total: number; completed: number; cancelled: number },
               cur
@@ -370,27 +421,96 @@ function PerformancePageContent() {
             },
             { total: 0, completed: 0, cancelled: 0 }
           );
-          if (kpiType === "totalAppointments") return totals.total;
-          if (kpiType === "completedAppointments") return totals.completed;
-          return totals.cancelled;
+
+          // Fetch previous period data
+          const prevParams = new URLSearchParams({
+            source: "appointments",
+            dimension: "time_series",
+            groupBy: groupBy,
+            period: "custom",
+            from: prevStartStr,
+            to: prevEndStr,
+          });
+          if (staffId) prevParams.set("staffId", staffId);
+          const prevUrl = `/api/analytics?${prevParams.toString()}&t=${Date.now()}`;
+          const prevRows = (await callApi(prevUrl, "GET")) as Array<
+            Record<string, unknown>
+          >;
+          const prevTotals = prevRows.reduce(
+            (
+              acc: { total: number; completed: number; cancelled: number },
+              cur
+            ) => {
+              acc.total += Number(cur.total ?? 0);
+              acc.completed += Number(cur.completed ?? 0);
+              acc.cancelled += Number(cur.cancelled ?? 0);
+              return acc;
+            },
+            { total: 0, completed: 0, cancelled: 0 }
+          );
+
+          let currentValue = 0;
+          let previousValue = 0;
+
+          if (kpiType === "totalAppointments") {
+            currentValue = currentTotals.total;
+            previousValue = prevTotals.total;
+          } else if (kpiType === "completedAppointments") {
+            currentValue = currentTotals.completed;
+            previousValue = prevTotals.completed;
+          } else {
+            currentValue = currentTotals.cancelled;
+            previousValue = prevTotals.cancelled;
+          }
+
+          const change = calculatePercentageChange(currentValue, previousValue);
+          return { value: currentValue, change };
         }
 
         if (kpiType === "totalRevenue") {
-          const params = new URLSearchParams({
+          // Fetch current period revenue
+          const currentParams = new URLSearchParams({
             source: "revenue",
             dimension: "time_series",
-            groupBy: "day",
+            groupBy: groupBy,
             period: "custom",
             from: startDate,
             to: endDate,
           });
-          if (staffId) params.set("staffId", staffId);
-          const url = `/api/analytics?${params.toString()}&t=${Date.now()}`;
-          const rows = await callApi(url, "GET");
-          return (rows as Array<Record<string, unknown>>).reduce(
+          if (staffId) currentParams.set("staffId", staffId);
+          const currentUrl = `/api/analytics?${currentParams.toString()}&t=${Date.now()}`;
+          const currentRows = (await callApi(currentUrl, "GET")) as Array<
+            Record<string, unknown>
+          >;
+          const currentRevenue = currentRows.reduce(
             (sum, cur) => sum + Number(cur.revenue ?? cur.value ?? 0),
             0
           );
+
+          // Fetch previous period revenue
+          const prevParams = new URLSearchParams({
+            source: "revenue",
+            dimension: "time_series",
+            groupBy: groupBy,
+            period: "custom",
+            from: prevStartStr,
+            to: prevEndStr,
+          });
+          if (staffId) prevParams.set("staffId", staffId);
+          const prevUrl = `/api/analytics?${prevParams.toString()}&t=${Date.now()}`;
+          const prevRows = (await callApi(prevUrl, "GET")) as Array<
+            Record<string, unknown>
+          >;
+          const prevRevenue = prevRows.reduce(
+            (sum, cur) => sum + Number(cur.revenue ?? cur.value ?? 0),
+            0
+          );
+
+          const change = calculatePercentageChange(currentRevenue, prevRevenue);
+          return {
+            value: Number(currentRevenue.toFixed(2)),
+            change,
+          };
         }
 
         if (kpiType === "averageServicePrice") {
@@ -401,36 +521,37 @@ function PerformancePageContent() {
           const url = `/api/analytics?${params.toString()}&t=${Date.now()}`;
           const rows = await callApi(url, "GET");
           const list = rows as Array<Record<string, unknown>>;
-          if (!list.length) return "N/A";
+          if (!list.length) return { value: "N/A" };
           const total = list.reduce((sum, r) => sum + Number(r.price ?? 0), 0);
-          return Number(total / list.length).toFixed(2);
+          const avgPrice = Number(total / list.length).toFixed(2);
+          return { value: avgPrice };
         }
 
         if (
           kpiType === "clientRetentionRate" ||
           kpiType === "newClientsAcquired"
         ) {
-          return "N/A";
+          return { value: "N/A" };
         }
       } catch (err) {
         console.error("Failed to load KPI", err);
-        return "N/A";
+        return { value: "N/A" };
       }
 
-      return "N/A";
+      return { value: "N/A" };
     },
-    [startDate, endDate]
+    [startDate, endDate, groupBy]
   );
 
   const fetchChartData = useCallback(
     async (item: DashboardItem): Promise<DashboardItem> => {
       if (item.type === "kpi") {
-        const value = await fetchKpiValue(
+        const result = await fetchKpiValue(
           item.kpiType,
           (item as DashboardItem & { configuration?: { staffId?: string } })
             .configuration?.staffId
         );
-        return { ...item, value };
+        return { ...item, value: result.value, change: result.change };
       }
 
       const config: Partial<ChartConfig["configuration"]> =
@@ -443,6 +564,115 @@ function PerformancePageContent() {
       const apiSource = source === "staff" ? "appointments" : source;
       const apiDimension = source === "staff" ? "by_staff" : dimension;
 
+      // Special handling for linebar charts: fetch current period (bars) and previous period (lines)
+      if (item.type === "linebar") {
+        // Calculate date range duration
+        const startDateObj = new Date(startDate);
+        const endDateObj = new Date(endDate);
+        const durationMs = endDateObj.getTime() - startDateObj.getTime();
+
+        // Calculate previous period dates
+        const prevEndDate = new Date(startDateObj);
+        prevEndDate.setDate(prevEndDate.getDate() - 1);
+        const prevStartDate = new Date(prevEndDate);
+        prevStartDate.setTime(prevStartDate.getTime() - durationMs);
+
+        // Fetch current period data (for bars)
+        const currentParams = new URLSearchParams({
+          source: apiSource,
+          dimension: apiDimension,
+          groupBy: config.groupBy || groupBy,
+          period: "custom",
+          from: startDate,
+          to: endDate,
+        });
+        if (config.staffId) currentParams.set("staffId", config.staffId);
+        const currentUrl = `/api/analytics?${currentParams.toString()}&t=${Date.now()}`;
+        const currentRows = (await callApi(currentUrl, "GET")) as Array<
+          Record<string, unknown>
+        >;
+
+        // Fetch previous period data (for lines)
+        const prevParams = new URLSearchParams({
+          source: apiSource,
+          dimension: apiDimension,
+          groupBy: config.groupBy || groupBy,
+          period: "custom",
+          from: prevStartDate.toISOString().split("T")[0],
+          to: prevEndDate.toISOString().split("T")[0],
+        });
+        if (config.staffId) prevParams.set("staffId", config.staffId);
+        const prevUrl = `/api/analytics?${prevParams.toString()}&t=${Date.now()}`;
+        const prevRows = (await callApi(prevUrl, "GET")) as Array<
+          Record<string, unknown>
+        >;
+
+        // Merge current and previous week data
+        const mergedData: Array<Record<string, unknown>> = [];
+
+        if (apiSource === "appointments") {
+          // Transform appointments data
+          currentRows.forEach((curr, idx) => {
+            const prev = prevRows[idx];
+            mergedData.push({
+              name: (curr.name as string) || "",
+              // Current week - bars
+              count: Number(curr.total ?? 0),
+              completed: Number(curr.completed ?? 0),
+              // Previous week - lines
+              prevCount: Number(prev?.total ?? 0),
+              prevCompleted: Number(prev?.completed ?? 0),
+            });
+          });
+        } else if (apiSource === "revenue") {
+          // Transform revenue data
+          currentRows.forEach((curr, idx) => {
+            const prev = prevRows[idx];
+            mergedData.push({
+              name: (curr.name as string) || "",
+              // Current week - bars
+              revenue: Number(curr.revenue ?? curr.value ?? 0),
+              // Previous week - lines
+              prevRevenue: Number(prev?.revenue ?? prev?.value ?? 0),
+            });
+          });
+        }
+
+        // Set appropriate data keys for bar vs line series
+        let dataKeys: string[] = [];
+        let seriesConfig = {};
+
+        if (apiSource === "appointments") {
+          dataKeys = ["count", "completed", "prevCount", "prevCompleted"];
+          seriesConfig = {
+            barSeries: ["count", "completed"],
+            lineSeries: ["prevCount", "prevCompleted"],
+          };
+        } else if (apiSource === "revenue") {
+          dataKeys = ["revenue", "prevRevenue"];
+          seriesConfig = {
+            barSeries: ["revenue"],
+            lineSeries: ["prevRevenue"],
+          };
+        }
+
+        return {
+          ...item,
+          data: mergedData,
+          dataKeys,
+          xAxisKey: "name",
+          seriesConfig,
+          configuration: {
+            ...config,
+            dataSource: source,
+            dimension: apiDimension,
+            from: startDate,
+            to: endDate,
+          },
+        } as DashboardItem;
+      }
+
+      // Standard chart fetching for non-linebar charts
       const params = new URLSearchParams({
         source: apiSource,
         dimension: apiDimension,
@@ -782,7 +1012,7 @@ function PerformancePageContent() {
 
       <div className="min-h-screen flex flex-col ">
         {/* Date Range Selector - Controls all charts */}
-        <div className="relative z-10 max-w-7xl mx-auto w-full px-4 py-6">
+        <div className="relative z-10 mx-auto w-full px-6 py-6">
           <DateRangeSelector />
         </div>
 

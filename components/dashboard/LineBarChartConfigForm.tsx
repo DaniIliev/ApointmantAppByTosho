@@ -72,40 +72,63 @@ export function LineBarChartConfigForm({
 
   const [previewData, setPreviewData] = useState<Record<string, unknown>[]>([]);
 
-  // Generate preview data using global date range
+  // Generate preview data using global date range with week comparison
   useMemo(() => {
-    let mockData: Record<string, unknown>[] = [];
-
-    // For now both modes use time_series; keys differ per source
-    const dimension = "time_series";
-    mockData = getDashboardData(
+    const mockData = getDashboardData(
       config.dataSource,
-      dimension,
+      "time_series",
       startDate,
       endDate,
       groupBy
     ) as Record<string, unknown>[];
 
-    setPreviewData(mockData);
+    // Transform to include previous week data for line visualization
+    const transformedData = mockData.map((item, idx) => {
+      // Simulate previous week data (slightly lower values)
+      const factor = 0.85;
+      return {
+        name: item.name,
+        // Current week (bars)
+        ...(config.dataSource === "appointments" && {
+          count: Number(item.total ?? 0),
+          completed: Number((item as Record<string, unknown>).completed ?? 0),
+          // Previous week (lines)
+          prevCount: Math.round(Number(item.total ?? 0) * factor),
+          prevCompleted: Math.round(
+            Number((item as Record<string, unknown>).completed ?? 0) * factor
+          ),
+        }),
+        ...(config.dataSource === "revenue" && {
+          revenue: Number((item as Record<string, unknown>).revenue ?? 0),
+          prevRevenue: Math.round(
+            Number((item as Record<string, unknown>).revenue ?? 0) * factor
+          ),
+        }),
+      };
+    });
+
+    setPreviewData(transformedData);
   }, [config, startDate, endDate, groupBy]);
 
   const getDataKeys = () => {
     if (config.dataSource === "appointments" && config.metric === "count") {
-      return ["count", "completed"];
+      return ["count", "completed", "prevCount", "prevCompleted"];
     }
     if (config.dataSource === "revenue" && config.metric === "total_revenue") {
-      return ["revenue", "target"];
+      return ["revenue", "prevRevenue"];
     }
     return ["count"];
   };
 
   const handleSave = () => {
-    // Determine which series are bars and which are lines based on compare mode
-    // Determine bar vs line based on selected data source
+    // Week-over-week comparison: current week as bars, previous week as lines
     const seriesConfig =
       config.dataSource === "appointments"
-        ? { barSeries: ["count"], lineSeries: ["completed"] }
-        : { barSeries: ["revenue"], lineSeries: ["target"] };
+        ? {
+            barSeries: ["count", "completed"],
+            lineSeries: ["prevCount", "prevCompleted"],
+          }
+        : { barSeries: ["revenue"], lineSeries: ["prevRevenue"] };
 
     const chartConfig: ChartConfig = {
       id: editingChart?.id || `chart-${Date.now()}`,
@@ -113,7 +136,7 @@ export function LineBarChartConfigForm({
       type: "linebar",
       dataKey: config.dataSource,
       dataKeys: getDataKeys(),
-      xAxisKey: "date",
+      xAxisKey: "name",
       colors: ["#3b61c0", "#00bfff", "#f59e0b", "#dc2626", "#1f2937"],
       data: previewData,
       seriesConfig,
@@ -285,7 +308,7 @@ export function LineBarChartConfigForm({
                   }
                   type="linebar"
                   dataKeys={getDataKeys()}
-                  xAxisKey="date"
+                  xAxisKey="name"
                   colors={[
                     "#3b61c0",
                     "#00bfff",
@@ -295,8 +318,11 @@ export function LineBarChartConfigForm({
                   ]}
                   seriesConfig={
                     config.dataSource === "appointments"
-                      ? { barSeries: ["count"], lineSeries: ["completed"] }
-                      : { barSeries: ["revenue"], lineSeries: ["target"] }
+                      ? {
+                          barSeries: ["count", "completed"],
+                          lineSeries: ["prevCount", "prevCompleted"],
+                        }
+                      : { barSeries: ["revenue"], lineSeries: ["prevRevenue"] }
                   }
                 />
               ) : (

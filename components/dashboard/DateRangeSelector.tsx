@@ -1,11 +1,8 @@
 "use client";
 
-import React, { useState } from "react";
+import React from "react";
 import { Calendar, ChevronLeft, ChevronRight } from "lucide-react";
-import {
-  useDashboardDate,
-  type DateRange,
-} from "@/context/DashboardDateContext";
+import { useDashboardDate } from "@/context/DashboardDateContext";
 import { Button } from "@/components/ui/button";
 import {
   Select,
@@ -14,18 +11,19 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { DateRangePicker } from "@/components/customUIComponents/DateRangePicker";
+import { format } from "date-fns";
+import { CustomTooltip } from "../customUIComponents/CustomTooltip";
+import { useTranslation } from "react-i18next";
 
 export const DateRangeSelector: React.FC = () => {
   const { dateRange, setDateRange, groupBy, setGroupBy } = useDashboardDate();
-  const [isOpen, setIsOpen] = useState(false);
-
-  const formatDate = (date: Date | undefined): string => {
-    if (!date) return "N/A";
-    return date.toLocaleDateString("en-US", {
-      month: "short",
-      day: "numeric",
-      year: "numeric",
-    });
+  const { t } = useTranslation();
+  const parseLocalDate = (value: string): Date | null => {
+    const [year, month, day] = value.split("-").map(Number);
+    if (!year || !month || !day) return null;
+    const d = new Date(year, month - 1, day);
+    return isNaN(d.getTime()) ? null : d;
   };
 
   const handlePreviousPeriod = () => {
@@ -90,39 +88,116 @@ export const DateRangeSelector: React.FC = () => {
     setGroupBy("month");
   };
 
+  const handleCustomRangeChange = (value: {
+    startDate: string | null;
+    endDate: string | null;
+  }) => {
+    const fromDate = value.startDate ? parseLocalDate(value.startDate) : null;
+    const toDate = value.endDate ? parseLocalDate(value.endDate) : null;
+
+    // If only start picked, store it so the second click can complete the range
+    if (fromDate && !toDate) {
+      setDateRange({ from: fromDate, to: undefined });
+      return;
+    }
+
+    if (fromDate && toDate) {
+      setDateRange({ from: fromDate, to: toDate });
+    }
+  };
+
+  const isSameDay = (a?: Date, b?: Date) => {
+    if (!a || !b) return false;
+    return (
+      a.getFullYear() === b.getFullYear() &&
+      a.getMonth() === b.getMonth() &&
+      a.getDate() === b.getDate()
+    );
+  };
+
+  const computeIsSelected = () => {
+    if (!dateRange.from || !dateRange.to)
+      return {
+        isThisWeekSelected: false,
+        isThisMonthSelected: false,
+        isThisYearSelected: false,
+      };
+
+    const today = new Date();
+
+    const weekStart = new Date(today);
+    weekStart.setDate(today.getDate() - today.getDay());
+    const weekEnd = new Date(weekStart);
+    weekEnd.setDate(weekStart.getDate() + 6);
+
+    const monthStart = new Date(today.getFullYear(), today.getMonth(), 1);
+    const monthEnd = new Date(today.getFullYear(), today.getMonth() + 1, 0);
+
+    const yearStart = new Date(today.getFullYear(), 0, 1);
+    const yearEnd = new Date(today.getFullYear(), 11, 31);
+
+    return {
+      isThisWeekSelected:
+        isSameDay(dateRange.from, weekStart) &&
+        isSameDay(dateRange.to, weekEnd),
+      isThisMonthSelected:
+        isSameDay(dateRange.from, monthStart) &&
+        isSameDay(dateRange.to, monthEnd),
+      isThisYearSelected:
+        isSameDay(dateRange.from, yearStart) &&
+        isSameDay(dateRange.to, yearEnd),
+    };
+  };
+
+  const { isThisWeekSelected, isThisMonthSelected, isThisYearSelected } =
+    computeIsSelected();
+
   return (
-    <div className="flex items-center gap-3 bg-card p-4 rounded-lg border">
-      <div className="flex items-center gap-2">
-        <Calendar className="w-5 h-5 text-muted-foreground" />
-        <span className="text-sm font-medium">
-          {formatDate(dateRange.from)} - {formatDate(dateRange.to)}
-        </span>
+    <div className="relative flex flex-col gap-3 sm:flex-row sm:flex-nowrap sm:items-center bg-card p-4 rounded-lg border z-[3000]">
+      <div className="flex w-full flex-wrap items-center gap-2 sm:flex-nowrap">
+        <div className="flex-1 min-w-[220px] sm:flex-initial">
+          <DateRangePicker
+            value={{
+              startDate: dateRange.from
+                ? format(dateRange.from, "yyyy-MM-dd")
+                : null,
+              endDate: dateRange.to ? format(dateRange.to, "yyyy-MM-dd") : null,
+            }}
+            onChange={handleCustomRangeChange}
+            renderTrigger={({ rangeLabel }) => (
+              <button
+                type="button"
+                className="flex w-full sm:w-auto items-center justify-between gap-2 px-3 py-2 rounded-md border bg-background hover:border-primary transition-colors text-left"
+              >
+                <span className="flex items-center gap-2">
+                  <Calendar className="w-5 h-5 text-muted-foreground" />
+                  <span className="text-sm font-medium truncate">
+                    {rangeLabel || "Select date range"}
+                  </span>
+                </span>
+                <ChevronRight className="w-4 h-4 text-muted-foreground sm:hidden" />
+              </button>
+            )}
+          />
+        </div>
+
+        <div className="flex items-center gap-1">
+          <CustomTooltip
+            onClick={handlePreviousPeriod}
+            tooltipText={t("Previous period")}
+            icon={<ChevronLeft />}
+          />
+          <CustomTooltip
+            onClick={handleNextPeriod}
+            tooltipText={t("Next period")}
+            icon={<ChevronRight />}
+          />
+        </div>
       </div>
 
-      <div className="flex items-center gap-1">
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={handlePreviousPeriod}
-          className="w-8 h-8 p-0"
-          title="Previous period"
-        >
-          <ChevronLeft className="w-4 h-4" />
-        </Button>
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={handleNextPeriod}
-          className="w-8 h-8 p-0"
-          title="Next period"
-        >
-          <ChevronRight className="w-4 h-4" />
-        </Button>
-      </div>
+      <div className="hidden sm:block w-px h-6 bg-border" />
 
-      <div className="w-px h-6 bg-border" />
-
-      <div className="flex items-center gap-2">
+      <div className="flex w-full flex-wrap items-center gap-2 sm:w-auto sm:flex-nowrap">
         <span className="text-xs text-muted-foreground">Grouping:</span>
         <Select
           value={groupBy}
@@ -139,11 +214,11 @@ export const DateRangeSelector: React.FC = () => {
         </Select>
       </div>
 
-      <div className="w-px h-6 bg-border" />
+      <div className="hidden sm:block w-px h-6 bg-border" />
 
-      <div className="flex items-center gap-2">
+      <div className="flex w-full flex-wrap items-center gap-2 sm:w-auto sm:flex-nowrap">
         <Button
-          variant="outline"
+          variant={isThisWeekSelected ? "default" : "outline"}
           size="sm"
           onClick={handleToday}
           className="text-xs"
@@ -151,7 +226,7 @@ export const DateRangeSelector: React.FC = () => {
           This Week
         </Button>
         <Button
-          variant="outline"
+          variant={isThisMonthSelected ? "default" : "outline"}
           size="sm"
           onClick={handleThisMonth}
           className="text-xs"
@@ -159,7 +234,7 @@ export const DateRangeSelector: React.FC = () => {
           This Month
         </Button>
         <Button
-          variant="outline"
+          variant={isThisYearSelected ? "default" : "outline"}
           size="sm"
           onClick={handleThisYear}
           className="text-xs"

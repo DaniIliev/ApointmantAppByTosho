@@ -2,7 +2,7 @@
 
 import React, { useState, useCallback, useMemo } from "react";
 import GridLayout from "react-grid-layout";
-import { Trash2 } from "lucide-react";
+import { GripHorizontal, Trash2 } from "lucide-react";
 import { PerformanceChart } from "@/components/performance/PerformanceChart";
 import { ChartActionsMenu } from "@/components/dashboard/ChartActionsMenu";
 import type {
@@ -180,69 +180,6 @@ export function DashboardGrid({
     }));
   };
 
-  const handlePrintChart = (chartId: string) => {
-    // Find the chart element and capture it as image
-    const chartElement = document.querySelector(
-      `[data-chart-id="${chartId}"] .echarts-for-react`
-    ) as HTMLElement;
-
-    if (chartElement) {
-      // Get the echarts instance to convert to image
-      const echartsInstance = (
-        chartElement as unknown as { getEchartsInstance?: () => unknown }
-      ).getEchartsInstance?.();
-      if (
-        echartsInstance &&
-        typeof echartsInstance === "object" &&
-        "getDataURL" in echartsInstance
-      ) {
-        const imageUrl = (
-          echartsInstance as unknown as {
-            getDataURL: (options: {
-              type: string;
-              pixelRatio: number;
-              backgroundColor: string;
-            }) => string;
-          }
-        ).getDataURL({
-          type: "png",
-          pixelRatio: 2,
-          backgroundColor: "#fff",
-        });
-
-        // Create a new window for printing
-        const printWindow = window.open("", "", "height=800,width=1000");
-        if (printWindow) {
-          const item = items.find((i) => i.id === chartId);
-          printWindow.document.write(`
-            <html>
-              <head>
-                <title>${item?.title || "Chart"}</title>
-                <style>
-                  body { margin: 20px; font-family: Arial, sans-serif; }
-                  h1 { color: #333; margin-bottom: 20px; }
-                  img { max-width: 100%; height: auto; }
-                  .footer { margin-top: 20px; font-size: 12px; color: #666; }
-                </style>
-              </head>
-              <body>
-                <h1>${item?.title || "Chart"}</h1>
-                <img src="${imageUrl}" />
-                <div class="footer">
-                  <p>Generated on ${new Date().toLocaleString()}</p>
-                </div>
-              </body>
-            </html>
-          `);
-          printWindow.document.close();
-          setTimeout(() => {
-            printWindow.print();
-          }, 250);
-        }
-      }
-    }
-  };
-
   const [screenWidth, setScreenWidth] = React.useState(0);
   const containerRef = React.useRef<HTMLDivElement>(null);
   const [containerWidth, setContainerWidth] = React.useState(0);
@@ -311,47 +248,43 @@ export function DashboardGrid({
               key={item.id}
               className="rounded-lg shadow-md hover:shadow-lg transition-shadow overflow-hidden flex flex-col relative z-10 border border-primary/20"
             >
-              <div className="bg-white dark:bg-slate-800 draggable-handle flex items-center justify-between p-3 cursor-grab active:cursor-grabbing relative z-10">
-                <h3 className="text-sm font-semibold text-primary truncate flex-1">
-                  {item.title}
-                </h3>
-                <div className="flex items-center gap-1 ml-2 relative z-20">
-                  <CustomTooltip
-                    onClick={() => onRemoveItem(item.id)}
-                    tooltipText={t("Remove KPI")}
-                    icon={<Trash2 className="w-5 h-5 text-red-400" />}
-                  />
-                </div>
+              <div className="absolute top-2 left-1/2 -translate-x-1/2 z-20 text-slate-300 hover:text-primary cursor-grab active:cursor-grabbing draggable-handle">
+                <GripHorizontal className="w-5 h-4" />
               </div>
+              <div className="absolute top-2 right-2 z-20">
+                <CustomTooltip
+                  onClick={() => onRemoveItem(item.id)}
+                  tooltipText={t("Remove KPI")}
+                  icon={<Trash2 className="w-5 h-5 text-red-400" />}
+                />
+              </div>
+
               <div className="flex-1 overflow-hidden flex items-center justify-center w-full h-full">
-                <div className="w-full h-full flex flex-col items-center justify-center">
-                  {/* Responsive value display */}
-                  <div className="bg-white dark:bg-gray-900 border-primary/20 text-center flex-1 flex flex-col items-center justify-center w-full">
-                    <div className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-text-primary break-words">
-                      {item.value}
-                    </div>
-                    <div className="text-xs sm:text-sm md:text-base mt-2 text-slate-400 text-center line-clamp-2">
-                      {item.title}
-                    </div>
-                    {item.change && (
-                      <div
-                        className={`text-xs sm:text-sm mt-2 font-semibold ${
-                          item.change.type === "increase"
-                            ? "text-green-400"
-                            : item.change.type === "decrease"
-                            ? "text-red-400"
-                            : "text-slate-400"
-                        }`}
-                      >
-                        {item.change.type === "increase"
-                          ? "↑"
-                          : item.change.type === "decrease"
-                          ? "↓"
-                          : "→"}{" "}
-                        {item.change.value}%
-                      </div>
-                    )}
+                <div className="w-full h-full rounded-lg bg-white dark:bg-gray-900 border-primary/20 text-center flex flex-col items-center justify-center">
+                  <div className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-text-primary break-words">
+                    {item.value}
                   </div>
+                  <div className="text-xs sm:text-sm md:text-base mt-2 text-slate-400 text-center line-clamp-2">
+                    {item.title}
+                  </div>
+                  {item.change && (
+                    <div
+                      className={`text-xs sm:text-sm mt-2 font-semibold ${
+                        item.change.type === "increase"
+                          ? "text-green-400"
+                          : item.change.type === "decrease"
+                          ? "text-red-400"
+                          : "text-slate-400"
+                      }`}
+                    >
+                      {item.change.type === "increase"
+                        ? "↑"
+                        : item.change.type === "decrease"
+                        ? "↓"
+                        : "→"}{" "}
+                      {item.change.value}%
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
@@ -369,6 +302,9 @@ export function DashboardGrid({
                 }
               }}
             >
+              <div className="absolute top-2 left-1/2 -translate-x-1/2 z-30 text-slate-300 hover:text-primary cursor-grab active:cursor-grabbing draggable-handle">
+                <GripHorizontal className="w-5 h-4" />
+              </div>
               {/* Chart content with header overlay */}
               <div className="flex-1 p-3 bg-white dark:bg-slate-800 flex flex-col relative border-primary/20">
                 {/* Header overlay */}
@@ -386,7 +322,6 @@ export function DashboardGrid({
                       onEdit={handleEditChart}
                       onDelete={handleDeleteChart}
                       onToggleSlider={handleToggleSlider}
-                      onPrint={handlePrintChart}
                       showSlider={showSlider[item.id] || false}
                       item={item as ChartConfig}
                     />
