@@ -27,60 +27,54 @@ const chartTypes: ChartType[] = [
   {
     id: "kpi",
     name: "KPI Card",
-    icon: <Gauge className="w-12 h-12" />,
+    icon: <Gauge className="w-12 h-12 text-primary" />,
     description: "Key metrics",
   },
   {
     id: "line",
     name: "Line Chart",
-    icon: <LineChart className="w-12 h-12" />,
+    icon: <LineChart className="w-12 h-12 text-primary" />,
     description: "Trends over time",
   },
   {
     id: "bar",
     name: "Bar Chart",
-    icon: <BarChart3 className="w-12 h-12" />,
+    icon: <BarChart3 className="w-12 h-12 text-primary" />,
     description: "Compare values",
   },
   {
     id: "hbar",
     name: "Horizontal Bar",
-    icon: <BarChartHorizontal className="w-12 h-12" />,
+    icon: <BarChartHorizontal className="w-12 h-12 text-primary" />,
     description: "Horizontal comparison",
-  },
-  {
-    id: "column",
-    name: "Column Chart",
-    icon: <Activity className="w-12 h-12" />,
-    description: "Vertical bars",
   },
   {
     id: "pie",
     name: "Pie Chart",
-    icon: <PieChart className="w-12 h-12" />,
+    icon: <PieChart className="w-12 h-12 text-primary" />,
     description: "Part of whole",
   },
   {
     id: "linebar",
     name: "Line & Bar",
-    icon: <TrendingUp className="w-12 h-12" />,
+    icon: <TrendingUp className="w-12 h-12 text-primary" />,
     description: "Combined view",
   },
 ];
 
 export function ChartSelectionGrid({ onSelectChart }: ChartSelectionGridProps) {
   return (
-    <div className="grid grid-cols-2 gap-4 max-h-[500px] overflow-y-auto p-2">
+    <div className="grid grid-cols-2 gap-4 overflow-y-auto p-2">
       {chartTypes.map((chart) => (
         <button
           key={chart.id}
           onClick={() => onSelectChart(chart.id)}
-          className="flex flex-col items-center gap-2 p-4 rounded-lg border border-slate-200 hover:border-blue-400 hover:bg-blue-50 transition-all group"
+          className="flex flex-col items-center gap-2 p-4 rounded-lg border border-primary/80 hover:border-primary hover:bg-primary/10 transition-all group"
         >
           <div className="text-slate-600 group-hover:text-blue-600">
             {chart.icon}
           </div>
-          <h4 className="font-semibold text-sm text-slate-700 group-hover:text-blue-600 text-center">
+          <h4 className="font-semibold text-sm text-text-primary text-center">
             {chart.name}
           </h4>
           <p className="text-xs text-slate-500 text-center">

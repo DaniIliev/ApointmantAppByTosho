@@ -12,6 +12,8 @@ import type {
 } from "./types";
 import "react-grid-layout/css/styles.css";
 import "react-resizable/css/styles.css";
+import { CustomTooltip } from "../customUIComponents/CustomTooltip";
+import { useTranslation } from "react-i18next";
 
 interface DashboardGridProps {
   items: DashboardItem[];
@@ -35,6 +37,7 @@ export function DashboardGrid({
   dateFrom,
   dateTo,
 }: DashboardGridProps) {
+  const { t } = useTranslation();
   const [isMobile, setIsMobile] = React.useState(false);
   const [openMenu, setOpenMenu] = useState<string | null>(null);
   const [showSlider, setShowSlider] = useState<{ [key: string]: boolean }>(
@@ -306,27 +309,25 @@ export function DashboardGrid({
           item.type === "kpi" ? (
             <div
               key={item.id}
-              className=" rounded-lg shadow-md hover:shadow-lg transition-shadow overflow-hidden flex flex-col relative z-10 border border-slate-700"
+              className="rounded-lg shadow-md hover:shadow-lg transition-shadow overflow-hidden flex flex-col relative z-10 border border-primary/20"
             >
-              <div className="draggable-handle flex items-center justify-between p-3 bg-gradient-to-r from-slate-700 to-slate-600 border-b border-slate-600 cursor-grab active:cursor-grabbing relative z-10">
-                <h3 className="text-sm font-semibold text-slate-100 truncate flex-1">
+              <div className="bg-white dark:bg-slate-800 draggable-handle flex items-center justify-between p-3 cursor-grab active:cursor-grabbing relative z-10">
+                <h3 className="text-sm font-semibold text-primary truncate flex-1">
                   {item.title}
                 </h3>
                 <div className="flex items-center gap-1 ml-2 relative z-20">
-                  <button
+                  <CustomTooltip
                     onClick={() => onRemoveItem(item.id)}
-                    className="p-2 hover:bg-red-900/50 rounded transition-colors"
-                    title="Remove KPI"
-                  >
-                    <Trash2 className="w-5 h-5 text-red-400" />
-                  </button>
+                    tooltipText={t("Remove KPI")}
+                    icon={<Trash2 className="w-5 h-5 text-red-400" />}
+                  />
                 </div>
               </div>
-              <div className="flex-1 overflow-hidden p-2 flex items-center justify-center w-full h-full">
+              <div className="flex-1 overflow-hidden flex items-center justify-center w-full h-full">
                 <div className="w-full h-full flex flex-col items-center justify-center">
                   {/* Responsive value display */}
-                  <div className="text-center flex-1 flex flex-col items-center justify-center w-full px-2">
-                    <div className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-slate-100 break-words">
+                  <div className="bg-white dark:bg-gray-900 border-primary/20 text-center flex-1 flex flex-col items-center justify-center w-full">
+                    <div className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-text-primary break-words">
                       {item.value}
                     </div>
                     <div className="text-xs sm:text-sm md:text-base mt-2 text-slate-400 text-center line-clamp-2">
@@ -357,7 +358,7 @@ export function DashboardGrid({
           ) : (
             <div
               key={item.id}
-              className="bg-primary rounded-lg shadow-md hover:shadow-lg transition-shadow overflow-visible flex flex-col border border-slate-700 relative"
+              className="bg-primary rounded-lg shadow-md hover:shadow-lg transition-shadow overflow-hidden flex flex-col relative"
               data-chart-id={item.id}
               onMouseDown={(e) => {
                 if (
@@ -369,7 +370,7 @@ export function DashboardGrid({
               }}
             >
               {/* Chart content with header overlay */}
-              <div className="flex-1 p-3 bg-white dark:bg-slate-800 flex flex-col relative">
+              <div className="flex-1 p-3 bg-white dark:bg-slate-800 flex flex-col relative border-primary/20">
                 {/* Header overlay */}
                 <div className="absolute top-1.5 left-7 right-5 z-30 flex items-center justify-between">
                   <h3 className="font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent text-sm font-semibold text-slate-900 truncate flex-1 draggable-handle cursor-grab active:cursor-grabbing">

@@ -28,6 +28,7 @@ import { DashboardDateProvider } from "@/context/DashboardDateContext";
 import { DateRangeSelector } from "@/components/dashboard/DateRangeSelector";
 import { useDashboardDate } from "@/context/DashboardDateContext";
 import callApi from "@/app/Api/callApi";
+import { Modal } from "@/components/customUIComponents/Modal";
 
 interface ChangeMetric {
   value: number;
@@ -702,17 +703,16 @@ function PerformancePageContent() {
   return (
     <>
       {/* Chart Selection Modal */}
-      <Dialog open={isCreateModalOpen} onOpenChange={setIsCreateModalOpen}>
-        <DialogContent className="max-w-2xl">
-          <DialogHeader>
-            <DialogTitle>Select Chart Type</DialogTitle>
-          </DialogHeader>
-          <ChartSelectionGrid
-            onSelectChart={handleSelectChartType}
-            addedChartIds={[]}
-          />
-        </DialogContent>
-      </Dialog>
+      <Modal
+        label={t("Select Chart Type")}
+        open={isCreateModalOpen}
+        onOpenChange={setIsCreateModalOpen}
+      >
+        <ChartSelectionGrid
+          onSelectChart={handleSelectChartType}
+          addedChartIds={[]}
+        />
+      </Modal>
 
       {/* Chart Configuration Forms */}
       {selectedChartType === "line" && (
