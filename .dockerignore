@@ -1,0 +1,33 @@
+# Dependencies and build output
+node_modules
+.next
+out
+dist
+build
+
+# Local and VCS
+.git
+.gitignore
+.vscode
+.DS_Store
+
+# Env and configs
+.env
+.env.*
+.eslintcache
+.cache
+.pnpm-store
+
+# Logs and temp
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+*.log
+coverage
+tmp
+logs
+
+# Misc not needed in Docker context
+Dockerfile
+docker-compose.yml
+README.md
