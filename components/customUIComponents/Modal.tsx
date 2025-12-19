@@ -148,7 +148,7 @@ export const Modal = ({
         <DialogContent
           className={`${widthClass} md:max-h-[90vh] h-full md:h-auto max-h-screen flex flex-col ${
             centerContentOnMobile ? "items-center md:items-stretch" : ""
-          } overflow-visible !important bg-card/95 backdrop-blur-lg border-2 border-primary/20 [&>button]:hidden md:rounded-lg rounded-none p-0 md:p-6`}
+          } bg-card/95 backdrop-blur-lg border-2 border-primary/20 [&>button]:hidden md:rounded-lg rounded-none p-0 md:p-6`}
         >
           <DialogHeader
             className={`flex-shrink-0 p-4 md:p-0 border-b md:border-b-0 border-border/50 ${
@@ -175,7 +175,7 @@ export const Modal = ({
             ref={contentRef}
             className={
               scrollableContent
-                ? "flex-1 overflow-y-auto overflow-x-hidden px-4 md:px-0 md:pr-2 pb-4 md:pb-0"
+                ? "flex-1 overflow-y-auto overflow-x-hidden px-4 md:px-0 md:pr-2 pb-4 md:pb-0 overscroll-contain"
                 : "flex-1 overflow-visible px-4 md:px-0 md:pr-2 pb-4 md:pb-0"
             }
           >

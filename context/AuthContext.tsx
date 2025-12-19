@@ -5,8 +5,8 @@ import { AuthContextType, User } from "./AuthContextTypes";
 import { jwtDecode } from "jwt-decode";
 import { findUserByID } from "@/app/Api/services/userService";
 import callApi from "@/app/Api/callApi";
-import { redirect } from "next/navigation";
 import LoadingBackdrop from "@/components/ui/LoadingBackdrop";
+import { useRouter } from "next/navigation";
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
@@ -14,13 +14,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const [token, setToken] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [shouldRedirect, setShouldRedirect] = useState(false);
-
-  useEffect(() => {
-    if (shouldRedirect) {
-      redirect("/dashboard");
-    }
-  }, [shouldRedirect]);
+  const router = useRouter();
 
   const login = async (formData: {
     email: string;
@@ -58,7 +52,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
             setUser(null);
           });
       }
-      setShouldRedirect(true);
+      router.push("/dashboard");
     } catch (error) {
       console.error("Invalid token:", error);
       setUser(null);
@@ -69,7 +63,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     setUser(null);
     setToken(null);
     localStorage.removeItem("token");
-    redirect("login");
+    router.push("/login");
   };
 
   useEffect(() => {
@@ -87,13 +81,13 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
             console.warn("Invalid token or missing _id in token.");
             logout();
             setIsLoading(false);
-            redirect("/login");
+            router.push("/login");
           }
         } catch (error) {
           console.error("Error fetching user data:", error);
           logout();
           setIsLoading(false);
-          redirect("/login");
+          router.push("/login");
         }
       } else {
         setUser(null);

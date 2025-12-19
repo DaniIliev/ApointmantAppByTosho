@@ -6,7 +6,7 @@ import {
   AppointmentType,
   SelectOptionsAppointmentType,
 } from "@/Global/Types/types";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { LabeledSelect } from "@/components/customUIComponents/LabeledSelect";
 import { FormGrid } from "@/Global/Styles/FormGrid";
 import callApi from "@/app/Api/callApi";
@@ -59,13 +59,18 @@ const AppointmentForm = ({
   const [availableSlots, setAvailableSlots] = useState<any[]>([]);
   const [closestSlot, setClosestSlot] = useState<any>(null);
   const [isClosestSlotModalOpen, setIsClosestSlotModalOpen] = useState(false);
-  const [loadingClosestSlot, setLoadingClosestSlot] = useState(false);
+  const fetchedStaffForTypeRef = useRef<string | null>(null);
 
-  console.log("appointmentData", appointmentData);
-  // 1. Извличане на Персонал по Тип Среща
   useEffect(() => {
     const fetchStaff = async () => {
       if (appointmentData.appointmentTypeId) {
+        if (
+          fetchedStaffForTypeRef.current === appointmentData.appointmentTypeId
+        ) {
+          return;
+        }
+        fetchedStaffForTypeRef.current = appointmentData.appointmentTypeId;
+
         const selectedService = appointmentTypes?.find(
           (type) => type._id === appointmentData.appointmentTypeId
         );
@@ -76,11 +81,12 @@ const AppointmentForm = ({
           setAvailableStaff(staffDetails);
         }
       } else {
-        setAvailableStaff([]); // Изчистване, ако типът е променен или нулиран
+        setAvailableStaff([]);
+        fetchedStaffForTypeRef.current = null;
       }
     };
     fetchStaff();
-  }, [appointmentData.appointmentTypeId, appointmentTypes]);
+  }, [appointmentData.appointmentTypeId]);
 
   useEffect(() => {
     const fetchSlots = async () => {
@@ -116,8 +122,6 @@ const AppointmentForm = ({
       ) {
         // Проверка дали вече има избрана дата/час (избягва изскачане, ако потребителят вече е избрал)
         if (appointmentData.date && appointmentData.time) return;
-
-        setLoadingClosestSlot(true);
         const response = await callApi(
           `/api/appointment/closest-slot?staffId=${appointmentData.staff._id}&serviceId=${appointmentData.appointmentTypeId}`,
           "GET"
@@ -129,7 +133,6 @@ const AppointmentForm = ({
         } else {
           setClosestSlot(null);
         }
-        setLoadingClosestSlot(false);
       }
     };
     fetchClosestSlot();
@@ -288,7 +291,6 @@ const AppointmentForm = ({
           setAppointmentData((prev) => ({ ...prev, notes: e.target.value }))
         }
         placeholder={t("Add any additional notes or special requirements...")}
-        rows={2}
       />
       {appointmentData.appointmentTypeId && (
         <div className="p-4 bg-primary/10 rounded-xl border border-primary/20">

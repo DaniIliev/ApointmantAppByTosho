@@ -1,33 +1,27 @@
 import React, { useState, forwardRef } from "react";
 import { Eye, EyeOff } from "lucide-react";
 
-// Simple utility function to merge Tailwind classes
 const cn = (...classes: (string | boolean | undefined | null)[]): string => {
   return classes.filter(Boolean).join(" ");
 };
 
-// Обновен интерфейс, вече включва onClear
 interface LabeledInputProps {
   label: string;
   id: string;
   value: string;
-  // Разширен тип, за да приема събития от input И textarea
   onChange: (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => void;
   placeholder?: string;
   className?: string;
   type?: React.HTMLInputTypeAttribute;
-  // Опционален параметър rows - ако е зададен, рендира <textarea>
   rows?: number;
-  // 👈 НОВА ФУНКЦИЯ ЗА ИЗЧИСТВАНЕ
   onClear?: () => void;
-  required?: boolean; // Позволява required атрибут
-  errorText?: string; // Текст за грешка при празно задължително поле
-  showError?: boolean; // Кога да показваме грешката (например при Submit)
+  required?: boolean;
+  errorText?: string;
+  showError?: boolean;
 }
 
-// Обновен тип на forwardRef, за да приема и двата DOM елемента
 export const LabeledInput = forwardRef<
   HTMLInputElement | HTMLTextAreaElement,
   LabeledInputProps
@@ -55,11 +49,8 @@ export const LabeledInput = forwardRef<
     const isTextarea = rows !== undefined;
     const isErroredEmpty = Boolean(showError && required && !hasValue);
 
-    // Проверка дали бутонът за изчистване трябва да се покаже
     const isClearable = onClear && hasValue;
 
-    // За date/time/datetime-local винаги запазваме оригиналния тип
-    // за да работи нативният picker на мобилни устройства
     const [showPassword, setShowPassword] = useState(false);
     const isPassword = type === "password";
     const inputType = isPassword ? (showPassword ? "text" : "password") : type;
@@ -69,18 +60,15 @@ export const LabeledInput = forwardRef<
       "border-b-2",
       isErroredEmpty ? "border-red-500" : "border-transparent",
       "outline-none",
-      "placeholder-transparent focus:placeholder-gray-400",
-      // 👈 Динамичен padding, за да направи място за иконата
+      isFocused ? "placeholder-gray-400" : "placeholder-transparent",
       isClearable ? "pr-8" : "pr-4",
       className
     );
 
-    // Класове, специфични за елемента
     const elementClasses = isTextarea
-      ? cn(baseClasses, `min-h-12 resize-y`) // За Textarea: минимална височина и разрешено оразмеряване
-      : cn(baseClasses, "h-12"); // За Input: фиксирана височина
+      ? cn(baseClasses, `min-h-12 resize-y`)
+      : cn(baseClasses, "h-12");
 
-    // Коригиране на позицията на label-а за textarea, когато не е фокусирано
     const finalLabelPosition = isErroredEmpty
       ? "text-red-500"
       : isFocused || hasValue
@@ -88,8 +76,8 @@ export const LabeledInput = forwardRef<
       : isErroredEmpty
       ? "text-red-500"
       : isTextarea
-      ? "top-3 text-sm left-4" // По-висока начална позиция за textarea
-      : "top-1/2 -translate-y-1/2 text-sm left-4"; // Начална позиция за стандартен input
+      ? "top-3 text-sm left-4"
+      : "top-1/2 -translate-y-1/2 text-sm left-4";
 
     return (
       <>
@@ -101,20 +89,27 @@ export const LabeledInput = forwardRef<
             textarea:-webkit-autofill,
             textarea:-webkit-autofill:hover,
             textarea:-webkit-autofill:focus {
-              /* Използваме box-shadow за да презапишем фона. 
-              Цветът #fefefe е много светъл сив/бял, близък до 'card' */
               -webkit-box-shadow: 0 0 0 1000px #fefefe inset !important;
               box-shadow: 0 0 0 1000px #fefefe inset !important;
-
-              /* Осигурява че текстът остава тъмен и четлив */
-              -webkit-text-fill-color: #1f2937 !important; /* Прокси за тъмен текст (Tailwind gray-800) */
-
-              /* Премахва евентуални сини или жълти граници, наложени от браузъра */
+              -webkit-text-fill-color: #1f2937 !important;
               transition: background-color 5000s ease-in-out 0s;
+            }
+
+            input[type="date"]:not(:focus)::-webkit-datetime-edit,
+            input[type="time"]:not(:focus)::-webkit-datetime-edit,
+            input[type="datetime-local"]:not(:focus)::-webkit-datetime-edit {
+              color: transparent;
+            }
+
+            input[type="date"]:not(:focus)::-webkit-calendar-picker-indicator,
+            input[type="time"]:not(:focus)::-webkit-calendar-picker-indicator,
+            input[type="datetime-local"]:not(
+                :focus
+              )::-webkit-calendar-picker-indicator {
+              opacity: 0.3;
             }
           `}</style>
 
-          {/* Етикетът, който се "движи" */}
           <label
             htmlFor={id}
             className={cn(
@@ -127,21 +122,17 @@ export const LabeledInput = forwardRef<
             {label}
           </label>
 
-          {/* 3. Условно Рендиране на input/textarea */}
           {isTextarea ? (
             <textarea
               id={id}
-              // Ref cast за textarea
               ref={ref as React.Ref<HTMLTextAreaElement>}
               rows={rows}
               value={value}
-              // onChange е съвместим
               onChange={onChange}
               onFocus={() => setIsFocused(true)}
               onBlur={() => setIsFocused(false)}
-              // Забележка: pt-4 е приложен в elementClasses
               className={elementClasses}
-              placeholder={!isFocused || !hasValue ? placeholder : ""}
+              placeholder={isFocused ? placeholder : ""}
               required={required}
               aria-invalid={isErroredEmpty}
               {...props}
@@ -160,7 +151,12 @@ export const LabeledInput = forwardRef<
                 onBlur={() => setIsFocused(false)}
                 className={elementClasses}
                 placeholder={
-                  inputType === "text" && (!isFocused || !hasValue)
+                  (type === "date" ||
+                    type === "time" ||
+                    type === "datetime-local") &&
+                  !isFocused
+                    ? ""
+                    : isFocused
                     ? placeholder
                     : ""
                 }
@@ -182,7 +178,6 @@ export const LabeledInput = forwardRef<
             </div>
           )}
 
-          {/* 👈 НОВ ЕЛЕМЕНТ: Бутон за изчистване (рачка) */}
           {isClearable && (
             <button
               type="button"
@@ -194,7 +189,6 @@ export const LabeledInput = forwardRef<
                 "h-5 w-5 rounded-full text-muted-foreground hover:text-primary/80 flex items-center justify-center z-20"
               )}
             >
-              {/* Иконка 'X' (Close) */}
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 width="18"

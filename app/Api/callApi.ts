@@ -52,18 +52,34 @@ const callApi = async (
   });
 
   if (!result.ok) {
-    // Handle 401 Unauthorized - redirect to login
-    if (result.status === 401) {
-      console.warn("Unauthorized access - redirecting to login");
-      localStorage.removeItem("token"); // Clear invalid token
-      if (typeof window !== "undefined") {
-        redirect("/login");
-      }
-      throw new Error("Unauthorized - redirecting to login");
-    }
-
     console.error("API error:", result);
     const errorData = await result.json();
+
+    // Handle 401 Unauthorized - only redirect for protected routes
+    if (result.status === 401) {
+      console.warn("Unauthorized access detected");
+      localStorage.removeItem("token"); // Clear invalid token
+
+      // Don't redirect on public pages (business pages, home, etc.)
+      if (typeof window !== "undefined") {
+        const currentPath = window.location.pathname;
+        const publicPaths = [
+          "/business/",
+          "/home",
+          "/about",
+          "/pricing",
+          "/for-business",
+        ];
+        const isPublicPage = publicPaths.some((path) =>
+          currentPath.startsWith(path)
+        );
+
+        if (!isPublicPage) {
+          redirect("/login");
+        }
+      }
+    }
+
     throw new Error(errorData.message || `API error - ${result.statusText}`);
   }
 
