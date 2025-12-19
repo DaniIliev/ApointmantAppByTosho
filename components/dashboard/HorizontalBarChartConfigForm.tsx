@@ -211,7 +211,6 @@ export function HorizontalBarChartConfigForm({
                   `${s.firstName} ${s.lastName}`.trim() || (s._id as string),
               })),
             ]}
-            disabled={loadingStaff}
           />
         </div>
 

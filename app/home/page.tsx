@@ -1,13 +1,7 @@
 "use client";
-import { CustomTooltip } from "@/components/customUIComponents/CustomTooltip";
-import { HeroSection } from "@/components/HeroSection/HeroSection";
 import { BenefitsSection } from "@/components/sections/benefits-section";
 import { BusinessList } from "@/components/sections/business-list";
-import { BusinessOwnerCTA } from "@/components/sections/business-owner-cta";
-import { SearchFilters } from "@/components/sections/search-filters";
 import { usePaddingControl } from "@/context/PaddingContext";
-import { ArrowLeft } from "lucide-react";
-import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -22,7 +16,7 @@ export default function HomePage() {
   }, [setRemovePadding]);
   return (
     <div className="min-h-screen">
-      <HeroSection />
+      {/* <HeroSection /> */}
 
       {/* Benefits Section */}
       <BenefitsSection type="benefits" />
