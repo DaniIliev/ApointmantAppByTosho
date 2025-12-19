@@ -19,8 +19,7 @@ import {
 } from "lucide-react";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
-import { DateRange as DayPickerDateRange } from "react-day-picker";
-import { DateRange } from "@/app/performance/page";
+import { DateRange } from "@/context/DashboardDateContext";
 
 interface TimeFilterProps {
   selectedPeriod: string;
