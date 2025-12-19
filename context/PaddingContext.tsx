@@ -1,7 +1,7 @@
 // app/context/PaddingContext.tsx
 "use client";
 
-import { createContext, useContext, useState, useEffect } from "react";
+import { createContext, useContext, useState } from "react";
 
 // 1. Създаваме Context
 type PaddingContextType = {

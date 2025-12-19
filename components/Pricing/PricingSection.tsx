@@ -172,7 +172,7 @@ const PricingSection = () => {
   };
 
   return (
-    <section id="pricing" className="bg-baground py-10 md:py-10 font-inter">
+    <section id="pricing" className="bg-gray-50 dark:bg-gray-900 p-16">
       <div className="container mx-auto px-4 max-w-7xl">
         <div className="max-w-6xl mx-auto">
           {/* Заглавна секция */}
@@ -219,7 +219,7 @@ const PricingSection = () => {
           </div>
 
           {/* Картите с планове */}
-          <div className="grid md:grid-cols-3 gap-8">
+          <div className="grid md:grid-cols-3 gap-8 mt-8 md:mt-12">
             {plans.map((plan, index) => {
               const planData = getPriceData(plan);
               const { price, cycleDisplay, checkoutName, discountNote } =
@@ -292,7 +292,7 @@ const PricingSection = () => {
 
           {/* Индикатор за логнат потребител */}
           <div className="text-center mt-12 text-sm text-gray-500">
-            <p className="mt-2 text-primary font-semibold">
+            <p className="mt-2 text-red-500 font-semibold">
               {t(
                 "IMPORTANT: The first time you will see a 50% discount on the Stripe Checkout page."
               )}
