@@ -1,15 +1,9 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
-import { Checkbox } from "@/components/ui/checkbox";
+import { Switch } from "@/components/ui/switch";
 import type { ChartConfig } from "./types";
 import { PerformanceChart } from "@/components/performance/PerformanceChart";
 import { useDashboardDate } from "@/context/DashboardDateContext";
@@ -17,6 +11,8 @@ import { useStaffOptions } from "./useStaffOptions";
 import { fetchPreviewData } from "./analyticsPreview";
 import { LabeledInput } from "@/components/customUIComponents/LabeledInput";
 import { LabeledSelect } from "@/components/customUIComponents/LabeledSelect";
+import { Modal } from "../customUIComponents/Modal";
+import { useTranslation } from "react-i18next";
 
 interface LineBarChartConfigFormProps {
   open: boolean;
@@ -39,9 +35,7 @@ interface LineBarConfig {
   title: string;
   dataSource: LineBarDataSource;
   metric: LineBarMetric;
-  showLine: boolean;
-  showBar: boolean;
-  compareMode: "week" | "standard"; // week comparison or standard view
+  compareWeeks: boolean; // Compare current vs previous week
   staffId?: string;
 }
 
@@ -53,14 +47,13 @@ export function LineBarChartConfigForm({
 }: LineBarChartConfigFormProps) {
   const { startDate, endDate, groupBy } = useDashboardDate();
   const { staffOptions, loadingStaff } = useStaffOptions();
+  const { t } = useTranslation();
 
   const [config, setConfig] = useState<LineBarConfig>({
-    title: "Appointments vs Target",
+    title: "Appointments Comparison",
     dataSource: "appointments",
     metric: "count",
-    showLine: true,
-    showBar: true,
-    compareMode: "week",
+    compareWeeks: true,
     staffId: "",
   });
 
@@ -78,7 +71,7 @@ export function LineBarChartConfigForm({
       setLoadingPreview(true);
       try {
         const result = await fetchPreviewData({
-          chartType: "linebar",
+          chartType: config.compareWeeks ? "linebar" : "bar",
           dataSource: config.dataSource,
           metric: config.metric,
           staffId: config.staffId || undefined,
@@ -89,9 +82,20 @@ export function LineBarChartConfigForm({
         if (isCancelled) return;
         setPreviewData(result.data);
         setPreviewDataKeys(result.dataKeys || []);
-        setPreviewSeries(
-          result.seriesConfig || { barSeries: [], lineSeries: [] }
-        );
+        if (config.compareWeeks) {
+          setPreviewSeries(
+            (result.seriesConfig as Record<string, unknown>) || {
+              barSeries: [],
+              lineSeries: [],
+            }
+          );
+        } else {
+          // Non-comparison mode: show bars only for returned keys
+          const bars = (result.dataKeys && result.dataKeys.length
+            ? result.dataKeys
+            : getDataKeys()) as unknown as string[];
+          setPreviewSeries({ barSeries: bars, lineSeries: [] });
+        }
       } catch (err) {
         if (!isCancelled) {
           setPreviewData([]);
@@ -110,32 +114,45 @@ export function LineBarChartConfigForm({
     config.dataSource,
     config.metric,
     config.staffId,
+    config.compareWeeks,
     groupBy,
     startDate,
     endDate,
   ]);
 
   const getDataKeys = () => {
-    if (config.dataSource === "appointments" && config.metric === "count") {
-      return ["count", "completed", "prevCount", "prevCompleted"];
+    if (config.compareWeeks) {
+      if (config.dataSource === "appointments" && config.metric === "count") {
+        return ["count", "completed", "prevCount", "prevCompleted"];
+      }
+      if (
+        config.dataSource === "revenue" &&
+        config.metric === "total_revenue"
+      ) {
+        return ["revenue", "prevRevenue"];
+      }
     }
-    if (config.dataSource === "revenue" && config.metric === "total_revenue") {
-      return ["revenue", "prevRevenue"];
+    // Standard mode (no comparison)
+    if (config.dataSource === "appointments") {
+      return ["count", "completed"];
     }
-    return ["count"];
+    return ["revenue"];
   };
 
   const handleSave = () => {
     // Week-over-week comparison: current week as bars, previous week as lines
-    const seriesConfig =
-      previewSeries && Object.keys(previewSeries).length
+    const seriesConfig = config.compareWeeks
+      ? previewSeries && Object.keys(previewSeries).length
         ? previewSeries
         : config.dataSource === "appointments"
         ? {
             barSeries: ["count", "completed"],
             lineSeries: ["prevCount", "prevCompleted"],
           }
-        : { barSeries: ["revenue"], lineSeries: ["prevRevenue"] };
+        : { barSeries: ["revenue"], lineSeries: ["prevRevenue"] }
+      : config.dataSource === "appointments"
+      ? { barSeries: ["count", "completed"], lineSeries: [] }
+      : { barSeries: ["revenue"], lineSeries: [] };
 
     const chartConfig: ChartConfig = {
       id: editingChart?.id || `chart-${Date.now()}`,
@@ -157,6 +174,7 @@ export function LineBarChartConfigForm({
         dataSource: config.dataSource,
         metric: config.metric,
         staffId: config.staffId?.trim() || undefined,
+        compareWeeks: config.compareWeeks,
       },
     };
 
@@ -165,127 +183,101 @@ export function LineBarChartConfigForm({
   };
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-5xl max-h-[500px] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle>Configure Line & Bar Chart</DialogTitle>
-        </DialogHeader>
+    <Modal
+      label={t("Configure Line & Bar Chart")}
+      open={open}
+      onOpenChange={onOpenChange}
+      width="5xl"
+    >
+      <div className="grid grid-cols-1 gap-6 p-2 lg:grid-cols-[30%_70%]">
+        {/* Configuration Panel */}
+        <div className="space-y-4">
+          <LabeledInput
+            id="chart-title"
+            label="Chart Title"
+            placeholder="Enter chart title"
+            value={config.title}
+            onChange={(e) => setConfig({ ...config, title: e.target.value })}
+          />
 
-        <div className="grid grid-cols-2 gap-6">
-          {/* Configuration Panel */}
-          <div className="space-y-4">
-            <LabeledInput
-              id="chart-title"
-              label="Chart Title"
-              placeholder="Enter chart title"
-              value={config.title}
-              onChange={(e) => setConfig({ ...config, title: e.target.value })}
-            />
+          <LabeledSelect<LineBarDataSource>
+            id="data-source"
+            label="Data Source"
+            placeholder="Select data source"
+            value={config.dataSource}
+            onValueChange={(value) =>
+              setConfig({
+                ...config,
+                dataSource: value as LineBarDataSource,
+                metric: dataSourceMetrics[value as LineBarDataSource][0],
+              })
+            }
+            options={[
+              { id: "appointments", name: "Appointments" },
+              { id: "revenue", name: "Revenue" },
+            ]}
+          />
 
-            <LabeledSelect<LineBarDataSource>
-              id="data-source"
-              label="Data Source"
-              placeholder="Select data source"
-              value={config.dataSource}
-              onValueChange={(value) =>
-                setConfig({
-                  ...config,
-                  dataSource: value as LineBarDataSource,
-                  metric: dataSourceMetrics[value as LineBarDataSource][0],
-                })
-              }
-              options={[
-                { id: "appointments", name: "Appointments" },
-                { id: "revenue", name: "Revenue" },
-              ]}
-            />
+          {/* Time Range removed; using global date selector */}
+          <LabeledSelect<string>
+            id="staff-id"
+            label="Staff (optional)"
+            placeholder={loadingStaff ? "Loading..." : "All staff"}
+            value={(config.staffId as string) || "all"}
+            onValueChange={(value) =>
+              setConfig({
+                ...config,
+                staffId: value === "all" ? "" : value,
+              })
+            }
+            options={[
+              { id: "all", name: "All staff" },
+              ...staffOptions.map((s) => ({
+                id: s._id as string,
+                name:
+                  `${s.firstName} ${s.lastName}`.trim() || (s._id as string),
+              })),
+            ]}
+          />
 
-            {/* Time Range removed; using global date selector */}
-
-            {/* Display Options */}
-            <div className="space-y-3">
-              <Label className="text-slate-700">Display Options</Label>
-              <div className="space-y-2">
-                <div className="flex items-center gap-2">
-                  <Checkbox
-                    id="compare-weeks"
-                    checked={config.compareMode === "week"}
-                    onCheckedChange={(checked) =>
-                      setConfig({
-                        ...config,
-                        compareMode: checked ? "week" : "standard",
-                      })
-                    }
-                    disabled={config.dataSource !== "appointments"}
-                  />
-                  <Label htmlFor="compare-weeks" className="cursor-pointer">
-                    Compare Weeks (Current vs Previous Weeks)
-                  </Label>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Checkbox
-                    id="show-line"
-                    checked={config.showLine}
-                    onCheckedChange={(checked) =>
-                      setConfig({
-                        ...config,
-                        showLine: checked as boolean,
-                      })
-                    }
-                  />
-                  <Label htmlFor="show-line" className="cursor-pointer">
-                    Show Line
-                  </Label>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Checkbox
-                    id="show-bar"
-                    checked={config.showBar}
-                    onCheckedChange={(checked) =>
-                      setConfig({
-                        ...config,
-                        showBar: checked as boolean,
-                      })
-                    }
-                  />
-                  <Label htmlFor="show-bar" className="cursor-pointer">
-                    Show Bar
-                  </Label>
-                </div>
+          {/* Comparison Option */}
+          <div className="space-y-3">
+            <div className="flex items-center justify-between">
+              <div className="space-y-0.5">
+                <Label
+                  htmlFor="compare-periods"
+                  className="text-primary text-base font-medium cursor-pointer"
+                >
+                  {t("Compare Periods")}
+                </Label>
+                <p className="text-sm text-muted-foreground">
+                  {t("Compare current vs previous period")}
+                </p>
               </div>
+              <Switch
+                id="compare-periods"
+                checked={config.compareWeeks}
+                onCheckedChange={(checked) =>
+                  setConfig({
+                    ...config,
+                    compareWeeks: checked as boolean,
+                  })
+                }
+              />
             </div>
-
-            <LabeledSelect<string>
-              id="staff-id"
-              label="Staff (optional)"
-              placeholder={loadingStaff ? "Loading..." : "All staff"}
-              value={(config.staffId as string) || "all"}
-              onValueChange={(value) =>
-                setConfig({
-                  ...config,
-                  staffId: value === "all" ? "" : value,
-                })
-              }
-              options={[
-                { id: "all", name: "All staff" },
-                ...staffOptions.map((s) => ({
-                  id: s._id as string,
-                  name:
-                    `${s.firstName} ${s.lastName}`.trim() || (s._id as string),
-                })),
-              ]}
-            />
           </div>
+        </div>
 
-          {/* Preview Panel */}
-          <div className="space-y-2">
-            <Label className="text-slate-700">Preview</Label>
-            <div className="border border-slate-200 rounded-lg p-0 bg-slate-50">
-              {loadingPreview ? (
-                <div className="h-48 flex items-center justify-center text-slate-400">
-                  Loading preview...
-                </div>
-              ) : previewData.length > 0 ? (
+        {/* Preview Panel */}
+        <div className="space-y-2">
+          <Label className="text-primary">{t("Preview")}</Label>
+          <div className="rounded-lg p-0 h-96">
+            {loadingPreview ? (
+              <div className="h-full flex items-center justify-center text-slate-400">
+                {t("Loading preview...")}
+              </div>
+            ) : previewData.length > 0 ? (
+              <div className="h-full">
                 <PerformanceChart
                   title=""
                   data={
@@ -307,27 +299,31 @@ export function LineBarChartConfigForm({
                   ]}
                   seriesConfig={previewSeries}
                 />
-              ) : (
-                <div className="h-48 flex items-center justify-center text-slate-400">
-                  No data to display
-                </div>
-              )}
-            </div>
+              </div>
+            ) : (
+              <div className="h-full flex items-center justify-center text-slate-400">
+                {t("No data to display")}
+              </div>
+            )}
           </div>
         </div>
-
-        <div className="flex gap-2 justify-end mt-4">
-          <Button variant="outline" onClick={() => onOpenChange(false)}>
-            Cancel
-          </Button>
-          <Button
-            onClick={handleSave}
-            className="bg-blue-600 hover:bg-blue-700"
-          >
-            Add Chart
-          </Button>
-        </div>
-      </DialogContent>
-    </Dialog>
+      </div>
+      <div className="flex gap-2 justify-center mt-4">
+        <Button
+          variant="outline"
+          onClick={() => onOpenChange(false)}
+          iconType="cancel"
+        >
+          {t("Cancel")}
+        </Button>
+        <Button
+          onClick={handleSave}
+          className="bg-blue-600 hover:bg-blue-700"
+          iconType="save"
+        >
+          {t("Add Chart")}
+        </Button>
+      </div>
+    </Modal>
   );
 }

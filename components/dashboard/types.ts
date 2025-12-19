@@ -61,6 +61,8 @@ export interface ChartConfig {
     status?: string;
     from?: string;
     to?: string;
+    // LineBar specific: compare current vs previous week
+    compareWeeks?: boolean;
   };
   seriesConfig?: {
     barSeries?: string[];

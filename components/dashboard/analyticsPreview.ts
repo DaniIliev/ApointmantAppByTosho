@@ -1,4 +1,5 @@
 import callApi from "@/app/Api/callApi";
+import { formatDateAndTime } from "@/Global/Utils/commonFn";
 
 export type PreviewRequest = {
   chartType: string;
@@ -69,7 +70,7 @@ export function transformPreviewData(
   if (source === "appointments") {
     if (dimension === "time_series") {
       data = rows.map((r) => ({
-        name: (r.name as string) || "",
+        name: formatDateAndTime((r.name as string) || "", "date"),
         count: Number(r.total ?? 0),
         completed: Number((r as Record<string, unknown>).completed ?? 0),
         cancelled: Number((r as Record<string, unknown>).cancelled ?? 0),
@@ -109,7 +110,7 @@ export function transformPreviewData(
   } else if (source === "revenue") {
     if (dimension === "time_series") {
       data = rows.map((r) => ({
-        name: (r.name as string) || "",
+        name: formatDateAndTime((r.name as string) || "", "date"),
         revenue: Number((r.revenue as number) ?? (r.value as number) ?? 0),
       }));
       dataKeys = ["revenue"];
@@ -214,7 +215,7 @@ export async function fetchPreviewData(
       currentRows.forEach((curr, idx) => {
         const prev = prevRows[idx];
         merged.push({
-          name: (curr.name as string) || "",
+          name: formatDateAndTime((curr.name as string) || "", "date"),
           count: Number(curr.total ?? 0),
           completed: Number(curr.completed ?? 0),
           prevCount: Number(prev?.total ?? 0),
@@ -230,7 +231,7 @@ export async function fetchPreviewData(
       currentRows.forEach((curr, idx) => {
         const prev = prevRows[idx];
         merged.push({
-          name: (curr.name as string) || "",
+          name: formatDateAndTime((curr.name as string) || "", "date"),
           revenue: Number(curr.revenue ?? curr.value ?? 0),
           prevRevenue: Number(prev?.revenue ?? prev?.value ?? 0),
         });

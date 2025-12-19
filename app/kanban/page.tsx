@@ -13,6 +13,7 @@ import { toast } from "sonner";
 import { BoardSelector } from "./components/BoardSelector";
 import callApi from "@/app/Api/callApi";
 import LoadingBackdrop from "@/components/ui/LoadingBackdrop";
+import { Loader2 } from "lucide-react";
 
 function KanbanPageContent() {
   const { t } = useTranslation();
@@ -359,7 +360,7 @@ function KanbanPageContent() {
   if (loading) {
     return (
       <div className="flex items-center justify-center h-full">
-        <LoadingBackdrop loading={loading} />
+        <Loader2 className="h-12 w-12 animate-spin text-primary" />
       </div>
     );
   }

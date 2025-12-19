@@ -3,7 +3,7 @@
 import { useEffect, useState, useCallback, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import ProtectedRoute from "@/components/guards/ProtectedRoute";
-import { Plus } from "lucide-react";
+import { Plus, Loader2 } from "lucide-react";
 import { usePageTitle } from "@/context/PageTitleContext";
 import { useRightNav } from "@/context/RightNavContext";
 import { CustomTooltip } from "@/components/customUIComponents/CustomTooltip";
@@ -17,18 +17,13 @@ import { LineBarChartConfigForm } from "@/components/dashboard/LineBarChartConfi
 import { KPIConfigForm } from "@/components/dashboard/KPIConfigForm";
 import type { ChartConfig, DashboardItem } from "@/components/dashboard/types";
 import { ChartSelectionGrid } from "@/components/dashboard/ChartSelectionGrid";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
 import { usePaddingControl } from "@/context/PaddingContext";
 import { DashboardDateProvider } from "@/context/DashboardDateContext";
 import { DateRangeSelector } from "@/components/dashboard/DateRangeSelector";
 import { useDashboardDate } from "@/context/DashboardDateContext";
 import callApi from "@/app/Api/callApi";
 import { Modal } from "@/components/customUIComponents/Modal";
+import { formatDateAndTime } from "@/Global/Utils/commonFn";
 
 interface ChangeMetric {
   value: number;
@@ -173,14 +168,16 @@ const getDateFromPeriod = (period: string) => {
   return { from, to };
 };
 
+const formatAxisLabel = (value: unknown) => {
+  if (value instanceof Date || typeof value === "string") {
+    return formatDateAndTime(value as string, "date");
+  }
+  return `${value ?? ""}`;
+};
+
 function PerformancePageContent() {
   const { t } = useTranslation();
   const { startDate, endDate, groupBy } = useDashboardDate();
-  const [selectedPeriod, setSelectedPeriod] = useState("last30days");
-  const [customDateRange, setCustomDateRange] = useState<{
-    from: Date | undefined;
-    to: Date | undefined;
-  }>({ from: undefined, to: undefined });
 
   // Dashboard state management
   const [items, setItems] = useState<DashboardItem[]>([]);
@@ -256,7 +253,7 @@ function PerformancePageContent() {
       if (source === "appointments") {
         if (dimension === "time_series") {
           data = rows.map((r) => ({
-            name: (r.name as string) || "",
+            name: formatAxisLabel(r.name),
             count: Number(r.total ?? 0),
             completed: Number((r as Record<string, unknown>).completed ?? 0),
             cancelled: Number((r as Record<string, unknown>).cancelled ?? 0),
@@ -287,7 +284,7 @@ function PerformancePageContent() {
         // Treat staff analytics the same as appointments by staff
         if (dimension === "by_staff" || dimension === "time_series") {
           data = rows.map((r) => ({
-            name: (r.name as string) || "",
+            name: formatAxisLabel(r.name),
             count: Number((r.total as number) ?? 0),
             completed: Number((r.completed as number) ?? 0),
             cancelled: Number((r.cancelled as number) ?? 0),
@@ -297,7 +294,7 @@ function PerformancePageContent() {
       } else if (source === "revenue") {
         if (dimension === "time_series") {
           data = rows.map((r) => ({
-            name: (r.name as string) || "",
+            name: formatAxisLabel(r.name),
             revenue: Number((r.revenue as number) ?? (r.value as number) ?? 0),
           }));
           dataKeys = ["revenue"];
@@ -615,7 +612,7 @@ function PerformancePageContent() {
           currentRows.forEach((curr, idx) => {
             const prev = prevRows[idx];
             mergedData.push({
-              name: (curr.name as string) || "",
+              name: formatAxisLabel(curr.name),
               // Current week - bars
               count: Number(curr.total ?? 0),
               completed: Number(curr.completed ?? 0),
@@ -629,7 +626,7 @@ function PerformancePageContent() {
           currentRows.forEach((curr, idx) => {
             const prev = prevRows[idx];
             mergedData.push({
-              name: (curr.name as string) || "",
+              name: formatAxisLabel(curr.name),
               // Current week - bars
               revenue: Number(curr.revenue ?? curr.value ?? 0),
               // Previous week - lines
@@ -916,20 +913,6 @@ function PerformancePageContent() {
     };
   }, [setPageTitle, t, setExtraRightNavMenu, setIsRightNavVisible]);
 
-  // Period and date handlers (stored for potential future use)
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const handlePeriodChange = (period: string) => {
-    setSelectedPeriod(period);
-    if (period !== "custom") {
-      setCustomDateRange({ from: undefined, to: undefined });
-    }
-  };
-
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const handleCustomDateChange = (range: typeof customDateRange) => {
-    setCustomDateRange(range);
-  };
-
   return (
     <>
       {/* Chart Selection Modal */}
@@ -1019,8 +1002,8 @@ function PerformancePageContent() {
         {/* Dashboard Grid Section */}
         <div className="flex-1 overflow-auto">
           {isLoading && (
-            <div className="flex items-center justify-center py-4 text-slate-400 text-sm">
-              {t("Loading dashboard...")}
+            <div className="flex items-center justify-center py-8">
+              <Loader2 className="h-8 w-8 animate-spin text-primary" />
             </div>
           )}
           {error && (
@@ -1035,27 +1018,28 @@ function PerformancePageContent() {
               onItemUpdate={handleUpdateItem}
               onEditChart={handleEditChart}
               onLayoutChange={handleLayoutChange}
-              dateFrom={
-                customDateRange.from
-                  ? customDateRange.from.toLocaleDateString()
-                  : getDateFromPeriod(
-                      selectedPeriod
-                    )?.from?.toLocaleDateString?.()
-              }
-              dateTo={
-                customDateRange.to
-                  ? customDateRange.to.toLocaleDateString()
-                  : getDateFromPeriod(
-                      selectedPeriod
-                    )?.to?.toLocaleDateString?.()
-              }
+              // dateFrom={
+              //   customDateRange.from
+              //     ? customDateRange.from.toLocaleDateString()
+              //     : getDateFromPeriod(
+              //         selectedPeriod
+              //       )?.from?.toLocaleDateString?.()
+              // }
+              // dateTo={
+              //   customDateRange.to
+              //     ? customDateRange.to.toLocaleDateString()
+              //     : getDateFromPeriod(
+              //         selectedPeriod
+              //       )?.to?.toLocaleDateString?.()
+              // }
             />
           ) : (
             <div className="flex items-center justify-center min-h-[400px] bg-gradient-to-br from-slate-800 to-slate-900">
               <div className="text-center">
                 <p className="text-slate-400 mb-4">
-                  No charts or KPIs added yet. Click the + button to get
-                  started.
+                  {t(
+                    "No charts or KPIs added yet. Click the + button to get started."
+                  )}
                 </p>
               </div>
             </div>

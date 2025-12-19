@@ -1,11 +1,8 @@
 "use client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import {
-  Calendar,
   Users,
-  Bell,
   BarChart3,
   Palette,
   CheckCircle2,
@@ -13,28 +10,20 @@ import {
   Zap,
   Shield,
   Check,
-  DollarSign,
-  CheckCircle,
   ArrowRight,
   PlayCircle,
 } from "lucide-react";
-// import { KPICard } from "@/components/performance/KPICard";
-import { PerformanceChart } from "@/components/performance/PerformanceChart";
-import { PerformanceData } from "../performance/page";
 import { usePaddingControl } from "@/context/PaddingContext";
 import { useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { BenefitsSection } from "@/components/sections/benefits-section";
 import PricingSection from "@/components/Pricing/PricingSection";
 import { useTranslation } from "react-i18next";
-import {
-  LEFT_NAV_CLOSED_WIDTH_CLASS,
-  LEFT_NAV_OPEN_WIDTH_CLASS,
-} from "@/components/ClientLayout";
-import { Footer } from "react-day-picker";
-
 export default function BusinessLandingPage() {
   const { t } = useTranslation();
+  const router = useRouter();
   const { setRemovePadding } = usePaddingControl();
+
   useEffect(() => {
     setRemovePadding(true);
     return () => {
@@ -42,7 +31,7 @@ export default function BusinessLandingPage() {
     };
   }, [setRemovePadding]);
   return (
-    <div className="min-h-screen bg-background">
+    <div>
       <section className="relative min-h- h-[85vh] flex items-center overflow-hidden">
         <div className="absolute inset-0 z-0">
           <div className="absolute inset-0 bg-gradient-to-br from-primary/90 via-primary/70 to-background/95 z-10" />
@@ -68,6 +57,7 @@ export default function BusinessLandingPage() {
               <Button
                 size="lg"
                 className="text-base sm:text-lg px-7 py-6 shadow-xl hover:shadow-2xl hover:scale-[1.02] transition-transform theme-gradient-primary text-white ring-1 ring-white/20"
+                onClick={() => router.push("/register")}
               >
                 <span className="mr-2">{t("Join Us")}</span>
                 <ArrowRight className="h-5 w-5" />
@@ -175,109 +165,6 @@ export default function BusinessLandingPage() {
           </div>
         </div>
       </section>
-      {/* <section
-        id="analytics"
-        className="bg-gray-50 dark:bg-gray-900 py-8 md:py-12  "
-      >
-        <div className="max-w-7xl mx-auto px-4">
-          <div className="text-center">
-            <h2 className="text-3xl sm:text-4xl md:text-5xl font-extrabold text-primary text-balance">
-              {t("Unlock the Power of Data 🚀")}
-            </h2>
-            <p className="text-base sm:text-lg text-muted-foreground text-balance max-w-3xl mx-auto mt-6">
-              {t(
-                "Transform your operations with precise insights into revenue, service popularity, and client engagement – all in one intuitive dashboard."
-              )}
-            </p>
-          </div>
-
-          <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-6 mt-6 md:mt-8 mb-6 md:mb-10">
-            <KPICard
-              title={t("Total Appointments")}
-              value={mockPerformanceData.kpiData.totalAppointments}
-              change={mockPerformanceData.kpiData.changes.totalAppointments}
-              icon={<Calendar />}
-              className="shadow-xl"
-            />
-            <KPICard
-              title={t("Total Revenue")}
-              value={`$${mockPerformanceData.kpiData.totalRevenue.toLocaleString()}`}
-              change={mockPerformanceData.kpiData.changes.totalRevenue}
-              icon={<DollarSign />}
-              className="shadow-xl"
-            />
-            <KPICard
-              title={t("Client Retention Rate")}
-              value={`${mockPerformanceData.kpiData.clientRetentionRate.toFixed(
-                1
-              )}%`}
-              icon={<Users />}
-              className="shadow-xl"
-            />
-            <KPICard
-              title={t("No-Show Reduction")}
-              value={`60%`}
-              icon={<CheckCircle />}
-              className="shadow-xl"
-            />
-          </div>
-          <div className="space-y-8">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-              <PerformanceChart
-                title={t("Appointments Over Time")}
-                data={mockPerformanceData.appointmentsOverTime}
-                type="line"
-                dataKeys={["total", "completed", "cancelled"]}
-                xAxisKey="name"
-                colors={["#3b61c0", "#22c55e", "#ef4444"]}
-              />
-              <PerformanceChart
-                title={t("Revenue Trends")}
-                data={mockPerformanceData.revenueOverTime}
-                type="line"
-                dataKey="value"
-                xAxisKey="name"
-                colors={["#00bfff"]}
-              />
-            </div>
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-              <PerformanceChart
-                title={t("Service Popularity")}
-                data={mockPerformanceData.servicePopularity}
-                type="bar"
-                dataKey="value"
-                xAxisKey="name"
-              />
-              <PerformanceChart
-                title={t("Revenue by Service Category")}
-                data={mockPerformanceData.revenueByService}
-                type="bar"
-                dataKey="value"
-                xAxisKey="name"
-                colors={["#f59e0b"]}
-              />
-            </div>
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <PerformanceChart
-                title={t("Appointment Status Distribution")}
-                data={mockPerformanceData.appointmentStatus}
-                type="pie"
-                dataKey="value"
-                colors={["#22c55e", "#ef4444"]}
-              />
-              <PerformanceChart
-                title={t("Client Types Distribution")}
-                data={mockPerformanceData.clientTypes}
-                type="pie"
-                dataKey="value"
-              />
-            </div>
-          </div>
-        </div>
-      </section> */}
-      <PricingSection />
-
-      {/* Kanban Board (Task Manager) Section */}
       <section className="bg-gray-50 dark:bg-gray-900 py-16">
         <div className="container mx-auto px-4">
           <div className="max-w-5xl mx-auto text-center space-y-6">
@@ -336,6 +223,117 @@ export default function BusinessLandingPage() {
           </div>
         </div>
       </section>
+      {/* Analytics & Performance Module Section */}
+      <section className="bg-muted/30 py-16">
+        <div className="container mx-auto px-4">
+          <div className="max-w-6xl mx-auto">
+            <div className="text-center mb-12">
+              <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-balance mb-6">
+                {t("Visualize Your Business Performance")}
+              </h2>
+              <p className="text-base sm:text-lg text-muted-foreground text-balance max-w-3xl mx-auto">
+                {t(
+                  "Create custom analytics dashboards with drag-and-drop charts. Build the perfect view of your business data with our flexible, responsive grid layout."
+                )}
+              </p>
+            </div>
+
+            <div className="grid lg:grid-cols-2 gap-12 items-center mb-12">
+              <div className="space-y-6">
+                <div className="flex gap-4">
+                  <div className="flex-shrink-0">
+                    <BarChart3 className="h-6 w-6 text-primary" />
+                  </div>
+                  <div>
+                    <h3 className="text-lg md:text-xl font-semibold mb-2">
+                      {t("Customizable Chart Types")}
+                    </h3>
+                    <p className="text-sm sm:text-base text-muted-foreground">
+                      {t(
+                        "Choose from line, bar, pie, and combined charts. Visualize appointments, revenue, services, and more with your preferred chart style."
+                      )}
+                    </p>
+                  </div>
+                </div>
+                <div className="flex gap-4">
+                  <div className="flex-shrink-0">
+                    <Palette className="h-6 w-6 text-primary" />
+                  </div>
+                  <div>
+                    <h3 className="text-lg md:text-xl font-semibold mb-2">
+                      {t("Drag & Drop Grid Layout")}
+                    </h3>
+                    <p className="text-sm sm:text-base text-muted-foreground">
+                      {t(
+                        "Arrange your dashboard exactly how you want. Resize and reposition charts with intuitive drag-and-drop. Your layout automatically adapts to mobile devices."
+                      )}
+                    </p>
+                  </div>
+                </div>
+                <div className="flex gap-4">
+                  <div className="flex-shrink-0">
+                    <TrendingUp className="h-6 w-6 text-primary" />
+                  </div>
+                  <div>
+                    <h3 className="text-lg md:text-xl font-semibold mb-2">
+                      {t("Real-Time KPI Cards")}
+                    </h3>
+                    <p className="text-sm sm:text-base text-muted-foreground">
+                      {t(
+                        "Track key metrics at a glance with live KPI cards. Monitor total appointments, revenue, client retention, and more with automatic change indicators."
+                      )}
+                    </p>
+                  </div>
+                </div>
+                <div className="flex gap-4">
+                  <div className="flex-shrink-0">
+                    <Zap className="h-6 w-6 text-primary" />
+                  </div>
+                  <div>
+                    <h3 className="text-lg md:text-xl font-semibold mb-2">
+                      {t("Filter by Date & Staff")}
+                    </h3>
+                    <p className="text-sm sm:text-base text-muted-foreground">
+                      {t(
+                        "Analyze data by custom date ranges or individual staff members. Get the insights that matter most to your business decisions."
+                      )}
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="space-y-6">
+                <Card className="overflow-hidden shadow-xl border-2 hover:shadow-2xl transition-shadow duration-500">
+                  <CardContent className="p-0">
+                    <img
+                      src="/analytics-dashboard.png"
+                      alt="Analytics dashboard with customizable charts and KPI cards"
+                      className="w-full h-auto"
+                    />
+                  </CardContent>
+                </Card>
+                <div className="grid grid-cols-2 gap-4">
+                  <Card className="p-4 text-center border-primary/20">
+                    <BarChart3 className="h-8 w-8 text-primary mx-auto mb-2" />
+                    <p className="text-sm font-semibold">
+                      {t("5+ Chart Types")}
+                    </p>
+                  </Card>
+                  <Card className="p-4 text-center border-primary/20">
+                    <Palette className="h-8 w-8 text-primary mx-auto mb-2" />
+                    <p className="text-sm font-semibold">
+                      {t("Responsive Grid")}
+                    </p>
+                  </Card>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <PricingSection />
+
       {/* CTA Section */}
       <section className="bg-primary text-primary-foreground py-10 md:py-10">
         <div className="container mx-auto px-4 text-center">
@@ -352,6 +350,7 @@ export default function BusinessLandingPage() {
               <Button
                 size="lg"
                 className="text-base sm:text-lg px-7 py-6 shadow-xl hover:shadow-2xl hover:scale-[1.02] transition-transform theme-gradient-primary text-white ring-1 ring-white/20"
+                onClick={() => router.push("/register")}
               >
                 <span className="mr-2">{t("Join Us")}</span>
                 <ArrowRight className="h-5 w-5" />
@@ -381,66 +380,3 @@ export default function BusinessLandingPage() {
     </div>
   );
 }
-const mockPerformanceData: PerformanceData = {
-  kpiData: {
-    // Текущи Стойности
-    totalAppointments: 450,
-    totalRevenue: 28750.55,
-    completedAppointments: 380,
-    cancelledAppointments: 70,
-    averageServicePrice: 75.66,
-    clientRetentionRate: 78.5,
-    newClientsAcquired: 35,
-
-    // Динамични Промени (Changes)
-    changes: {
-      // 🟢 Увеличение
-      totalAppointments: { value: 15.2, type: "increase" },
-      // 🟢 Увеличение
-      totalRevenue: { value: 8.7, type: "increase" },
-      // 🟡 Неутрална промяна (стойност 0)
-      completedAppointments: { value: 0, type: "neutral" },
-      cancelledAppointments: { value: 25.0, type: "increase" },
-      averageServicePrice: { value: 4.1, type: "decrease" },
-      newClientsAcquired: { value: 150.0, type: "increase" },
-    },
-  },
-
-  // Данни за Графики (Опростени Mock Data)
-  appointmentsOverTime: [
-    { name: "Mon", total: 65, completed: 50, cancelled: 15 },
-    { name: "Tue", total: 72, completed: 68, cancelled: 4 },
-    { name: "Wed", total: 80, completed: 75, cancelled: 5 },
-    { name: "Thu", total: 55, completed: 45, cancelled: 10 },
-    { name: "Fri", total: 90, completed: 85, cancelled: 5 },
-    { name: "Sat", total: 88, completed: 80, cancelled: 8 },
-  ],
-  revenueOverTime: [
-    { name: "Jan", value: 5000 },
-    { name: "Feb", value: 6500 },
-    { name: "Mar", value: 7200 },
-    { name: "Apr", value: 8500 },
-    { name: "May", value: 9100 },
-  ],
-  servicePopularity: [
-    { name: "Haircut", value: 150 },
-    { name: "Coloring", value: 90 },
-    { name: "Massage", value: 70 },
-    { name: "Facial", value: 50 },
-    { name: "Manicure", value: 45 },
-  ],
-  clientTypes: [
-    { name: "Returning Clients", value: 300 },
-    { name: "New Clients", value: 100 },
-  ],
-  appointmentStatus: [
-    { name: "Completed", value: 380 },
-    { name: "Cancelled", value: 70 },
-  ],
-  revenueByService: [
-    { name: "Haircut", value: 9500 },
-    { name: "Coloring", value: 12000 },
-    { name: "Massage", value: 4000 },
-    { name: "Facial", value: 3250 },
-  ],
-};

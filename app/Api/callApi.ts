@@ -1,3 +1,5 @@
+import { redirect } from "next/navigation";
+
 const callApi = async (
   endpoint: string,
   method: "GET" | "POST" | "PUT" | "DELETE",
@@ -50,6 +52,16 @@ const callApi = async (
   });
 
   if (!result.ok) {
+    // Handle 401 Unauthorized - redirect to login
+    if (result.status === 401) {
+      console.warn("Unauthorized access - redirecting to login");
+      localStorage.removeItem("token"); // Clear invalid token
+      if (typeof window !== "undefined") {
+        redirect("/login");
+      }
+      throw new Error("Unauthorized - redirecting to login");
+    }
+
     console.error("API error:", result);
     const errorData = await result.json();
     throw new Error(errorData.message || `API error - ${result.statusText}`);

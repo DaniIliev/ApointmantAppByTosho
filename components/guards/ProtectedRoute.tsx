@@ -10,7 +10,7 @@ import {
 } from "@/lib/permissions";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Lock, TrendingUp, ArrowRight } from "lucide-react";
+import { Lock, TrendingUp, ArrowRight, Loader2 } from "lucide-react";
 import Link from "next/link";
 import { useTranslation } from "react-i18next";
 
@@ -48,7 +48,9 @@ export default function ProtectedRoute({
   if (isChecking) {
     return (
       <div className="flex items-center justify-center min-h-screen">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+        {/* <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+         */}
+        <Loader2 className="h-12 w-12 animate-spin text-primary" />
       </div>
     );
   }
@@ -280,7 +282,7 @@ export default function ProtectedRoute({
     }
     return (
       <div className="flex items-center justify-center min-h-full">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+        <Loader2 className="h-12 w-12 animate-spin text-primary" />
       </div>
     );
   }

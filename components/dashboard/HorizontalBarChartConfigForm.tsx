@@ -1,12 +1,6 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import type { ChartConfig } from "./types";
@@ -16,6 +10,8 @@ import { useStaffOptions } from "./useStaffOptions";
 import { fetchPreviewData } from "./analyticsPreview";
 import { LabeledInput } from "@/components/customUIComponents/LabeledInput";
 import { LabeledSelect } from "@/components/customUIComponents/LabeledSelect";
+import { Modal } from "../customUIComponents/Modal";
+import { useTranslation } from "react-i18next";
 
 interface HorizontalBarChartConfigFormProps {
   open: boolean;
@@ -44,6 +40,7 @@ export function HorizontalBarChartConfigForm({
   onSave,
   editingChart,
 }: HorizontalBarChartConfigFormProps) {
+  const { t } = useTranslation();
   const [config, setConfig] = useState<ChartConfig>(() => {
     if (editingChart && editingChart.type === "hbar") {
       return editingChart as ChartConfig;
@@ -131,13 +128,15 @@ export function HorizontalBarChartConfigForm({
   };
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-4xl max-h-[90vh] overflow-auto">
-        <DialogHeader>
-          <DialogTitle>Configure Horizontal Bar Chart</DialogTitle>
-        </DialogHeader>
-
-        <div className="space-y-6">
+    <Modal
+      label={t("Configure Horizontal Bar Chart")}
+      open={open}
+      onOpenChange={onOpenChange}
+      width="5xl"
+    >
+      <div className="grid grid-cols-1 gap-6 p-2 lg:grid-cols-[30%_70%]">
+        {/* Configuration Panel */}
+        <div className="space-y-4">
           <LabeledInput
             id="chart-title"
             label="Chart Title"
@@ -214,16 +213,18 @@ export function HorizontalBarChartConfigForm({
             ]}
             disabled={loadingStaff}
           />
+        </div>
 
-          {/* Preview */}
-          <div className="space-y-2">
-            <Label>Preview</Label>
-            <div className="border rounded-lg p-0 h-96 bg-slate-50">
-              {loadingPreview ? (
-                <div className="flex items-center justify-center h-full text-slate-500">
-                  Loading preview...
-                </div>
-              ) : previewData && previewData.length > 0 ? (
+        {/* Preview Panel */}
+        <div className="space-y-2">
+          <Label className="text-primary">{t("Preview")}</Label>
+          <div className="rounded-lg p-0 h-96">
+            {loadingPreview ? (
+              <div className="flex items-center justify-center h-full text-slate-400">
+                {t("Loading preview...")}
+              </div>
+            ) : previewData && previewData.length > 0 ? (
+              <div className="h-full">
                 <PerformanceChart
                   title={config.title}
                   data={previewData.map((item) => ({ ...item }))}
@@ -234,25 +235,31 @@ export function HorizontalBarChartConfigForm({
                   }
                   colors={config.colors}
                 />
-              ) : (
-                <div className="flex items-center justify-center h-full text-slate-500">
-                  No data available
-                </div>
-              )}
-            </div>
-          </div>
-
-          {/* Action Buttons */}
-          <div className="flex justify-end gap-2">
-            <Button variant="outline" onClick={() => onOpenChange(false)}>
-              Cancel
-            </Button>
-            <Button onClick={handleSave}>
-              {editingChart ? "Update Chart" : "Create Chart"}
-            </Button>
+              </div>
+            ) : (
+              <div className="flex items-center justify-center h-full text-slate-400">
+                {t("No data available")}
+              </div>
+            )}
           </div>
         </div>
-      </DialogContent>
-    </Dialog>
+      </div>
+      <div className="flex gap-2 justify-center mt-4">
+        <Button
+          variant="outline"
+          onClick={() => onOpenChange(false)}
+          iconType="cancel"
+        >
+          {t("Cancel")}
+        </Button>
+        <Button
+          onClick={handleSave}
+          className="bg-blue-600 hover:bg-blue-700"
+          iconType="save"
+        >
+          {t(editingChart ? "Update Chart" : "Create Chart")}
+        </Button>
+      </div>
+    </Modal>
   );
 }

@@ -1,21 +1,9 @@
 "use client";
 
-import React, { useState } from "react";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
+import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
+import { LabeledSelect } from "@/components/customUIComponents/LabeledSelect";
 import {
   Calendar,
   DollarSign,
@@ -27,6 +15,10 @@ import {
 } from "lucide-react";
 import type { KPIConfig } from "./types";
 import { useStaffOptions } from "./useStaffOptions";
+import { Modal } from "../customUIComponents/Modal";
+import { useTranslation } from "react-i18next";
+import { useDashboardDate } from "@/context/DashboardDateContext";
+import callApi from "@/app/Api/callApi";
 
 interface KPIConfigFormProps {
   open: boolean;
@@ -80,39 +72,239 @@ export function KPIConfigForm({
   onSave,
   mockPerformanceData,
 }: KPIConfigFormProps) {
+  const { t } = useTranslation();
+  const { startDate, endDate, groupBy } = useDashboardDate();
   const [selectedKPI, setSelectedKPI] = useState<string>("totalAppointments");
   const [staffId, setStaffId] = useState<string>("");
   const { staffOptions, loadingStaff } = useStaffOptions();
+  const [previewValue, setPreviewValue] = useState<string | number>(
+    "Loading..."
+  );
+  const [previewChange, setPreviewChange] = useState<
+    { value: number; type: "increase" | "decrease" | "neutral" } | undefined
+  >();
+  const [loadingPreview, setLoadingPreview] = useState(false);
+
+  const formatKpiValue = (kpiType: string, raw: number) => {
+    if (kpiType === "totalRevenue") return `$${raw.toLocaleString()}`;
+    if (kpiType === "averageServicePrice") return `$${raw.toFixed(2)}`;
+    if (kpiType === "clientRetentionRate") return `${raw.toFixed(1)}%`;
+    return raw;
+  };
+
+  const calculatePercentageChange = (
+    current: number,
+    previous: number
+  ): { value: number; type: "increase" | "decrease" | "neutral" } => {
+    if (previous === 0) {
+      return {
+        value: current > 0 ? 100 : 0,
+        type: current > 0 ? "increase" : "neutral",
+      };
+    }
+    const change = ((current - previous) / previous) * 100;
+    return {
+      value: Math.abs(change),
+      type: change > 0.1 ? "increase" : change < -0.1 ? "decrease" : "neutral",
+    };
+  };
+
+  useEffect(() => {
+    let isCancelled = false;
+    const fetchKpiPreview = async () => {
+      setLoadingPreview(true);
+      try {
+        const startDateObj = new Date(startDate);
+        const endDateObj = new Date(endDate);
+        const durationMs = endDateObj.getTime() - startDateObj.getTime();
+
+        const prevEndDate = new Date(startDateObj);
+        prevEndDate.setDate(prevEndDate.getDate() - 1);
+        const prevStartDate = new Date(prevEndDate);
+        prevStartDate.setTime(prevStartDate.getTime() - durationMs);
+
+        const prevStartStr = prevStartDate.toISOString().split("T")[0];
+        const prevEndStr = prevEndDate.toISOString().split("T")[0];
+
+        if (
+          selectedKPI === "totalAppointments" ||
+          selectedKPI === "completedAppointments" ||
+          selectedKPI === "cancelledAppointments"
+        ) {
+          const currentParams = new URLSearchParams({
+            source: "appointments",
+            dimension: "time_series",
+            groupBy: groupBy,
+            period: "custom",
+            from: startDate,
+            to: endDate,
+          });
+          if (staffId) currentParams.set("staffId", staffId);
+          const currentUrl = `/api/analytics?${currentParams.toString()}&t=${Date.now()}`;
+          const currentRows = (await callApi(currentUrl, "GET")) as Array<
+            Record<string, unknown>
+          >;
+          const currentTotals = currentRows.reduce(
+            (
+              acc: { total: number; completed: number; cancelled: number },
+              cur
+            ) => {
+              acc.total += Number(cur.total ?? 0);
+              acc.completed += Number(cur.completed ?? 0);
+              acc.cancelled += Number(cur.cancelled ?? 0);
+              return acc;
+            },
+            { total: 0, completed: 0, cancelled: 0 }
+          );
+
+          const prevParams = new URLSearchParams({
+            source: "appointments",
+            dimension: "time_series",
+            groupBy: groupBy,
+            period: "custom",
+            from: prevStartStr,
+            to: prevEndStr,
+          });
+          if (staffId) prevParams.set("staffId", staffId);
+          const prevUrl = `/api/analytics?${prevParams.toString()}&t=${Date.now()}`;
+          const prevRows = (await callApi(prevUrl, "GET")) as Array<
+            Record<string, unknown>
+          >;
+          const prevTotals = prevRows.reduce(
+            (
+              acc: { total: number; completed: number; cancelled: number },
+              cur
+            ) => {
+              acc.total += Number(cur.total ?? 0);
+              acc.completed += Number(cur.completed ?? 0);
+              acc.cancelled += Number(cur.cancelled ?? 0);
+              return acc;
+            },
+            { total: 0, completed: 0, cancelled: 0 }
+          );
+
+          let currentValue = 0;
+          let previousValue = 0;
+
+          if (selectedKPI === "totalAppointments") {
+            currentValue = currentTotals.total;
+            previousValue = prevTotals.total;
+          } else if (selectedKPI === "completedAppointments") {
+            currentValue = currentTotals.completed;
+            previousValue = prevTotals.completed;
+          } else {
+            currentValue = currentTotals.cancelled;
+            previousValue = prevTotals.cancelled;
+          }
+
+          if (!isCancelled) {
+            const change = calculatePercentageChange(
+              currentValue,
+              previousValue
+            );
+            setPreviewValue(formatKpiValue(selectedKPI, currentValue));
+            setPreviewChange(change);
+          }
+        } else if (selectedKPI === "totalRevenue") {
+          const currentParams = new URLSearchParams({
+            source: "revenue",
+            dimension: "time_series",
+            groupBy: groupBy,
+            period: "custom",
+            from: startDate,
+            to: endDate,
+          });
+          if (staffId) currentParams.set("staffId", staffId);
+          const currentUrl = `/api/analytics?${currentParams.toString()}&t=${Date.now()}`;
+          const currentRows = (await callApi(currentUrl, "GET")) as Array<
+            Record<string, unknown>
+          >;
+          const currentRevenue = currentRows.reduce(
+            (sum, cur) => sum + Number(cur.revenue ?? cur.value ?? 0),
+            0
+          );
+
+          const prevParams = new URLSearchParams({
+            source: "revenue",
+            dimension: "time_series",
+            groupBy: groupBy,
+            period: "custom",
+            from: prevStartStr,
+            to: prevEndStr,
+          });
+          if (staffId) prevParams.set("staffId", staffId);
+          const prevUrl = `/api/analytics?${prevParams.toString()}&t=${Date.now()}`;
+          const prevRows = (await callApi(prevUrl, "GET")) as Array<
+            Record<string, unknown>
+          >;
+          const prevRevenue = prevRows.reduce(
+            (sum, cur) => sum + Number(cur.revenue ?? cur.value ?? 0),
+            0
+          );
+
+          if (!isCancelled) {
+            const change = calculatePercentageChange(
+              currentRevenue,
+              prevRevenue
+            );
+            setPreviewValue(formatKpiValue(selectedKPI, currentRevenue));
+            setPreviewChange(change);
+          }
+        } else if (selectedKPI === "averageServicePrice") {
+          const params = new URLSearchParams({
+            source: "services",
+            dimension: "metrics",
+          });
+          const url = `/api/analytics?${params.toString()}&t=${Date.now()}`;
+          const rows = await callApi(url, "GET");
+          const list = rows as Array<Record<string, unknown>>;
+          if (!isCancelled) {
+            if (!list.length) {
+              setPreviewValue("N/A");
+              setPreviewChange(undefined);
+            } else {
+              const total = list.reduce(
+                (sum, r) => sum + Number(r.price ?? 0),
+                0
+              );
+              const avgPrice = total / list.length;
+              setPreviewValue(formatKpiValue(selectedKPI, avgPrice));
+              setPreviewChange(undefined);
+            }
+          }
+        } else {
+          if (!isCancelled) {
+            setPreviewValue("N/A");
+            setPreviewChange(undefined);
+          }
+        }
+      } catch (err) {
+        console.error("Failed to load KPI preview", err);
+        if (!isCancelled) {
+          setPreviewValue("Error");
+          setPreviewChange(undefined);
+        }
+      } finally {
+        if (!isCancelled) setLoadingPreview(false);
+      }
+    };
+    fetchKpiPreview();
+    return () => {
+      isCancelled = true;
+    };
+  }, [selectedKPI, staffId, startDate, endDate, groupBy]);
 
   const handleSave = () => {
     const kpiOption = kpiOptions.find((opt) => opt.id === selectedKPI);
     if (!kpiOption) return;
-
-    const kpiKey = selectedKPI as keyof typeof mockPerformanceData.kpiData;
-    const kpiData = mockPerformanceData.kpiData;
-    const changeData = mockPerformanceData.kpiData.changes as Record<
-      string,
-      { value: number; type: "increase" | "decrease" | "neutral" } | undefined
-    >;
-
-    const valueNum = kpiData[kpiKey] as number;
-    let formattedValue: string | number = valueNum;
-
-    if (selectedKPI === "totalRevenue") {
-      formattedValue = `$${valueNum.toLocaleString()}`;
-    } else if (selectedKPI === "averageServicePrice") {
-      formattedValue = `$${valueNum.toFixed(2)}`;
-    } else if (selectedKPI === "clientRetentionRate") {
-      formattedValue = `${valueNum.toFixed(1)}%`;
-    }
 
     const config: KPIConfig = {
       id: `kpi-${Date.now()}`,
       type: "kpi",
       kpiType: selectedKPI as KPIConfig["kpiType"],
       title: kpiOption.label,
-      value: formattedValue,
-      change: changeData[selectedKPI as string],
+      value: previewValue,
+      change: previewChange,
       configuration: staffId ? { staffId } : undefined,
       layout: {
         x: 0,
@@ -127,71 +319,89 @@ export function KPIConfigForm({
   };
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-sm">
-        <DialogHeader>
-          <DialogTitle>Add KPI Card</DialogTitle>
-        </DialogHeader>
-
+    <Modal
+      label={t("Add KPI Card")}
+      open={open}
+      onOpenChange={onOpenChange}
+      width="3xl"
+    >
+      <div className="grid grid-cols-1 gap-6 p-2 lg:grid-cols-[30%_70%]">
+        {/* Configuration Panel */}
         <div className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="kpi-select" className="text-slate-300">
-              Select KPI
-            </Label>
-            <Select value={selectedKPI} onValueChange={setSelectedKPI}>
-              <SelectTrigger id="kpi-select">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {kpiOptions.map((option) => (
-                  <SelectItem key={option.id} value={option.id}>
-                    {option.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
+          <LabeledSelect<string>
+            id="kpi-select"
+            label={t("Select KPI")}
+            placeholder={t("Select KPI")}
+            value={selectedKPI}
+            onValueChange={setSelectedKPI}
+            options={kpiOptions.map((option) => ({
+              id: option.id,
+              name: option.label,
+            }))}
+          />
 
-          <div className="space-y-2">
-            <Label htmlFor="staff-id" className="text-slate-300">
-              Staff (optional)
-            </Label>
-            <Select
-              value={staffId || "all"}
-              onValueChange={(value) =>
-                setStaffId(value === "all" ? "" : value)
-              }
-              disabled={loadingStaff}
-            >
-              <SelectTrigger id="staff-id">
-                <SelectValue
-                  placeholder={loadingStaff ? "Loading..." : "All staff"}
-                />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All staff</SelectItem>
-                {staffOptions.map((s) => (
-                  <SelectItem key={s._id} value={s._id}>
-                    {`${s.firstName} ${s.lastName}`.trim() || s._id}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
+          <LabeledSelect<string>
+            id="staff-id"
+            label={t("Staff (optional)")}
+            placeholder={loadingStaff ? "Loading..." : "All staff"}
+            value={staffId || "all"}
+            onValueChange={(value) => setStaffId(value === "all" ? "" : value)}
+            options={[
+              { id: "all", name: "All staff" },
+              ...staffOptions.map((s) => ({
+                id: s._id as string,
+                name:
+                  `${s.firstName} ${s.lastName}`.trim() || (s._id as string),
+              })),
+            ]}
+          />
+        </div>
 
-          <div className="flex gap-2 justify-end">
-            <Button variant="outline" onClick={() => onOpenChange(false)}>
-              Cancel
-            </Button>
-            <Button
-              onClick={handleSave}
-              className="bg-blue-600 hover:bg-blue-700"
-            >
-              Add KPI
-            </Button>
+        {/* Preview Panel */}
+        <div className="space-y-2">
+          <Label className="text-primary">{t("Preview")}</Label>
+          <div className="rounded-lg border border-primary/20 bg-white dark:bg-gray-900 p-6 flex flex-col items-center justify-center h-48">
+            <div className="text-5xl font-bold text-primary break-words text-center">
+              {loadingPreview
+                ? t("Loading...")
+                : previewValue || t("Select a KPI")}
+            </div>
+            <div className="text-sm mt-2 text-slate-400 text-center line-clamp-2">
+              {kpiOptions.find((opt) => opt.id === selectedKPI)?.label || ""}
+            </div>
+            {previewChange && (
+              <div
+                className={`text-sm mt-2 font-semibold ${
+                  previewChange.type === "increase"
+                    ? "text-green-400"
+                    : previewChange.type === "decrease"
+                    ? "text-red-400"
+                    : "text-slate-400"
+                }`}
+              >
+                {previewChange.type === "increase"
+                  ? "↑"
+                  : previewChange.type === "decrease"
+                  ? "↓"
+                  : "→"}{" "}
+                {previewChange.value}%
+              </div>
+            )}
           </div>
         </div>
-      </DialogContent>
-    </Dialog>
+      </div>
+      <div className="flex gap-2 justify-center mt-4">
+        <Button
+          variant="outline"
+          onClick={() => onOpenChange(false)}
+          iconType="cancel"
+        >
+          {t("Cancel")}
+        </Button>
+        <Button onClick={handleSave} iconType="save">
+          {t("Add KPI")}
+        </Button>
+      </div>
+    </Modal>
   );
 }

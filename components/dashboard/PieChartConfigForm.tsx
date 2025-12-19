@@ -1,12 +1,6 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import type { ChartConfig } from "./types";
@@ -16,6 +10,8 @@ import { useStaffOptions } from "./useStaffOptions";
 import { fetchPreviewData } from "./analyticsPreview";
 import { LabeledInput } from "@/components/customUIComponents/LabeledInput";
 import { LabeledSelect } from "@/components/customUIComponents/LabeledSelect";
+import { Modal } from "../customUIComponents/Modal";
+import { useTranslation } from "react-i18next";
 
 interface PieChartConfigFormProps {
   open: boolean;
@@ -53,6 +49,7 @@ export function PieChartConfigForm({
   onSave,
   editingChart,
 }: PieChartConfigFormProps) {
+  const { t } = useTranslation();
   const [config, setConfig] = useState<PieConfig>({
     title: "Appointments by Service",
     dataSource: "appointments",
@@ -177,92 +174,93 @@ export function PieChartConfigForm({
   };
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-5xl max-h-[500px] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle>Configure Pie Chart</DialogTitle>
-        </DialogHeader>
+    <Modal
+      label={t("Configure Pie Chart")}
+      open={open}
+      onOpenChange={onOpenChange}
+      width="5xl"
+    >
+      <div className="grid grid-cols-1 gap-6 p-2 lg:grid-cols-[30%_70%]">
+        {/* Configuration Panel */}
+        <div className="space-y-4">
+          <LabeledInput
+            id="chart-title"
+            label="Chart Title"
+            placeholder="Enter chart title"
+            value={config.title}
+            onChange={(e) => setConfig({ ...config, title: e.target.value })}
+          />
 
-        <div className="grid grid-cols-2 gap-6">
-          {/* Configuration Panel */}
-          <div className="space-y-4">
-            <LabeledInput
-              id="chart-title"
-              label="Chart Title"
-              placeholder="Enter chart title"
-              value={config.title}
-              onChange={(e) => setConfig({ ...config, title: e.target.value })}
-            />
+          <LabeledSelect<PieDataSource>
+            id="data-source"
+            label="Data Source"
+            placeholder="Select data source"
+            value={config.dataSource}
+            onValueChange={(value) =>
+              setConfig({
+                ...config,
+                dataSource: value as PieDataSource,
+                metric: dataSourceMetrics[value as PieDataSource][0],
+              })
+            }
+            options={[
+              { id: "appointments", name: "Appointments" },
+              { id: "clients", name: "Clients" },
+              { id: "revenue", name: "Revenue" },
+              { id: "services", name: "Services" },
+            ]}
+          />
 
-            <LabeledSelect<PieDataSource>
-              id="data-source"
-              label="Data Source"
-              placeholder="Select data source"
-              value={config.dataSource}
-              onValueChange={(value) =>
-                setConfig({
-                  ...config,
-                  dataSource: value as PieDataSource,
-                  metric: dataSourceMetrics[value as PieDataSource][0],
-                })
-              }
-              options={[
-                { id: "appointments", name: "Appointments" },
-                { id: "clients", name: "Clients" },
-                { id: "revenue", name: "Revenue" },
-                { id: "services", name: "Services" },
-              ]}
-            />
+          <LabeledSelect<PieMetric>
+            id="metric"
+            label="Metric"
+            placeholder="Select metric"
+            value={config.metric}
+            onValueChange={(value) =>
+              setConfig({ ...config, metric: value as PieMetric })
+            }
+            options={availableMetrics.map((metric) => ({
+              id: metric,
+              name: metric
+                .split("_")
+                .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+                .join(" "),
+            }))}
+          />
 
-            <LabeledSelect<PieMetric>
-              id="metric"
-              label="Metric"
-              placeholder="Select metric"
-              value={config.metric}
-              onValueChange={(value) =>
-                setConfig({ ...config, metric: value as PieMetric })
-              }
-              options={availableMetrics.map((metric) => ({
-                id: metric,
-                name: metric
-                  .split("_")
-                  .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-                  .join(" "),
-              }))}
-            />
+          <LabeledSelect<string>
+            id="staff-id"
+            label="Staff (optional)"
+            placeholder={loadingStaff ? "Loading..." : "All staff"}
+            value={(config.staffId as string) || "all"}
+            onValueChange={(value) =>
+              setConfig({
+                ...config,
+                staffId: value === "all" ? "" : value,
+              })
+            }
+            options={[
+              { id: "all", name: "All staff" },
+              ...staffOptions.map((s) => ({
+                id: s._id as string,
+                name:
+                  `${s.firstName} ${s.lastName}`.trim() || (s._id as string),
+              })),
+            ]}
+            disabled={loadingStaff}
+          />
+        </div>
 
-            <LabeledSelect<string>
-              id="staff-id"
-              label="Staff (optional)"
-              placeholder={loadingStaff ? "Loading..." : "All staff"}
-              value={(config.staffId as string) || "all"}
-              onValueChange={(value) =>
-                setConfig({
-                  ...config,
-                  staffId: value === "all" ? "" : value,
-                })
-              }
-              options={[
-                { id: "all", name: "All staff" },
-                ...staffOptions.map((s) => ({
-                  id: s._id as string,
-                  name:
-                    `${s.firstName} ${s.lastName}`.trim() || (s._id as string),
-                })),
-              ]}
-              disabled={loadingStaff}
-            />
-          </div>
-
-          {/* Preview Panel */}
-          <div className="space-y-2">
-            <Label className="text-slate-700">Preview</Label>
-            <div className="border border-slate-200 rounded-lg p-0 bg-slate-50">
-              {loadingPreview ? (
-                <div className="h-48 flex items-center justify-center text-slate-400">
-                  Loading preview...
-                </div>
-              ) : previewData.length > 0 ? (
+        {/* Preview Panel */}
+        <div className="space-y-2">
+          <Label className="text-primary">{t("Preview")}</Label>
+          <div className="rounded-lg p-0 h-96">
+            {loadingPreview ? (
+              <div className="h-full flex items-center justify-center text-slate-400">
+                {t("Loading preview...")}
+              </div>
+            ) : previewData.length > 0 ? (
+              <div className="h-full">
                 <PerformanceChart
                   title=""
                   data={
@@ -283,27 +281,31 @@ export function PieChartConfigForm({
                     "#1f2937",
                   ]}
                 />
-              ) : (
-                <div className="h-48 flex items-center justify-center text-slate-400">
-                  No data to display
-                </div>
-              )}
-            </div>
+              </div>
+            ) : (
+              <div className="h-full flex items-center justify-center text-slate-400">
+                {t("No data to display")}
+              </div>
+            )}
           </div>
         </div>
-
-        <div className="flex gap-2 justify-end mt-4">
-          <Button variant="outline" onClick={() => onOpenChange(false)}>
-            Cancel
-          </Button>
-          <Button
-            onClick={handleSave}
-            className="bg-blue-600 hover:bg-blue-700"
-          >
-            Add Chart
-          </Button>
-        </div>
-      </DialogContent>
-    </Dialog>
+      </div>
+      <div className="flex gap-2 justify-center mt-4">
+        <Button
+          variant="outline"
+          onClick={() => onOpenChange(false)}
+          iconType="cancel"
+        >
+          {t("Cancel")}
+        </Button>
+        <Button
+          onClick={handleSave}
+          className="bg-blue-600 hover:bg-blue-700"
+          iconType="save"
+        >
+          {t("Add Chart")}
+        </Button>
+      </div>
+    </Modal>
   );
 }
