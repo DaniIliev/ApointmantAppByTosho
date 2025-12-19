@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { MapPin, ArrowUpRight } from "lucide-react";
 import { Button } from "@/components/ui/button"; // Добавяме Button за линка
 import { BusinessData } from "@/app/business/[id]/page";
+import { useTranslation } from "react-i18next";
 
 interface BusinessMapProps {
   business: BusinessData;
@@ -33,6 +34,8 @@ const getGoogleMapLink = (address: string, city: string) => {
 
 export function BusinessMap({ business }: BusinessMapProps) {
   const fullAddress = `${business.address}, ${business.city}`;
+  const { t } = useTranslation();
+
   // const mapEmbedUrl = getGoogleMapEmbedUrl(
   //   business.address,
   //   business.city,
@@ -55,13 +58,13 @@ export function BusinessMap({ business }: BusinessMapProps) {
         <div className="flex items-center gap-3">
           <MapPin className="h-6 w-6 text-primary" />
           <CardTitle className="font-bold text-primary text-2xl font-sans">
-            Our Location
+            {t("Our Location")}
           </CardTitle>
         </div>
 
         {/* Бутон за директна навигация */}
         <Button variant="outline" onClick={handleOpenMaps}>
-          Open in Maps
+          {t("Open in Maps")}
           <ArrowUpRight className="h-4 w-4 ml-1" />
         </Button>
       </CardHeader>

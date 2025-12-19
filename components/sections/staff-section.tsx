@@ -4,9 +4,11 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { UserCheck } from "lucide-react";
 import { useEffect, useState } from "react";
 import Image from "next/image";
+import { useTranslation } from "react-i18next";
 
 export function StaffSection(businessId: { businessId: string }) {
   const [staff, setStaff] = useState<StaffMember[]>([]);
+  const { t } = useTranslation();
   useEffect(() => {
     const fetchStaff = async () => {
       try {
@@ -26,7 +28,7 @@ export function StaffSection(businessId: { businessId: string }) {
       <CardHeader className="flex flex-row items-center pb-4 border-b">
         <UserCheck className="h-6 w-6 text-primary mr-2" />
         <CardTitle className="font-bold text-2xl font-sans text-primary">
-          Meet Our Experts
+          {t("Meet Our Experts")}
         </CardTitle>
       </CardHeader>
       <CardContent className="pt-6 pb-6">
