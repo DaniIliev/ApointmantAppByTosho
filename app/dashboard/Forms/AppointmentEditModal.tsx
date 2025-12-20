@@ -18,7 +18,18 @@ import moment from "moment";
 import { useAuthContext } from "@/context/AuthContext";
 import { formatDateAndTime } from "@/Global/Utils/commonFn";
 import { CustomTooltip } from "@/components/customUIComponents/CustomTooltip";
-import { ClosedCaptionIcon, X } from "lucide-react";
+import { X } from "lucide-react";
+
+type StaffOption = {
+  _id: string;
+  firstName: string;
+  lastName: string;
+};
+
+type SlotOption = {
+  startTime: string;
+  endTime: string;
+};
 
 type AppointmentEditModalProps = {
   open: boolean;
@@ -42,8 +53,8 @@ export const AppointmentEditModal: React.FC<AppointmentEditModalProps> = ({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isCancelling, setIsCancelling] = useState(false);
   const [showCancelConfirm, setShowCancelConfirm] = useState(false);
-  const [availableStaff, setAvailableStaff] = useState<any[]>([]);
-  const [availableSlots, setAvailableSlots] = useState<any[]>([]);
+  const [availableStaff, setAvailableStaff] = useState<StaffOption[]>([]);
+  const [availableSlots, setAvailableSlots] = useState<SlotOption[]>([]);
 
   const [formData, setFormData] = useState({
     clientName: "",
@@ -112,7 +123,7 @@ export const AppointmentEditModal: React.FC<AppointmentEditModalProps> = ({
         let finalSlots = slots.slots || [];
         if (appointment && formData.time) {
           const currentSlotExists = finalSlots.some(
-            (slot: any) => slot.startTime === formData.time
+            (slot: SlotOption) => slot.startTime === formData.time
           );
 
           if (!currentSlotExists) {
@@ -190,23 +201,24 @@ export const AppointmentEditModal: React.FC<AppointmentEditModalProps> = ({
   };
 
   const handleCancelAppointment = async () => {
-    if (!appointment) return;
-
     try {
+      if (!appointment) return;
       setIsCancelling(true);
-      await callApi(`/api/appointment/${appointment._id}`, "DELETE");
+      const updatedAppointment: Appointment = await callApi(
+        `/api/appointment/${appointment._id}/status`,
+        "PUT",
+        {
+          status: "cancelled",
+        }
+      );
 
-      toast.success(t("Appointment cancelled successfully") as string);
-      onOpenChange(false);
+      onAppointmentUpdated(updatedAppointment);
       setShowCancelConfirm(false);
-
-      // Notify parent to refresh the appointments list
-      onAppointmentUpdated({ ...appointment, status: "cancelled" } as any);
+      onOpenChange(false);
+      toast.success(t("Appointment cancelled successfully!"));
     } catch (error) {
       console.error("Failed to cancel appointment:", error);
-      toast.error(
-        t("Failed to cancel appointment. Please try again.") as string
-      );
+      toast.error(t("Failed to cancel appointment. Please try again."));
     } finally {
       setIsCancelling(false);
     }

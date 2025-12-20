@@ -106,6 +106,8 @@ function DashboardPageContent() {
     fetchServices();
   }, [fetchServices, getDashboardData]);
 
+  // Global auto-completion now handled by AutoCompletePastAppointments component
+
   useEffect(() => {
     setPageTitle(t("Dashboard"));
     setExtraRightNavMenu(
@@ -148,10 +150,11 @@ function DashboardPageContent() {
       );
     }
     setSelectedAppointment(null);
+    // Refresh from server to ensure latest state
+    void getDashboardData();
   };
 
   const handleDeleteAppointment = () => {
-    // ... (логиката за handleDeleteAppointment остава същата)
     if (selectedAppointment) {
       setAppointments((prev) =>
         prev.filter((apt) => apt._id !== selectedAppointment._id)
@@ -161,7 +164,6 @@ function DashboardPageContent() {
     }
   };
 
-  // ФУНКЦИЯ ЗА СЪЗДАВАНЕ НА НОВА СРЕЩА
   const handleCreateAppointment = async (
     appointmentData: AppointmentFormData
   ) => {
@@ -237,44 +239,12 @@ function DashboardPageContent() {
             value="calendar"
             className="data-[state=active]:bg-primary data-[state=active]:text-white data-[state=inactive]:text-muted-foreground flex flex-col items-center justify-center gap-1 rounded-lg transition-all py-2 px-3"
           >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="20"
-              height="20"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
-              <line x1="16" y1="2" x2="16" y2="6"></line>
-              <line x1="8" y1="2" x2="8" y2="6"></line>
-              <line x1="3" y1="10" x2="21" y2="10"></line>
-            </svg>
             <span className="text-xs font-medium">{t("Calendar")}</span>
           </TabsTrigger>
           <TabsTrigger
             value="table"
             className="data-[state=active]:bg-primary data-[state=active]:text-white data-[state=inactive]:text-muted-foreground flex flex-col items-center justify-center gap-1 rounded-lg transition-all py-2 px-3"
           >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="20"
-              height="20"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <rect x="3" y="3" width="7" height="7"></rect>
-              <rect x="14" y="3" width="7" height="7"></rect>
-              <rect x="14" y="14" width="7" height="7"></rect>
-              <rect x="3" y="14" width="7" height="7"></rect>
-            </svg>
             <span className="text-xs font-medium">{t("Table")}</span>
           </TabsTrigger>
         </TabsList>
@@ -294,6 +264,22 @@ function DashboardPageContent() {
           <AppointmentsTable
             data={appointments}
             onOpenViewModal={openViewModal}
+            onOpenEditModal={(apt) => {
+              setSelectedAppointment(apt);
+              setIsEditModalOpen(true);
+            }}
+            onDeleteAppointment={async (id: string) => {
+              try {
+                await callApi(`/api/appointment/${id}`, "DELETE");
+                setAppointments((prev) => prev.filter((a) => a._id !== id));
+                toast.success(t("Appointment deleted successfully!"));
+              } catch (error) {
+                console.error("Failed to delete appointment:", error);
+                toast.error(
+                  t("Failed to delete appointment. Please try again.")
+                );
+              }
+            }}
           />
         </TabsContent>
 

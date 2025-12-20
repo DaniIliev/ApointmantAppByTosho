@@ -9,7 +9,7 @@ import useClickOutside from "@/Global/Hooks/useClickOutside";
 import { useAuthContext } from "@/context/AuthContext";
 import io from "socket.io-client";
 import callApi from "@/app/Api/callApi";
-import { toast } from "sonner";
+import NotificationsPanel from "./NotificationsPanel";
 
 // Интерфейс за аларма
 interface AppointmentInfo {
@@ -75,7 +75,7 @@ export default function TopNav({
       if (typeof window !== "undefined") {
         localStorage.setItem("appLocale", lng);
       }
-    } catch (e) {
+    } catch {
       // Ignore persistence errors (private mode, etc.)
     }
     // Keep current path (no locale prefixes in routes structure)
@@ -110,62 +110,12 @@ export default function TopNav({
     setIsAlertsOpen(false);
   };
 
-  const handleConfirmAppointment = async (alert: Alert) => {
-    try {
-      console.log("alert", alert);
-      const appointmentId = alert.appointment?._id;
-      const alertId = alert._id;
-
-      if (!appointmentId) {
-        toast.error(t("This alert has no appointment to confirm."));
-        return;
-      }
-
-      // Стъпка 1: Изпращаме заявка за потвърждаване на срещата
-      const confirmedAppointment = await callApi(
-        `/api/appointment/${appointmentId}/status`,
-        "PUT",
-        { status: "confirmed" }
-      );
-
-      console.log("alertId", alertId);
-      if (confirmedAppointment) {
-        // Стъпка 2: Изпращаме заявка за изтриване на алармата
-        await callApi(`/api/alerts/${alertId}`, "DELETE");
-
-        setAlerts((prevAlerts) =>
-          prevAlerts.filter((a) => a._id !== alert._id)
-        );
-
-        toast.success(t("Appointment confirmed successfully!"));
-      }
-    } catch (error) {
-      console.error("Failed to confirm appointment:", error);
-      toast.error(t("Failed to confirm appointment. Please try again."));
-    }
-  };
-
-  const handleAlertClick = async (alert: Alert) => {
-    if (!alert.isRead) {
-      try {
-        await callApi(`/api/alerts/${alert._id}/read`, "PUT", {});
-        console.log("alert", alert);
-
-        setAlerts((prevAlerts) =>
-          prevAlerts.map((a) =>
-            a._id === alert._id ? { ...a, isRead: true } : a
-          )
-        );
-      } catch (error) {
-        console.error("Failed to mark alert as read:", error);
-      }
-    }
-  };
-
   useEffect(() => {
     console.log("user", user);
     if (user && (user.role === "staff" || user.role === "business")) {
-      const socket = io("http://localhost:8080");
+      const socket = io(
+        process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080"
+      );
 
       socket.on("connect", () => {
         console.log("Connected to Socket.IO server:", socket.id);
@@ -260,81 +210,11 @@ export default function TopNav({
                 <span className="text-xs text-primary mt-1">{t("Alerts")}</span>
               </button>
               {isAlertsOpen && (
-                <div className="absolute right-0 mt-2 w-72 md:w-80 bg-slate-900/90 backdrop-blur-xl border border-white/20 rounded-xl shadow-2xl p-4 max-h-96 overflow-y-auto">
-                  <h3 className="text-white font-bold mb-3">
-                    {t("Notifications")}
-                  </h3>
-                  {alerts.length > 0 ? (
-                    alerts.map((alert) => {
-                      const appt = alert.appointment;
-                      const hasAppt = alert.type === "appointment" && !!appt;
-                      return (
-                        <div
-                          key={alert._id}
-                          onClick={() => handleAlertClick(alert)}
-                          className={`mb-2 p-3 rounded-lg cursor-pointer transition-all duration-200 ${
-                            !alert.isRead
-                              ? "bg-blue-600/20 border-l-4 border-blue-400"
-                              : "bg-white/5"
-                          } hover:bg-white/10`}
-                        >
-                          <p className="text-sm font-semibold text-white/90">
-                            {alert.message}
-                          </p>
-                          {hasAppt ? (
-                            <>
-                              <p className="text-xs text-white/60 mt-1">
-                                {t("Appointment from")}:
-                                {appt?.clientName ?? t("Unknown")}
-                              </p>
-                              <p className="text-xs text-white/60">
-                                {t("Time")}:
-                                {appt?.appointmentTime?.start
-                                  ? new Date(
-                                      appt.appointmentTime.start
-                                    ).toLocaleTimeString("bg-BG", {
-                                      hour: "2-digit",
-                                      minute: "2-digit",
-                                    })
-                                  : "N/A"}
-                                -
-                                {appt?.appointmentTime?.end
-                                  ? new Date(
-                                      appt.appointmentTime.end
-                                    ).toLocaleTimeString("bg-BG", {
-                                      hour: "2-digit",
-                                      minute: "2-digit",
-                                    })
-                                  : "N/A"}
-                              </p>
-                              <div className="flex justify-end mt-2">
-                                <button
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    handleConfirmAppointment(alert);
-                                  }}
-                                  className="px-3 py-1 text-sm font-semibold text-white bg-accent rounded-full hover:bg-accent/80 transition-colors"
-                                >
-                                  {t("Confirm")}
-                                </button>
-                              </div>
-                            </>
-                          ) : (
-                            <p className="text-xs text-white/60 mt-1">
-                              {new Date(alert.createdAt).toLocaleString(
-                                "bg-BG"
-                              )}
-                            </p>
-                          )}
-                        </div>
-                      );
-                    })
-                  ) : (
-                    <p className="text-white/80">
-                      {t("You have no new notifications.")}
-                    </p>
-                  )}
-                </div>
+                <NotificationsPanel
+                  isOpen={isAlertsOpen}
+                  alerts={alerts}
+                  onAlertsChange={setAlerts}
+                />
               )}
             </div>
 
