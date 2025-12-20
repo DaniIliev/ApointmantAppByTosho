@@ -10,6 +10,7 @@ import ChangePasswordModal from "@/components/customUIComponents/ChangePasswordM
 import GuestLayout from "./GuestLayout";
 import { Toaster } from "sonner";
 import { PaddingProvider } from "@/context/PaddingContext";
+import AutoCompletePastAppointments from "@/components/Global/AutoCompletePastAppointments";
 
 export default function ClientLayoutWrapper({
   children,
@@ -42,6 +43,7 @@ export default function ClientLayoutWrapper({
             {user ? (
               <ClientLayout>
                 <Toaster />
+                <AutoCompletePastAppointments />
                 {children}
                 <ChangePasswordModal
                   open={showChangePassword}

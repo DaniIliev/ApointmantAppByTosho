@@ -95,16 +95,16 @@ export function BusinessHeader({ business }: BusinessHeaderProps) {
                 </div>
                 <div className="flex items-center gap-2">
                   <CalendarDays className="h-5 w-5 flex-shrink-0 text-primary" />
-                  <span className="font-normal text-foreground">
+                  <span className="hover:text-primary transition-colors font-normal text-foreground">
                     {todayName}: ({business.schedule.monday})
                   </span>
                 </div>
               </div>
 
               {/* Адрес */}
-              <div className="flex items-start gap-3">
+              <div className="flex items-start gap-2">
                 <MapPin className="h-5 w-5 mt-0.5 flex-shrink-0 text-primary" />
-                <span className="hover:text-foreground transition-colors cursor-pointer">
+                <span className="hover:text-primary transition-colors cursor-pointer">
                   {business.address || business.city
                     ? `${displayValue(business.address)}, ${displayValue(
                         business.city
@@ -114,7 +114,7 @@ export function BusinessHeader({ business }: BusinessHeaderProps) {
               </div>
 
               {/* Телефон */}
-              <div className="flex items-center gap-3">
+              <div className="flex items-center gap-2">
                 <Phone className="h-5 w-5 flex-shrink-0 text-primary" />
                 {business.phone ? (
                   <a
@@ -131,7 +131,7 @@ export function BusinessHeader({ business }: BusinessHeaderProps) {
               </div>
 
               {/* Имейл */}
-              <div className="flex items-center gap-3">
+              <div className="flex items-center gap-2">
                 <Mail className="h-5 w-5 flex-shrink-0 text-primary" />
                 {business.email ? (
                   <a
@@ -149,7 +149,7 @@ export function BusinessHeader({ business }: BusinessHeaderProps) {
 
               {/* Уебсайт */}
               {business.website && (
-                <div className="flex items-center gap-3">
+                <div className="flex items-center gap-2">
                   <Globe className="h-5 w-5 flex-shrink-0 text-primary" />
                   <a
                     href={`https://${business.website}`}

@@ -21,6 +21,9 @@ export interface Appointment {
     start: string;
     end: string; // За да е съвместимо с това, което връща бекендът
   };
+  // Derived fields for table sorting/filters
+  date?: string; // ISO start date (for table filters and sorting)
+  time?: string; // Display start time (for sorting)
   serviceName: string; // Променено на serviceName, тъй като така го връща бекендът
   status: AppointmentStatus;
   notes?: string;
