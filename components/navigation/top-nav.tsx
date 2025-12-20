@@ -11,7 +11,6 @@ import io from "socket.io-client";
 import callApi from "@/app/Api/callApi";
 import NotificationsPanel from "./NotificationsPanel";
 
-// Интерфейс за аларма
 interface AppointmentInfo {
   _id: string;
   clientName: string;
