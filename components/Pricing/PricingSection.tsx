@@ -1,5 +1,11 @@
 "use client";
-import React, { useCallback, useState, useMemo, ReactNode } from "react";
+import React, {
+  useCallback,
+  useState,
+  useMemo,
+  ReactNode,
+  useEffect,
+} from "react";
 import { useTranslation } from "react-i18next";
 import { Badge, Check, Loader2 } from "lucide-react";
 import { useAuthContext } from "@/context/AuthContext";
@@ -7,6 +13,7 @@ import callApi from "@/app/Api/callApi";
 import { Button } from "../ui/button";
 import { ScrollReveal } from "../scroll-reveal";
 import { Card, CardContent } from "../ui/card";
+import { usePaddingControl } from "@/context/PaddingContext";
 
 // 1. Дефиниране на TypeScript интерфейси за по-добра структура на данните
 
@@ -35,7 +42,14 @@ const PricingSection = () => {
   const [billingCycle, setBillingCycle] = useState<"monthly" | "annual">(
     "monthly"
   ); // Ограничаваме възможните стойности
+  const { setRemovePadding } = usePaddingControl();
 
+  useEffect(() => {
+    setRemovePadding(true);
+    return () => {
+      setRemovePadding(false);
+    };
+  }, [setRemovePadding]);
   // Типизиране на useCallback
   const handleCheckout = useCallback(
     async (checkoutPlanName: string) => {
@@ -172,7 +186,7 @@ const PricingSection = () => {
   };
 
   return (
-    <section id="pricing" className="bg-gray-50 dark:bg-gray-900 p-16">
+    <section id="pricing" className="bg-gray-50 dark:bg-gray-900 py-16">
       <div className="container mx-auto px-4 max-w-7xl">
         <div className="max-w-6xl mx-auto">
           {/* Заглавна секция */}
