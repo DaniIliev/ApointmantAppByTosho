@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useMemo, useCallback } from "react";
+import React, { useState, useMemo, useCallback, useEffect } from "react";
 import {
   format,
   addMonths,
@@ -70,6 +70,7 @@ export const DateRangePicker: React.FC<DateRangePickerProps> = ({
   const { t } = useTranslation();
   const locale = useLocale();
   const [open, setOpen] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
   const [anchorMonth, setAnchorMonth] = useState<Date>(() => {
     const today = new Date();
     if (value.startDate) {
@@ -78,6 +79,18 @@ export const DateRangePicker: React.FC<DateRangePickerProps> = ({
     }
     return today;
   });
+
+  // Detect mobile screen size
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 640); // sm breakpoint
+    };
+
+    checkMobile();
+    window.addEventListener("resize", checkMobile);
+    return () => window.removeEventListener("resize", checkMobile);
+  }, []);
+
   const startDate = value.startDate ? new Date(value.startDate) : null;
   const endDate = value.endDate ? new Date(value.endDate) : null;
   const clearSelection = () => onChange({ startDate: null, endDate: null });
@@ -167,7 +180,7 @@ export const DateRangePicker: React.FC<DateRangePickerProps> = ({
   const renderMonth = (month: Date, weeks: Date[][]) => {
     return (
       <div className="flex flex-col gap-2 w-full">
-        <div className="text-center font-medium text-sm">
+        <div className="text-center font-medium text-sm sm:text-base">
           {format(month, "MMMM yyyy", { locale })}
         </div>
         <div className="grid grid-cols-7 text-xs text-muted-foreground">
@@ -177,7 +190,10 @@ export const DateRangePicker: React.FC<DateRangePickerProps> = ({
               end: endOfWeek(month, { locale }),
             })[i];
             return (
-              <div key={i} className="h-6 flex items-center justify-center">
+              <div
+                key={i}
+                className="h-6 sm:h-8 flex items-center justify-center"
+              >
                 {format(day, "EEEEE", { locale })}
               </div>
             );
@@ -203,7 +219,7 @@ export const DateRangePicker: React.FC<DateRangePickerProps> = ({
                     onClick={() => handleDayClick(day)}
                     disabled={disabled}
                     className={cn(
-                      "relative h-8 text-xs rounded-md flex items-center justify-center transition-colors",
+                      "relative h-8 sm:h-9 text-xs sm:text-sm rounded-md flex items-center justify-center transition-colors",
                       disabled && "opacity-30 cursor-not-allowed",
                       between && "bg-primary/30 text-primary-foreground",
                       selected &&
@@ -318,26 +334,26 @@ export const DateRangePicker: React.FC<DateRangePickerProps> = ({
       <Popover.Portal>
         <Popover.Content
           sideOffset={8}
-          className="rounded-xl border border-border bg-popover p-4 shadow-xl w-full max-w-[360px] sm:max-w-[560px] z-[40000]"
+          className="rounded-xl border border-border bg-popover p-3 sm:p-4 shadow-xl w-[calc(100vw-2rem)] max-w-[340px] sm:max-w-[560px] z-[40000]"
           align="start"
         >
-          <div className="flex items-center justify-between mb-2">
+          <div className="flex items-center justify-between mb-3 sm:mb-2 gap-2">
             <button
               type="button"
-              className="h-8 w-8 flex items-center justify-center rounded-md hover:bg-primary/20"
+              className="h-8 w-8 flex items-center justify-center rounded-md hover:bg-primary/20 shrink-0"
               onClick={() => setAnchorMonth(addMonths(anchorMonth, -1))}
             >
               <ChevronLeft className="h-4 w-4" />
             </button>
-            <div className="flex gap-2 text-xs text-muted-foreground">
+            <div className="flex-1 flex gap-2 text-[10px] sm:text-xs text-muted-foreground justify-center overflow-hidden">
               {startDate && endDate && (
-                <span>
+                <span className="truncate">
                   {t("Start date")}: {format(startDate, "MMM d", { locale })} ·{" "}
                   {t("End date")}: {format(endDate, "MMM d", { locale })}
                 </span>
               )}
             </div>
-            <div className="flex gap-1">
+            <div className="flex gap-1 shrink-0">
               {startDate && (
                 <button
                   type="button"
@@ -347,7 +363,7 @@ export const DateRangePicker: React.FC<DateRangePickerProps> = ({
                       endDate: null,
                     })
                   }
-                  className="px-2 h-8 text-xs rounded-md border border-input hover:bg-accent"
+                  className="px-2 h-8 text-[10px] sm:text-xs rounded-md border border-input hover:bg-accent"
                 >
                   {t("Today")}
                 </button>
@@ -365,17 +381,22 @@ export const DateRangePicker: React.FC<DateRangePickerProps> = ({
             </div>
             <button
               type="button"
-              className="h-8 w-8 flex items-center justify-center rounded-md hover:bg-primary/20"
+              className="h-8 w-8 flex items-center justify-center rounded-md hover:bg-primary/20 shrink-0"
               onClick={() => setAnchorMonth(addMonths(anchorMonth, 1))}
             >
               <ChevronRight className="h-4 w-4" />
             </button>
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+          <div
+            className={cn(
+              "grid gap-4 sm:gap-6",
+              isMobile ? "grid-cols-1" : "grid-cols-1 sm:grid-cols-2"
+            )}
+          >
             {renderMonth(anchorMonth, leftMonthWeeks)}
-            {renderMonth(rightMonth, rightMonthWeeks)}
+            {!isMobile && renderMonth(rightMonth, rightMonthWeeks)}
           </div>
-          <div className="mt-4 flex justify-end gap-2">
+          <div className="mt-3 sm:mt-4 flex justify-end gap-2">
             <button
               type="button"
               onClick={() => setOpen(false)}
