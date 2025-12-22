@@ -45,9 +45,20 @@ export const LabeledInput = forwardRef<
     ref
   ) => {
     const [isFocused, setIsFocused] = useState<boolean>(false);
-    const hasValue = value.length > 0;
+    const hasValue = value?.length > 0;
     const isTextarea = rows !== undefined;
     const isErroredEmpty = Boolean(showError && required && !hasValue);
+    // Normalize display for date values passed in dd.MM.yyyy
+    const displayValue = React.useMemo(() => {
+      if (type === "date" && typeof value === "string") {
+        const m = value.match(/^(\d{2})\.(\d{2})\.(\d{4})$/);
+        if (m) {
+          const [, dd, mm, yyyy] = m;
+          return `${yyyy}-${mm}-${dd}`;
+        }
+      }
+      return value;
+    }, [type, value]);
 
     const isClearable = onClear && hasValue;
 
@@ -79,6 +90,8 @@ export const LabeledInput = forwardRef<
       ? "top-3 text-sm left-4"
       : "top-1/2 -translate-y-1/2 text-sm left-4";
 
+    const hideLabelForDate = type === "date" && !isFocused && !hasValue;
+
     return (
       <>
         <div className="relative group/labeled-input w-full">
@@ -95,18 +108,18 @@ export const LabeledInput = forwardRef<
               transition: background-color 5000s ease-in-out 0s;
             }
 
-            input[type="date"]:not(:focus)::-webkit-datetime-edit,
-            input[type="time"]:not(:focus)::-webkit-datetime-edit,
-            input[type="datetime-local"]:not(:focus)::-webkit-datetime-edit {
-              color: transparent;
+            /* Ensure native date/time value is always visible */
+            input[type="date"]::-webkit-datetime-edit,
+            input[type="time"]::-webkit-datetime-edit,
+            input[type="datetime-local"]::-webkit-datetime-edit {
+              color: inherit !important;
             }
 
-            input[type="date"]:not(:focus)::-webkit-calendar-picker-indicator,
-            input[type="time"]:not(:focus)::-webkit-calendar-picker-indicator,
-            input[type="datetime-local"]:not(
-                :focus
-              )::-webkit-calendar-picker-indicator {
-              opacity: 0.3;
+            /* Keep native date/time value visible when not focused */
+            input[type="date"]::-webkit-calendar-picker-indicator,
+            input[type="time"]::-webkit-calendar-picker-indicator,
+            input[type="datetime-local"]::-webkit-calendar-picker-indicator {
+              opacity: 0.6;
             }
           `}</style>
 
@@ -116,7 +129,8 @@ export const LabeledInput = forwardRef<
               "absolute transition-all duration-300 transform pointer-events-none z-10",
               isErroredEmpty ? "text-red-500" : "text-gray-500",
               "group-focus-within/labeled-input:text-primary",
-              finalLabelPosition
+              finalLabelPosition,
+              hideLabelForDate && "opacity-0"
             )}
           >
             {label}
@@ -127,12 +141,12 @@ export const LabeledInput = forwardRef<
               id={id}
               ref={ref as React.Ref<HTMLTextAreaElement>}
               rows={rows}
-              value={value}
+              value={displayValue}
               onChange={onChange}
               onFocus={() => setIsFocused(true)}
               onBlur={() => setIsFocused(false)}
               className={elementClasses}
-              placeholder={isFocused ? placeholder : ""}
+              placeholder={isFocused && !hasValue ? placeholder : ""}
               required={required}
               aria-invalid={isErroredEmpty}
               {...props}
@@ -143,7 +157,7 @@ export const LabeledInput = forwardRef<
                 id={id}
                 ref={ref as React.Ref<HTMLInputElement>}
                 type={inputType}
-                value={value}
+                value={displayValue}
                 onChange={
                   onChange as React.ChangeEventHandler<HTMLInputElement>
                 }
@@ -151,12 +165,11 @@ export const LabeledInput = forwardRef<
                 onBlur={() => setIsFocused(false)}
                 className={elementClasses}
                 placeholder={
-                  (type === "date" ||
-                    type === "time" ||
-                    type === "datetime-local") &&
-                  !isFocused
-                    ? ""
-                    : isFocused
+                  type === "date" ||
+                  type === "time" ||
+                  type === "datetime-local"
+                    ? placeholder
+                    : isFocused && !hasValue
                     ? placeholder
                     : ""
                 }

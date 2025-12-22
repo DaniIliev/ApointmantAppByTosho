@@ -7,6 +7,7 @@ import { Clock, CalendarIcon, Trash2, Eye, Pencil } from "lucide-react";
 import { formatDateAndTime } from "@/Global/Utils/commonFn";
 import { CustomTooltip } from "../customUIComponents/CustomTooltip";
 import { StatusChip } from "../customUIComponents/StatusChip";
+import { useAuthContext } from "@/context/AuthContext";
 
 type AppointmentsTableProps = {
   data: Appointment[];
@@ -22,6 +23,7 @@ export default function AppointmentsTable({
   onDeleteAppointment,
 }: AppointmentsTableProps) {
   const { t } = useTranslation();
+  const { user } = useAuthContext();
   const handleOpenViewModal = (appointment: Appointment): void => {
     onOpenViewModal(appointment);
   };
@@ -98,11 +100,13 @@ export default function AppointmentsTable({
             tooltipText={t("Edit")}
             icon={<Pencil />}
           />
-          <CustomTooltip
-            onClick={() => onDeleteAppointment(row.original._id)}
-            tooltipText={t("Delete")}
-            icon={<Trash2 className=" text-red-500" />}
-          />
+          {user && (user.role === "business" || user.role == "staff") && (
+            <CustomTooltip
+              onClick={() => onDeleteAppointment(row.original._id)}
+              tooltipText={t("Delete")}
+              icon={<Trash2 className=" text-red-500" />}
+            />
+          )}
         </div>
       ),
       enableHiding: false,

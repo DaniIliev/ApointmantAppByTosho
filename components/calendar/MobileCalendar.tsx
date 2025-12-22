@@ -25,17 +25,29 @@ import {
 } from "lucide-react";
 import { Appointment } from "@/Global/Types/types";
 import { getStatusColor } from "@/Global/Utils/statusIndicator";
+import { useTranslation } from "react-i18next";
+import { formatDateAndTime } from "@/Global/Utils/commonFn";
 
 const cn = (...classes: (string | boolean | undefined | null)[]): string =>
   classes.filter(Boolean).join(" ");
 
 interface AppointmentCardProps {
   appointment: Appointment;
+  onClick?: () => void;
 }
 
-const AppointmentCard: React.FC<AppointmentCardProps> = ({ appointment }) => {
+const AppointmentCard: React.FC<AppointmentCardProps> = ({
+  appointment,
+  onClick,
+}) => {
+  const { t } = useTranslation();
   return (
-    <div className="p-3 border border-gray-200 dark:border-gray-700 rounded-lg shadow-sm mb-2 hover:shadow-lg transition-shadow duration-200 bg-white dark:bg-gray-800">
+    <div
+      className="p-3 border border-gray-200 dark:border-gray-700 rounded-lg shadow-sm mb-2 hover:shadow-lg transition-shadow duration-200 bg-white dark:bg-gray-800"
+      onClick={onClick}
+      role={onClick ? "button" : undefined}
+      tabIndex={onClick ? 0 : undefined}
+    >
       <div className="flex items-center justify-between space-x-2 mb-1 pb-1 border-b border-gray-200 dark:border-gray-700">
         <h3 className="font-semibold text-lg flex items-center space-x-1">
           <User className="h-4 w-4 text-gray-700 dark:text-gray-300" />
@@ -47,22 +59,29 @@ const AppointmentCard: React.FC<AppointmentCardProps> = ({ appointment }) => {
             getStatusColor(appointment.status)
           )}
         >
-          {appointment.status}
+          {t(
+            appointment.status.charAt(0).toUpperCase() +
+              appointment.status.slice(1)
+          )}
         </span>
       </div>
       <div className="space-y-1 text-sm text-gray-600 dark:text-gray-300">
         <div className="flex items-center space-x-2">
-          <CalendarDays className="h-4 w-4 text-purple-500" />
+          <CalendarDays className="h-4 w-4 text-primary" />
+          <p>{formatDateAndTime(appointment.appointmentTime.start, "date")}</p>
+        </div>
+        <div className="flex items-center space-x-2">
+          <Clock className="h-4 w-4 text-primary" />
           <p>
-            {format(parseISO(appointment.appointmentTime.start), "dd.MM.yyyy")}
+            {" "}
+            {formatDateAndTime(
+              appointment.appointmentTime.start,
+              "time"
+            )} - {formatDateAndTime(appointment.appointmentTime.end, "time")}
           </p>
         </div>
         <div className="flex items-center space-x-2">
-          <Clock className="h-4 w-4 text-green-500" />
-          <p>{appointment.appointmentTime.start}</p>
-        </div>
-        <div className="flex items-center space-x-2">
-          <Briefcase className="h-4 w-4 text-blue-500" />
+          <Briefcase className="h-4 w-4 text-primary" />
           <p>{appointment.serviceName}</p>
         </div>
       </div>
@@ -231,9 +250,16 @@ const MonthlyCalendar: React.FC<MonthlyCalendarProps> = ({
 
 interface MobileCalendarProps {
   appointments: Appointment[];
+  onSelectAppointment: (appointment: Appointment) => void;
+  openDetailsModal: () => void;
 }
 
-const MobileCalendar = ({ appointments }: MobileCalendarProps) => {
+const MobileCalendar = ({
+  appointments,
+  onSelectAppointment,
+  openDetailsModal,
+}: MobileCalendarProps) => {
+  const { t } = useTranslation();
   const [selectedDate, setSelectedDate] = React.useState<Date>(new Date());
   const [searchQuery, setSearchQuery] = React.useState<string>("");
   const [isMonthlyView, setIsMonthlyView] = React.useState<boolean>(false);
@@ -486,7 +512,7 @@ const MobileCalendar = ({ appointments }: MobileCalendarProps) => {
             return (
               <div key={dateKey}>
                 <h2
-                  className="font-semibold text-lg sticky top-0 py-2 z-10 bg-white dark:bg-black"
+                  className="font-semibold text-lg sticky top-0 py-2 bg-white dark:bg-black"
                   ref={(el: HTMLDivElement | null) => {
                     if (el) appointmentRefs.current[dateKey] = el;
                   }}
@@ -499,11 +525,15 @@ const MobileCalendar = ({ appointments }: MobileCalendarProps) => {
                     <AppointmentCard
                       key={appointment._id}
                       appointment={appointment}
+                      onClick={() => {
+                        onSelectAppointment(appointment);
+                        openDetailsModal();
+                      }}
                     />
                   ))
                 ) : (
                   <p className="text-center text-gray-500 dark:text-gray-400 mt-4 p-4 rounded-lg bg-gray-100 dark:bg-gray-800 border border-dashed border-gray-300 dark:border-gray-700">
-                    Няма срещи.
+                    {t("No appointments.")}
                   </p>
                 )}
               </div>
@@ -511,7 +541,7 @@ const MobileCalendar = ({ appointments }: MobileCalendarProps) => {
           })
         ) : (
           <p className="text-center text-gray-500 dark:text-gray-400 mt-8">
-            Няма срещи.
+            {t("No appointments.")}
           </p>
         )}
       </div>

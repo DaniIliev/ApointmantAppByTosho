@@ -1,7 +1,8 @@
 // components/AppointmentDetailsModal.tsx
 import React from "react";
 import { Modal } from "@/components/customUIComponents/Modal";
-import { Clock, DollarSign } from "lucide-react";
+import { Clock, Euro } from "lucide-react";
+import { formatPriceEUR } from "@/Global/Utils/commonFn";
 import { AppointmentType } from "@/Global/Types/types";
 
 type AppointmentDetailsModalProps = {
@@ -42,8 +43,9 @@ const AppointmentDetailsModal = ({
               {formatDuration(selectedType.duration)}
             </div>
             <div className="flex items-center gap-2 text-lg font-bold text-primary">
-              <DollarSign className="h-5 w-5" />
-              <span className="font-medium">Price:</span> {selectedType.price}
+              <Euro className="h-5 w-5" />
+              <span className="font-medium">Price:</span>{" "}
+              {formatPriceEUR(selectedType.price)}
             </div>
           </div>
         </div>

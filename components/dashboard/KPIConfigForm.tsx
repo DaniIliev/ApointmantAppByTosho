@@ -6,13 +6,14 @@ import { Label } from "@/components/ui/label";
 import { LabeledSelect } from "@/components/customUIComponents/LabeledSelect";
 import {
   Calendar,
-  DollarSign,
+  Euro,
   Users,
   CheckCircle,
   XCircle,
   TrendingUp,
   UserPlus,
 } from "lucide-react";
+import { formatPriceEUR } from "@/Global/Utils/commonFn";
 import type { KPIConfig } from "./types";
 import { useStaffOptions } from "./useStaffOptions";
 import { Modal } from "../customUIComponents/Modal";
@@ -37,7 +38,7 @@ const kpiOptions = [
   {
     id: "totalRevenue",
     label: "Total Revenue",
-    icon: DollarSign,
+    icon: Euro,
   },
   {
     id: "completedAppointments",
@@ -86,8 +87,8 @@ export function KPIConfigForm({
   const [loadingPreview, setLoadingPreview] = useState(false);
 
   const formatKpiValue = (kpiType: string, raw: number) => {
-    if (kpiType === "totalRevenue") return `$${raw.toLocaleString()}`;
-    if (kpiType === "averageServicePrice") return `$${raw.toFixed(2)}`;
+    if (kpiType === "totalRevenue") return formatPriceEUR(raw);
+    if (kpiType === "averageServicePrice") return formatPriceEUR(raw);
     if (kpiType === "clientRetentionRate") return `${raw.toFixed(1)}%`;
     return raw;
   };

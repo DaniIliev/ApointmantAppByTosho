@@ -1,7 +1,7 @@
 "use client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Clock, DollarSign } from "lucide-react";
+import { Clock, Euro } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { useEffect, useState } from "react";
 import callApi from "@/app/Api/callApi";
@@ -10,7 +10,7 @@ import {
   SelectOptionsAppointmentType,
 } from "@/Global/Types/types";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { getInitials } from "@/Global/Utils/commonFn";
+import { getInitials, formatPriceEUR } from "@/Global/Utils/commonFn";
 import { Modal } from "@/components/customUIComponents/Modal";
 import AppointmentForm, {
   AppointmentFormData,
@@ -110,7 +110,7 @@ export function ServicesSection({ businessId }: { businessId: string }) {
     <Card className="shadow-lg">
       <CardHeader className="flex flex-row justify-between items-center border-b p-4">
         <CardTitle className="text-2xl font-bold tracking-tight flex items-center gap-2 text-primary">
-          <DollarSign className="h-6 w-6 text-primary" />
+          <Euro className="h-6 w-6 text-primary" />
           {t("Services and Price List")}
         </CardTitle>
       </CardHeader>
@@ -153,8 +153,8 @@ export function ServicesSection({ businessId }: { businessId: string }) {
                               <span>{service.duration} мин.</span>
                             </div>
                             <div className="flex items-center gap-1 text-green-600 dark:text-green-400">
-                              <DollarSign className="h-4 w-4" />
-                              <span>{service.price} лв.</span>
+                              <Euro className="h-4 w-4" />
+                              <span>{formatPriceEUR(service.price)}</span>
                             </div>
                             {service.staffs && service.staffs.length > 0 && (
                               <>

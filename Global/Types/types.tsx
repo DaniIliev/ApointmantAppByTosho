@@ -25,6 +25,8 @@ export interface Appointment {
   date?: string; // ISO start date (for table filters and sorting)
   time?: string; // Display start time (for sorting)
   serviceName: string; // Променено на serviceName, тъй като така го връща бекендът
+  servicePrice?: number;
+  serviceDuration?: number;
   status: AppointmentStatus;
   notes?: string;
   staff: {

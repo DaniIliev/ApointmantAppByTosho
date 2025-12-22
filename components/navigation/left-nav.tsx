@@ -274,7 +274,7 @@ export default function LeftNav({ isOpen }: LeftNavProps) {
 
   return (
     <nav
-      className={`bg-primary-foreground fixed left-0 top-17.5 bottom-0 backdrop-blur-xl  z-40 transition-all duration-300 
+      className={`zIndex-100 bg-primary-foreground fixed left-0 top-17.5 bottom-0 backdrop-blur-xl  z-40 transition-all duration-300 
         ${isOpen ? "w-64 translate-x-0" : "w-64 -translate-x-full"}
         ${isOpen ? "lg:w-64 lg:translate-x-0" : "lg:w-20 lg:translate-x-0"}
       `}

@@ -208,9 +208,10 @@ export default function BusinessSetupModal({
       description: t(
         "Upload a professional photo of your business. This helps customers recognize your brand."
       ),
-      hint: t(
-        "Tip: Use a high-quality image (min 800x600px) showing your storefront or logo."
-      ),
+      // hint: t(
+      //   "Tip: Use a high-quality image (min 800x600px) showing your storefront or logo."
+      // ),
+      hint: "",
     },
     1: {
       icon: Building2,
@@ -218,7 +219,8 @@ export default function BusinessSetupModal({
       description: t(
         "Tell us about your business. This information will be visible to your customers."
       ),
-      hint: t("Choose a category that best describes your business type."),
+      // hint: t("Choose a category that best describes your business type."),
+      hint: "",
     },
     2: {
       icon: Phone,
@@ -226,9 +228,10 @@ export default function BusinessSetupModal({
       description: t(
         "How can customers reach you? Add your phone, email, and website."
       ),
-      hint: t(
-        "Optional: All fields are optional, but providing more contact options builds trust."
-      ),
+      // hint: t(
+      //   "Optional: All fields are optional, but providing more contact options builds trust."
+      // ),
+      hint: "",
     },
     3: {
       icon: MapPin,
@@ -236,9 +239,10 @@ export default function BusinessSetupModal({
       description: t(
         "Where is your business located? This helps customers find you easily."
       ),
-      hint: t(
-        "Optional: You can skip this if you operate online or provide mobile services."
-      ),
+      // hint: t(
+      //   "Optional: You can skip this if you operate online or provide mobile services."
+      // ),
+      hint: "",
     },
     4: {
       icon: Users,
@@ -423,17 +427,17 @@ export default function BusinessSetupModal({
 
   const StepsHeader = () => {
     return (
-      <div className="mb-4">
-        <div className="flex items-center gap-2">
+      <div className="mb-3">
+        <div className="flex items-center gap-1 sm:gap-2 overflow-x-auto pb-2">
           {stepLabels.map((label, i) => {
             const isActive = i === step;
             const isCompleted = i < step;
             return (
               <React.Fragment key={label}>
-                <div className="flex flex-col items-center min-w-[60px]">
+                <div className="flex flex-col items-center min-w-[50px] sm:min-w-[60px]">
                   <div
                     className={
-                      `w-8 h-8 rounded-full flex items-center justify-center text-xs font-semibold ` +
+                      `w-7 h-7 sm:w-8 sm:h-8 rounded-full flex items-center justify-center text-xs font-semibold ` +
                       (isActive
                         ? "bg-primary text-primary-foreground"
                         : isCompleted
@@ -445,7 +449,7 @@ export default function BusinessSetupModal({
                   </div>
                   <div
                     className={
-                      `mt-1 text-[11px] sm:text-xs text-center ` +
+                      `mt-1 text-[10px] sm:text-xs text-center hidden sm:block ` +
                       (isActive
                         ? "text-primary font-medium"
                         : "text-muted-foreground")
@@ -481,27 +485,29 @@ export default function BusinessSetupModal({
         <StepsHeader />
 
         {/* Step Info Card */}
-        <div className="bg-primary/5 border border-primary/20 rounded-lg p-4 mb-6">
-          <div className="flex items-start gap-3">
-            <div className="p-2 bg-primary/10 rounded-lg">
+        <div className="bg-primary/5 border border-primary/20 rounded-lg p-3 sm:p-4 mb-4 sm:mb-6">
+          <div className="flex items-start gap-2 sm:gap-3">
+            <div className="p-1.5 sm:p-2 bg-primary/10 rounded-lg">
               {React.createElement(
                 stepInfo[step as keyof typeof stepInfo].icon,
                 {
-                  className: "h-5 w-5 text-primary",
+                  className: "h-4 w-4 sm:h-5 sm:w-5 text-primary",
                 }
               )}
             </div>
             <div className="flex-1">
-              <h3 className="font-semibold text-lg mb-1">
+              <h3 className="font-semibold text-base sm:text-lg mb-1">
                 {t(stepInfo[step as keyof typeof stepInfo].title)}
               </h3>
-              <p className="text-sm text-muted-foreground mb-2">
+              <p className="text-xs sm:text-sm text-muted-foreground mb-2 hidden sm:block">
                 {t(stepInfo[step as keyof typeof stepInfo].description)}
               </p>
-              <div className="flex items-start gap-2 text-xs text-primary/80 bg-primary/5 rounded px-2 py-1.5">
-                <Info className="h-3.5 w-3.5 mt-0.5 flex-shrink-0" />
-                <span>{t(stepInfo[step as keyof typeof stepInfo].hint)}</span>
-              </div>
+              {stepInfo[step as keyof typeof stepInfo].hint && (
+                <div className="hidden sm:flex items-start gap-2 text-xs text-primary/80 bg-primary/5 rounded px-2 py-1.5">
+                  <Info className="h-3.5 w-3.5 mt-0.5 flex-shrink-0" />
+                  <span>{t(stepInfo[step as keyof typeof stepInfo].hint)}</span>
+                </div>
+              )}
             </div>
           </div>
         </div>
@@ -934,17 +940,22 @@ export default function BusinessSetupModal({
         )}
 
         {/* Footer nav */}
-        <div className="flex items-center justify-between pt-2">
+        <div className="flex items-center justify-between gap-2 pt-2">
           <Button
             iconType="back"
             variant="outline"
             onClick={back}
             disabled={step === 0}
+            className="flex-1 sm:flex-initial"
           >
             {t("Back")}
           </Button>
           {step < stepLabels.length - 1 ? (
-            <Button iconType="next" onClick={handleNext}>
+            <Button
+              iconType="next"
+              onClick={handleNext}
+              className="flex-1 sm:flex-initial"
+            >
               {t("Next")}
             </Button>
           ) : (
@@ -952,6 +963,7 @@ export default function BusinessSetupModal({
               iconType="confirm"
               onClick={handleFinish}
               disabled={submitting}
+              className="flex-1 sm:flex-initial"
             >
               {submitting ? t("Submitting...") : t("Finish")}
             </Button>
@@ -1000,7 +1012,7 @@ export default function BusinessSetupModal({
               setNewStaff({ ...newStaff, phone: e.target.value })
             }
           />
-          <div className="flex justify-end gap-2 pt-2">
+          <div className="flex justify-center gap-2 pt-2">
             <Button variant="outline" onClick={() => setInviteOpen(false)}>
               {t("Cancel")}
             </Button>
