@@ -58,7 +58,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
 
   return (
     <ThemeContext.Provider value={{ theme, setTheme: handleSetTheme }}>
-            {children}   {" "}
+      {children}
     </ThemeContext.Provider>
   );
 }
