@@ -137,7 +137,11 @@ export function KanbanPreview() {
       });
     }
 
-    setDraggedCard({ columnId, cardId: columns.find(c => c.id === columnId)?.cards[cardIndex].id || "", cardIndex });
+    setDraggedCard({
+      columnId,
+      cardId: columns.find((c) => c.id === columnId)?.cards[cardIndex].id || "",
+      cardIndex,
+    });
     (e.currentTarget as HTMLElement).style.opacity = "0.5";
   };
 
@@ -196,12 +200,15 @@ export function KanbanPreview() {
             className="flex-shrink-0 w-72 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 overflow-hidden flex flex-col"
           >
             {/* Column Header */}
-            <div className={`${column.color} px-4 py-3 border-b border-gray-200 dark:border-gray-700`}>
+            <div
+              className={`${column.color} px-4 py-3 border-b border-gray-200 dark:border-gray-700`}
+            >
               <h3 className="font-semibold text-sm text-gray-900 dark:text-gray-100">
                 {column.title}
               </h3>
               <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">
-                {column.cards.length} {column.cards.length === 1 ? "task" : "tasks"}
+                {column.cards.length}{" "}
+                {column.cards.length === 1 ? "task" : "tasks"}
               </p>
             </div>
 
@@ -220,7 +227,9 @@ export function KanbanPreview() {
                   <div
                     key={card.id}
                     draggable
-                    onDragStart={(e) => handleDragStart(e, column.id, cardIndex)}
+                    onDragStart={(e) =>
+                      handleDragStart(e, column.id, cardIndex)
+                    }
                     onDragEnd={handleDragEnd}
                     className="bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded p-3 cursor-grab active:cursor-grabbing hover:shadow-md transition-shadow group"
                   >
@@ -246,12 +255,14 @@ export function KanbanPreview() {
                             card.priority
                           )}`}
                         >
-                          {card.priority.charAt(0).toUpperCase() + card.priority.slice(1)}
+                          {card.priority.charAt(0).toUpperCase() +
+                            card.priority.slice(1)}
                         </span>
                       </div>
                       {card.assignee && (
                         <div className="text-xs text-gray-600 dark:text-gray-400">
-                          <span className="font-medium">Assigned:</span> {card.assignee}
+                          <span className="font-medium">Assigned:</span>{" "}
+                          {card.assignee}
                         </div>
                       )}
                     </div>
