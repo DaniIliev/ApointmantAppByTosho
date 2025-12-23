@@ -22,17 +22,20 @@ const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
   // theme-blue е твоята default палитра от :root
-  const [theme, setTheme] = useState<Theme>("theme-blue");
-
-  useEffect(() => {
-    const savedTheme = localStorage.getItem("selectedPalette") as Theme;
-    const initialTheme =
-      savedTheme && ALL_THEME_CLASSES.includes(savedTheme)
+  const [theme, setTheme] = useState<Theme>(() => {
+    // Зареждаме темата синхронно при първоначалния рендер
+    if (typeof window !== "undefined") {
+      const savedTheme = localStorage.getItem("selectedPalette") as Theme;
+      return savedTheme && ALL_THEME_CLASSES.includes(savedTheme)
         ? savedTheme
         : "theme-blue";
+    }
+    return "theme-blue";
+  });
 
-    setTheme(initialTheme);
-    applyThemeClass(initialTheme);
+  useEffect(() => {
+    // Прилагаме темата към DOM при монтиране
+    applyThemeClass(theme);
   }, []);
 
   const applyThemeClass = (themeClass: Theme) => {
@@ -55,7 +58,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
 
   return (
     <ThemeContext.Provider value={{ theme, setTheme: handleSetTheme }}>
-            {children}   {" "}
+      {children}
     </ThemeContext.Provider>
   );
 }

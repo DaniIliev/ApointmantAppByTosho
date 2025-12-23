@@ -17,43 +17,18 @@ interface TimeRangePickerProps {
   label?: string;
 }
 
-const hoursAM = Array.from({ length: 12 }, (_, i) =>
-  (i + 1).toString().padStart(2, "0")
+const hours24 = Array.from({ length: 24 }, (_, i) =>
+  i.toString().padStart(2, "0")
 );
-const hoursPM = Array.from({ length: 12 }, (_, i) => {
-  const hour = i === 0 ? 12 : i + 12;
-  return hour.toString().padStart(2, "0");
-});
 const minutes = Array.from({ length: 12 }, (_, i) =>
   (i * 5).toString().padStart(2, "0")
 );
-const ampm = ["AM", "PM"];
-
-function parseTime12(str: string | null) {
-  if (!str) return { hour: "12", minute: "00", ampm: "AM" };
+function parseTime24(str: string | null) {
+  if (!str) return { hour: "00", minute: "00" };
   const [h, m] = str.split(":");
-  let hour = parseInt(h, 10);
-  const minute = m.padStart(2, "0");
-  let period = "AM";
-  if (hour === 0) hour = 12;
-  else if (hour === 12) period = "PM";
-  else if (hour > 12) {
-    hour -= 12;
-    period = "PM";
-  }
-  return { hour: hour.toString().padStart(2, "0"), minute, ampm: period };
-}
-
-function to24(hour: string, minute: string, ampmVal: string) {
-  let h = parseInt(hour, 10);
-  // If hour is already in 24-hour format (>12), just use it as-is
-  if (h > 12) {
-    return `${h.toString().padStart(2, "0")}:${minute}`;
-  }
-  // Otherwise, handle 12-hour to 24-hour conversion
-  if (ampmVal === "AM" && h === 12) h = 0;
-  else if (ampmVal === "PM" && h !== 12) h += 12;
-  return `${h.toString().padStart(2, "0")}:${minute}`;
+  const hour = h?.padStart(2, "0") || "00";
+  const minute = m?.padStart(2, "0") || "00";
+  return { hour, minute };
 }
 
 export const TimeRangePicker: React.FC<TimeRangePickerProps> = ({
@@ -65,20 +40,20 @@ export const TimeRangePicker: React.FC<TimeRangePickerProps> = ({
   const [open, setOpen] = useState(false);
   const [selecting, setSelecting] = useState<"start" | "end">("start");
   // Local state for pickers
-  const [tempStart, setTempStart] = useState(parseTime12(value.startTime));
-  const [tempEnd, setTempEnd] = useState(parseTime12(value.endTime));
+  const [tempStart, setTempStart] = useState(parseTime24(value.startTime));
+  const [tempEnd, setTempEnd] = useState(parseTime24(value.endTime));
 
   React.useEffect(() => {
     if (!open) {
-      setTempStart(parseTime12(value.startTime));
-      setTempEnd(parseTime12(value.endTime));
+      setTempStart(parseTime24(value.startTime));
+      setTempEnd(parseTime24(value.endTime));
       setSelecting("start");
     }
   }, [open, value.startTime, value.endTime]);
 
   const formatLabel = (start: typeof tempStart, end: typeof tempEnd) => {
-    const s = `${start.hour}:${start.minute} ${start.ampm}`;
-    const e = `${end.hour}:${end.minute} ${end.ampm}`;
+    const s = `${start.hour}:${start.minute}`;
+    const e = `${end.hour}:${end.minute}`;
     if (value.startTime && value.endTime) return `${s} – ${e}`;
     if (value.startTime) return `${s} – …`;
   };
@@ -88,15 +63,13 @@ export const TimeRangePicker: React.FC<TimeRangePickerProps> = ({
     type: "start" | "end",
     next: typeof tempStart | typeof tempEnd
   ) => {
+    const as24 = `${next.hour}:${next.minute}`;
     if (type === "start") {
-      const start24 = to24(next.hour, next.minute, next.ampm);
-      onChange({ startTime: start24, endTime: value.endTime });
+      onChange({ startTime: as24, endTime: value.endTime });
     } else {
-      const end24 = to24(next.hour, next.minute, next.ampm);
       const start24 =
-        value.startTime ||
-        to24(tempStart.hour, tempStart.minute, tempStart.ampm);
-      onChange({ startTime: start24, endTime: end24 });
+        value.startTime || `${tempStart.hour}:${tempStart.minute}`;
+      onChange({ startTime: start24, endTime: as24 });
       // Do not close popover automatically
     }
   };
@@ -176,8 +149,8 @@ export const TimeRangePicker: React.FC<TimeRangePickerProps> = ({
                 onClick={() => {
                   onChange({ startTime: null, endTime: null });
                   setOpen(false);
-                  setTempStart(parseTime12(null));
-                  setTempEnd(parseTime12(null));
+                  setTempStart(parseTime24(null));
+                  setTempEnd(parseTime24(null));
                   setSelecting("start");
                 }}
                 aria-label="Clear"
@@ -259,7 +232,7 @@ export const TimeRangePicker: React.FC<TimeRangePickerProps> = ({
                   setTempStart(next);
                   handleImmediate("start", next);
                 }}
-                options={tempStart.ampm === "AM" ? hoursAM : hoursPM}
+                options={hours24}
               />
               <span className="self-center font-bold text-lg">:</span>
               <Picker
@@ -271,19 +244,6 @@ export const TimeRangePicker: React.FC<TimeRangePickerProps> = ({
                 }}
                 options={minutes}
               />
-              <Picker
-                value={tempStart.ampm}
-                setValue={(v) => {
-                  // Don't do anything if clicking the same AM/PM
-                  const next = {
-                    ...tempStart,
-                    ampm: v,
-                  };
-                  setTempStart(next);
-                  handleImmediate("start", next);
-                }}
-                options={ampm}
-              />
             </>
           ) : (
             <>
@@ -294,7 +254,7 @@ export const TimeRangePicker: React.FC<TimeRangePickerProps> = ({
                   setTempEnd(next);
                   handleImmediate("end", next);
                 }}
-                options={tempEnd.ampm === "AM" ? hoursAM : hoursPM}
+                options={hours24}
               />
               <span className="self-center font-bold text-lg">:</span>
               <Picker
@@ -305,19 +265,6 @@ export const TimeRangePicker: React.FC<TimeRangePickerProps> = ({
                   handleImmediate("end", next);
                 }}
                 options={minutes}
-              />
-              <Picker
-                value={tempEnd.ampm}
-                setValue={(v) => {
-                  // Don't do anything if clicking the same AM/PM
-                  const next = {
-                    ...tempEnd,
-                    ampm: v,
-                  };
-                  setTempEnd(next);
-                  handleImmediate("end", next);
-                }}
-                options={ampm}
               />
             </>
           )}

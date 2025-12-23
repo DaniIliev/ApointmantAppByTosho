@@ -16,7 +16,7 @@ import { toast } from "sonner";
 import callApi from "@/app/Api/callApi";
 import moment from "moment";
 import { useAuthContext } from "@/context/AuthContext";
-import { formatDateAndTime } from "@/Global/Utils/commonFn";
+import { formatDateAndTime, formatPriceEUR } from "@/Global/Utils/commonFn";
 import { CustomTooltip } from "@/components/customUIComponents/CustomTooltip";
 import { X } from "lucide-react";
 
@@ -379,7 +379,9 @@ export const AppointmentEditModal: React.FC<AppointmentEditModalProps> = ({
                       </p>
                     </div>
                     <div className="text-right">
-                      <p className="font-semibold">${selectedType.price}</p>
+                      <p className="font-semibold">
+                        {formatPriceEUR(selectedType.price)}
+                      </p>
                       <p className="text-sm text-muted-foreground">
                         {selectedType.duration} {t("minutes")}
                       </p>

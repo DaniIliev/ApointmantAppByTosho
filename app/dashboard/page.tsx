@@ -234,7 +234,7 @@ function DashboardPageContent() {
         </TabsList>
 
         {/* Mobile Tabs - Bottom Fixed */}
-        <TabsList className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-primary-foreground/95 backdrop-blur-xl border-t border-white/10 p-2 grid grid-cols-2 gap-2 h-16 shadow-lg w-full">
+        <TabsList className="md:hidden fixed bottom-0 left-0 right-0 z-5 bg-primary-foreground/95 backdrop-blur-xl border-t border-white/10 p-2 grid grid-cols-2 gap-2 h-16 shadow-lg w-full">
           <TabsTrigger
             value="calendar"
             className="data-[state=active]:bg-primary data-[state=active]:text-white data-[state=inactive]:text-muted-foreground flex flex-col items-center justify-center gap-1 rounded-lg transition-all py-2 px-3"

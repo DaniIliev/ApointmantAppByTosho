@@ -13,6 +13,7 @@ import callApi from "@/app/Api/callApi";
 import { Modal } from "@/components/customUIComponents/Modal";
 import { Clock } from "lucide-react";
 import { LabeledInput } from "@/components/customUIComponents/LabeledInput";
+import { formatPriceEUR } from "@/Global/Utils/commonFn";
 
 // Общ тип за данните, който включва и _id за Edit
 export interface AppointmentFormData {
@@ -311,7 +312,9 @@ const AppointmentForm = ({
                     </p>
                   </div>
                   <div className="text-right">
-                    <p className="font-semibold">${selectedType.price}</p>
+                    <p className="font-semibold">
+                      {formatPriceEUR(selectedType.price)}
+                    </p>
                     <p className="text-sm text-muted-foreground">
                       {selectedType.duration} {t("minutes")}
                     </p>

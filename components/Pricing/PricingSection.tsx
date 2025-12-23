@@ -1,5 +1,11 @@
 "use client";
-import React, { useCallback, useState, useMemo, ReactNode } from "react";
+import React, {
+  useCallback,
+  useState,
+  useMemo,
+  ReactNode,
+  useEffect,
+} from "react";
 import { useTranslation } from "react-i18next";
 import { Badge, Check, Loader2 } from "lucide-react";
 import { useAuthContext } from "@/context/AuthContext";
@@ -7,6 +13,7 @@ import callApi from "@/app/Api/callApi";
 import { Button } from "../ui/button";
 import { ScrollReveal } from "../scroll-reveal";
 import { Card, CardContent } from "../ui/card";
+import { usePaddingControl } from "@/context/PaddingContext";
 
 // 1. Дефиниране на TypeScript интерфейси за по-добра структура на данните
 
@@ -35,7 +42,14 @@ const PricingSection = () => {
   const [billingCycle, setBillingCycle] = useState<"monthly" | "annual">(
     "monthly"
   ); // Ограничаваме възможните стойности
+  const { setRemovePadding } = usePaddingControl();
 
+  useEffect(() => {
+    setRemovePadding(true);
+    return () => {
+      setRemovePadding(false);
+    };
+  }, [setRemovePadding]);
   // Типизиране на useCallback
   const handleCheckout = useCallback(
     async (checkoutPlanName: string) => {
@@ -74,8 +88,8 @@ const PricingSection = () => {
 
   // Хелпер функция за рендиране на бутона (с TS типове)
   const renderPlanButton = (
-    checkoutPlanName: string,
-    isPrimary: boolean = false
+    checkoutPlanName: string
+    // isPrimary: boolean = false
   ): ReactNode => {
     const isLoading = loadingPlan === checkoutPlanName;
 
@@ -83,10 +97,8 @@ const PricingSection = () => {
 
     return (
       <Button
-        className={`w-full bg-primary hover:bg-primary-dark mt-6 text-white ${
-          !isPrimary ? "border-primary text-white hover:text-white" : ""
-        }`}
-        variant={isPrimary ? "default" : "outline"}
+        className={`w-full bg-primary hover:bg-primary-dark mt-6 text-white`}
+        // variant={isPrimary ? "default" : "outline"}
         onClick={() => handleCheckout(checkoutPlanName)}
         disabled={isLoading}
       >
@@ -110,9 +122,11 @@ const PricingSection = () => {
         annualPrice: 110, // €10 * 11 месеца
         description: t("Ideal for small and emerging businesses."),
         features: [
-          t("Up to 3 staff"),
+          t("Up to 2 staff"),
           t("Unlimited appointments"),
-          t("Basic analytics"),
+          t("SMS & email notifications"),
+          t("Support 24/7 via chat and email"),
+          // t("Basic analytics"),
         ],
         isPopular: false,
       },
@@ -122,11 +136,9 @@ const PricingSection = () => {
         annualPrice: 165, // €15 * 11 месеца
         description: t("For growing businesses needing more tools."),
         features: [
-          t("Up to 10 staff"),
+          t("Up to 5 staff"),
           t("All Starter features"),
-          t("SMS & email notifications"),
-          t("Advanced analytics"),
-          t("Priority support"),
+          t("Performance & Analytics"),
         ],
         isPopular: true,
       },
@@ -140,7 +152,6 @@ const PricingSection = () => {
           t("All Professional features"),
           t("Multi-location support"),
           t("Full API access"),
-          t("24/7 phone support"),
           t("Custom integrations"),
         ],
         isPopular: false,
@@ -172,7 +183,7 @@ const PricingSection = () => {
   };
 
   return (
-    <section id="pricing" className="bg-gray-50 dark:bg-gray-900 p-16">
+    <section id="pricing" className="bg-gray-50 dark:bg-gray-900 py-16">
       <div className="container mx-auto px-4 max-w-7xl">
         <div className="max-w-6xl mx-auto">
           {/* Заглавна секция */}
@@ -281,8 +292,7 @@ const PricingSection = () => {
                         ))}
                       </ul>
 
-                      {/* Използваме checkoutName, който съдържа цикъла на плащане */}
-                      {renderPlanButton(checkoutName, plan.isPopular)}
+                      {renderPlanButton(checkoutName)}
                     </CardContent>
                   </Card>
                 </ScrollReveal>

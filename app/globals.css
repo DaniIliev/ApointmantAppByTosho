@@ -50,8 +50,8 @@
 .theme-purple {
   --primary: #8a2be2; /* Blue-Violet */
   --primary-dark: #6a1ba5;
-  --secondary: #d8bfd8; /* Thistle */
-  --accent: #d8bfd8;
+  --secondary: #9b59b6; /* Darker, richer purple */
+  --accent: #9370db;
 }
 /* Green Theme */
 .theme-green {
@@ -59,16 +59,16 @@
   --primary: #4caf50; /* Primary Green */
   --primary-dark: #388e3c; /* Darker Green */
   /* Replace with your desired green secondary/accent color */
-  --secondary: #a5d6a7; /* Lighter Green Accent */
-  --accent: #a5d6a7;
+  --secondary: #2e7d32; /* Deep Green */
+  --accent: #66bb6a;
 }
 .theme-red {
   /* Replace with your desired red primary color */
   --primary: #f44336; /* Primary Red */
   --primary-dark: #d32f2f; /* Darker Red */
   /* Replace with your desired red secondary/accent color */
-  --secondary: #ef9a9a; /* Lighter Red Accent */
-  --accent: #ef9a9a;
+  --secondary: #b71c1c; /* Deep Crimson */
+  --accent: #e57373;
 }
 @theme inline {
   --color-text-primary: var(--text-primary);

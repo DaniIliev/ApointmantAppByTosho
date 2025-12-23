@@ -1,7 +1,8 @@
 import React, { useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Edit, Trash2, Clock, DollarSign, Settings } from "lucide-react";
+import { Edit, Trash2, Clock, Euro, Settings } from "lucide-react";
+import { formatPriceEUR } from "@/Global/Utils/commonFn";
 import { CustomTooltip } from "@/components/customUIComponents/CustomTooltip";
 import { AppointmentType } from "@/Global/Types/types";
 
@@ -101,8 +102,8 @@ const AppointmentCard = ({
             {formatDuration(type.duration)}
           </div>
           <div className="flex items-center gap-2 text-lg font-bold text-primary">
-            <DollarSign className="h-5 w-5" />
-            {type.price}
+            <Euro className="h-5 w-5" />
+            {formatPriceEUR(type.price)}
           </div>
         </div>
       </CardContent>

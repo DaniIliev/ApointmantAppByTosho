@@ -16,7 +16,6 @@ import {
   FileText,
   AlertCircle,
 } from "lucide-react";
-import ProtectedRoute from "@/components/guards/ProtectedRoute";
 
 // Type for backend response
 interface BackendAppointment {
@@ -77,7 +76,7 @@ function CancelAppointmentPageContent() {
           "GET"
         );
         setAppointment(data);
-      } catch (error) {
+      } catch {
         toast.error(t("Failed to load appointment details."));
         // Don't redirect immediately, let the UI show "not found"
         setAppointment(null);
@@ -262,9 +261,5 @@ function CancelAppointmentPageContent() {
 }
 
 export default function CancelAppointmentPage() {
-  return (
-    <ProtectedRoute>
-      <CancelAppointmentPageContent />
-    </ProtectedRoute>
-  );
+  return <CancelAppointmentPageContent />;
 }

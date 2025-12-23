@@ -4,7 +4,6 @@ import { useTranslation } from "react-i18next";
 import { ChevronLeft, ChevronRight, Search } from "lucide-react";
 import { Card, CardContent } from "../ui/card";
 import { Button } from "../ui/button";
-import { Input } from "../ui/input";
 import { Appointment, AppointmentStatus } from "@/Global/Types/types";
 import {
   formatDateAndTime,
@@ -45,7 +44,9 @@ export default function Calendar({
     return () => window.removeEventListener("resize", checkIsMobile);
   }, []);
 
-  const handleDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleDateChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
     const newDateStr = e.target.value;
     const newDate = new Date(newDateStr);
     if (!isNaN(newDate.getTime())) {
@@ -112,7 +113,13 @@ export default function Calendar({
   const translatedMonthNames = monthNames.map((name) => t(name));
 
   if (isMobile) {
-    return <MobileCalendar appointments={appointments} />;
+    return (
+      <MobileCalendar
+        appointments={appointments}
+        onSelectAppointment={onSelectAppointment}
+        openDetailsModal={openDetailsModal}
+      />
+    );
   }
   return (
     <>
@@ -133,8 +140,8 @@ export default function Calendar({
                     translatedMonthNames[currentDate.getMonth()]
                   } ${currentDate.getFullYear()}`}
             </h2>
-            <div className="flex flex-wrap items-center gap-2">
-              <div className="relative flex-grow">
+            <div className="flex flex-wrap items-center gap-2 transition-all duration-300 ease-in-out">
+              <div className="relative flex-grow min-w-[200px] transition-all duration-300">
                 <Search className="h-4 w-4 absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
                 <LabeledInput
                   value={searchTerm}
@@ -145,8 +152,8 @@ export default function Calendar({
                 />
               </div>
               {/* Detail Level Slider */}
-              <div className="flex items-center gap-2">
-                <span className="text-xs text-muted-foreground">
+              <div className="flex items-center gap-2 transition-all duration-300">
+                <span className="text-xs text-muted-foreground whitespace-nowrap">
                   {t("Details")}
                 </span>
                 <input
@@ -160,7 +167,7 @@ export default function Calendar({
                   className="w-28 accent-primary"
                 />
               </div>
-              <div className="flex gap-2">
+              <div className="flex gap-2 transition-all duration-300">
                 <Button
                   variant={calendarView === "week" ? "default" : "outline"}
                   size="sm"
@@ -176,15 +183,16 @@ export default function Calendar({
                   {t("Month")}
                 </Button>
               </div>
-              <div className="flex gap-2">
-                <Input
+              <div className="flex gap-2 transition-all duration-300">
+                <LabeledInput
                   type="date"
+                  id="calendar-date-picker"
+                  label={t("Date")}
                   value={currentDate.toISOString().split("T")[0]}
                   onChange={handleDateChange}
-                  className="h-10 text-sm text-text-primary focus:border-primary transition-all duration-300 bg-input/80 backdrop-blur-sm rounded-xl"
                 />
               </div>
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 transition-all duration-300">
                 <Button
                   variant="outline"
                   size="sm"

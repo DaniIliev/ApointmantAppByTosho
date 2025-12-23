@@ -84,6 +84,13 @@ export const formatDateAndTime = (
   return `${dateResult}, ${timeResult}`;
 };
 
+// Always format numbers as Euro currency. Locale defaults to bg-BG but can be overridden.
+export const formatPriceEUR = (value: number, locale: string = "bg-BG") =>
+  new Intl.NumberFormat(locale, {
+    style: "currency",
+    currency: "EUR",
+  }).format(value);
+
 export const getInitials = (name: string) => {
   const parts = name.split(" ");
   if (parts.length === 1) return parts[0][0]?.toUpperCase() || "";

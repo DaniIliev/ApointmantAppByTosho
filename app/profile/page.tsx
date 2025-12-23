@@ -107,6 +107,7 @@ export default function SettingsPage() {
     setPageTitle(t("Profile Settings"));
 
     if (user && isInitialLoad) {
+      setNextTheme(user.theme as "light" | "dark");
       fetchUserData();
     }
     return () => {
