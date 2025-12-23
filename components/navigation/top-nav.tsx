@@ -274,31 +274,13 @@ export default function TopNav({
             </div>
 
             <div className="relative hidden md:block" ref={helpRef}>
-              <button
-                onClick={toggleHelp}
+              <Link
+                href="/help/contact"
                 className="flex flex-col items-center justify-center p-2 rounded-lg hover:bg-white/10 transition-colors duration-200"
               >
                 <Info className="w-5 h-5 text-primary" />
                 <span className="text-xs text-primary mt-1">{t("Help")}</span>
-              </button>
-              {isHelpOpen && (
-                <div className="absolute right-0 mt-2 w-48 bg-slate-900/90 backdrop-blur-xl border border-white/20 rounded-xl shadow-2xl">
-                  <Link
-                    href="/help/faq"
-                    onClick={toggleHelp}
-                    className="block px-4 py-3 text-white/80 hover:text-white hover:bg-white/10 rounded-t-xl"
-                  >
-                    {t("FAQ")}
-                  </Link>
-                  <Link
-                    href="/help/contact"
-                    onClick={toggleHelp}
-                    className="block px-4 py-3 text-white/80 hover:text-white hover:bg-white/10 rounded-b-xl"
-                  >
-                    {t("Contact Us")}
-                  </Link>
-                </div>
-              )}
+              </Link>
             </div>
 
             {/* Profile Button with Text (hidden on mobile) */}

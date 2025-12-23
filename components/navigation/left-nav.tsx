@@ -305,7 +305,7 @@ export default function LeftNav({ isOpen }: LeftNavProps) {
               </Link>
               {/* Help */}
               <Link
-                href="/help/faq"
+                href="/help/contact"
                 className="flex flex-col items-center justify-center p-2 rounded-lg hover:bg-white/10 transition-colors duration-200"
               >
                 <InfoIcon className="w-5 h-5 text-primary" />

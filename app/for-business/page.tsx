@@ -26,7 +26,7 @@ import { useRouter } from "next/navigation";
 import Image from "next/image";
 import PricingSection from "@/components/Pricing/PricingSection";
 import { useTranslation } from "react-i18next";
-import { ScrollReveal } from "@/components/scroll-reveal";
+
 export default function BusinessLandingPage() {
   const { t } = useTranslation();
   const router = useRouter();
@@ -486,9 +486,9 @@ export default function BusinessLandingPage() {
               <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
                 <Card className="p-4 md:p-5 border-primary/20 bg-gradient-to-br from-background/60 to-background shadow-sm">
                   <div className="flex items-start gap-3">
-                    <CheckCircle2 className="h-6 w-6 text-primary" />
+                    <CheckCircle2 className="h-14 w-14 text-primary" />
                     <div>
-                      <h4 className="font-semibold mb-1">
+                      <h4 className="b-1 text-primary">
                         {t("Save Time & Reduce No-Shows")}
                       </h4>
                       <p className="text-sm text-muted-foreground">
@@ -500,10 +500,10 @@ export default function BusinessLandingPage() {
                   </div>
                 </Card>
                 <Card className="p-4 md:p-5 border-primary/20 bg-gradient-to-br from-background/60 to-background shadow-sm">
-                  <div className="flex items-start gap-3">
-                    <TrendingUp className="h-6 w-6 text-primary" />
+                  <div className="flex items-start align-center gap-3">
+                    <TrendingUp className="h-7 w-14 text-primary" />
                     <div>
-                      <h4 className="font-semibold mb-1">
+                      <h4 className="text-primary mb-1">
                         {t("Increase Revenue")}
                       </h4>
                       <p className="text-sm text-muted-foreground">
@@ -516,9 +516,9 @@ export default function BusinessLandingPage() {
                 </Card>
                 <Card className="p-4 md:p-5 border-primary/20 bg-gradient-to-br from-background/60 to-background shadow-sm">
                   <div className="flex items-start gap-3">
-                    <Users className="h-6 w-6 text-primary" />
+                    <Users className="h-7 w-12 text-primary" />
                     <div>
-                      <h4 className="font-semibold mb-1">
+                      <h4 className="text-primary mb-1">
                         {t("Empower Your Team")}
                       </h4>
                       <p className="text-sm text-muted-foreground">
@@ -531,9 +531,9 @@ export default function BusinessLandingPage() {
                 </Card>
                 <Card className="p-4 md:p-5 border-primary/20 bg-gradient-to-br from-background/60 to-background shadow-sm">
                   <div className="flex items-start gap-3">
-                    <Shield className="h-6 w-6 text-primary" />
+                    <Shield className="h-7 w-12 text-primary" />
                     <div>
-                      <h4 className="font-semibold mb-1">
+                      <h4 className="text-primary mb-1">
                         {t("Professional & Reliable")}
                       </h4>
                       <p className="text-sm text-muted-foreground">
