@@ -330,7 +330,7 @@ function BusinessInformationPageContent() {
               )}
             </Card>
 
-            {/* Info Card */}
+            {/* Info Card
             <Card className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-500/30 p-4">
               <div className="flex items-start gap-3">
                 <Info className="h-5 w-5 text-blue-600 dark:text-blue-400 mt-0.5 flex-shrink-0" />
@@ -345,7 +345,7 @@ function BusinessInformationPageContent() {
                   </p>
                 </div>
               </div>
-            </Card>
+            </Card> */}
           </div>
 
           {/* Right Column - Form Sections */}

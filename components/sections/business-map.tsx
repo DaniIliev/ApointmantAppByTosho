@@ -62,10 +62,16 @@ export function BusinessMap({ business }: BusinessMapProps) {
           </CardTitle>
         </div>
 
-        {/* Бутон за директна навигация */}
-        <Button variant="outline" onClick={handleOpenMaps}>
-          {t("Open in Maps")}
-          <ArrowUpRight className="h-4 w-4 ml-1" />
+        {/* Бутон за директна навигация (икона на мобилни устройства) */}
+        <Button
+          variant="outline"
+          onClick={handleOpenMaps}
+          size="sm"
+          className="px-2 sm:px-3"
+          aria-label={t("Open in Maps") as string}
+        >
+          <span className="hidden sm:inline">{t("Open in Maps")}</span>
+          <ArrowUpRight className="h-4 w-4 sm:ml-1" />
         </Button>
       </CardHeader>
 

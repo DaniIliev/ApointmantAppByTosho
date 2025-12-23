@@ -88,8 +88,8 @@ const PricingSection = () => {
 
   // Хелпер функция за рендиране на бутона (с TS типове)
   const renderPlanButton = (
-    checkoutPlanName: string,
-    isPrimary: boolean = false
+    checkoutPlanName: string
+    // isPrimary: boolean = false
   ): ReactNode => {
     const isLoading = loadingPlan === checkoutPlanName;
 
@@ -97,10 +97,8 @@ const PricingSection = () => {
 
     return (
       <Button
-        className={`w-full bg-primary hover:bg-primary-dark mt-6 text-white ${
-          !isPrimary ? "border-primary text-white hover:text-white" : ""
-        }`}
-        variant={isPrimary ? "default" : "outline"}
+        className={`w-full bg-primary hover:bg-primary-dark mt-6 text-white`}
+        // variant={isPrimary ? "default" : "outline"}
         onClick={() => handleCheckout(checkoutPlanName)}
         disabled={isLoading}
       >
@@ -124,9 +122,11 @@ const PricingSection = () => {
         annualPrice: 110, // €10 * 11 месеца
         description: t("Ideal for small and emerging businesses."),
         features: [
-          t("Up to 3 staff"),
+          t("Up to 2 staff"),
           t("Unlimited appointments"),
-          t("Basic analytics"),
+          t("SMS & email notifications"),
+          t("Support 24/7 via chat and email"),
+          // t("Basic analytics"),
         ],
         isPopular: false,
       },
@@ -136,11 +136,9 @@ const PricingSection = () => {
         annualPrice: 165, // €15 * 11 месеца
         description: t("For growing businesses needing more tools."),
         features: [
-          t("Up to 10 staff"),
+          t("Up to 5 staff"),
           t("All Starter features"),
-          t("SMS & email notifications"),
-          t("Advanced analytics"),
-          t("Priority support"),
+          t("Performance & Analytics"),
         ],
         isPopular: true,
       },
@@ -154,7 +152,6 @@ const PricingSection = () => {
           t("All Professional features"),
           t("Multi-location support"),
           t("Full API access"),
-          t("24/7 phone support"),
           t("Custom integrations"),
         ],
         isPopular: false,
@@ -295,8 +292,7 @@ const PricingSection = () => {
                         ))}
                       </ul>
 
-                      {/* Използваме checkoutName, който съдържа цикъла на плащане */}
-                      {renderPlanButton(checkoutName, plan.isPopular)}
+                      {renderPlanButton(checkoutName)}
                     </CardContent>
                   </Card>
                 </ScrollReveal>

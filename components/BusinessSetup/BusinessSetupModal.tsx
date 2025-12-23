@@ -345,12 +345,18 @@ export default function BusinessSetupModal({
   // handleWorkTimeChange is unused (replaced by TimeRangePicker)
   const handleBreakChange = (
     index: number,
-    type: "start" | "end",
-    value: string
+    next: { startTime: string | null; endTime: string | null }
   ) => {
-    const nb = [...breaks];
-    nb[index] = { ...nb[index], [type]: value };
-    setBreaks(nb);
+    setBreaks((prev) =>
+      prev.map((b, i) =>
+        i === index
+          ? {
+              start: next.startTime ?? b.start,
+              end: next.endTime ?? b.end,
+            }
+          : b
+      )
+    );
   };
   const addBreak = () =>
     breaks.length < 3 && setBreaks([...breaks, { start: null, end: null }]);
@@ -779,7 +785,6 @@ export default function BusinessSetupModal({
                     workTime: { start: val.startTime, end: val.endTime },
                   }))
                 }
-                label={t("Work Time") as string}
               />
             </div>
             <div>
@@ -798,10 +803,7 @@ export default function BusinessSetupModal({
                           startTime: br.start,
                           endTime: br.end,
                         }}
-                        onChange={(val) => {
-                          handleBreakChange(idx, "start", val.startTime || "");
-                          handleBreakChange(idx, "end", val.endTime || "");
-                        }}
+                        onChange={(val) => handleBreakChange(idx, val)}
                         label={t(`Break ${idx + 1}`) as string}
                       />
                     </div>
