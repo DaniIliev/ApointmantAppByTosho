@@ -1,6 +1,6 @@
 "use client";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card } from "@/components/ui/card";
 import {
   Users,
   BarChart3,
@@ -26,6 +26,8 @@ import { useRouter } from "next/navigation";
 import Image from "next/image";
 import PricingSection from "@/components/Pricing/PricingSection";
 import { useTranslation } from "react-i18next";
+import { AnalyticsPreview } from "@/components/for-business/AnalyticsPreview";
+import { KanbanPreview } from "@/components/for-business/KanbanPreview";
 
 export default function BusinessLandingPage() {
   const { t } = useTranslation();
@@ -368,32 +370,7 @@ export default function BusinessLandingPage() {
               </div>
 
               <div className="space-y-6">
-                <Card className="overflow-hidden shadow-xl border-2 hover:shadow-2xl transition-shadow duration-500">
-                  <CardContent className="p-0">
-                    <Image
-                      src="/analytics-dashboard.png"
-                      alt="Analytics dashboard with customizable charts and KPI cards"
-                      width={1200}
-                      height={760}
-                      className="w-full h-auto"
-                      sizes="(min-width: 1024px) 50vw, 100vw"
-                    />
-                  </CardContent>
-                </Card>
-                <div className="grid grid-cols-2 gap-4">
-                  <Card className="p-4 text-center border-primary/20">
-                    <BarChart3 className="h-8 w-8 text-primary mx-auto mb-2" />
-                    <p className="text-sm font-semibold">
-                      {t("5+ Chart Types")}
-                    </p>
-                  </Card>
-                  <Card className="p-4 text-center border-primary/20">
-                    <Palette className="h-8 w-8 text-primary mx-auto mb-2" />
-                    <p className="text-sm font-semibold">
-                      {t("Responsive Grid")}
-                    </p>
-                  </Card>
-                </div>
+                <AnalyticsPreview />
               </div>
             </div>
           </div>
@@ -405,17 +382,11 @@ export default function BusinessLandingPage() {
             <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-balance mb-4">
               {t("Organize Work Effortlessly with Our Kanban Board")}
             </h2>
-            {/* Kanban Board Visual Image */}
+            {/* Kanban Board Interactive Preview */}
             <div className="flex justify-center mb-6">
-              <Image
-                src="/kanban-preview.png"
-                alt={t("Kanban Board Example") as string}
-                width={1200}
-                height={720}
-                className="rounded-xl shadow-lg border w-full max-w-3xl object-cover"
-                style={{ maxHeight: 340 }}
-                sizes="(min-width: 1024px) 60vw, 100vw"
-              />
+              <div className="w-full max-w-3xl">
+                <KanbanPreview />
+              </div>
             </div>
             <p className="text-base sm:text-lg md:text-xl text-muted-foreground max-w-3xl mx-auto">
               {t(
@@ -560,7 +531,7 @@ export default function BusinessLandingPage() {
             </h2>
             <p className="text-base sm:text-lg text-primary-foreground/90 text-balance">
               {t(
-                "Join thousands of businesses that have streamlined their operations and increased revenue with AppointFlow"
+                "Join thousands of businesses that have streamlined their operations and increased revenue with AppointDI."
               )}
             </p>
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4">
