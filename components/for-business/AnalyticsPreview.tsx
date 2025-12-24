@@ -14,6 +14,7 @@ import { useMemo, useState, useCallback, useEffect, useRef } from "react";
 import GridLayout, { Layout } from "react-grid-layout";
 import "react-grid-layout/css/styles.css";
 import "react-resizable/css/styles.css";
+import { useTranslation } from "react-i18next";
 
 // Dynamic import to avoid SSR issues
 const ReactECharts = dynamic(() => import("echarts-for-react"), { ssr: false });
@@ -94,6 +95,7 @@ function KPICard({
 }
 
 export function AnalyticsPreview() {
+  const { t } = useTranslation();
   const containerRef = useRef<HTMLDivElement>(null);
   const [containerWidth, setContainerWidth] = useState(800);
   const fixedHeight = 660;
@@ -171,6 +173,34 @@ export function AnalyticsPreview() {
     setVisibleIds((prev) => prev.filter((itemId) => itemId !== id));
   }, []);
 
+  // Translated mock data
+  const translatedAppointments = useMemo(
+    () =>
+      mockChartData.appointments.map((item) => ({
+        ...item,
+        name: t(item.name),
+      })),
+    [t]
+  );
+
+  const translatedRevenue = useMemo(
+    () =>
+      mockChartData.revenue.map((item) => ({
+        ...item,
+        name: t(item.name),
+      })),
+    [t]
+  );
+
+  const translatedServices = useMemo(
+    () =>
+      mockChartData.services.map((item) => ({
+        ...item,
+        name: t(item.name),
+      })),
+    [t]
+  );
+
   // Line chart for appointments
   const appointmentsOption = useMemo(
     () => ({
@@ -189,7 +219,7 @@ export function AnalyticsPreview() {
       },
       xAxis: {
         type: "category",
-        data: mockChartData.appointments.map((item) => item.name),
+        data: translatedAppointments.map((item) => item.name),
         axisLine: { lineStyle: { color: "#ddd" } },
         axisLabel: { color: "#666", fontSize: 10 },
       },
@@ -231,7 +261,7 @@ export function AnalyticsPreview() {
         },
       ],
     }),
-    []
+    [translatedAppointments]
   );
 
   // Bar chart for revenue
@@ -258,7 +288,7 @@ export function AnalyticsPreview() {
       },
       xAxis: {
         type: "category",
-        data: mockChartData.revenue.map((item) => item.name),
+        data: translatedRevenue.map((item) => item.name),
         axisLine: { lineStyle: { color: "#ddd" } },
         axisLabel: { color: "#666", fontSize: 10 },
       },
@@ -294,7 +324,7 @@ export function AnalyticsPreview() {
         },
       ],
     }),
-    []
+    [translatedRevenue]
   );
 
   // Pie chart for services
@@ -318,6 +348,7 @@ export function AnalyticsPreview() {
           type: "pie",
           radius: ["40%", "65%"],
           center: ["50%", "45%"],
+          data: translatedServices,
           avoidLabelOverlap: true,
           itemStyle: {
             borderRadius: 6,
@@ -337,12 +368,11 @@ export function AnalyticsPreview() {
               shadowColor: "rgba(0, 0, 0, 0.3)",
             },
           },
-          data: mockChartData.services,
           color: ["#3b61c0", "#00bfff", "#f59e0b", "#dc2626"],
         },
       ],
     }),
-    []
+    [translatedServices]
   );
 
   return (
@@ -390,8 +420,8 @@ export function AnalyticsPreview() {
                   <Trash2 className="h-4 w-4" />
                 </button>
                 <KPICard
-                  title="Total Appointments"
-                  value={156}
+                  title={t("Total Bookings")}
+                  value="284"
                   change={12.5}
                   changeType="increase"
                   icon={<Calendar className="h-5 w-5 text-primary" />}
@@ -418,7 +448,7 @@ export function AnalyticsPreview() {
                   <Trash2 className="h-4 w-4" />
                 </button>
                 <KPICard
-                  title="Total Revenue"
+                  title={t("Total Revenue")}
                   value="€12.3k"
                   change={8.3}
                   changeType="increase"
@@ -450,7 +480,7 @@ export function AnalyticsPreview() {
                     <Trash2 className="h-4 w-4" />
                   </button>
                   <CardTitle className="text-sm font-semibold text-text-primary">
-                    Appointments This Week
+                    {t("Appointments This Week")}
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="p-2 flex-1 overflow-hidden">
@@ -486,7 +516,7 @@ export function AnalyticsPreview() {
                     <Trash2 className="h-4 w-4" />
                   </button>
                   <CardTitle className="text-sm font-semibold text-text-primary">
-                    Monthly Revenue
+                    {t("Weekly Revenue")}
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="p-2 flex-1 overflow-hidden">
@@ -522,7 +552,7 @@ export function AnalyticsPreview() {
                     <Trash2 className="h-4 w-4" />
                   </button>
                   <CardTitle className="text-sm font-semibold text-text-primary">
-                    Popular Services
+                    {t("Popular Services")}
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="p-2 flex-1 overflow-hidden">
