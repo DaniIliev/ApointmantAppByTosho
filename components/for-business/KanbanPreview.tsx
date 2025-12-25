@@ -1,282 +1,451 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
-import { GripHorizontal, Trash2 } from "lucide-react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useState } from "react";
+import { GripHorizontal, Calendar, Clock } from "lucide-react";
+import { useTranslation } from "react-i18next";
+import {
+  DndContext,
+  DragEndEvent,
+  DragOverEvent,
+  DragOverlay,
+  DragStartEvent,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  closestCenter,
+  DragOverlayProps,
+  useDroppable,
+} from "@dnd-kit/core";
+import {
+  arrayMove,
+  SortableContext,
+  useSortable,
+  verticalListSortingStrategy,
+} from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
+
+type Priority = "low" | "medium" | "high" | "urgent";
 
 interface KanbanCard {
-  id: string;
+  _id: string;
   title: string;
-  priority: "low" | "medium" | "high" | "urgent";
-  assignee?: string;
+  description?: string;
+  priority?: Priority;
+  startDate?: string;
+  endDate?: string;
+  assignedTo?: string;
+  columnId: string;
 }
 
 interface KanbanColumn {
-  id: string;
+  _id: string;
   title: string;
   color: string;
   cards: KanbanCard[];
 }
 
-interface DraggedCard {
+interface DroppableColumnProps {
   columnId: string;
-  cardId: string;
-  cardIndex: number;
+  children: React.ReactNode;
+}
+
+function DroppableColumn({ columnId, children }: DroppableColumnProps) {
+  const { setNodeRef, isOver } = useDroppable({
+    id: columnId,
+  });
+
+  return (
+    <div
+      ref={setNodeRef}
+      className={`flex-1 bg-muted/30 rounded-b-lg border border-border border-t-0 p-3 space-y-2 min-h-[200px] ${
+        isOver ? "bg-primary/10 border-primary" : ""
+      }`}
+      style={{ maxHeight: "500px", overflowY: "auto" }}
+    >
+      {children}
+    </div>
+  );
+}
+
+interface SortableCardProps {
+  card: KanbanCard;
+}
+
+function SortableCard({ card }: SortableCardProps) {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id: card._id });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.5 : 1,
+  };
+
+  const getPriorityColor = (priority?: Priority) => {
+    switch (priority) {
+      case "urgent":
+        return "bg-red-500";
+      case "high":
+        return "bg-orange-500";
+      case "medium":
+        return "bg-yellow-500";
+      case "low":
+        return "bg-green-500";
+      default:
+        return "bg-gray-400";
+    }
+  };
+
+  return (
+    <div
+      ref={setNodeRef}
+      style={style}
+      className="bg-card border border-border rounded-lg p-3 shadow-sm hover:shadow-md transition-shadow cursor-grab active:cursor-grabbing group relative"
+    >
+      {/* Centered drag handle at top */}
+      <div
+        className="absolute -top-2 left-1/2 -translate-x-1/2 z-10 opacity-0 group-hover:opacity-100 transition-opacity"
+        {...attributes}
+        {...listeners}
+      >
+        <div className="bg-card border border-border rounded-full p-1 shadow-sm">
+          <GripHorizontal className="h-4 w-4 text-muted-foreground" />
+        </div>
+      </div>
+
+      <div className="flex flex-col gap-2">
+        <div className="flex justify-start items-center gap-2">
+          {card.priority && (
+            <div
+              className={`w-3 h-3 rounded-full mt-1 ${getPriorityColor(
+                card.priority
+              )}`}
+              title={card.priority}
+            />
+          )}
+          <h4 className="text-sm font-medium text-foreground">{card.title}</h4>
+        </div>
+        {card.description && (
+          <p className="text-xs text-muted-foreground line-clamp-2">
+            {card.description}
+          </p>
+        )}
+        <div className="flex flex-wrap gap-2 text-xs text-muted-foreground">
+          {card.startDate && (
+            <div className="flex items-center gap-1">
+              <Calendar className="h-3 w-3" />
+              <span>{new Date(card.startDate).toLocaleDateString()}</span>
+            </div>
+          )}
+          {card.assignedTo && (
+            <div className="flex items-center gap-1">
+              <div className="w-5 h-5 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-[10px] font-medium">
+                {card.assignedTo.charAt(0).toUpperCase()}
+              </div>
+              <span className="truncate">{card.assignedTo}</span>
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
 }
 
 export function KanbanPreview() {
-  const containerRef = useRef<HTMLDivElement>(null);
-  const [draggedCard, setDraggedCard] = useState<DraggedCard | null>(null);
-  const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
+  const { t } = useTranslation();
+  const [activeCard, setActiveCard] = useState<KanbanCard | null>(null);
+
+  const sensors = useSensors(
+    useSensor(PointerSensor, {
+      activationConstraint: {
+        distance: 8,
+      },
+    })
+  );
 
   const [columns, setColumns] = useState<KanbanColumn[]>([
     {
-      id: "todo",
-      title: "To Do",
-      color: "bg-red-100 dark:bg-red-950",
+      _id: "backlog",
+      title: t("Backlog"),
+      color: "bg-gray-100 dark:bg-gray-800",
       cards: [
         {
-          id: "card1",
-          title: "Design new landing page",
-          priority: "high",
-          assignee: "John",
-        },
-        {
-          id: "card2",
-          title: "Setup database migrations",
+          _id: "card1",
+          title: t("Update salon equipment"),
+          description: t("Purchase new hair dryers and styling tools"),
           priority: "medium",
-          assignee: "Sarah",
+          startDate: "2024-01-15",
+          assignedTo: "Maria",
+          columnId: "backlog",
         },
         {
-          id: "card3",
-          title: "Write API documentation",
+          _id: "card2",
+          title: t("Train staff on new techniques"),
+          description: t("Organize training session for balayage"),
           priority: "low",
+          assignedTo: "Elena",
+          columnId: "backlog",
         },
       ],
     },
     {
-      id: "inprogress",
-      title: "In Progress",
-      color: "bg-yellow-100 dark:bg-yellow-950",
-      cards: [
-        {
-          id: "card4",
-          title: "Implement user authentication",
-          priority: "urgent",
-          assignee: "Mike",
-        },
-        {
-          id: "card5",
-          title: "Fix responsive design issues",
-          priority: "high",
-          assignee: "Emma",
-        },
-      ],
-    },
-    {
-      id: "review",
-      title: "Review",
+      _id: "todo",
+      title: t("To Do"),
       color: "bg-blue-100 dark:bg-blue-950",
       cards: [
         {
-          id: "card6",
-          title: "Code review PR #234",
+          _id: "card3",
+          title: t("Client consultation - Wedding makeup"),
+          description: t("Meet with bride for makeup trial"),
+          priority: "high",
+          startDate: "2024-01-10",
+          assignedTo: "Sofia",
+          columnId: "todo",
+        },
+        {
+          _id: "card4",
+          title: t("Restock salon products"),
+          description: t("Order shampoos, conditioners, and styling products"),
           priority: "medium",
-          assignee: "Alex",
+          assignedTo: t("Manager"),
+          columnId: "todo",
         },
       ],
     },
     {
-      id: "done",
-      title: "Done",
+      _id: "inprogress",
+      title: t("In Progress"),
+      color: "bg-yellow-100 dark:bg-yellow-950",
+      cards: [
+        {
+          _id: "card5",
+          title: t("Color treatment - Full highlights"),
+          description: t("Client Sarah Johnson - 2 hour appointment"),
+          priority: "urgent",
+          startDate: "2024-01-08",
+          assignedTo: "Anna",
+          columnId: "inprogress",
+        },
+        {
+          _id: "card6",
+          title: t("Deep conditioning treatment"),
+          description: t("Keratin treatment for damaged hair"),
+          priority: "high",
+          assignedTo: "Kristina",
+          columnId: "inprogress",
+        },
+      ],
+    },
+    {
+      _id: "done",
+      title: t("Completed"),
       color: "bg-green-100 dark:bg-green-950",
       cards: [
         {
-          id: "card7",
-          title: "Setup CI/CD pipeline",
-          priority: "high",
-          assignee: "David",
+          _id: "card7",
+          title: t("Hair cut and blow dry"),
+          description: t("Client Emma White - Completed successfully"),
+          priority: "medium",
+          startDate: "2024-01-07",
+          assignedTo: "Diana",
+          columnId: "done",
         },
         {
-          id: "card8",
-          title: "Deploy v1.0 release",
-          priority: "high",
-          assignee: "Lisa",
+          _id: "card8",
+          title: t("Manicure and nail art"),
+          description: t("Client Jessica Brown - Gel polish with designs"),
+          priority: "low",
+          assignedTo: "Natalia",
+          columnId: "done",
         },
       ],
     },
   ]);
 
-  const getPriorityColor = (priority: string) => {
-    switch (priority) {
-      case "urgent":
-        return "bg-red-200 text-red-800 dark:bg-red-900 dark:text-red-200";
-      case "high":
-        return "bg-orange-200 text-orange-800 dark:bg-orange-900 dark:text-orange-200";
-      case "medium":
-        return "bg-yellow-200 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200";
-      case "low":
-        return "bg-green-200 text-green-800 dark:bg-green-900 dark:text-green-200";
-      default:
-        return "bg-gray-200 text-gray-800 dark:bg-gray-700 dark:text-gray-200";
+  const handleDragStart = (event: DragStartEvent) => {
+    const { active } = event;
+    const card = columns
+      .flatMap((col) => col.cards)
+      .find((c) => c._id === active.id);
+    if (card) {
+      setActiveCard(card);
     }
   };
 
-  const handleDragStart = (
-    e: React.DragEvent<HTMLDivElement>,
-    columnId: string,
-    cardIndex: number
-  ) => {
-    const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
-    const containerRect = containerRef.current?.getBoundingClientRect();
+  const handleDragOver = (event: DragOverEvent) => {
+    const { active, over } = event;
 
-    if (containerRect) {
-      setDragOffset({
-        x: e.clientX - rect.left,
-        y: e.clientY - rect.top,
-      });
-    }
+    if (!over) return;
 
-    setDraggedCard({
-      columnId,
-      cardId: columns.find((c) => c.id === columnId)?.cards[cardIndex].id || "",
-      cardIndex,
-    });
-    (e.currentTarget as HTMLElement).style.opacity = "0.5";
-  };
+    const activeId = active.id as string;
+    const overId = over.id as string;
 
-  const handleDragEnd = (e: React.DragEvent<HTMLDivElement>) => {
-    (e.currentTarget as HTMLElement).style.opacity = "1";
-    setDraggedCard(null);
-  };
+    if (activeId === overId) return;
 
-  const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
-    e.preventDefault();
-    e.dataTransfer.dropEffect = "move";
-  };
-
-  const handleDropOnColumn = (targetColumnId: string) => {
-    if (!draggedCard) return;
-
-    // Find the source column and card
-    const sourceColumn = columns.find((c) => c.id === draggedCard.columnId);
-    const targetColumn = columns.find((c) => c.id === targetColumnId);
-
-    if (!sourceColumn || !targetColumn) return;
-
-    const [movedCard] = sourceColumn.cards.splice(draggedCard.cardIndex, 1);
-
-    // Add to target column
-    targetColumn.cards.push(movedCard);
-
-    // Update state
-    setColumns([...columns]);
-    setDraggedCard(null);
-  };
-
-  const handleRemoveCard = (columnId: string, cardIndex: number) => {
-    setColumns((prev) =>
-      prev.map((col) =>
-        col.id === columnId
-          ? {
-              ...col,
-              cards: col.cards.filter((_, i) => i !== cardIndex),
-            }
-          : col
-      )
+    const activeColumn = columns.find((col) =>
+      col.cards.some((card) => card._id === activeId)
     );
+
+    // Check if overId is a column ID (for dropping in empty columns)
+    let overColumn = columns.find((col) => col._id === overId);
+
+    // If not found, check if it's a card ID
+    if (!overColumn) {
+      overColumn = columns.find((col) =>
+        col.cards.some((card) => card._id === overId)
+      );
+    }
+
+    if (!activeColumn || !overColumn) return;
+
+    if (activeColumn._id !== overColumn._id) {
+      const newColumns = columns.map((col) => {
+        if (col._id === activeColumn._id) {
+          return {
+            ...col,
+            cards: col.cards.filter((card) => card._id !== activeId),
+          };
+        }
+        if (col._id === overColumn._id) {
+          const activeCard = activeColumn.cards.find(
+            (card) => card._id === activeId
+          )!;
+          const overCard = col.cards.find((card) => card._id === overId);
+
+          if (overCard) {
+            const overIndex = col.cards.indexOf(overCard);
+            const newCards = [...col.cards];
+            newCards.splice(overIndex, 0, {
+              ...activeCard,
+              columnId: col._id,
+            });
+            return { ...col, cards: newCards };
+          } else {
+            return {
+              ...col,
+              cards: [...col.cards, { ...activeCard, columnId: col._id }],
+            };
+          }
+        }
+        return col;
+      });
+
+      setColumns(newColumns);
+    }
+  };
+
+  const handleDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event;
+
+    if (!over) {
+      setActiveCard(null);
+      return;
+    }
+
+    const activeId = active.id as string;
+    const overId = over.id as string;
+
+    const activeColumn = columns.find((col) =>
+      col.cards.some((card) => card._id === activeId)
+    );
+
+    if (activeColumn && activeId !== overId) {
+      const activeIndex = activeColumn.cards.findIndex(
+        (card) => card._id === activeId
+      );
+      const overIndex = activeColumn.cards.findIndex(
+        (card) => card._id === overId
+      );
+
+      if (activeIndex !== -1 && overIndex !== -1) {
+        const newColumns = columns.map((col) => {
+          if (col._id === activeColumn._id) {
+            return {
+              ...col,
+              cards: arrayMove(col.cards, activeIndex, overIndex),
+            };
+          }
+          return col;
+        });
+
+        setColumns(newColumns);
+      }
+    }
+
+    setActiveCard(null);
   };
 
   return (
     <div
-      ref={containerRef}
-      className="w-full bg-gray-50 dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-800 p-6"
-      style={{ maxWidth: "960px", margin: "0 auto", minHeight: "500px" }}
+      className="w-full bg-background rounded-lg border border-border p-6"
+      style={{ maxWidth: "1500px", margin: "0 auto", minHeight: "400px" }}
     >
-      <div className="flex gap-4 overflow-x-auto pb-4">
-        {columns.map((column) => (
-          <div
-            key={column.id}
-            className="flex-shrink-0 w-72 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 overflow-hidden flex flex-col"
-          >
-            {/* Column Header */}
-            <div
-              className={`${column.color} px-4 py-3 border-b border-gray-200 dark:border-gray-700`}
+      <DndContext
+        sensors={sensors}
+        onDragStart={handleDragStart}
+        onDragOver={handleDragOver}
+        onDragEnd={handleDragEnd}
+        collisionDetection={closestCenter}
+      >
+        <div className="flex gap-4 overflow-x-auto pb-4">
+          {columns.map((column) => (
+            <SortableContext
+              key={column._id}
+              items={column.cards.map((card) => card._id)}
+              strategy={verticalListSortingStrategy}
             >
-              <h3 className="font-semibold text-sm text-gray-900 dark:text-gray-100">
-                {column.title}
-              </h3>
-              <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">
-                {column.cards.length}{" "}
-                {column.cards.length === 1 ? "task" : "tasks"}
-              </p>
-            </div>
-
-            {/* Cards Container */}
-            <div
-              className="flex-1 p-3 space-y-2 overflow-y-auto"
-              onDragOver={handleDragOver}
-              onDrop={() => handleDropOnColumn(column.id)}
-            >
-              {column.cards.length === 0 ? (
-                <div className="flex items-center justify-center h-20 text-gray-400 dark:text-gray-600 text-sm">
-                  Drop cards here
+              <div className="flex-shrink-0 w-72 flex flex-col align-start">
+                {/* Column Header */}
+                <div
+                  className={`${column.color} px-4 py-3 rounded-t-lg border border-border border-b-0`}
+                >
+                  <h3 className="font-semibold text-sm text-foreground">
+                    {column.title}
+                  </h3>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    {column.cards.length}{" "}
+                    {column.cards.length === 1 ? t("task") : t("tasks")}
+                  </p>
                 </div>
-              ) : (
-                column.cards.map((card, cardIndex) => (
-                  <div
-                    key={card.id}
-                    draggable
-                    onDragStart={(e) =>
-                      handleDragStart(e, column.id, cardIndex)
-                    }
-                    onDragEnd={handleDragEnd}
-                    className="bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded p-3 cursor-grab active:cursor-grabbing hover:shadow-md transition-shadow group"
-                  >
-                    <div className="flex items-start gap-2 mb-2">
-                      <GripHorizontal className="h-4 w-4 text-gray-400 dark:text-gray-500 flex-shrink-0 mt-0.5 opacity-0 group-hover:opacity-100 transition-opacity" />
-                      <h4 className="text-sm font-medium text-gray-900 dark:text-gray-100 flex-1 leading-tight">
-                        {card.title}
-                      </h4>
-                      <button
-                        onClick={() => handleRemoveCard(column.id, cardIndex)}
-                        className="p-1 hover:bg-red-100 dark:hover:bg-red-900 rounded opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0"
-                        title="Remove card"
-                      >
-                        <Trash2 className="h-4 w-4 text-red-600 dark:text-red-400" />
-                      </button>
-                    </div>
 
-                    {/* Card Metadata */}
-                    <div className="flex flex-col gap-2">
-                      <div className="flex items-center gap-2">
-                        <span
-                          className={`inline-block px-2 py-1 rounded text-xs font-medium ${getPriorityColor(
-                            card.priority
-                          )}`}
-                        >
-                          {card.priority.charAt(0).toUpperCase() +
-                            card.priority.slice(1)}
-                        </span>
-                      </div>
-                      {card.assignee && (
-                        <div className="text-xs text-gray-600 dark:text-gray-400">
-                          <span className="font-medium">Assigned:</span>{" "}
-                          {card.assignee}
-                        </div>
-                      )}
+                {/* Cards Container */}
+                <DroppableColumn columnId={column._id}>
+                  {column.cards.length === 0 ? (
+                    <div className="flex items-center justify-center h-20 text-muted-foreground text-sm">
+                      {t("Drop cards here")}
                     </div>
-                  </div>
-                ))
-              )}
+                  ) : (
+                    column.cards.map((card) => (
+                      <SortableCard key={card._id} card={card} />
+                    ))
+                  )}
+                </DroppableColumn>
+              </div>
+            </SortableContext>
+          ))}
+        </div>
+
+        {/* Drag Overlay */}
+        <DragOverlay>
+          {activeCard ? (
+            <div className="w-72 opacity-80 rotate-3 transform scale-105">
+              <div className="bg-card border-2 border-primary rounded-lg p-3 shadow-2xl">
+                <h3 className="font-semibold text-sm">{activeCard.title}</h3>
+              </div>
             </div>
-          </div>
-        ))}
-      </div>
+          ) : null}
+        </DragOverlay>
+      </DndContext>
 
       {/* Info text */}
-      <div className="mt-4 text-center text-sm text-gray-600 dark:text-gray-400">
-        <p>💡 Drag cards between columns to organize your workflow</p>
+      <div className="mt-4 text-center text-sm text-muted-foreground">
+        <p>💡 {t("Drag cards between columns to organize salon tasks")}</p>
       </div>
     </div>
   );

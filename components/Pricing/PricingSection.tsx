@@ -183,7 +183,7 @@ const PricingSection = () => {
   };
 
   return (
-    <section id="pricing" className="bg-gray-50 dark:bg-gray-900 py-16">
+    <section id="pricing" className="bg-muted/30 py-16">
       <div className="container mx-auto px-4 max-w-7xl">
         <div className="max-w-6xl mx-auto">
           {/* Заглавна секция */}
