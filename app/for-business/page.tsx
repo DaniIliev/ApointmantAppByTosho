@@ -28,6 +28,8 @@ import PricingSection from "@/components/Pricing/PricingSection";
 import { useTranslation } from "react-i18next";
 import { AnalyticsPreview } from "@/components/for-business/AnalyticsPreview";
 import { KanbanPreview } from "@/components/for-business/KanbanPreview";
+import { PublicPagePreview } from "@/components/for-business/PublicPagePreview";
+import { CalendarPreview } from "@/components/for-business/CalendarPreview";
 
 export default function BusinessLandingPage() {
   const { t } = useTranslation();
@@ -90,7 +92,7 @@ export default function BusinessLandingPage() {
 
       {/* Core Features for Beauty Salons */}
 
-      <section className="bg-gray-50 dark:bg-gray-900 py-16">
+      <section className="bg-gray-50 dark:bg-gray-900 py-10 md:py-16">
         <div className="container mx-auto px-4">
           <div className="max-w-6xl mx-auto text-center space-y-4">
             <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-balance">
@@ -140,25 +142,9 @@ export default function BusinessLandingPage() {
                 </div>
               </div>
             </div>
-            {/* Simple phone mock to break monotony */}
-            <div className="mx-auto w-full max-w-sm">
-              <div className="rounded-[2rem] border border-primary/20 bg-card shadow-xl p-4">
-                <div className="rounded-xl bg-primary/10 p-3">
-                  <div className="flex items-center justify-between mb-3">
-                    <div className="h-2 w-16 rounded-full bg-primary/30" />
-                    <div className="h-2 w-10 rounded-full bg-primary/30" />
-                  </div>
-                  <div className="space-y-2">
-                    <div className="h-10 rounded-md bg-primary/20" />
-                    <div className="h-10 rounded-md bg-primary/15" />
-                    <div className="h-10 rounded-md bg-primary/10" />
-                  </div>
-                  <div className="mt-4 h-12 rounded-md bg-gradient-to-r from-primary/30 to-accent/30" />
-                </div>
-              </div>
-              <p className="text-xs text-muted-foreground text-center mt-2">
-                {t("Mobile preview of booking flow")}
-              </p>
+            {/* Interactive public page preview */}
+            <div className="mx-auto w-full max-w-2xl">
+              <PublicPagePreview />
             </div>
           </div>
 
@@ -266,32 +252,15 @@ export default function BusinessLandingPage() {
                 </div>
               </div>
             </div>
-            {/* Schedule mock */}
-            <div className="mx-auto w-full max-w-md">
-              <div className="rounded-xl border border-primary/20 bg-card p-4 shadow">
-                <div className="grid grid-cols-7 gap-1 text-xs text-muted-foreground mb-2">
-                  {["M", "T", "W", "T", "F", "S", "S"].map((d, index) => (
-                    <div key={index} className="text-center">
-                      {d}
-                    </div>
-                  ))}
-                </div>
-                <div className="space-y-1">
-                  <div className="h-3 rounded bg-primary/20" />
-                  <div className="h-3 rounded bg-primary/10" />
-                  <div className="h-3 rounded bg-primary/20" />
-                  <div className="h-3 rounded bg-primary/10" />
-                </div>
-              </div>
-              <p className="text-xs text-muted-foreground text-center mt-2">
-                {t("Staff schedule and services overview")}
-              </p>
+            {/* Interactive Calendar Preview */}
+            <div className="mx-auto w-full max-w-2xl">
+              <CalendarPreview />
             </div>
           </div>
         </div>
       </section>
       {/* Analytics & Performance Module Section */}
-      <section className="bg-muted/30 py-16">
+      <section className="bg-muted/30 py-10 md:py-16">
         <div className="container mx-auto px-4">
           <div className="max-w-6xl mx-auto">
             <div className="text-center mb-12">
@@ -376,7 +345,7 @@ export default function BusinessLandingPage() {
           </div>
         </div>
       </section>
-      <section className="bg-gray-50 dark:bg-gray-900 py-16">
+      <section className="bg-gray-50 dark:bg-gray-900 py-10 md:py-16">
         <div className="container mx-auto px-4">
           <div className="max-w-5xl mx-auto text-center space-y-6">
             <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-balance mb-4">
@@ -384,7 +353,7 @@ export default function BusinessLandingPage() {
             </h2>
             {/* Kanban Board Interactive Preview */}
             <div className="flex justify-center mb-6">
-              <div className="w-full max-w-3xl">
+              <div className="w-full max-w-8xl">
                 <KanbanPreview />
               </div>
             </div>
@@ -432,7 +401,7 @@ export default function BusinessLandingPage() {
         </div>
       </section>
       {/* Why Businesses Choose AppointDI */}
-      <section className="bg-muted/30 py-16">
+      <section className="bg-muted/30 py-10 md:py-16">
         <div className="container mx-auto px-4">
           <div className="relative overflow-hidden rounded-2xl border border-primary/15 bg-card/60 shadow-xl backdrop-blur">
             <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-primary/5 to-transparent" />
@@ -520,10 +489,71 @@ export default function BusinessLandingPage() {
           </div>
         </div>
       </section>
+
+      {/* Custom Public Page Offering (before Pricing) */}
+      <section className="bg-gray-50 dark:bg-gray-900 py-10 md:py-16">
+        <div className="container mx-auto px-4">
+          <div className="max-w-6xl mx-auto text-center mb-10">
+            <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-balance mb-4">
+              {t("Custom Branded Public Pages")}
+            </h2>
+            <p className="text-base sm:text-lg text-muted-foreground text-balance max-w-3xl mx-auto">
+              {t(
+                "We create a tailored client-facing landing page (website) for your business — with your logo and a preferred layout. We agree on the design, build the page, and provide it for you to use as your site. The page connects to AppointDI for live schedules and bookings."
+              )}
+            </p>
+          </div>
+
+          <div className="max-w-4xl mx-auto space-y-4">
+            <div className="flex items-start gap-3">
+              <Palette className="h-6 w-6 text-primary flex-shrink-0" />
+              <div>
+                <h3 className="font-semibold">{t("Branding & Logo")}</h3>
+                <p className="text-sm text-muted-foreground">
+                  {t("Page styled to your brand — logo, colors, typography.")}
+                </p>
+              </div>
+            </div>
+            <div className="flex items-start gap-3">
+              <ListChecks className="h-6 w-6 text-primary flex-shrink-0" />
+              <div>
+                <h3 className="font-semibold">{t("Preferred Layout")}</h3>
+                <p className="text-sm text-muted-foreground">
+                  {t(
+                    "You choose how content is visualized — list, calendar, staff-first or service-first."
+                  )}
+                </p>
+              </div>
+            </div>
+            <div className="flex items-start gap-3">
+              <CalendarCheck className="h-6 w-6 text-primary flex-shrink-0" />
+              <div>
+                <h3 className="font-semibold">{t("Connected To AppointDI")}</h3>
+                <p className="text-sm text-muted-foreground">
+                  {t(
+                    "Live connection to schedules and bookings from our software."
+                  )}
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div className="text-center mt-10">
+            <Button
+              size="lg"
+              className="text-base px-7 py-6 theme-gradient-primary text-white ring-1 ring-white/20 shadow-xl hover:shadow-2xl hover:scale-[1.02] transition-transform"
+              onClick={() => router.push("/help/contact")}
+            >
+              {t("Request Your Branded Page")}
+            </Button>
+          </div>
+        </div>
+      </section>
+
       <PricingSection />
 
       {/* CTA Section */}
-      <section className="bg-primary text-primary-foreground py-10 md:py-10">
+      <section className="bg-primary text-primary-foreground py-10 md:py-16">
         <div className="container mx-auto px-4 text-center">
           <div className="max-w-3xl mx-auto space-y-4">
             <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-text-primary">

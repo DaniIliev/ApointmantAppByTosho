@@ -97,9 +97,14 @@ function KPICard({
 export function AnalyticsPreview() {
   const { t } = useTranslation();
   const containerRef = useRef<HTMLDivElement>(null);
-  const [containerWidth, setContainerWidth] = useState(800);
+  const [containerWidth, setContainerWidth] = useState(360);
   const fixedHeight = 660;
+  const rowHeight = 44;
+  const isMobile = containerWidth <= 768;
   const maxWidth = 960;
+  const chartMinHeight = isMobile ? 200 : 240;
+  const smallChartMinHeight = isMobile ? 170 : 200;
+  const wasMobile = useRef(false);
   const [layout, setLayout] = useState<Layout[]>([
     { i: "kpi1", x: 0, y: 0, w: 6, h: 2, minW: 4, minH: 2, maxW: 12, maxH: 4 },
     { i: "kpi2", x: 6, y: 0, w: 6, h: 2, minW: 4, minH: 2, maxW: 12, maxH: 4 },
@@ -112,29 +117,29 @@ export function AnalyticsPreview() {
       minW: 6,
       minH: 4,
       maxW: 12,
-      maxH: 8,
+      maxH: 16,
     },
     {
       i: "revenue",
       x: 0,
       y: 8,
       w: 6,
-      h: 5,
+      h: 6,
       minW: 4,
-      minH: 3,
-      maxW: 8,
-      maxH: 7,
+      minH: 4,
+      maxW: 12,
+      maxH: 20,
     },
     {
       i: "appointments",
       x: 6,
       y: 8,
       w: 6,
-      h: 5,
+      h: 6,
       minW: 4,
-      minH: 3,
-      maxW: 8,
-      maxH: 7,
+      minH: 4,
+      maxW: 12,
+      maxH: 20,
     },
   ]);
   const [visibleIds, setVisibleIds] = useState<string[]>([
@@ -146,10 +151,9 @@ export function AnalyticsPreview() {
   ]);
   useEffect(() => {
     const updateWidth = () => {
-      if (containerRef.current) {
-        const measured = containerRef.current.offsetWidth;
-        setContainerWidth(Math.min(measured, maxWidth));
-      }
+      const measured = containerRef.current?.offsetWidth ?? window.innerWidth;
+      const safeWidth = Math.max(320, measured);
+      setContainerWidth(Math.min(safeWidth, maxWidth));
     };
 
     updateWidth();
@@ -158,12 +162,10 @@ export function AnalyticsPreview() {
   }, []);
 
   const handleLayoutChange = useCallback((newLayout: Layout[]) => {
-    // Clamp items within bounds
-    const maxY = Math.floor(fixedHeight / 40) - 1;
+    // Clamp horizontally, allow vertical growth
     const clampedLayout = newLayout.map((item) => ({
       ...item,
       x: Math.max(0, Math.min(item.x, 12 - item.w)),
-      y: Math.max(0, Math.min(item.y, maxY - item.h)),
     }));
     setLayout(clampedLayout);
   }, []);
@@ -172,6 +174,47 @@ export function AnalyticsPreview() {
     setLayout((prev) => prev.filter((item) => item.i !== id));
     setVisibleIds((prev) => prev.filter((itemId) => itemId !== id));
   }, []);
+
+  // On mobile, stack items to full width to avoid cramped columns
+  useEffect(() => {
+    // Only stack once on entering mobile so user can still resize freely afterward
+    if (isMobile && !wasMobile.current) {
+      setLayout((prev) => {
+        const sorted = [...prev].sort((a, b) =>
+          a.y === b.y ? a.x - b.x : a.y - b.y
+        );
+
+        let currentY = 0;
+        return sorted.map((item) => {
+          const height = Math.max(item.h, item.minH ?? item.h);
+          const nextItem = {
+            ...item,
+            x: 0,
+            w: 12,
+            y: currentY,
+            h: height,
+            maxW: 12,
+            maxH: Math.max(item.maxH ?? height, 20),
+          };
+          currentY += height;
+          return nextItem;
+        });
+      });
+      wasMobile.current = true;
+    }
+
+    if (!isMobile && wasMobile.current) {
+      // Ensure items stay within bounds when returning to desktop
+      setLayout((prev) =>
+        prev.map((item) => ({
+          ...item,
+          w: Math.min(item.w, 12),
+          x: Math.max(0, Math.min(item.x, 12 - item.w)),
+        }))
+      );
+      wasMobile.current = false;
+    }
+  }, [isMobile]);
 
   // Translated mock data
   const translatedAppointments = useMemo(
@@ -212,10 +255,11 @@ export function AnalyticsPreview() {
         textStyle: { color: "#fff" },
       },
       grid: {
-        left: "8%",
-        right: "8%",
-        bottom: "15%",
-        top: "15%",
+        left: isMobile ? "6%" : "8%",
+        right: isMobile ? "4%" : "8%",
+        bottom: isMobile ? "12%" : "15%",
+        top: isMobile ? "12%" : "15%",
+        containLabel: true,
       },
       xAxis: {
         type: "category",
@@ -261,7 +305,7 @@ export function AnalyticsPreview() {
         },
       ],
     }),
-    [translatedAppointments]
+    [translatedAppointments, isMobile]
   );
 
   // Bar chart for revenue
@@ -281,10 +325,11 @@ export function AnalyticsPreview() {
         },
       },
       grid: {
-        left: "8%",
-        right: "8%",
-        bottom: "15%",
-        top: "10%",
+        left: isMobile ? "6%" : "8%",
+        right: isMobile ? "4%" : "8%",
+        bottom: isMobile ? "12%" : "15%",
+        top: isMobile ? "10%" : "12%",
+        containLabel: true,
       },
       xAxis: {
         type: "category",
@@ -324,7 +369,7 @@ export function AnalyticsPreview() {
         },
       ],
     }),
-    [translatedRevenue]
+    [translatedRevenue, isMobile]
   );
 
   // Pie chart for services
@@ -379,7 +424,7 @@ export function AnalyticsPreview() {
     <div
       className="relative"
       ref={containerRef}
-      style={{ maxWidth, margin: "0 auto" }}
+      style={{ maxWidth, margin: "0 auto", padding: isMobile ? "0 0.5rem" : 0 }}
     >
       {/* Info badge */}
       <div className="absolute -top-10 right-0 text-xs text-primary/70 flex items-center gap-1.5 z-10 bg-primary/10 px-3 py-1.5 rounded-full border border-primary/20">
@@ -387,14 +432,14 @@ export function AnalyticsPreview() {
         <span className="font-medium">Drag & resize to customize</span>
       </div>
 
-      <div style={{ height: fixedHeight, overflow: "hidden" }}>
+      <div style={{ minHeight: fixedHeight, overflow: "visible" }}>
         <GridLayout
           className="layout"
           layout={layout}
           cols={12}
-          rowHeight={40}
-          margin={[8, 8]}
-          containerPadding={[0, 0]}
+          rowHeight={rowHeight}
+          margin={[isMobile ? 6 : 8, isMobile ? 6 : 8]}
+          containerPadding={[isMobile ? 4 : 0, isMobile ? 4 : 0]}
           width={containerWidth}
           onLayoutChange={handleLayoutChange}
           draggableHandle=".drag-handle"
@@ -489,7 +534,7 @@ export function AnalyticsPreview() {
                     style={{
                       height: "100%",
                       width: "100%",
-                      minHeight: "240px",
+                      minHeight: `${chartMinHeight}px`,
                     }}
                     opts={{ renderer: "svg" }}
                   />
@@ -525,7 +570,7 @@ export function AnalyticsPreview() {
                     style={{
                       height: "100%",
                       width: "100%",
-                      minHeight: "180px",
+                      minHeight: `${smallChartMinHeight}px`,
                     }}
                     opts={{ renderer: "svg" }}
                   />
@@ -561,7 +606,7 @@ export function AnalyticsPreview() {
                     style={{
                       height: "100%",
                       width: "100%",
-                      minHeight: "180px",
+                      minHeight: `${smallChartMinHeight}px`,
                     }}
                     opts={{ renderer: "svg" }}
                   />
@@ -663,6 +708,28 @@ export function AnalyticsPreview() {
           border-right: 2px solid hsl(var(--muted-foreground) / 0.6);
           border-bottom: 2px solid hsl(var(--muted-foreground) / 0.6);
           transition: all 0.2s ease;
+        }
+
+        @media (max-width: 768px) {
+          .react-resizable-handle {
+            width: 28px;
+            height: 28px;
+          }
+
+          .react-resizable-handle-se {
+            right: -2px;
+            bottom: -2px;
+          }
+
+          .react-resizable-handle-se::after {
+            right: 2px;
+            bottom: 2px;
+          }
+
+          .react-resizable-handle-se::before {
+            right: 6px;
+            bottom: 6px;
+          }
         }
 
         .react-resizable-handle-se::before {
