@@ -16,24 +16,31 @@ const getStatusProps = (status: AppointmentStatus) => {
       return {
         icon: <Check size={16} />,
         className:
-          "bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300",
+          "bg-card/50 border-2 border-green-500 text-green-600 dark:text-green-400",
       };
     case "cancelled":
       return {
         icon: <X size={16} />,
-        className: "bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-300",
+        className:
+          "bg-card/50 border-2 border-red-500 text-red-600 dark:text-red-400",
       };
-    case "upcoming":
+    case "pending":
       return {
         icon: <Clock size={16} />,
         className:
-          "bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300",
+          "bg-card/50 border-2 border-yellow-500 text-yellow-600 dark:text-yellow-400",
+      };
+    case "confirmed":
+      return {
+        icon: <Clock size={16} />,
+        className:
+          "bg-card/50 border-2 border-blue-500 text-blue-600 dark:text-blue-400",
       };
     default:
       return {
         icon: null,
         className:
-          "bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300",
+          "bg-card/50 border-2 border-gray-400 text-gray-600 dark:text-gray-400",
       };
   }
 };
@@ -41,16 +48,15 @@ const getStatusProps = (status: AppointmentStatus) => {
 export const StatusChip = ({ status }: StatusChipProps) => {
   console.log("status", status);
   const { t } = useTranslation();
-  const { icon, color } = getStatusIndicator(status);
+  const statusProps = getStatusProps(status);
 
   return (
     <div
       className={cn(
-        `flex items-center gap-1 rounded-full px-3 py-1 text-sm font-semibold whitespace-nowrap ${color}`
-        // className
+        `flex items-center gap-1 rounded-full px-3 py-1 text-sm font-semibold whitespace-nowrap ${statusProps.className}`
       )}
     >
-      {icon}
+      {statusProps.icon}
       <span className="text-sm">{capitalizeFirstLetter(t(status))}</span>
     </div>
   );

@@ -1,12 +1,19 @@
 import { useTranslation } from "react-i18next";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Appointment } from "@/Global/Types/types";
-import { getStatusColor } from "@/Global/Utils/statusIndicator";
-import { CalendarIcon, Clock, Mail, Phone, Timer, Euro } from "lucide-react";
+import {
+  CalendarIcon,
+  Mail,
+  Phone,
+  Timer,
+  Euro,
+  CreditCard,
+  Clock,
+} from "lucide-react";
 import React from "react";
 import { formatDateAndTime, formatPriceEUR } from "@/Global/Utils/commonFn";
 import { useAuthContext } from "@/context/AuthContext";
+import { StatusChip } from "@/components/customUIComponents/StatusChip";
 
 interface ViewDetailsProps {
   handleEditAppointment?: () => void;
@@ -25,16 +32,7 @@ const ViewDetails = ({
     <>
       <div className="flex items-center justify-between mb-3">
         <h3 className="text-xl font-bold">{selectedAppointment.clientName}</h3>
-        <Badge
-          className={`${getStatusColor(
-            selectedAppointment.status
-          )} px-3 py-1 rounded-full font-semibold`}
-        >
-          {t(
-            selectedAppointment.status.charAt(0).toUpperCase() +
-              selectedAppointment.status.slice(1)
-          )}
-        </Badge>
+        <StatusChip status={selectedAppointment.status} />
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -98,6 +96,37 @@ const ViewDetails = ({
               </span>
             </div>
           )}
+          {/* Payment indicator */}
+          {(selectedAppointment.paymentStatus &&
+            selectedAppointment.paymentStatus !== "not_required") ||
+          selectedAppointment.serviceName === "card" ? (
+            <div className="flex items-center gap-2 text-sm">
+              <CreditCard
+                className={`h-4 w-4 ${
+                  selectedAppointment.paymentStatus === "captured" ||
+                  selectedAppointment.paymentStatus === "authorized" ||
+                  selectedAppointment.serviceName === "card"
+                    ? "text-green-500"
+                    : selectedAppointment.paymentStatus === "pending"
+                    ? "text-yellow-600"
+                    : selectedAppointment.paymentStatus === "refunded"
+                    ? "text-blue-600"
+                    : "text-red-600"
+                }`}
+              />
+              <span>
+                {selectedAppointment.paymentStatus === "captured" ||
+                selectedAppointment.paymentStatus === "authorized" ||
+                selectedAppointment.serviceName === "card"
+                  ? t("Paid Online")
+                  : selectedAppointment.paymentStatus === "pending"
+                  ? t("Payment Pending")
+                  : selectedAppointment.paymentStatus === "refunded"
+                  ? t("Refunded")
+                  : t("Payment Issue")}
+              </span>
+            </div>
+          ) : null}
         </div>
       </div>
 

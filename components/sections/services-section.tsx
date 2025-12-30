@@ -240,6 +240,7 @@ export function ServicesSection({ businessId }: { businessId: string }) {
           onClose={() => setIsCreateOpen(false)}
           appoitmentTypesOptions={appoitmentTypesOptions}
           appointmentTypes={appointmentTypes}
+          businessId={businessId}
         />
       </Modal>
     </Card>
