@@ -22,11 +22,13 @@ import {
   ChevronLeft,
   ChevronRight,
   CalendarDays,
+  CreditCard,
 } from "lucide-react";
 import { Appointment } from "@/Global/Types/types";
 import { getStatusColor } from "@/Global/Utils/statusIndicator";
 import { useTranslation } from "react-i18next";
 import { formatDateAndTime } from "@/Global/Utils/commonFn";
+import { CustomTooltip } from "../customUIComponents/CustomTooltip";
 
 const cn = (...classes: (string | boolean | undefined | null)[]): string =>
   classes.filter(Boolean).join(" ");
@@ -72,12 +74,14 @@ const AppointmentCard: React.FC<AppointmentCardProps> = ({
         </div>
         <div className="flex items-center space-x-2">
           <Clock className="h-4 w-4 text-primary" />
-          <p>
-            {" "}
-            {formatDateAndTime(
-              appointment.appointmentTime.start,
-              "time"
-            )} - {formatDateAndTime(appointment.appointmentTime.end, "time")}
+          <p className="flex items-center gap-1">
+            {(appointment.paymentStatus === "captured" ||
+              appointment.paymentStatus === "authorized" ||
+              appointment.serviceName === "card") && (
+              <CreditCard className="w-4 h-4 text-green-500 flex-shrink-0" />
+            )}
+            {formatDateAndTime(appointment.appointmentTime.start, "time")} -{" "}
+            {formatDateAndTime(appointment.appointmentTime.end, "time")}
           </p>
         </div>
         <div className="flex items-center space-x-2">

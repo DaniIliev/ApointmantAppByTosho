@@ -3,7 +3,14 @@
 import { Appointment, AppointmentStatus } from "@/Global/Types/types";
 import { CellProps, Column, GenericTable } from "../GenericTable/GenericTable";
 import { useTranslation } from "react-i18next";
-import { Clock, CalendarIcon, Trash2, Eye, Pencil } from "lucide-react";
+import {
+  Clock,
+  CalendarIcon,
+  Trash2,
+  Eye,
+  Pencil,
+  CreditCard,
+} from "lucide-react";
 import { formatDateAndTime } from "@/Global/Utils/commonFn";
 import { CustomTooltip } from "../customUIComponents/CustomTooltip";
 import { StatusChip } from "../customUIComponents/StatusChip";
@@ -39,6 +46,11 @@ export default function AppointmentsTable({
             <h3 className="font-semibold text-foreground">
               {appointment.clientName}
             </h3>
+            {(appointment.paymentStatus === "captured" ||
+              appointment.paymentStatus === "authorized" ||
+              appointment.serviceName === "card") && (
+              <CreditCard className="h-4 w-4 text-green-500" />
+            )}
           </div>
         );
       },
@@ -51,6 +63,58 @@ export default function AppointmentsTable({
           <StatusChip status={row.original.status as AppointmentStatus} />
         </div>
       ),
+    },
+    {
+      accessorKey: "paymentStatus",
+      header: t("Payment"),
+      cell: ({ row }: CellProps<Appointment>) => {
+        const paymentStatus = row.original.paymentStatus;
+        const serviceName = row.original.serviceName;
+
+        // Check if it's card payment by serviceName or paymentStatus
+        const isPaidOnline =
+          paymentStatus === "captured" ||
+          paymentStatus === "authorized" ||
+          serviceName === "card";
+
+        if (!paymentStatus || paymentStatus === "not_required") {
+          if (serviceName === "card") {
+            return (
+              <div className="flex items-center gap-1">
+                <CreditCard className="h-4 w-4 text-green-500" />
+                <span className="text-sm text-green-600 font-medium">
+                  {t("Paid Online")}
+                </span>
+              </div>
+            );
+          }
+          return (
+            <span className="text-sm text-muted-foreground">{t("Cash")}</span>
+          );
+        }
+        if (paymentStatus === "captured" || paymentStatus === "authorized") {
+          return (
+            <div className="flex items-center gap-1">
+              <CreditCard className="h-4 w-4 text-green-500" />
+              <span className="text-sm text-green-600 font-medium">
+                {t("Paid Online")}
+              </span>
+            </div>
+          );
+        }
+        if (paymentStatus === "pending") {
+          return (
+            <span className="text-sm text-yellow-600">{t("Pending")}</span>
+          );
+        }
+        if (paymentStatus === "refunded") {
+          return <span className="text-sm text-blue-600">{t("Refunded")}</span>;
+        }
+        if (paymentStatus === "failed" || paymentStatus === "cancelled") {
+          return <span className="text-sm text-red-600">{t("Failed")}</span>;
+        }
+        return <span className="text-sm text-muted-foreground">-</span>;
+      },
     },
     {
       accessorKey: "date",

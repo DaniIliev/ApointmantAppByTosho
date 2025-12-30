@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { ChevronLeft, ChevronRight, Search } from "lucide-react";
+import { ChevronLeft, ChevronRight, Search, CreditCard } from "lucide-react";
 import { Card, CardContent } from "../ui/card";
 import { Button } from "../ui/button";
 import { Appointment, AppointmentStatus } from "@/Global/Types/types";
@@ -34,6 +34,21 @@ export default function Calendar({
   const [searchTerm, setSearchTerm] = useState("");
   const [isMobile, setIsMobile] = useState(false);
   const [detailLevel, setDetailLevel] = useState<number>(3); // 1=time, 2=time+service, 3=all
+
+  // Debug: Check if paymentStatus is coming through
+  useEffect(() => {
+    if (appointments.length > 0) {
+      console.log("Sample appointment data:", appointments[0]);
+      console.log(
+        "PaymentStatus values:",
+        appointments.map((a) => ({
+          id: a._id,
+          client: a.clientName,
+          paymentStatus: a.paymentStatus,
+        }))
+      );
+    }
+  }, [appointments]);
 
   useEffect(() => {
     const checkIsMobile = () => {
@@ -255,12 +270,16 @@ export default function Calendar({
                             <div
                               key={apt._id}
                               onClick={() => handleOpenAppointmentModal(apt)}
-                              className={`text-xs p-2 rounded cursor-pointer hover:scale-[1.02] transition-transform  ${getStatusColor(
+                              className={`text-xs p-2 rounded cursor-pointer hover:scale-[1.02] transition-transform ${getStatusColor(
                                 apt.status
                               )}`}
                             >
-                              {/* **ПРОМЯНА:** Използваме appointmentTime за показване на интервала */}
-                              <div className="font-medium">
+                              <div className="font-medium flex items-center gap-1">
+                                {(apt.paymentStatus === "captured" ||
+                                  apt.paymentStatus === "authorized" ||
+                                  apt.serviceName === "card") && (
+                                  <CreditCard className="w-4 h-4 text-green-500 flex-shrink-0" />
+                                )}
                                 {formatDateAndTime(
                                   apt.appointmentTime.start,
                                   "time"
@@ -271,14 +290,20 @@ export default function Calendar({
                                   "time"
                                 )}
                               </div>
-                              {detailLevel >= 2 && (
-                                <div className="truncate font-semibold">
-                                  {apt.serviceName}
+                              <div className="flex items-center gap-1">
+                                <div className="flex-1">
+                                  {detailLevel >= 2 && (
+                                    <div className="truncate font-semibold">
+                                      {apt.serviceName}
+                                    </div>
+                                  )}
+                                  {detailLevel >= 3 && (
+                                    <div className="truncate">
+                                      {apt.clientName}
+                                    </div>
+                                  )}
                                 </div>
-                              )}
-                              {detailLevel >= 3 && (
-                                <div className="truncate">{apt.clientName}</div>
-                              )}
+                              </div>
                             </div>
                           ))
                         ) : (
@@ -331,25 +356,38 @@ export default function Calendar({
                               )}`}
                             >
                               {/* **ПРОМЯНА:** Използваме appointmentTime за показване на интервала */}
-                              <div className="font-medium truncate">
-                                {formatDateAndTime(
-                                  apt.appointmentTime.start,
-                                  "time"
-                                )}{" "}
-                                -{" "}
-                                {formatDateAndTime(
-                                  apt.appointmentTime.end,
-                                  "time"
+                              <div className="font-medium truncate flex items-center gap-1">
+                                {(apt.paymentStatus === "captured" ||
+                                  apt.paymentStatus === "authorized" ||
+                                  apt.serviceName === "card") && (
+                                  <CreditCard className="w-4 h-4 text-green-500 flex-shrink-0" />
                                 )}
+                                <span className="truncate">
+                                  {formatDateAndTime(
+                                    apt.appointmentTime.start,
+                                    "time"
+                                  )}{" "}
+                                  -{" "}
+                                  {formatDateAndTime(
+                                    apt.appointmentTime.end,
+                                    "time"
+                                  )}
+                                </span>
                               </div>
-                              {detailLevel >= 2 && (
-                                <div className="truncate font-semibold">
-                                  {apt.serviceName}
+                              <div className="flex items-center gap-1">
+                                <div className="flex-1">
+                                  {detailLevel >= 2 && (
+                                    <div className="truncate font-semibold">
+                                      {apt.serviceName}
+                                    </div>
+                                  )}
+                                  {detailLevel >= 3 && (
+                                    <div className="truncate">
+                                      {apt.clientName}
+                                    </div>
+                                  )}
                                 </div>
-                              )}
-                              {detailLevel >= 3 && (
-                                <div className="truncate">{apt.clientName}</div>
-                              )}
+                              </div>
                             </div>
                           ))
                         : isCurrentMonth && (

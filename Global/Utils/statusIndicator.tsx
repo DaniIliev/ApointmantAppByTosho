@@ -20,16 +20,16 @@ type CardStatusIndicator = {
 export const getStatusColor = (status: AppointmentStatus) => {
   switch (status) {
     case "pending":
-      return "bg-gradient-to-r from-yellow-500 to-amber-500 text-white";
+      return "bg-card/50 border-2 border-yellow-500 text-yellow-600";
     case "confirmed":
-      return "bg-gradient-to-r from-blue-500 to-cyan-500 text-white";
+      return "bg-card/50 border-2 border-blue-500 text-blue-600";
     case "completed":
-      return "bg-gradient-to-r from-green-500 to-emerald-500 text-white";
+      return "bg-card/50 border-2 border-green-500 text-green-600";
     case "cancelled":
     case "missed":
-      return "bg-gradient-to-r from-red-500 to-rose-500 text-white";
+      return "bg-card/50 border-2 border-red-500 text-red-600";
     default:
-      return "bg-muted text-muted-foreground";
+      return "bg-card/50 border-2 border-muted text-muted-foreground";
   }
 };
 

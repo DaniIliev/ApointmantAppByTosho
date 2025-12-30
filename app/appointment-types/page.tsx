@@ -49,6 +49,7 @@ function AppointmentTypesPageContent() {
     imageUrl: File | string | null;
     category: string;
     staffMembers: { _id: string; name: string }[];
+    paymentOption: "cash" | "card" | "cash_and_card";
   }>({
     name: "",
     category: "",
@@ -58,6 +59,7 @@ function AppointmentTypesPageContent() {
     color: "from-blue-500 to-cyan-500",
     imageUrl: null,
     staffMembers: [],
+    paymentOption: "cash",
   });
 
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
@@ -120,6 +122,7 @@ function AppointmentTypesPageContent() {
         color: type.color || "from-blue-500 to-cyan-500",
         imageUrl: type.imageUrl || null,
         staffMembers: type.staffs || [],
+        paymentOption: (type as any).paymentOption || "cash",
       });
     } else {
       setEditingType(null);
@@ -132,6 +135,7 @@ function AppointmentTypesPageContent() {
         color: "from-blue-500 to-cyan-500",
         imageUrl: null,
         staffMembers: [],
+        paymentOption: "cash",
       });
     }
     setIsModalOpen(true);
@@ -154,6 +158,7 @@ function AppointmentTypesPageContent() {
         imageUrl: formData.imageUrl,
         category: formData.category,
         staffs: JSON.stringify(formData.staffMembers),
+        paymentOption: formData.paymentOption,
       };
       console.log("payload", dataToSend);
       await callApi(endpoint, method, dataToSend, isFile);

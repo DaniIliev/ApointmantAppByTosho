@@ -44,6 +44,8 @@ interface AppointmentFormProps {
   mode: "create" | "edit";
   // Обща функция за затваряне на модала
   onClose: () => void;
+  // Идентификатор на бизнес за създаване на checkout сесия
+  businessId?: string;
 }
 
 const AppointmentForm = ({
@@ -54,6 +56,7 @@ const AppointmentForm = ({
   onClose,
   appointmentTypes,
   mode,
+  businessId,
 }: AppointmentFormProps) => {
   const { t } = useTranslation();
   const [availableStaff, setAvailableStaff] = useState<any[]>([]);
@@ -61,7 +64,7 @@ const AppointmentForm = ({
   const [closestSlot, setClosestSlot] = useState<any>(null);
   const [isClosestSlotModalOpen, setIsClosestSlotModalOpen] = useState(false);
   const fetchedStaffForTypeRef = useRef<string | null>(null);
-
+  console.log("appointment types in form", appointmentTypes);
   useEffect(() => {
     const fetchStaff = async () => {
       if (appointmentData.appointmentTypeId) {
@@ -121,12 +124,16 @@ const AppointmentForm = ({
         appointmentData.appointmentTypeId &&
         appointmentData.staff._id
       ) {
-        // Проверка дали вече има избрана дата/час (избягва изскачане, ако потребителят вече е избрал)
-        if (appointmentData.date && appointmentData.time) return;
-        const response = await callApi(
-          `/api/appointment/closest-slot?staffId=${appointmentData.staff._id}&serviceId=${appointmentData.appointmentTypeId}`,
-          "GET"
-        );
+        // Ако има избрана дата и час, не показвай модал
+        if (appointmentData.time) return;
+
+        // Ако има избрана дата, зареди най-близкия час за тази дата
+        let endpoint = `/api/appointment/closest-slot?staffId=${appointmentData.staff._id}&serviceId=${appointmentData.appointmentTypeId}`;
+        if (appointmentData.date) {
+          endpoint += `&date=${appointmentData.date}`;
+        }
+
+        const response = await callApi(endpoint, "GET");
 
         if (response.slot) {
           setClosestSlot(response.slot);
@@ -140,8 +147,8 @@ const AppointmentForm = ({
   }, [
     appointmentData.appointmentTypeId,
     appointmentData.staff._id,
-    mode,
     appointmentData.date,
+    mode,
     appointmentData.time,
   ]);
 
@@ -165,12 +172,75 @@ const AppointmentForm = ({
     }
   };
 
+  const handleUseClosestSlot = () => {
+    if (closestSlot) {
+      // Backend returns date in DD.MM.YYYY format, convert to YYYY-MM-DD
+      const dateParts = closestSlot.date.split(".");
+      const formattedDate = `${dateParts[2]}-${dateParts[1]}-${dateParts[0]}`;
+
+      // Only fill date and time, don't submit yet
+      setAppointmentData((prev) => ({
+        ...prev,
+        date: formattedDate,
+        time: closestSlot.startTime,
+      }));
+      setIsClosestSlotModalOpen(false);
+    }
+  };
+
   const handleManualSelection = () => {
     setIsClosestSlotModalOpen(false);
   };
 
   const handleFormSubmit = () => {
     handleSubmit(appointmentData); // Използваме общия handleSubmit
+  };
+
+  const selectedType = appointmentTypes?.find(
+    (type) => type._id === appointmentData.appointmentTypeId
+  );
+
+  const canSubmitBase =
+    !!appointmentData.clientName &&
+    !!appointmentData.email &&
+    !!appointmentData.date &&
+    !!appointmentData.time &&
+    !!appointmentData.appointmentTypeId &&
+    !!appointmentData.staff._id;
+
+  const handlePayOnline = async () => {
+    if (!canSubmitBase || !selectedType || !businessId) return;
+
+    const startISO = new Date(
+      `${appointmentData.date}T${appointmentData.time}`
+    );
+    const endISO = new Date(startISO);
+    endISO.setMinutes(endISO.getMinutes() + (selectedType.duration || 0));
+
+    const appointmentPayload = {
+      business: businessId,
+      clientName: appointmentData.clientName,
+      clientPhone: appointmentData.clientPhone,
+      email: appointmentData.email,
+      staff: appointmentData.staff._id,
+      appointmentTime: {
+        start: startISO.toISOString(),
+        end: endISO.toISOString(),
+      },
+      notes: appointmentData.notes,
+    };
+
+    try {
+      const res = await callApi("/api/stripe/checkout/session", "POST", {
+        serviceId: appointmentData.appointmentTypeId,
+        appointmentData: appointmentPayload,
+      });
+      if (res?.url && typeof window !== "undefined") {
+        window.location.href = res.url;
+      }
+    } catch (e) {
+      console.error(e);
+    }
   };
 
   // Хендлър за промяна на типа среща (за да нулира персонала, датата и часа)
@@ -333,21 +403,41 @@ const AppointmentForm = ({
         >
           {t("Cancel")}
         </Button>
-        <Button
-          iconType="save"
-          onClick={handleFormSubmit}
-          disabled={
-            !appointmentData.clientName ||
-            !appointmentData.email ||
-            !appointmentData.date ||
-            !appointmentData.time ||
-            !appointmentData.appointmentTypeId ||
-            !appointmentData.staff._id
-          }
-        >
-          {t(mode === "create" ? "Create" : "Save Changes")}{" "}
-          {/* Динамичен текст */}
-        </Button>
+        {selectedType?.paymentOption === "card" ? (
+          <Button
+            iconType="save"
+            onClick={handlePayOnline}
+            disabled={!canSubmitBase}
+          >
+            {t("Pay Online")}
+          </Button>
+        ) : selectedType?.paymentOption === "cash_and_card" ? (
+          <div className="flex gap-3">
+            <Button
+              variant="outline"
+              iconType="save"
+              onClick={handleFormSubmit}
+              disabled={!canSubmitBase}
+            >
+              {t("Book with Cash")}
+            </Button>
+            <Button
+              iconType="save"
+              onClick={handlePayOnline}
+              disabled={!canSubmitBase}
+            >
+              {t("Pay Online")}
+            </Button>
+          </div>
+        ) : (
+          <Button
+            iconType="save"
+            onClick={handleFormSubmit}
+            disabled={!canSubmitBase}
+          >
+            {t(mode === "create" ? "Create" : "Save Changes")}{" "}
+          </Button>
+        )}
       </div>
 
       {isClosestSlotModalOpen &&
@@ -382,10 +472,10 @@ const AppointmentForm = ({
                 {t("Continue to manual selection")}
               </Button>
               <Button
-                onClick={handleSaveClosestSlot}
+                onClick={handleUseClosestSlot}
                 className="flex-1 bg-gradient-to-r from-primary to-accent hover:from-primary/90 hover:to-accent/90 rounded-xl"
               >
-                {t("Book this time")}
+                {t("Use this time")}
               </Button>
             </div>
           </Modal>
