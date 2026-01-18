@@ -33,6 +33,17 @@ export interface Appointment {
     _id: string;
     name: string;
   };
+  paymentStatus?:
+    | "not_required"
+    | "pending"
+    | "authorized"
+    | "captured"
+    | "refunded"
+    | "cancelled"
+    | "failed";
+  stripePaymentIntentId?: string;
+  stripePaymentMethodId?: string;
+  stripePaymentAmount?: number;
 }
 
 export interface AppointmentType {
@@ -45,6 +56,7 @@ export interface AppointmentType {
   price: number;
   color: string;
   staffs: { _id: string; name: string }[]; // Променено на staffIds
+  paymentOption?: "cash" | "card" | "cash_and_card";
 }
 
 export interface Staff {

@@ -349,6 +349,8 @@ export default function TopNav({
                       src="/Flag_of_Bulgaria.png"
                       alt="Bulgarian Flag"
                       className="w-5 h-4 mr-2"
+                      width={32}
+                      height={32}
                     />
                     {t("Bulgarian")}
                   </button>
@@ -360,6 +362,8 @@ export default function TopNav({
                       src="/Flag_of_the_United_Kingdom.png"
                       alt="British Flag"
                       className="w-5 h-4 mr-2"
+                      width={32}
+                      height={32}
                     />
                     {t("English")}
                   </button>
@@ -371,6 +375,8 @@ export default function TopNav({
                       src="/Flag_of_Germany.png"
                       alt="German Flag"
                       className="w-5 h-4 mr-2"
+                      width={32}
+                      height={32}
                     />
                     {t("German")}
                   </button>

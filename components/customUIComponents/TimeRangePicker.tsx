@@ -144,18 +144,30 @@ export const TimeRangePicker: React.FC<TimeRangePickerProps> = ({
               {formatLabel(tempStart, tempEnd)}
             </span>
             {(value.startTime || value.endTime) && (
-              <button
-                type="button"
-                onClick={() => {
+              <span
+                role="button"
+                tabIndex={0}
+                onClick={(e) => {
+                  e.stopPropagation();
                   onChange({ startTime: null, endTime: null });
                   setOpen(false);
                   setTempStart(parseTime24(null));
                   setTempEnd(parseTime24(null));
                   setSelecting("start");
                 }}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" || e.key === " ") {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    onChange({ startTime: null, endTime: null });
+                    setOpen(false);
+                    setTempStart(parseTime24(null));
+                    setTempEnd(parseTime24(null));
+                    setSelecting("start");
+                  }
+                }}
                 aria-label="Clear"
-                className="absolute right-8 top-1/2 -translate-y-1/2 h-7 w-7 sm:h-5 sm:w-5 rounded-full text-muted-foreground hover:text-primary/80 flex items-center justify-center z-20"
-                tabIndex={-1}
+                className="absolute right-8 top-1/2 -translate-y-1/2 h-7 w-7 sm:h-5 sm:w-5 rounded-full text-muted-foreground hover:text-primary/80 flex items-center justify-center z-20 cursor-pointer"
               >
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
@@ -171,7 +183,7 @@ export const TimeRangePicker: React.FC<TimeRangePickerProps> = ({
                   <line x1="18" y1="6" x2="6" y2="18" />
                   <line x1="6" y1="6" x2="18" y2="18" />
                 </svg>
-              </button>
+              </span>
             )}
             <Clock className="h-5 w-5 sm:h-4 sm:w-4 text-muted-foreground absolute right-2 top-1/2 -translate-y-1/2" />
             <span
