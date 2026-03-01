@@ -4,6 +4,7 @@ import { Modal } from "@/components/customUIComponents/Modal";
 import { Clock, Euro } from "lucide-react";
 import { formatPriceEUR } from "@/Global/Utils/commonFn";
 import { AppointmentType } from "@/Global/Types/types";
+import { useTranslation } from "react-i18next";
 
 type AppointmentDetailsModalProps = {
   selectedType: AppointmentType | null;
@@ -16,6 +17,7 @@ const AppointmentDetailsModal = ({
   setSelectedType,
   formatDuration,
 }: AppointmentDetailsModalProps) => {
+  const { t } = useTranslation();
   if (!selectedType) return null;
 
   return (
@@ -39,12 +41,12 @@ const AppointmentDetailsModal = ({
           <div className="flex-1 space-y-2">
             <div className="flex items-center gap-2 text-sm text-muted-foreground">
               <Clock className="h-4 w-4" />
-              <span className="font-medium">Duration:</span>{" "}
+              <span className="font-medium">{t("Duration")}:</span>{" "}
               {formatDuration(selectedType.duration)}
             </div>
             <div className="flex items-center gap-2 text-lg font-bold text-primary">
-              <Euro className="h-5 w-5" />
-              <span className="font-medium">Price:</span>{" "}
+              <Euro className="h-4 w-4" />
+              <span className="font-medium">{t("Price")}:</span>{" "}
               {formatPriceEUR(selectedType.price)}
             </div>
           </div>

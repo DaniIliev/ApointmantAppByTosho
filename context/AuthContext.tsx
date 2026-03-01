@@ -7,6 +7,7 @@ import { findUserByID } from "@/app/Api/services/userService";
 import callApi from "@/app/Api/callApi";
 import LoadingBackdrop from "@/components/ui/LoadingBackdrop";
 import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
@@ -53,7 +54,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           });
       }
       router.push("/dashboard");
-    } catch (error) {
+    } catch (error: any) {
       console.error("Invalid token:", error);
       setUser(null);
     }

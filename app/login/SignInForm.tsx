@@ -9,6 +9,7 @@ import callApi from "../Api/callApi";
 import { useAuthContext } from "@/context/AuthContext";
 import { useTranslation } from "react-i18next";
 import ForgotPasswordModal from "./ForgotPasswordModal";
+import { toast } from "sonner";
 
 interface SignInFormProps {
   onBack?: () => void;
@@ -17,7 +18,7 @@ interface SignInFormProps {
 
 export function SignInForm({ onSuccess }: SignInFormProps) {
   const { t } = useTranslation();
-  const { login } = useAuthContext();
+  const { login, user } = useAuthContext();
   const [showPassword, setShowPassword] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -37,14 +38,20 @@ export function SignInForm({ onSuccess }: SignInFormProps) {
       if (otpMode) {
         // OTP login
         const payload = { email, otp: password };
-        login(payload);
+        await login(payload);
       } else {
         // Normal login
         const payload = { email, password };
-        login(payload);
+        await login(payload);
+      }
+      if (!user) {
+        setError(t("Login failed. Invalid email or password."));
+        toast.error(t("Login failed. Invalid email or password."));
       }
     } catch (err: any) {
-      setError(err?.message || t("Authentication failed"));
+      setError(t("Login failed. Invalid email or password."));
+      toast.error(t("Login failed. Invalid email or password."));
+      console.log("Login error:", err);
     } finally {
       setLoading(false);
     }

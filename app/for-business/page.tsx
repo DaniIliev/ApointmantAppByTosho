@@ -11,7 +11,6 @@ import {
   Shield,
   Check,
   ArrowRight,
-  PlayCircle,
   QrCode,
   Smartphone,
   MessageSquare,
@@ -64,7 +63,7 @@ export default function BusinessLandingPage() {
 
             <p className="text-base sm:text-lg md:text-xl text-white/95 text-balance max-w-3xl mx-auto drop-shadow-md">
               {t(
-                "Schedule faster, empower your team, and grow with our all-in-one platform."
+                "Schedule faster, empower your team, and grow with our all-in-one platform.",
               )}
             </p>
 
@@ -77,14 +76,14 @@ export default function BusinessLandingPage() {
                 <span className="mr-2">{t("Join Us")}</span>
                 <ArrowRight className="h-5 w-5" />
               </Button>
-              <Button
+              {/* <Button
                 variant="outline"
                 size="lg"
                 className="text-base sm:text-lg px-7 py-6 bg-white/10 text-white border-primary/30 hover:bg-white/20 hover:scale-[1.02] transition-all backdrop-blur-md shadow-xl"
               >
                 <PlayCircle className="h-5 w-5 mr-2" />
                 {t("Watch Demo")}
-              </Button>
+              </Button> */}
             </div>
           </div>
         </div>
@@ -100,7 +99,7 @@ export default function BusinessLandingPage() {
             </h2>
             <p className="text-base sm:text-lg text-muted-foreground max-w-3xl mx-auto">
               {t(
-                "Booking via link, QR in the salon, or directly from the phone — with a helpful AI assistant."
+                "Booking via link, QR in the salon, or directly from the phone — with a helpful AI assistant.",
               )}
             </p>
           </div>
@@ -114,7 +113,7 @@ export default function BusinessLandingPage() {
                   <h3 className="font-semibold">{t("Book via QR or Link")}</h3>
                   <p className="text-sm text-muted-foreground">
                     {t(
-                      "Clients book from a shared link or by scanning a QR code displayed in your salon."
+                      "Clients book from a shared link or by scanning a QR code displayed in your salon.",
                     )}
                   </p>
                 </div>
@@ -125,7 +124,7 @@ export default function BusinessLandingPage() {
                   <h3 className="font-semibold">{t("Mobile Friendly")}</h3>
                   <p className="text-sm text-muted-foreground">
                     {t(
-                      "Optimized for phones, so clients quickly pick a service and a free slot."
+                      "Optimized for phones, so clients quickly pick a service and a free slot.",
                     )}
                   </p>
                 </div>
@@ -136,7 +135,7 @@ export default function BusinessLandingPage() {
                   <h3 className="font-semibold">{t("AI Chatbot Help")}</h3>
                   <p className="text-sm text-muted-foreground">
                     {t(
-                      "Guides clients with questions, services, and finding a suitable time."
+                      "Guides clients with questions, services, and finding a suitable time.",
                     )}
                   </p>
                 </div>
@@ -196,7 +195,7 @@ export default function BusinessLandingPage() {
                   </h3>
                   <p className="text-sm text-muted-foreground">
                     {t(
-                      "Add many staff members with their own working hours and breaks."
+                      "Add many staff members with their own working hours and breaks.",
                     )}
                   </p>
                 </div>
@@ -209,7 +208,7 @@ export default function BusinessLandingPage() {
                   </h3>
                   <p className="text-sm text-muted-foreground">
                     {t(
-                      "Create services and assign them to specific staff members."
+                      "Create services and assign them to specific staff members.",
                     )}
                   </p>
                 </div>
@@ -222,7 +221,7 @@ export default function BusinessLandingPage() {
                   </h3>
                   <p className="text-sm text-muted-foreground">
                     {t(
-                      "Manage all bookings in one place—create, review, approve or decline."
+                      "Manage all bookings in one place—create, review, approve or decline.",
                     )}
                   </p>
                 </div>
@@ -235,7 +234,7 @@ export default function BusinessLandingPage() {
                   </h3>
                   <p className="text-sm text-muted-foreground">
                     {t(
-                      "Take bookings on behalf of clients when they call or visit the salon."
+                      "Take bookings on behalf of clients when they call or visit the salon.",
                     )}
                   </p>
                 </div>
@@ -246,7 +245,7 @@ export default function BusinessLandingPage() {
                   <h3 className="font-semibold">{t("Analytics")}</h3>
                   <p className="text-sm text-muted-foreground">
                     {t(
-                      "See popular services, staff workload, and trends over time."
+                      "See popular services, staff workload, and trends over time.",
                     )}
                   </p>
                 </div>
@@ -269,7 +268,7 @@ export default function BusinessLandingPage() {
               </h2>
               <p className="text-base sm:text-lg text-muted-foreground text-balance max-w-3xl mx-auto">
                 {t(
-                  "Create custom analytics dashboards with drag-and-drop charts. Build the perfect view of your business data with our flexible, responsive grid layout."
+                  "Create custom analytics dashboards with drag-and-drop charts. Build the perfect view of your business data with our flexible, responsive grid layout.",
                 )}
               </p>
             </div>
@@ -286,7 +285,7 @@ export default function BusinessLandingPage() {
                     </h3>
                     <p className="text-sm sm:text-base text-muted-foreground">
                       {t(
-                        "Choose from line, bar, pie, and combined charts. Visualize appointments, revenue, services, and more with your preferred chart style."
+                        "Choose from line, bar, pie, and combined charts. Visualize appointments, revenue, services, and more with your preferred chart style.",
                       )}
                     </p>
                   </div>
@@ -301,7 +300,7 @@ export default function BusinessLandingPage() {
                     </h3>
                     <p className="text-sm sm:text-base text-muted-foreground">
                       {t(
-                        "Arrange your dashboard exactly how you want. Resize and reposition charts with intuitive drag-and-drop. Your layout automatically adapts to mobile devices."
+                        "Arrange your dashboard exactly how you want. Resize and reposition charts with intuitive drag-and-drop. Your layout automatically adapts to mobile devices.",
                       )}
                     </p>
                   </div>
@@ -316,7 +315,7 @@ export default function BusinessLandingPage() {
                     </h3>
                     <p className="text-sm sm:text-base text-muted-foreground">
                       {t(
-                        "Track key metrics at a glance with live KPI cards. Monitor total appointments, revenue, client retention, and more with automatic change indicators."
+                        "Track key metrics at a glance with live KPI cards. Monitor total appointments, revenue, client retention, and more with automatic change indicators.",
                       )}
                     </p>
                   </div>
@@ -331,7 +330,7 @@ export default function BusinessLandingPage() {
                     </h3>
                     <p className="text-sm sm:text-base text-muted-foreground">
                       {t(
-                        "Analyze data by custom date ranges or individual staff members. Get the insights that matter most to your business decisions."
+                        "Analyze data by custom date ranges or individual staff members. Get the insights that matter most to your business decisions.",
                       )}
                     </p>
                   </div>
@@ -359,7 +358,7 @@ export default function BusinessLandingPage() {
             </div>
             <p className="text-base sm:text-lg md:text-xl text-muted-foreground max-w-3xl mx-auto">
               {t(
-                "Stay on top of every task, deadline, and project with our intuitive Kanban Board. Designed for teams and individuals, it helps you visualize work, track progress, and boost productivity—all in one place."
+                "Stay on top of every task, deadline, and project with our intuitive Kanban Board. Designed for teams and individuals, it helps you visualize work, track progress, and boost productivity—all in one place.",
               )}
             </p>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mt-8">
@@ -370,7 +369,7 @@ export default function BusinessLandingPage() {
                 </h3>
                 <p className="text-sm text-muted-foreground">
                   {t(
-                    "Easily move tasks between columns to reflect their status. Simple, fast, and visual."
+                    "Easily move tasks between columns to reflect their status. Simple, fast, and visual.",
                   )}
                 </p>
               </div>
@@ -381,7 +380,7 @@ export default function BusinessLandingPage() {
                 </h3>
                 <p className="text-sm text-muted-foreground">
                   {t(
-                    "See what’s in progress, completed, or overdue at a glance. Perfect for managing team workloads."
+                    "See what’s in progress, completed, or overdue at a glance. Perfect for managing team workloads.",
                   )}
                 </p>
               </div>
@@ -392,7 +391,7 @@ export default function BusinessLandingPage() {
                 </h3>
                 <p className="text-sm text-muted-foreground">
                   {t(
-                    "Assign tasks, add comments, and keep everyone in sync—no matter where you work from."
+                    "Assign tasks, add comments, and keep everyone in sync—no matter where you work from.",
                   )}
                 </p>
               </div>
@@ -418,7 +417,7 @@ export default function BusinessLandingPage() {
                 </h3>
                 <p className="text-sm sm:text-base text-muted-foreground max-w-2xl mx-auto">
                   {t(
-                    "From fewer no-shows to happier staff, see how the platform impacts daily operations and growth."
+                    "From fewer no-shows to happier staff, see how the platform impacts daily operations and growth.",
                   )}
                 </p>
               </div>
@@ -433,7 +432,7 @@ export default function BusinessLandingPage() {
                       </h4>
                       <p className="text-sm text-muted-foreground">
                         {t(
-                          "Automated notifications and confirmations cut no-shows and save staff time."
+                          "Automated notifications and confirmations cut no-shows and save staff time.",
                         )}
                       </p>
                     </div>
@@ -448,7 +447,7 @@ export default function BusinessLandingPage() {
                       </h4>
                       <p className="text-sm text-muted-foreground">
                         {t(
-                          "Fill more slots and optimize services with performance insights."
+                          "Fill more slots and optimize services with performance insights.",
                         )}
                       </p>
                     </div>
@@ -463,7 +462,7 @@ export default function BusinessLandingPage() {
                       </h4>
                       <p className="text-sm text-muted-foreground">
                         {t(
-                          "Staff manage schedules and bookings while you stay in control."
+                          "Staff manage schedules and bookings while you stay in control.",
                         )}
                       </p>
                     </div>
@@ -478,7 +477,7 @@ export default function BusinessLandingPage() {
                       </h4>
                       <p className="text-sm text-muted-foreground">
                         {t(
-                          "Deliver a seamless booking experience that reflects your brand."
+                          "Deliver a seamless booking experience that reflects your brand.",
                         )}
                       </p>
                     </div>
@@ -499,7 +498,7 @@ export default function BusinessLandingPage() {
             </h2>
             <p className="text-base sm:text-lg text-muted-foreground text-balance max-w-3xl mx-auto">
               {t(
-                "We create a tailored client-facing landing page (website) for your business — with your logo and a preferred layout. We agree on the design, build the page, and provide it for you to use as your site. The page connects to AppointDI for live schedules and bookings."
+                "We create a tailored client-facing landing page (website) for your business — with your logo and a preferred layout. We agree on the design, build the page, and provide it for you to use as your site. The page connects to AppointDI for live schedules and bookings.",
               )}
             </p>
           </div>
@@ -520,7 +519,7 @@ export default function BusinessLandingPage() {
                 <h3 className="font-semibold">{t("Preferred Layout")}</h3>
                 <p className="text-sm text-muted-foreground">
                   {t(
-                    "You choose how content is visualized — list, calendar, staff-first or service-first."
+                    "You choose how content is visualized — list, calendar, staff-first or service-first.",
                   )}
                 </p>
               </div>
@@ -531,7 +530,7 @@ export default function BusinessLandingPage() {
                 <h3 className="font-semibold">{t("Connected To AppointDI")}</h3>
                 <p className="text-sm text-muted-foreground">
                   {t(
-                    "Live connection to schedules and bookings from our software."
+                    "Live connection to schedules and bookings from our software.",
                   )}
                 </p>
               </div>
@@ -561,7 +560,7 @@ export default function BusinessLandingPage() {
             </h2>
             <p className="text-base sm:text-lg text-primary-foreground/90 text-balance">
               {t(
-                "Join thousands of businesses that have streamlined their operations and increased revenue with AppointDI."
+                "Join thousands of businesses that have streamlined their operations and increased revenue with AppointDI.",
               )}
             </p>
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4">
@@ -573,14 +572,14 @@ export default function BusinessLandingPage() {
                 <span className="mr-2">{t("Join Us")}</span>
                 <ArrowRight className="h-5 w-5" />
               </Button>
-              <Button
+              {/* <Button
                 variant="outline"
                 size="lg"
                 className="text-base sm:text-lg px-7 py-6 bg-white/10 text-white border-primary/30 hover:bg-white/20 hover:scale-[1.02] transition-all backdrop-blur-md shadow-xl"
               >
                 <PlayCircle className="h-5 w-5 mr-2" />
                 {t("Watch Demo")}
-              </Button>
+              </Button> */}
             </div>
           </div>
         </div>
