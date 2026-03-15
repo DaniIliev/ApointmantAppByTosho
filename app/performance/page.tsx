@@ -1053,7 +1053,7 @@ function PerformancePageContent() {
 export default function PerformancePage() {
   return (
     <ProtectedRoute
-      requiredRoles={["business"]}
+      requiredRoles={["business", "staff"]}
       requiredPlan={["starter", "professional", "enterprise"]}
     >
       <DashboardDateProvider>
