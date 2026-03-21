@@ -8,12 +8,14 @@ import { StaffMember } from "./types";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 import callApi from "../Api/callApi";
+import { LabeledSelect } from "@/components/customUIComponents/LabeledSelect";
 
 type StaffEditModalProps = {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   staff: StaffMember | null;
   onStaffUpdated: (updatedStaff: StaffMember) => void;
+  locations: any[];
 };
 
 export const StaffEditModal: React.FC<StaffEditModalProps> = ({
@@ -21,6 +23,7 @@ export const StaffEditModal: React.FC<StaffEditModalProps> = ({
   onOpenChange,
   staff,
   onStaffUpdated,
+  locations,
 }) => {
   const { t } = useTranslation();
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -30,6 +33,7 @@ export const StaffEditModal: React.FC<StaffEditModalProps> = ({
     email: "",
     phone: "",
     role: "",
+    locationId: "",
   });
 
   // Reset form when staff changes or modal opens
@@ -41,6 +45,7 @@ export const StaffEditModal: React.FC<StaffEditModalProps> = ({
         email: staff.email,
         phone: staff.phone,
         role: staff.role,
+        locationId: staff.locationId || "",
       });
     }
   }, [staff, open]);
@@ -121,6 +126,15 @@ export const StaffEditModal: React.FC<StaffEditModalProps> = ({
           onChange={(e) => setFormData({ ...formData, role: e.target.value })}
           label={t("Role") as string}
           id="role"
+        />
+
+        <LabeledSelect<string>
+          id="locationId"
+          label={t("Location")}
+          value={formData.locationId}
+          onValueChange={(val) => setFormData({ ...formData, locationId: val })}
+          placeholder={t("Select a location")}
+          options={locations.map(l => ({ id: l._id, name: l.name }))}
         />
 
         <div className="flex justify-center gap-2 pt-4">

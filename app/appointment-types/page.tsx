@@ -17,6 +17,7 @@ import EmptyState from "./EmptyState";
 import CreateAppointmentModal from "./CreateAppointmentModal";
 import AppointmentDetailsModal from "./AppointmentDetailsModal";
 import { useAuthContext } from "@/context/AuthContext";
+import { Skeleton } from "@/components/ui/skeleton";
 
 type CreateNewDashboardMenuProps = {
   onOpenModal: () => void;
@@ -48,6 +49,7 @@ function AppointmentTypesPageContent() {
     color: string;
     imageUrl: File | string | null;
     category: string;
+    locationId: string;
     staffMembers: { _id: string; name: string }[];
     paymentOption: "cash" | "card" | "cash_and_card";
   }>({
@@ -55,6 +57,7 @@ function AppointmentTypesPageContent() {
     category: "",
     description: "",
     duration: "",
+    locationId: "",
     price: "",
     color: "from-blue-500 to-cyan-500",
     imageUrl: null,
@@ -67,6 +70,7 @@ function AppointmentTypesPageContent() {
     null
   );
   const [isLoading, setIsLoading] = useState(false);
+  const [isPageLoading, setIsPageLoading] = useState(true);
   const [selectedType, setSelectedType] = useState<AppointmentType | null>(
     null
   );
@@ -83,6 +87,8 @@ function AppointmentTypesPageContent() {
       setAppointmentTypes(services);
     } catch (error) {
       console.error("Failed to fetch services:", error);
+    } finally {
+      setIsPageLoading(false);
     }
   };
 
@@ -123,6 +129,7 @@ function AppointmentTypesPageContent() {
         imageUrl: type.imageUrl || null,
         staffMembers: type.staffs || [],
         paymentOption: (type as any).paymentOption || "cash",
+        locationId: type.locationId || "",
       });
     } else {
       setEditingType(null);
@@ -136,6 +143,7 @@ function AppointmentTypesPageContent() {
         imageUrl: null,
         staffMembers: [],
         paymentOption: "cash",
+        locationId: "",
       });
     }
     setIsModalOpen(true);
@@ -159,6 +167,7 @@ function AppointmentTypesPageContent() {
         category: formData.category,
         staffs: JSON.stringify(formData.staffMembers),
         paymentOption: formData.paymentOption,
+        locationId: formData.locationId,
       };
       console.log("payload", dataToSend);
       await callApi(endpoint, method, dataToSend, isFile);
@@ -199,6 +208,16 @@ function AppointmentTypesPageContent() {
       ? `${hours} ${t("hours")} ${remainingMinutes} ${t("minutes")}`
       : `${hours} ${t("hours")}`;
   };
+  if (isPageLoading) {
+    return (
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        {[1, 2, 3, 4, 5, 6].map((i) => (
+          <Skeleton key={i} className="h-48 rounded-2xl w-full" />
+        ))}
+      </div>
+    );
+  }
+
   return (
     <div>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">

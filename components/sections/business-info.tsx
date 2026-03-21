@@ -5,11 +5,14 @@ import { useTranslation } from "react-i18next";
 import { BusinessData } from "@/app/business/[id]/page";
 import { getTodayDayName } from "@/Global/Utils/commonFn";
 
+import { Location } from "./locations-section";
+
 interface BusinessInfoProps {
   business: BusinessData;
+  selectedLocation?: Location;
 }
 
-export function BusinessInfo({ business }: BusinessInfoProps) {
+export function BusinessInfo({ business, selectedLocation }: BusinessInfoProps) {
   const { t } = useTranslation();
 
   // Day keys in English (matching backend keys)
@@ -35,8 +38,11 @@ export function BusinessInfo({ business }: BusinessInfoProps) {
   ];
 
   const todayKey = getTodayDayName();
-  const isScheduleObject =
-    typeof business.schedule === "object" && business.schedule !== null;
+  
+  // Use business schedule as fallback if no location-specific logic is implemented yet
+  const schedule = business.schedule;
+  const isScheduleObject = typeof schedule === "object" && schedule !== null;
+  const isScheduleString = typeof schedule === "string" && schedule !== "";
 
   return (
     <div className="grid lg:grid-cols-3 gap-6">
@@ -66,20 +72,28 @@ export function BusinessInfo({ business }: BusinessInfoProps) {
         </CardHeader>
         <CardContent className="pt-6 pb-4">
           <div className="space-y-3">
-            {!isScheduleObject && (
+            {!isScheduleObject && !isScheduleString && (
               <div className="flex items-center space-x-2 text-center py-4 bg-muted/50 rounded-lg">
                 <XCircle className="h-5 w-5 text-red-500 ml-4" />
                 <span className="font-semibold text-muted-foreground">
-                  {business.schedule as any}
+                  {schedule as any}
+                </span>
+              </div>
+            )}
+
+            {isScheduleString && (
+              <div className="flex items-center space-x-2 py-4 bg-muted/50 rounded-lg">
+                <Clock className="h-5 w-5 text-primary ml-4 shrink-0" />
+                <span className="font-medium text-foreground">
+                  {schedule as string}
                 </span>
               </div>
             )}
 
             {isScheduleObject &&
               dayKeys.map((dayKey, index) => {
-                // Get daily hours from business.schedule using English key
-                const dayHours =
-                  business.schedule[dayKey as keyof typeof business.schedule];
+                // Get daily hours from schedule using English key
+                const dayHours = (schedule as any)[dayKey];
                 const dayName = dayNames[index]; // Get translated day name
                 const isToday = dayKey === todayKey;
                 const isDayOff =

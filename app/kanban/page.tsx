@@ -15,6 +15,8 @@ import callApi from "@/app/Api/callApi";
 import LoadingBackdrop from "@/components/ui/LoadingBackdrop";
 import { Loader2 } from "lucide-react";
 
+import { Skeleton } from "@/components/ui/skeleton";
+
 function KanbanPageContent() {
   const { t } = useTranslation();
   const { setPageTitle } = usePageTitle();
@@ -359,8 +361,13 @@ function KanbanPageContent() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-full">
-        <Loader2 className="h-12 w-12 animate-spin text-primary" />
+      <div className="flex gap-4 h-full p-4 overflow-hidden">
+        {[1, 2, 3].map((i) => (
+          <div key={i} className="flex-1 space-y-4">
+            <Skeleton className="h-10 w-full rounded-xl" />
+            <Skeleton className="h-[500px] w-full rounded-xl" />
+          </div>
+        ))}
       </div>
     );
   }

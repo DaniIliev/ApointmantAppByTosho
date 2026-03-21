@@ -46,6 +46,7 @@ interface AppointmentFormProps {
   onClose: () => void;
   // Идентификатор на бизнес за създаване на checkout сесия
   businessId?: string;
+  locationId?: string;
 }
 
 const AppointmentForm = ({
@@ -57,6 +58,7 @@ const AppointmentForm = ({
   appointmentTypes,
   mode,
   businessId,
+  locationId,
 }: AppointmentFormProps) => {
   const { t } = useTranslation();
   const [availableStaff, setAvailableStaff] = useState<any[]>([]);
@@ -228,6 +230,7 @@ const AppointmentForm = ({
         end: endISO.toISOString(),
       },
       notes: appointmentData.notes,
+      location: locationId,
     };
 
     try {

@@ -28,7 +28,7 @@ const groupServicesByCategory = (services: AppointmentType[]) => {
   }, {} as Record<string, AppointmentType[]>);
 };
 
-export function ServicesSection({ businessId }: { businessId: string }) {
+export function ServicesSection({ businessId, locationId }: { businessId: string; locationId?: string }) {
   const { t } = useTranslation();
   const [services, setServices] = useState<Record<string, AppointmentType[]>>();
   const [categories, setCategories] = useState<string[]>([]);
@@ -47,10 +47,11 @@ export function ServicesSection({ businessId }: { businessId: string }) {
   });
 
   const fetchBusinessServices = async () => {
-    const result = await callApi(
-      `/api/service?businessId=${businessId}`,
-      "GET"
-    );
+    let url = `/api/service?businessId=${businessId}`;
+    if (locationId) {
+      url += `&locationId=${locationId}`;
+    }
+    const result = await callApi(url, "GET");
     const categorizedServices = groupServicesByCategory(result);
     const categories = Object.keys(categorizedServices);
     setCategories(categories);
@@ -59,7 +60,7 @@ export function ServicesSection({ businessId }: { businessId: string }) {
 
   useEffect(() => {
     fetchBusinessServices();
-  }, []);
+  }, [businessId, locationId]);
 
   const appointmentTypes: AppointmentType[] = services
     ? Object.values(services).flat()
@@ -241,6 +242,7 @@ export function ServicesSection({ businessId }: { businessId: string }) {
           appoitmentTypesOptions={appoitmentTypesOptions}
           appointmentTypes={appointmentTypes}
           businessId={businessId}
+          locationId={locationId}
         />
       </Modal>
     </Card>

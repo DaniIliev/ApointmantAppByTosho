@@ -14,8 +14,10 @@ export const LEFT_NAV_CLOSED_WIDTH_CLASS = "ml-0 lg:ml-20";
 
 export default function ClientLayout({
   children,
+  hideLeftNav = false,
 }: Readonly<{
   children: React.ReactNode;
+  hideLeftNav?: boolean;
 }>) {
   const [isLeftNavOpen, setIsLeftNavOpen] = useState(false);
 
@@ -27,17 +29,19 @@ export default function ClientLayout({
   return (
     <div className="flex flex-col min-h-screen ">
       <div className="fixed top-0 left-0 right-0 z-50">
-        <TopNav onToggleLeftNav={toggleLeftNav} isLeftNavOpen={isLeftNavOpen} />
+        <TopNav onToggleLeftNav={toggleLeftNav} isLeftNavOpen={isLeftNavOpen} hideLeftNav={hideLeftNav} />
       </div>
       <div className="flex flex-1 pt-12.5 transition-all duration-300">
-        <LeftNav isOpen={isLeftNavOpen} />
+        {!hideLeftNav && <LeftNav isOpen={isLeftNavOpen} />}
 
         <main
           className={`
             flex-1 
             transition-all duration-300
             ${
-              isLeftNavOpen
+              hideLeftNav
+                ? "ml-0"
+                : isLeftNavOpen
                 ? LEFT_NAV_OPEN_WIDTH_CLASS
                 : LEFT_NAV_CLOSED_WIDTH_CLASS
             }
@@ -46,7 +50,7 @@ export default function ClientLayout({
         >
           {children}
         </main>
-        <RightNavigation />
+        {!hideLeftNav && <RightNavigation />}
       </div>
     </div>
   );

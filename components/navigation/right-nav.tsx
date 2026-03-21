@@ -25,7 +25,6 @@ function RightNavBubbles({ content }: { content: React.ReactNode }) {
 
   useEffect(() => {
     const handleResize = () => {
-      // Keep bubble within viewport
       const vh = window.innerHeight;
       setTop((prev) => Math.min(Math.max(prev, 64), vh - 64));
     };

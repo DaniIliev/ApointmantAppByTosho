@@ -572,14 +572,6 @@ export default function BusinessLandingPage() {
                 <span className="mr-2">{t("Join Us")}</span>
                 <ArrowRight className="h-5 w-5" />
               </Button>
-              {/* <Button
-                variant="outline"
-                size="lg"
-                className="text-base sm:text-lg px-7 py-6 bg-white/10 text-white border-primary/30 hover:bg-white/20 hover:scale-[1.02] transition-all backdrop-blur-md shadow-xl"
-              >
-                <PlayCircle className="h-5 w-5 mr-2" />
-                {t("Watch Demo")}
-              </Button> */}
             </div>
           </div>
         </div>

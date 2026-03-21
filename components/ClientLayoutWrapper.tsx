@@ -11,6 +11,7 @@ import GuestLayout from "./GuestLayout";
 import { Toaster } from "sonner";
 import { PaddingProvider } from "@/context/PaddingContext";
 import AutoCompletePastAppointments from "@/components/Global/AutoCompletePastAppointments";
+import { usePathname } from "next/navigation";
 
 export default function ClientLayoutWrapper({
   children,
@@ -35,13 +36,18 @@ export default function ClientLayoutWrapper({
     }
   }, []);
 
+  const pathname = usePathname();
+  const isOnboarding = pathname === "/onboarding";
+  const hasNoRole = !user?.role || !["personal", "business", "staff", "admin"].includes(user.role as any);
+  const hideLeftNav = isOnboarding || hasNoRole;
+
   return (
     <I18nextProvider i18n={i18n}>
       <PageTitleProvider>
         <PaddingProvider>
           <RightNavProvider>
             {user ? (
-              <ClientLayout>
+              <ClientLayout hideLeftNav={hideLeftNav}>
                 <Toaster />
                 <AutoCompletePastAppointments />
                 {children}

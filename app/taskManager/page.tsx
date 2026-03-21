@@ -80,6 +80,7 @@ import {
   getMockKanbanBoardById,
   getMockKanbanBoardsList,
 } from "@/components/InteractiveKanbanBoard/lib/mockData";
+import { Skeleton } from "@/components/ui/skeleton";
 
 const TaskManagerPageContent: React.FC = () => {
   const { t } = useTranslation();

@@ -1,26 +1,22 @@
-// components/customUIComponents/ScheduleModal.tsx
-
 import React, { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { Modal } from "@/components/customUIComponents/Modal";
-// import { LabeledInput } from "@/components/customUIComponents/LabeledInput";
 import { DateRangePicker } from "@/components/customUIComponents/DateRangePicker";
 import { TimeRangePicker } from "@/components/customUIComponents/TimeRangePicker";
-// import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
 import { Plus, Trash } from "lucide-react";
 import { Schedule, TimeRange } from "./page";
 import { CustomTooltip } from "@/components/customUIComponents/CustomTooltip";
+import { LabeledSelect } from "@/components/customUIComponents/LabeledSelect";
 
-// Използваме 'Partial<Schedule>' за да може 'schedule' да е null или да липсват полета при създаване
 type ScheduleModalProps = {
   isOpen: boolean;
   onOpenChange: (open: boolean) => void;
   onSave: (scheduleData: Schedule) => void;
-  schedule: Schedule | null; // За създаване: null. За редакция: текущият график.
+  schedule: Schedule | null;
+  locations: any[];
 };
 
-// Начално състояние за нов график
 const initialNewSchedule: Schedule = {
   _id: "",
   startDate: "",
@@ -38,6 +34,7 @@ const initialNewSchedule: Schedule = {
   break1: { start: null, end: null },
   break2: { start: null, end: null },
   break3: { start: null, end: null },
+  locationId: "",
 };
 
 // Функция за филтриране на празните почивки за показване
@@ -53,6 +50,7 @@ export const ScheduleModal = ({
   onOpenChange,
   onSave,
   schedule,
+  locations,
 }: ScheduleModalProps) => {
   const { t } = useTranslation();
   const [localSchedule, setLocalSchedule] =
@@ -249,7 +247,6 @@ export const ScheduleModal = ({
                 localSchedule.isDayOff[key]
                   ? "bg-primary text-white"
                   : "bg-transparent text-foreground hover:bg-primary/10",
-                4,
               ].join(" ")}
               onClick={() =>
                 setLocalSchedule((prev) => ({
@@ -265,6 +262,18 @@ export const ScheduleModal = ({
                 key.slice(2, 3)}
             </button>
           ))}
+        </div>
+
+        {/* Location Selection */}
+        <div className="pt-2">
+          <LabeledSelect<string>
+            id="locationId"
+            label={t("Location")}
+            value={localSchedule.locationId || ""}
+            onValueChange={(val) => setLocalSchedule(prev => ({ ...prev, locationId: val }))}
+            placeholder={t("Select a location")}
+            options={locations.map(l => ({ id: l._id, name: l.name }))}
+          />
         </div>
 
         {/* Action buttons */}

@@ -24,6 +24,7 @@ import {
   LogOut,
   LayoutList,
   ShieldCheck, // For QR Code page
+  MapPin,
 } from "lucide-react";
 
 import { useAuthContext } from "@/context/AuthContext";
@@ -217,6 +218,11 @@ export default function LeftNav({ isOpen }: LeftNavProps) {
                     href: "/business/business-information",
                     label: t("Business Info"),
                     icon: Info,
+                  },
+                  {
+                    href: "/business/locations",
+                    label: t("Locations"),
+                    icon: MapPin,
                   },
                   { href: "/schedule", label: t("Schedule"), icon: Clock },
                   {

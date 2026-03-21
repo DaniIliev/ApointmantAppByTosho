@@ -12,6 +12,7 @@ const callApi = async (
 
   if (token) {
     headers["x-auth-token"] = token;
+    headers["Authorization"] = `Bearer ${token}`
   }
 
   let body: BodyInit | null = null;

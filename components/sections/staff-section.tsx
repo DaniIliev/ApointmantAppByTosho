@@ -6,23 +6,24 @@ import { useEffect, useState } from "react";
 import Image from "next/image";
 import { useTranslation } from "react-i18next";
 
-export function StaffSection(businessId: { businessId: string }) {
+export function StaffSection({ businessId, locationId }: { businessId: string; locationId?: string }) {
   const [staff, setStaff] = useState<StaffMember[]>([]);
   const { t } = useTranslation();
   useEffect(() => {
     const fetchStaff = async () => {
       try {
-        const data = await callApi(
-          `/api/staff/staff-list?businessId=${businessId.businessId}`,
-          "GET"
-        );
+        let url = `/api/staff/staff-list?businessId=${businessId}`;
+        if (locationId) {
+          url += `&locationId=${locationId}`;
+        }
+        const data = await callApi(url, "GET");
         setStaff(data);
       } catch (error) {
         // Optionally handle error UI here
       }
     };
     fetchStaff();
-  }, []);
+  }, [businessId, locationId]);
   return (
     <Card className="shadow-lg">
       <CardHeader className="flex flex-row items-center pb-4 border-b">

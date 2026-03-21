@@ -24,6 +24,8 @@ import { useAuthContext } from "@/context/AuthContext";
 import callApi from "../Api/callApi";
 import { usePaletteTheme } from "@/components/ThemeProvider";
 
+import { Skeleton } from "@/components/ui/skeleton";
+
 // Дефиниране на наличните палитри
 const AVAILABLE_PALETTES = [
   { name: "Blue (Default)", value: "theme-blue", displayColor: "#3b61c0" },
@@ -242,8 +244,13 @@ export default function SettingsPage() {
 
   // Показваме loading, докато данните се зареждат ИЛИ докато mounted е false
   if (isLoading) {
-    // Можем да махнем !mounted от тук, за да покажем съдържанието, докато се монтира.
-    return <div className="p-8 text-center">{t("Loading settings...")}</div>;
+    return (
+      <div className="p-8 space-y-6">
+        <Skeleton className="h-48 w-full rounded-xl" />
+        <Skeleton className="h-48 w-full rounded-xl" />
+        <Skeleton className="h-48 w-full rounded-xl" />
+      </div>
+    );
   }
 
   // Добавяме проверка за mounted тук, за да избегнем неактивни контроли, когато nextTheme е undefined
@@ -428,6 +435,54 @@ export default function SettingsPage() {
             </div>
           </CardContent>
         </Card>
+
+        {/* Change Password Card - Hidden for social login users */}
+        {(!userData.authProvider || userData.authProvider === "local") && (
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-secondary text-2xl">
+                {t("Change Password")}
+              </CardTitle>
+              <CardDescription>
+                {t("Update your password to keep your account secure")}
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4 pt-4 pb-4">
+              <div className="grid gap-4 sm:grid-cols-2">
+                <LabeledInput
+                  id="currentPassword"
+                  label={t("Current Password")}
+                  type="password"
+                  placeholder={t("Enter current password")}
+                  value={""}
+                  onChange={() => {}}
+                />
+                <div />
+                <LabeledInput
+                  id="newPassword"
+                  label={t("New Password")}
+                  type="password"
+                  placeholder={t("Enter new password")}
+                  value={""}
+                  onChange={() => {}}
+                />
+                <LabeledInput
+                  id="confirmNewPassword"
+                  label={t("Confirm New Password")}
+                  type="password"
+                  placeholder={t("Confirm new password")}
+                  value={""}
+                  onChange={() => {}}
+                />
+              </div>
+              <div className="flex justify-start">
+                <Button variant="outline" className="mt-2 text-secondary">
+                  {t("Update Password")}
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        )}
 
         {isDirty && (
           <div className="flex justify-center gap-4">

@@ -12,6 +12,7 @@ export type User = {
   primaryColor?: string;
   theme?: "light" | "dark";
   mustChangePassword: boolean;
+  authProvider?: "local" | "google" | "facebook";
   // Subscription fields from database
   subscriptionPlan?: string; // "Starter_Monthly", "Professional_Annual", "Enterprise_Monthly", "none"
   subscriptionStatus?:
@@ -39,6 +40,7 @@ export type AuthContextType = {
     otp?: string;
   }) => Promise<void>;
   logout: () => void;
+  refreshToken: () => Promise<void>;
   setUser: React.Dispatch<React.SetStateAction<User | null>>;
   // updateUser: (updatedData: Partial<User>) => void;
 };

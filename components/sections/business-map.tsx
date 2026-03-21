@@ -6,10 +6,11 @@ import { MapPin, ArrowUpRight } from "lucide-react";
 import { Button } from "@/components/ui/button"; // Добавяме Button за линка
 import { BusinessData } from "@/app/business/[id]/page";
 import { useTranslation } from "react-i18next";
+import { Location } from "./locations-section";
 
 interface BusinessMapProps {
   business: BusinessData;
-  // isEditMode е премахнат
+  selectedLocation?: Location;
 }
 
 // Функцията генерира URL за вграден Google Map, който използва пълния адрес
@@ -32,16 +33,18 @@ const getGoogleMapLink = (address: string, city: string) => {
   return `https://www.google.com/maps/search/?api=1&query=${encodedAddress}`;
 };
 
-export function BusinessMap({ business }: BusinessMapProps) {
-  const fullAddress = `${business.address}, ${business.city}`;
+export function BusinessMap({ business, selectedLocation }: BusinessMapProps) {
+  const address = selectedLocation?.address || business.address;
+  const city = selectedLocation?.city || business.city;
+  const fullAddress = `${address}, ${city}`;
   const { t } = useTranslation();
 
   // const mapEmbedUrl = getGoogleMapEmbedUrl(
-  //   business.address,
-  //   business.city,
+  //   address,
+  //   city,
   //   business.state
   // );
-  const mapLink = getGoogleMapLink(business.address, business.city);
+  const mapLink = getGoogleMapLink(address, city);
 
   // Ако нямате API ключ или не искате да го използвате:
   // Използвайте този URL за iframe, той обикновено работи без ключ за основни нужди:
@@ -86,14 +89,14 @@ export function BusinessMap({ business }: BusinessMapProps) {
               allowFullScreen
               referrerPolicy="no-referrer-when-downgrade"
               src={fallbackEmbedUrl} // Използваме Fallback URL за по-голяма съвместимост без API ключ
-              aria-label={`Location of ${business.address}`}
+              aria-label={`Location of ${address}`}
               className="border-0"
             />
           </div>
 
           {/* Информация за адреса */}
           <div className="text-base space-y-1">
-            <p className="font-bold text-lg text-primary">{business.address}</p>
+            <p className="font-bold text-lg text-primary">{address}</p>
             <p className="text-muted-foreground">{fullAddress}</p>
           </div>
         </div>

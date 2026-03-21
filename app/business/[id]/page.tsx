@@ -11,6 +11,7 @@ import { usePageTitle } from "@/context/PageTitleContext";
 import { BusinessHeader } from "@/components/sections/business-header";
 import callApi from "@/app/Api/callApi";
 import Chatbot from "@/components/chatBot/Chatbot";
+import { LocationsSection, Location } from "@/components/sections/locations-section";
 
 export interface BusinessData {
   _id: string;
@@ -41,6 +42,8 @@ export interface BusinessData {
 function PublicBusinessPageContent() {
   const params = useParams();
   const [businessData, setBusinessData] = useState<BusinessData | null>(null);
+  const [locations, setLocations] = useState<Location[]>([]);
+  const [selectedLocationId, setSelectedLocationId] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const { t } = useTranslation();
@@ -64,11 +67,15 @@ function PublicBusinessPageContent() {
       setIsLoading(true);
       setError(null);
       try {
-        const backendData: BusinessData = await callApi(
-          `/api/business/${resolvedBusinessId}`,
-          "GET"
-        );
+        const [backendData, locationsData]: [BusinessData, Location[]] = await Promise.all([
+          callApi(`/api/business/${resolvedBusinessId}`, "GET"),
+          callApi(`/api/locations?businessId=${resolvedBusinessId}`, "GET")
+        ]);
         setBusinessData(backendData);
+        setLocations(locationsData);
+        if (locationsData.length > 0) {
+          setSelectedLocationId(locationsData[0]._id);
+        }
       } catch (e) {
         console.error("Failed to fetch business configuration:", e);
         setError(t("Failed to load business configuration."));
@@ -95,14 +102,29 @@ function PublicBusinessPageContent() {
     );
   }
 
+  const selectedLocation = locations.find(l => l._id === selectedLocationId) || locations[0];
+
   return (
     <div className="container mx-auto px-4 min-h-screen">
       <div className="space-y-10">
         <BusinessHeader business={businessData} />
-        <BusinessInfo business={businessData} />
-        <ServicesSection businessId={businessData._id} />
-        <StaffSection businessId={businessData._id} />
-        <BusinessMap business={businessData} />
+        <BusinessInfo business={businessData} selectedLocation={selectedLocation} />
+        {locations.length > 0 && (
+          <LocationsSection 
+            locations={locations} 
+            selectedLocationId={selectedLocationId}
+            onLocationSelect={setSelectedLocationId}
+          />
+        )}
+        <ServicesSection 
+          businessId={resolvedBusinessId} 
+          locationId={selectedLocationId || undefined} 
+        />
+        <StaffSection 
+          businessId={resolvedBusinessId} 
+          locationId={selectedLocationId || undefined} 
+        />
+        <BusinessMap business={businessData} selectedLocation={selectedLocation} />
       </div>
       <Chatbot businessId={businessData._id} />
     </div>

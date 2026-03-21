@@ -18,6 +18,9 @@ import { StaffViewModal } from "./StaffViewModal";
 import { StaffEditModal } from "./StaffEditModal";
 import { useAuthContext } from "@/context/AuthContext";
 
+import { Skeleton } from "@/components/ui/skeleton";
+import { LabeledSelect } from "@/components/customUIComponents/LabeledSelect";
+
 type AddStaffNavProps = {
   onOpenModal: () => void;
 };
@@ -43,11 +46,14 @@ function StaffPageContent() {
   const [isViewModalOpen, setIsViewModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [selectedStaff, setSelectedStaff] = useState<StaffMember | null>(null);
+  const [locations, setLocations] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   const [newStaffMember, setNewStaffMember] = useState({
     firstName: "",
     lastName: "",
     email: "",
     phone: "",
+    locationId: "",
   });
 
   useEffect(() => {
@@ -64,19 +70,25 @@ function StaffPageContent() {
   }, [setPageTitle, setExtraRightNavMenu, setIsRightNavVisible, t]);
 
   useEffect(() => {
-    const fetchStaff = async () => {
+    const loadData = async () => {
+      if (!user?.businessId) return;
+      setIsLoading(true);
       try {
-        const data = await callApi(
-          `/api/staff/staff-list?businessId=${user?.businessId}`,
-          "GET"
-        );
-        setStaff(data);
+        const [staffData, locationsData] = await Promise.all([
+          callApi(`/api/staff/staff-list?businessId=${user.businessId}`, "GET"),
+          callApi(`/api/locations?businessId=${user.businessId}`, "GET")
+        ]);
+        setStaff(staffData);
+        setLocations(locationsData);
       } catch (error) {
-        toast.error(t("Failed to load staff"));
+        toast.error(t("Failed to load staff data"));
+      } finally {
+        setIsLoading(false);
       }
     };
-    fetchStaff();
-  }, []);
+
+    loadData();
+  }, [user?.businessId, t]);
 
   // Open staff details modal
   const openStaffDetailsModal = (staffId: string) => {
@@ -140,6 +152,7 @@ function StaffPageContent() {
         lastName: "",
         email: "",
         phone: "",
+        locationId: "",
       });
     } catch (error) {
       toast.error(t("Failed to invite staff member"));
@@ -166,6 +179,14 @@ function StaffPageContent() {
       accessorKey: "phone",
       header: t("Phone"),
       cell: ({ row }) => <span>{row.original.phone}</span>,
+    },
+    {
+      accessorKey: "locationId",
+      header: t("Location"),
+      cell: ({ row }) => {
+        const location = locations.find(l => l._id === row.original.locationId);
+        return <span>{location ? location.name : "-"}</span>;
+      }
     },
     {
       accessorKey: "role",
@@ -197,6 +218,19 @@ function StaffPageContent() {
       enableHiding: false,
     },
   ];
+
+  if (isLoading) {
+    return (
+      <div className="p-4 space-y-4">
+        <Skeleton className="h-10 w-full" />
+        <Skeleton className="h-12 w-full" />
+        <Skeleton className="h-12 w-full" />
+        <Skeleton className="h-12 w-full" />
+        <Skeleton className="h-12 w-full" />
+        <Skeleton className="h-12 w-full" />
+      </div>
+    );
+  }
 
   return (
     <>
@@ -248,6 +282,15 @@ function StaffPageContent() {
             id="phone"
           />
 
+          <LabeledSelect<string>
+            id="locationId"
+            label={t("Location")}
+            value={newStaffMember.locationId}
+            onValueChange={(val) => setNewStaffMember({ ...newStaffMember, locationId: val })}
+            placeholder={t("Select a location")}
+            options={locations.map(l => ({ id: l._id, name: l.name }))}
+          />
+
           <div className="flex justify-end gap-2 pt-4">
             <Button variant="outline" onClick={() => setIsModalOpen(false)}>
               {t("Cancel")}
@@ -261,6 +304,7 @@ function StaffPageContent() {
         open={isViewModalOpen}
         onOpenChange={setIsViewModalOpen}
         staff={selectedStaff}
+        locations={locations}
       />
 
       <StaffEditModal
@@ -268,6 +312,7 @@ function StaffPageContent() {
         onOpenChange={setIsEditModalOpen}
         staff={selectedStaff}
         onStaffUpdated={handleStaffUpdated}
+        locations={locations}
       />
     </>
   );
