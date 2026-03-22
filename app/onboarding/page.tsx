@@ -180,6 +180,7 @@ export default function OnboardingPage() {
         return (
           <HoursSetup 
             locations={onboardingData.locations}
+            staff={onboardingData.staff}
             initialData={onboardingData.hours}
             onNext={(hours: LocationsOpeningHours) => {
               setOnboardingData(prev => ({ ...prev, hours }));
@@ -192,6 +193,7 @@ export default function OnboardingPage() {
         return (
           <ServicesSetup 
             locations={onboardingData.locations}
+            staff={onboardingData.staff}
             initialData={onboardingData.services}
             onFinish={() => {
               router.push("/pricing");

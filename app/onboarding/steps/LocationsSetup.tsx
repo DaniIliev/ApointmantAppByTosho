@@ -15,17 +15,19 @@ interface LocationsSetupProps {
   initialData?: Location[];
 }
 
+import { ImageUpload } from "@/components/customUIComponents/ImageUpload";
+
 export default function LocationsSetup({ onNext, onBack, initialData }: LocationsSetupProps) {
   const { t } = useTranslation();
   const [loading, setLoading] = useState(false);
   const [locations, setLocations] = useState<Location[]>(
     initialData && initialData.length > 0
       ? initialData
-      : [{ name: "", address: "", city: "", phone: "", country: "България", isDefault: true }]
+      : [{ name: "", address: "", city: "", phone: "", country: "България", isDefault: true, imageUrl: "" as any }]
   );
 
   const addLocation = () => {
-    setLocations([...locations, { name: "", address: "", city: "", phone: "", country: "България", isDefault: false }]);
+    setLocations([...locations, { name: "", address: "", city: "", phone: "", country: "България", isDefault: false, imageUrl: "" as any }]);
   };
 
   const removeLocation = (index: number) => {
@@ -34,7 +36,7 @@ export default function LocationsSetup({ onNext, onBack, initialData }: Location
     }
   };
 
-  const updateLocation = (index: number, field: keyof Location, value: string) => {
+  const updateLocation = (index: number, field: keyof Location, value: any) => {
     const newLocations = [...locations];
     newLocations[index] = { ...newLocations[index], [field]: value };
     setLocations(newLocations);
@@ -47,10 +49,11 @@ export default function LocationsSetup({ onNext, onBack, initialData }: Location
       // Save each location (POST for new, PUT for existing)
       const savedLocations = await Promise.all(
         locations.map(loc => {
-          if (loc._id) {
-            return callApi(`/api/locations/${loc._id}`, "PUT", loc);
-          }
-          return callApi("/api/locations", "POST", loc);
+          const method = loc._id ? "PUT" : "POST";
+          const endpoint = loc._id ? `/api/locations/${loc._id}` : "/api/locations";
+          const useMultipart = (loc.imageUrl as any) instanceof File;
+          
+          return callApi(endpoint, method, loc, useMultipart);
         })
       );
       onNext(savedLocations);
@@ -93,47 +96,57 @@ export default function LocationsSetup({ onNext, onBack, initialData }: Location
                 )}
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <LabeledInput
-                  id={`name-${index}`}
-                  label={t("Internal Name")}
-                  value={loc.name}
-                  onChange={(e) => updateLocation(index, "name", e.target.value)}
-                  placeholder={t("e.g. Downtown, Uptown")}
-                  required
-                />
-                <LabeledInput
-                  id={`phone-${index}`}
-                  label={t("Phone")}
-                  value={loc.phone || ""}
-                  onChange={(e) => updateLocation(index, "phone", e.target.value)}
-                  placeholder={t("Contact phone for this branch")}
-                  required
-                />
-                <LabeledInput
-                  id={`city-${index}`}
-                  label={t("City")}
-                  value={loc.city}
-                  onChange={(e) => updateLocation(index, "city", e.target.value)}
-                  placeholder={t("City")}
-                  required
-                />
-                <LabeledInput
-                  id={`postalCode-${index}`}
-                  label={t("Postal Code")}
-                  placeholder={t("12345")}
-                  value={loc.postalCode || ""}
-                  onChange={(e) => updateLocation(index, "postalCode", e.target.value)}
-                />
-                <div className="md:col-span-2">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div className="md:col-span-1">
+                  <ImageUpload
+                    label={t("Location Image")}
+                    value={loc.imageUrl}
+                    onChange={(file) => updateLocation(index, "imageUrl", file)}
+                    onRemove={() => updateLocation(index, "imageUrl", "")}
+                  />
+                </div>
+                <div className="md:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-4">
                   <LabeledInput
-                    id={`address-${index}`}
-                    label={t("Full Address")}
-                    value={loc.address}
-                    onChange={(e) => updateLocation(index, "address", e.target.value)}
-                    placeholder={t("Street, Number, etc.")}
+                    id={`name-${index}`}
+                    label={t("Internal Name")}
+                    value={loc.name}
+                    onChange={(e) => updateLocation(index, "name", e.target.value)}
+                    placeholder={t("e.g. Downtown, Uptown")}
                     required
                   />
+                  <LabeledInput
+                    id={`phone-${index}`}
+                    label={t("Phone")}
+                    value={loc.phone || ""}
+                    onChange={(e) => updateLocation(index, "phone", e.target.value)}
+                    placeholder={t("Contact phone for this branch")}
+                    required
+                  />
+                  <LabeledInput
+                    id={`city-${index}`}
+                    label={t("City")}
+                    value={loc.city}
+                    onChange={(e) => updateLocation(index, "city", e.target.value)}
+                    placeholder={t("City")}
+                    required
+                  />
+                  <LabeledInput
+                    id={`postalCode-${index}`}
+                    label={t("Postal Code")}
+                    placeholder={t("12345")}
+                    value={loc.postalCode || ""}
+                    onChange={(e) => updateLocation(index, "postalCode", e.target.value)}
+                  />
+                  <div className="md:col-span-2">
+                    <LabeledInput
+                      id={`address-${index}`}
+                      label={t("Full Address")}
+                      value={loc.address}
+                      onChange={(e) => updateLocation(index, "address", e.target.value)}
+                      placeholder={t("Street, Number, etc.")}
+                      required
+                    />
+                  </div>
                 </div>
               </div>
             </div>

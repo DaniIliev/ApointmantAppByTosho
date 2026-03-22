@@ -113,7 +113,7 @@ export interface Business {
 
 export interface Location {
   _id?: string;
-  imageUrl?: string;
+  imageUrl?: string | File | null;
   businessId?: string;
   name: string;
   address: string;
