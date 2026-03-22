@@ -32,19 +32,13 @@ export interface AppointmentFormData {
 }
 
 interface AppointmentFormProps {
-  // Данните за срещата (нови или съществуващи)
   appointmentData: AppointmentFormData;
-  // Функция за промяна на данните (setNewAppointment или setEditingAppointment)
   setAppointmentData: React.Dispatch<React.SetStateAction<AppointmentFormData>>;
   appointmentTypes: AppointmentType[] | null;
   appoitmentTypesOptions: SelectOptionsAppointmentType[];
-  // Обща функция за обработка (Create или Update)
   handleSubmit: (data: AppointmentFormData) => void;
-  // Нов проп за определяне на режима
   mode: "create" | "edit";
-  // Обща функция за затваряне на модала
   onClose: () => void;
-  // Идентификатор на бизнес за създаване на checkout сесия
   businessId?: string;
   locationId?: string;
 }

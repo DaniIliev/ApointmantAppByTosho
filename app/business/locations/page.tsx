@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Plus, MapPin, Phone, Clock, Pencil, Trash2 } from "lucide-react";
+import { Plus, MapPin, Phone, Clock, Pencil, Trash2, Upload } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { usePageTitle } from "@/context/PageTitleContext";
 import { useRightNav } from "@/context/RightNavContext";
@@ -15,14 +15,10 @@ import { toast } from "sonner";
 import ProtectedRoute from "@/components/guards/ProtectedRoute";
 import DeleteConfirmationDialog from "@/components/DeleteConfirmationDialog/DeleteConfirmationDialog";
 import { CustomTooltip } from "@/components/customUIComponents/CustomTooltip";
-
-interface Location {
-  _id: string;
-  name: string;
-  address: string;
-  city: string;
-  phone: string;
-}
+import { useRouter } from "next/navigation";
+import { LocationCard } from "@/components/business/LocationCard";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Location } from "@/Global/Types/types";
 
 const AddLocationNav = ({ onOpenModal }: { onOpenModal: () => void }) => {
   const { t } = useTranslation();
@@ -47,22 +43,36 @@ function LocationsPageContent() {
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [locationToDelete, setLocationToDelete] = useState<Location | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [isInitialLoading, setIsInitialLoading] = useState(true);
+  const router = useRouter();
 
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<{
+    name: string;
+    address: string;
+    city: string;
+    phone: string;
+    email: string;  
+    imageUrl: File | string | null;
+  }>({
     name: "",
     address: "",
     city: "",
     phone: "",
+    email: "",
+    imageUrl: null,
   });
 
-  const fetchLocations = async () => {
+  const fetchLocations = async (isInitial = false) => {
     if (!user?.businessId) return;
+    if (isInitial) setIsInitialLoading(true);
     try {
       const data = await callApi(`/api/locations?businessId=${user.businessId}`, "GET");
       setLocations(data);
     } catch (error) {
       console.error("Failed to fetch locations:", error);
       toast.error(t("Failed to load locations"));
+    } finally {
+      if (isInitial) setIsInitialLoading(false);
     }
   };
 
@@ -70,7 +80,7 @@ function LocationsPageContent() {
     setPageTitle(t("Manage Locations"));
     setExtraRightNavMenu(<AddLocationNav onOpenModal={() => openModal()} />);
     setIsRightNavVisible(true);
-    fetchLocations();
+    fetchLocations(true);
 
     return () => {
       setPageTitle(null);
@@ -87,6 +97,8 @@ function LocationsPageContent() {
         address: location.address,
         city: location.city,
         phone: location.phone,
+        imageUrl: location.imageUrl || "",
+        email: location.email || "",
       });
     } else {
       setEditingLocation(null);
@@ -95,6 +107,8 @@ function LocationsPageContent() {
         address: "",
         city: "",
         phone: "",
+        imageUrl: null,
+        email: "",
       });
     }
     setIsModalOpen(true);
@@ -107,7 +121,9 @@ function LocationsPageContent() {
     const endpoint = editingLocation ? `/api/locations/${editingLocation._id}` : "/api/locations";
 
     try {
-      await callApi(endpoint, method, { ...formData, businessId: user?.businessId });
+      const isFile = formData.imageUrl instanceof File;
+      const payload = { ...formData, businessId: user?.businessId };
+      await callApi(endpoint, method, payload, isFile);
       toast.success(editingLocation ? t("Location updated") : t("Location created"));
       fetchLocations();
       setIsModalOpen(false);
@@ -142,27 +158,20 @@ function LocationsPageContent() {
   return (
     <div className="space-y-6">
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {locations.length > 0 ? (
+        {isInitialLoading ? (
+          [1, 2, 3].map((i) => (
+            <Skeleton key={i} className="h-96 rounded-3xl w-full" />
+          ))
+        ) : locations.length > 0 ? (
           locations.map((loc) => (
-            <Card key={loc._id} className="bg-white dark:bg-gray-800 border-primary/10 shadow-lg hover:shadow-xl transition-shadow">
-              <CardHeader className="flex flex-row items-center justify-between pb-2">
-                <CardTitle className="text-xl font-bold text-primary">{loc.name}</CardTitle>
-                <div className="flex gap-1">
-                  <CustomTooltip onClick={() => openModal(loc)} tooltipText={t("Edit")} icon={<Pencil className="h-4 w-4" />} />
-                  <CustomTooltip onClick={() => handleDelete(loc)} tooltipText={t("Delete")} icon={<Trash2 className="h-4 w-4 text-red-500" />} />
-                </div>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                <div className="flex items-start gap-2 text-sm text-muted-foreground">
-                  <MapPin className="h-4 w-4 mt-1 text-primary" />
-                  <span>{loc.address}, {loc.city}</span>
-                </div>
-                <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                  <Phone className="h-4 w-4 text-primary" />
-                  <span>{loc.phone}</span>
-                </div>
-              </CardContent>
-            </Card>
+            <LocationCard
+              key={loc._id}
+              location={loc}
+              showActions
+              onEdit={() => openModal(loc)}
+              onDelete={() => handleDelete(loc)}
+              onClick={() => router.push(`/business/locations/${loc._id}`)}
+            />
           ))
         ) : (
           <div className="col-span-full text-center py-12 bg-white/50 dark:bg-gray-800/50 rounded-3xl border-2 border-dashed border-primary/20">
@@ -181,6 +190,36 @@ function LocationsPageContent() {
           <LabeledInput label={t("Address")} id="address" value={formData.address} onChange={(e) => setFormData({ ...formData, address: e.target.value })} required />
           <LabeledInput label={t("City")} id="city" value={formData.city} onChange={(e) => setFormData({ ...formData, city: e.target.value })} required />
           <LabeledInput label={t("Phone")} id="phone" value={formData.phone} onChange={(e) => setFormData({ ...formData, phone: e.target.value })} required />
+          <LabeledInput label={t("Email")} id="email" value={formData.email} onChange={(e) => setFormData({ ...formData, email: e.target.value })} required />
+
+          
+          <div className="space-y-2">
+            <label
+              htmlFor="image"
+              className="flex flex-col items-center justify-center h-24 border-2 border-dashed border-input rounded-xl cursor-pointer bg-input/20 hover:bg-input/40 transition-colors duration-300"
+            >
+              <Upload className="h-6 w-6 text-gray-500 mb-1" />
+              <span className="text-sm text-gray-600">
+                {formData.imageUrl instanceof File
+                  ? `1 file selected: ${formData.imageUrl.name}`
+                  : formData.imageUrl
+                  ? t("Image uploaded")
+                  : t("Click to upload or drag & drop")}
+              </span>
+              <input
+                id="image"
+                type="file"
+                onChange={(e) =>
+                  setFormData({
+                    ...formData,
+                    imageUrl: e.target.files?.[0] || null,
+                  })
+                }
+                className="sr-only"
+                accept="image/*"
+              />
+            </label>
+          </div>
           
           <div className="flex justify-end gap-2 pt-4">
             <Button variant="outline" onClick={() => setIsModalOpen(false)} disabled={isLoading}>

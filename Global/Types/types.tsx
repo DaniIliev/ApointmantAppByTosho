@@ -99,12 +99,21 @@ export interface Business {
   stripeConnectAccountId?: string;
   stripeConnectChargesEnabled?: boolean;
   stripeConnectDetailsSubmitted?: boolean;
+  email?: string;
+  phone?: string;
+  website?: string;
+  address?: string;
+  addressLine2?: string;
+  postalCode?: string;
+  city?: string;
+  country?: string;
   createdAt?: string;
   updatedAt?: string;
 }
 
 export interface Location {
   _id?: string;
+  imageUrl?: string;
   businessId?: string;
   name: string;
   address: string;
@@ -114,9 +123,19 @@ export interface Location {
   country?: string;
   phone: string;
   email?: string;
+  website?: string;
   isDefault?: boolean;
   createdAt?: string;
   updatedAt?: string;
+  schedule?: {
+    monday: string;
+    tuesday: string;
+    wednesday: string;
+    thursday: string;
+    friday: string;
+    saturday: string;
+    sunday: string;
+  } | string;
 }
 
 export interface Service {

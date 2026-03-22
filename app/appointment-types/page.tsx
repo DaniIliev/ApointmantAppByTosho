@@ -168,6 +168,7 @@ function AppointmentTypesPageContent() {
         staffs: JSON.stringify(formData.staffMembers),
         paymentOption: formData.paymentOption,
         locationId: formData.locationId,
+        businessId: user?.businessId,
       };
       console.log("payload", dataToSend);
       await callApi(endpoint, method, dataToSend, isFile);

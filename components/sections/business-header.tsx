@@ -1,62 +1,31 @@
 "use client";
 import { Badge } from "@/components/ui/badge";
 import {
-  Star,
-  MapPin,
   Phone,
   Globe,
   Mail,
-  ArrowLeft,
-  Clock,
-  CalendarDays,
-} from "lucide-react"; // Добавяме Clock и CalendarDays
-import { CustomTooltip } from "../customUIComponents/CustomTooltip";
-// Може да ви трябват и компоненти като DropdownMenu, Popover или Dialog
-// import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from "@/components/ui/dropdown-menu";
-// import { Button } from "@/components/ui/button"; // За бутона за работно време
-import { useRouter } from "next/navigation";
+  Info,
+  MapPin,
+} from "lucide-react"
 import { useTranslation } from "react-i18next";
-import { BusinessData } from "@/app/business/[id]/page";
-import { isBusinessOpenNow } from "@/Global/Utils/commonFn";
+import { Business } from "@/Global/Types/types";
+import { Card, CardHeader, CardTitle } from "../ui/card";
 
 interface BusinessHeaderProps {
-  business: BusinessData;
+  business: Business;
 }
 export function BusinessHeader({ business }: BusinessHeaderProps) {
-  const router = useRouter();
   const { t } = useTranslation();
-  const now = new Date();
-  const dayIndex = now.getDay();
-  const days: string[] = [
-    t("Sunday"),
-    t("Monday"),
-    t("Tuesday"),
-    t("Wednesday"),
-    t("Thursday"),
-    t("Friday"),
-    t("Saturday"),
-  ];
-  const todayName = days[dayIndex];
 
-  const isOpen = isBusinessOpenNow(business.schedule);
-  const isClosed = !isOpen;
-  // Generic fallback for missing values
-  const displayValue = (val?: string | null) => {
-    if (!val || val.toString().trim() === "") return "N/A";
-    return val;
-  };
-  // Fallback for schedule (keep existing monday reference with N/A safety)
-  const todaySchedule = business.schedule?.monday || "N/A";
   return (
-    <div className="relative bg-card border-b border-border shadow-md">
-      <div className="absolute top-4 right-4 z-10  hidden md:block">
-        <CustomTooltip
-          onClick={() => router.back()}
-          tooltipText={t("Back")}
-          icon={<ArrowLeft className="hover:text-primary h-6 w-6" />} // По-визуален бутон
-        />
-      </div>
-      <div className="container mx-auto px-4 py-10 lg:py-16">
+    <Card className="shadow-lg">
+      <CardHeader className="flex flex-row items-center border-b">
+        <Info className="h-6 w-6 text-primary mr-2" />
+        <CardTitle className="font-bold text-2xl font-sans text-primary">
+          {t("Business Information")}
+        </CardTitle>
+      </CardHeader>
+      <div className="container mx-auto px-4 py-6 lg:py-6">
         <div className="flex flex-col md:grid md:grid-cols-12 gap-8">
           <div className=" items-center md:col-span-5 relative h-64 md:h-80 lg:h-96 rounded-xl overflow-hidden shadow-lg">
             <img
@@ -74,97 +43,50 @@ export function BusinessHeader({ business }: BusinessHeaderProps) {
               {business.businessName}
             </h1>
 
-            {/* Contacts and Location - Стилизираме малко по-добре */}
-            <div className="space-y-4 text-base text-muted-foreground">
-              {/* Работно време - Новото добавяне */}
-              <div className="flex flex-col gap-2 font-semibold">
-                <div className="flex items-center gap-2">
-                  <Clock
-                    className="h-5 w-5 flex-shrink-0"
-                    style={{
-                      color: isClosed
-                        ? "hsl(0, 80%, 50%)"
-                        : "hsl(142, 71%, 45%)",
-                    }}
-                  />
-                  <span
-                    className={isClosed ? "text-red-500" : "text-green-600"}
-                  >
-                    {isClosed ? t("CLOSED") : t("OPEN")} {t("NOW")}
-                  </span>
+            <div className="flex flex-wrap gap-4 mb-6">
+              {business.phone && (
+                <div className="flex items-center gap-2 text-sm text-muted-foreground bg-muted/50 px-3 py-1.5 rounded-full border border-border/50">
+                  <Phone className="h-4 w-4 text-primary" />
+                  <span>{business.phone}</span>
                 </div>
-                <div className="flex items-center gap-2">
-                  <CalendarDays className="h-5 w-5 flex-shrink-0 text-primary" />
-                  <span className="hover:text-primary transition-colors font-normal text-foreground">
-                    {todayName}: ({business.schedule.monday})
-                  </span>
+              )}
+              {business.email && (
+                <div className="flex items-center gap-2 text-sm text-muted-foreground bg-muted/50 px-3 py-1.5 rounded-full border border-border/50">
+                  <Mail className="h-4 w-4 text-primary" />
+                  <span>{business.email}</span>
                 </div>
-              </div>
-
-              {/* Адрес */}
-              <div className="flex items-start gap-2">
-                <MapPin className="h-5 w-5 mt-0.5 flex-shrink-0 text-primary" />
-                <span className="hover:text-primary transition-colors cursor-pointer">
-                  {business.address || business.city
-                    ? `${displayValue(business.address)}, ${displayValue(
-                        business.city
-                      )}`
-                    : displayValue("")}
-                </span>
-              </div>
-
-              {/* Телефон */}
-              <div className="flex items-center gap-2">
-                <Phone className="h-5 w-5 flex-shrink-0 text-primary" />
-                {business.phone ? (
-                  <a
-                    href={`tel:${business.phone}`}
-                    className="hover:text-primary font-medium transition-colors"
-                  >
-                    {business.phone}
-                  </a>
-                ) : (
-                  <span className="text-muted-foreground">
-                    {displayValue(business.phone)}
-                  </span>
-                )}
-              </div>
-
-              {/* Имейл */}
-              <div className="flex items-center gap-2">
-                <Mail className="h-5 w-5 flex-shrink-0 text-primary" />
-                {business.email ? (
-                  <a
-                    href={`mailto:${business.email}`}
-                    className="hover:text-primary transition-colors"
-                  >
-                    {business.email}
-                  </a>
-                ) : (
-                  <span className="text-muted-foreground">
-                    {displayValue(business.email)}
-                  </span>
-                )}
-              </div>
-
-              {/* Уебсайт */}
+              )}
               {business.website && (
-                <div className="flex items-center gap-2">
-                  <Globe className="h-5 w-5 flex-shrink-0 text-primary" />
-                  <a
-                    href={`https://${business.website}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="hover:text-primary transition-colors"
-                  >
-                    {business.website}
+                <div className="flex items-center gap-2 text-sm text-muted-foreground bg-muted/50 px-3 py-1.5 rounded-full border border-border/50">
+                  <Globe className="h-4 w-4 text-primary" />
+                  <a href={business.website.startsWith('http') ? business.website : `https://${business.website}`} target="_blank" rel="noopener noreferrer" className="hover:text-primary transition-colors">
+                    {business.website.replace(/^https?:\/\//, '')}
                   </a>
                 </div>
               )}
+              {business.address && (
+                <div className="flex items-center gap-2 text-sm text-muted-foreground bg-muted/50 px-3 py-1.5 rounded-full border border-border/50">
+                  <MapPin className="h-4 w-4 text-primary" />
+                  <span>{business.address}, {business.city}</span>
+                </div>
+              )}
             </div>
+
+            {/* About Us Section */}
+            {business.aboutUs && (
+              <div className="mt-8 pt-6 border-t border-border/50">
+                <h3 className="text-lg font-semibold text-foreground mb-3 flex items-center gap-2">
+                  <Info className="h-5 w-5 text-primary" />
+                  {t("About us")}
+                </h3>
+                <p className="text-muted-foreground whitespace-pre-wrap text-[15px] leading-relaxed">
+                  {business.aboutUs}
+                </p>
+              </div>
+            )}
           </div>
         </div>
       </div>
-    </div>
+    </Card>
   );
 }

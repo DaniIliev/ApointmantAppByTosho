@@ -27,7 +27,7 @@ export default function ClientLayout({
   const { removePadding } = usePaddingControl();
 
   return (
-    <div className="flex flex-col min-h-screen ">
+    <div className="flex flex-col min-h-screen py-6">
       <div className="fixed top-0 left-0 right-0 z-50">
         <TopNav onToggleLeftNav={toggleLeftNav} isLeftNavOpen={isLeftNavOpen} hideLeftNav={hideLeftNav} />
       </div>

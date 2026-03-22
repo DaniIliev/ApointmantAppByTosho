@@ -4,15 +4,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { MapPin, Phone, Clock } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { cn } from "@/lib/utils";
-
-export interface Location {
-  _id: string;
-  name: string;
-  address: string;
-  city: string;
-  phone: string;
-  openingHours: string;
-}
+import { Location } from "@/Global/Types/types";
+import { LocationCard } from "@/components/business/LocationCard";
 
 interface LocationsSectionProps {
   locations: Location[];
@@ -42,43 +35,14 @@ export function LocationsSection({
       </CardHeader>
       <CardContent className="pt-6 pb-6">
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {locations.map((loc) => {
-            const isSelected = selectedLocationId === loc._id;
-            return (
-              <div
-                key={loc._id}
-                onClick={() => onLocationSelect(loc._id)}
-                className={cn(
-                  "flex flex-col p-6 rounded-xl border cursor-pointer transition-all duration-300 transform hover:scale-[1.02]",
-                  isSelected
-                    ? "border-primary bg-primary/5 shadow-md ring-2 ring-primary/20"
-                    : "border-border bg-white/80 dark:bg-slate-900/60 hover:shadow-lg hover:border-primary/50"
-                )}
-              >
-                <div className="flex justify-between items-start mb-3">
-                  <h3 className="font-bold text-lg text-text-primary capitalize">
-                    {loc.name}
-                  </h3>
-                  {isSelected && (
-                    <span className="bg-primary text-white text-[10px] uppercase font-bold px-2 py-0.5 rounded-full">
-                      {t("Selected")}
-                    </span>
-                  )}
-                </div>
-                
-                <div className="space-y-2 text-sm text-muted-foreground">
-                  <div className="flex items-start gap-2">
-                    <MapPin className="h-4 w-4 mt-0.5 text-primary/70 shrink-0" />
-                    <span>{loc.address}, {loc.city}</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Phone className="h-4 w-4 text-primary/70 shrink-0" />
-                    <span>{loc.phone}</span>
-                  </div>
-                </div>
-              </div>
-            );
-          })}
+          {locations.map((loc) => (
+            <LocationCard
+              key={loc._id}
+              location={loc}
+              isSelected={selectedLocationId === loc._id}
+              onClick={() => onLocationSelect(loc._id || "")}
+            />
+          ))}
         </div>
       </CardContent>
     </Card>
