@@ -18,7 +18,6 @@ import AppointmentForm, {
 import { useAuthContext } from "@/context/AuthContext";
 import { toast } from "sonner";
 
-// Групиране на услугите по категория
 const groupServicesByCategory = (services: AppointmentType[]) => {
   return services.reduce((acc, service) => {
     const category = service.category;
@@ -28,7 +27,7 @@ const groupServicesByCategory = (services: AppointmentType[]) => {
   }, {} as Record<string, AppointmentType[]>);
 };
 
-export function ServicesSection({ businessId }: { businessId: string }) {
+export function ServicesSection({ businessId, locationId }: { businessId: string; locationId?: string }) {
   const { t } = useTranslation();
   const [services, setServices] = useState<Record<string, AppointmentType[]>>();
   const [categories, setCategories] = useState<string[]>([]);
@@ -47,10 +46,11 @@ export function ServicesSection({ businessId }: { businessId: string }) {
   });
 
   const fetchBusinessServices = async () => {
-    const result = await callApi(
-      `/api/service?businessId=${businessId}`,
-      "GET"
-    );
+    let url = `/api/service?businessId=${businessId}`;
+    if (locationId) {
+      url += `&locationId=${locationId}`;
+    }
+    const result = await callApi(url, "GET");
     const categorizedServices = groupServicesByCategory(result);
     const categories = Object.keys(categorizedServices);
     setCategories(categories);
@@ -59,7 +59,7 @@ export function ServicesSection({ businessId }: { businessId: string }) {
 
   useEffect(() => {
     fetchBusinessServices();
-  }, []);
+  }, [businessId, locationId]);
 
   const appointmentTypes: AppointmentType[] = services
     ? Object.values(services).flat()
@@ -132,11 +132,11 @@ export function ServicesSection({ businessId }: { businessId: string }) {
                     >
                       <div className="flex-1 w-full flex items-start gap-3 md:gap-4">
                         <div className="flex-shrink-0 w-16 h-16 rounded-full overflow-hidden border-2 border-primary/20 shadow-md">
-                          <img
-                            src={service.imageUrl || "/default-service.png"}
-                            alt={service.name}
+                        <img
+                          src={service.imageUrl || "/default-service.png"}
+                          alt={service.name}
                             className="w-full h-full object-cover"
-                          />
+                        />
                         </div>
 
                         <div className="min-w-0">
@@ -156,24 +156,24 @@ export function ServicesSection({ businessId }: { businessId: string }) {
                               <Euro className="h-4 w-4" />
                               <span>{formatPriceEUR(service.price)}</span>
                             </div>
-                            {service.staffs && service.staffs.length > 0 && (
+                          {service.staffs && service.staffs.length > 0 && (
                               <>
                                 {/* Mobile: left-aligned avatar group with initials only */}
                                 <div className="flex items-center justify-start gap-2 w-full md:hidden">
                                   <span className="text-sm text-muted-foreground mr-1">
                                     {t("Performed by")}:
                                   </span>
-                                  <div className="flex -space-x-2">
-                                    {service.staffs.map((staff) => (
-                                      <Avatar
-                                        key={staff._id}
+                              <div className="flex -space-x-2">
+                                {service.staffs.map((staff) => (
+                                  <Avatar
+                                    key={staff._id}
                                         className="h-7 w-7 ring-2 ring-background border border-primary/40"
-                                      >
-                                        <AvatarFallback className="bg-primary text-white text-[10px] font-semibold">
-                                          {getInitials(staff.name)}
-                                        </AvatarFallback>
-                                      </Avatar>
-                                    ))}
+                                  >
+                                    <AvatarFallback className="bg-primary text-white text-[10px] font-semibold">
+                                      {getInitials(staff.name)}
+                                    </AvatarFallback>
+                                  </Avatar>
+                                ))}
                                   </div>
                                 </div>
 
@@ -199,15 +199,15 @@ export function ServicesSection({ businessId }: { businessId: string }) {
                                       </Avatar>
                                       <span className="text-sm font-medium text-foreground group-hover:text-primary transition-colors">
                                         {staff.name}
-                                      </span>
-                                    </div>
+                                </span>
+                              </div>
                                   ))}
-                                </div>
+                            </div>
                               </>
-                            )}
+                          )}
                           </div>
                         </div>
-                      </div>
+                        </div>
 
                       <div className="flex flex-col justify-center items-stretch md:items-center md:flex-row gap-2 flex-shrink-0 w-full md:w-auto">
                         <Button
@@ -241,6 +241,7 @@ export function ServicesSection({ businessId }: { businessId: string }) {
           appoitmentTypesOptions={appoitmentTypesOptions}
           appointmentTypes={appointmentTypes}
           businessId={businessId}
+          locationId={locationId}
         />
       </Modal>
     </Card>

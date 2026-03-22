@@ -1,50 +1,28 @@
-// components/sections/business-map.tsx (ФИНАЛНА ВЕРСИЯ - БЕЗ EDIT MODE С GOOGLE MAPS)
 "use client";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { MapPin, ArrowUpRight } from "lucide-react";
-import { Button } from "@/components/ui/button"; // Добавяме Button за линка
-import { BusinessData } from "@/app/business/[id]/page";
+import { Button } from "@/components/ui/button";
 import { useTranslation } from "react-i18next";
+import { Location } from "@/Global/Types/types";
 
 interface BusinessMapProps {
-  business: BusinessData;
-  // isEditMode е премахнат
+  selectedLocation: Location;
 }
-
-// Функцията генерира URL за вграден Google Map, който използва пълния адрес
-const getGoogleMapEmbedUrl = (address: string, city: string, state: string) => {
-  const fullAddress = `${address}, ${city}, ${state}`;
-  // Кодираме адреса за URL
-  const encodedAddress = encodeURIComponent(fullAddress);
-
-  // Използвайте своя API ключ тук, ако искате да активирате картата!
-  const apiKey = "YOUR_GOOGLE_MAPS_API_KEY";
-
-  // URL за вградена карта (iframe)
-  return `https://www.google.com/maps/embed/v1/place?key=${apiKey}&q=${encodedAddress}`;
-};
-
-// Функцията генерира директен линк към Google Maps за навигация
 const getGoogleMapLink = (address: string, city: string) => {
   const fullAddress = `${address}, ${city}`;
   const encodedAddress = encodeURIComponent(fullAddress);
   return `https://www.google.com/maps/search/?api=1&query=${encodedAddress}`;
 };
 
-export function BusinessMap({ business }: BusinessMapProps) {
-  const fullAddress = `${business.address}, ${business.city}`;
+export function BusinessMap({ selectedLocation }: BusinessMapProps) {
+  const address = selectedLocation?.address;
+  const city = selectedLocation?.city;
+  const fullAddress = `${address}, ${city}`;
   const { t } = useTranslation();
 
-  // const mapEmbedUrl = getGoogleMapEmbedUrl(
-  //   business.address,
-  //   business.city,
-  //   business.state
-  // );
-  const mapLink = getGoogleMapLink(business.address, business.city);
+  const mapLink = getGoogleMapLink(address, city);
 
-  // Ако нямате API ключ или не искате да го използвате:
-  // Използвайте този URL за iframe, той обикновено работи без ключ за основни нужди:
   const fallbackEmbedUrl = `https://maps.google.com/maps?q=${encodeURIComponent(
     fullAddress
   )}&t=&z=14&ie=UTF8&iwloc=&output=embed`;
@@ -86,15 +64,9 @@ export function BusinessMap({ business }: BusinessMapProps) {
               allowFullScreen
               referrerPolicy="no-referrer-when-downgrade"
               src={fallbackEmbedUrl} // Използваме Fallback URL за по-голяма съвместимост без API ключ
-              aria-label={`Location of ${business.address}`}
+              aria-label={`Location of ${address}`}
               className="border-0"
             />
-          </div>
-
-          {/* Информация за адреса */}
-          <div className="text-base space-y-1">
-            <p className="font-bold text-lg text-primary">{business.address}</p>
-            <p className="text-muted-foreground">{fullAddress}</p>
           </div>
         </div>
       </CardContent>
@@ -102,79 +74,3 @@ export function BusinessMap({ business }: BusinessMapProps) {
   );
 }
 
-// "use client";
-
-// import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-// import { MapPin } from "lucide-react";
-// import { Input } from "../ui/input";
-
-// interface BusinessMapProps {
-//   business: {
-//     name: string;
-//     address: string;
-//     city: string;
-//     state: string;
-//     coordinates: {
-//       lat: number;
-//       lng: number;
-//     };
-//   };
-//   isEditMode: boolean;
-// }
-
-// export function BusinessMap({ business, isEditMode }: BusinessMapProps) {
-//   const mapUrl = `https://api.mapbox.com/styles/v1/mapbox/streets-v12/static/pin-s-l+5B4FFF(${business.coordinates.lng},${business.coordinates.lat})/${business.coordinates.lng},${business.coordinates.lat},14,0/800x400@2x?access_token=pk.eyJ1IjoibWFwYm94IiwiYSI6ImNpejY4NXVycTA2emYycXBndHRqcmZ3N3gifQ.rJcFIG214AriISLbB6B5aw`;
-
-//   return (
-//     <Card>
-//       {/* ... CardHeader */}
-//       <CardContent>
-//         <div className="space-y-4">
-//           {/* Map Image/Interactive Map */}
-//           <div className="relative w-full h-64 md:h-96 rounded-lg overflow-hidden border border-border">
-//             {/* В Edit Mode, тук може да има интерактивна Mapbox/Google Maps карта с плъзгащ се маркер */}
-//             <img
-//               src={mapUrl || "/placeholder.svg"}
-//               alt={`Map showing ${business.name} location`}
-//               className="w-full h-full object-cover"
-//             />
-//           </div>
-
-//           <div className="text-sm space-y-2">
-//             <p className="font-semibold mb-1 font-sans">{business.name}</p>
-//             {isEditMode ? (
-//               <>
-//                 <Input
-//                   type="text"
-//                   defaultValue={business.address}
-//                   placeholder="Address"
-//                 />
-//                 <div className="flex gap-2">
-//                   <Input
-//                     type="text"
-//                     defaultValue={business.city}
-//                     placeholder="City"
-//                   />
-//                   <Input
-//                     type="text"
-//                     defaultValue={business.state}
-//                     placeholder="State"
-//                     className="w-1/3"
-//                   />
-//                 </div>
-//                 <p className="text-xs text-muted-foreground pt-2">
-//                   Coordinates: {business.coordinates.lat},{" "}
-//                   {business.coordinates.lng}
-//                 </p>
-//               </>
-//             ) : (
-//               <p className="text-muted-foreground">
-//                 {business.address}, {business.city}, {business.state}
-//               </p>
-//             )}
-//           </div>
-//         </div>
-//       </CardContent>
-//     </Card>
-//   );
-// }

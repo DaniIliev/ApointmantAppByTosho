@@ -19,6 +19,9 @@ import { Checkbox } from "@/components/ui/checkbox";
 import callApi from "../Api/callApi";
 import { jwtDecode } from "jwt-decode";
 import { ScheduleModal } from "./ScheduleModal";
+import { LabeledSelect } from "@/components/customUIComponents/LabeledSelect";
+
+import { Skeleton } from "@/components/ui/skeleton";
 
 // Types
 export type TimeRange = {
@@ -43,6 +46,7 @@ export type Schedule = {
   break1: TimeRange;
   break2: TimeRange;
   break3: TimeRange;
+  locationId?: string;
 };
 
 function StaffSchedulePageContent() {
@@ -71,7 +75,10 @@ function StaffSchedulePageContent() {
   const [schedules, setSchedules] = useState<Schedule[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isApplyToAllModalOpen, setIsApplyToAllModalOpen] = useState(false);
+  const [selectedLocationId, setSelectedLocationId] = useState<string>("");
+  const [locations, setLocations] = useState<any[]>([]);
   const [scheduleToEdit, setScheduleToEdit] = useState<Schedule | null>(null); // Ново състояние за редактиране
+  const [isPageLoading, setIsPageLoading] = useState(true);
 
   const router = useRouter();
 
@@ -98,14 +105,40 @@ function StaffSchedulePageContent() {
   useEffect(() => {
     const fetchSchedules = async () => {
       try {
-        const data = await callApi("/api/staff-schedules", "GET");
+        let url = "/api/staff-schedules";
+        if (selectedLocationId) {
+          url += `?locationId=${selectedLocationId}`;
+        }
+        const data = await callApi(url, "GET");
         setSchedules(data);
       } catch (error) {
         toast.error(t("Failed to load schedules."));
       }
     };
-    fetchSchedules();
-  }, []);
+
+    const fetchLocations = async () => {
+      const storedToken = localStorage.getItem("token");
+      if (!storedToken) return;
+      try {
+        const decodedUser = jwtDecode<any>(storedToken);
+        const data = await callApi(`/api/locations?businessId=${decodedUser.businessId}`, "GET");
+        setLocations(data);
+      } catch (error) {
+        console.error("Failed to fetch locations", error);
+      }
+    };
+
+    const loadData = async () => {
+      setIsPageLoading(true);
+      try {
+        await Promise.all([fetchSchedules(), fetchLocations()]);
+      } finally {
+        setIsPageLoading(false);
+      }
+    };
+
+    loadData();
+  }, [selectedLocationId, t]);
 
   const handleSave = async (updatedData: Schedule[]) => {
     try {
@@ -552,8 +585,36 @@ function StaffSchedulePageContent() {
     },
   ];
 
+  if (isPageLoading) {
+    return (
+      <div className="p-6 space-y-6">
+        <Skeleton className="h-10 w-48 mb-6" />
+        <div className="space-y-4">
+          <Skeleton className="h-12 w-full" />
+          <Skeleton className="h-16 w-full" />
+          <Skeleton className="h-16 w-full" />
+          <Skeleton className="h-16 w-full" />
+          <Skeleton className="h-16 w-full" />
+        </div>
+      </div>
+    );
+  }
+
   return (
     <>
+      <div className="mb-6 max-w-xs">
+        <LabeledSelect<string>
+          id="filterLocation"
+          label={t("Filter by Location")}
+          value={selectedLocationId}
+          onValueChange={setSelectedLocationId}
+          placeholder={t("All Locations")}
+          options={[
+            { id: "", name: t("All Locations") },
+            ...locations.map(l => ({ id: l._id, name: l.name }))
+          ]}
+        />
+      </div>
       <GenericTable
         data={schedules}
         columns={columns}
@@ -566,6 +627,7 @@ function StaffSchedulePageContent() {
         onOpenChange={setIsModalOpen}
         onSave={handleCreateOrEdit}
         schedule={scheduleToEdit}
+        locations={locations}
       />
 
       <Modal

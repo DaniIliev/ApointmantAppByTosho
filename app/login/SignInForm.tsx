@@ -193,6 +193,60 @@ export function SignInForm({ onSuccess }: SignInFormProps) {
                 {t("Create one here")}
               </a>
             </div>
+
+            <div className="relative my-6">
+              <div className="absolute inset-0 flex items-center">
+                <span className="w-full border-t border-muted/50"></span>
+              </div>
+              <div className="relative flex justify-center text-xs uppercase">
+                <span className="bg-white dark:bg-gray-900 px-2 text-muted-foreground">
+                  {t("Or continue with")}
+                </span>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <Button
+                type="button"
+                variant="outline"
+                className="w-full flex items-center justify-center gap-2 py-5 rounded-2xl border-primary/20 hover:bg-primary/5"
+                onClick={() => {
+                  window.location.href = `${
+                    process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080"
+                  }/api/auth/google`;
+                }}
+              >
+                <Image
+                  src="/google.svg"
+                  alt="Google"
+                  width={20}
+                  height={20}
+                  className="w-5 h-5"
+                />
+                <span className="font-semibold text-xs md:text-sm">Google</span>
+              </Button>
+              <Button
+                type="button"
+                variant="outline"
+                className="w-full flex items-center justify-center gap-2 py-5 rounded-2xl border-primary/20 hover:bg-primary/5"
+                onClick={() => {
+                  window.location.href = `${
+                    process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080"
+                  }/api/auth/facebook`;
+                }}
+              >
+                <Image
+                  src="/facebook.svg"
+                  alt="Facebook"
+                  width={20}
+                  height={20}
+                  className="w-5 h-5"
+                />
+                <span className="font-semibold text-xs md:text-sm">
+                  Facebook
+                </span>
+              </Button>
+            </div>
           </form>
         </div>
       </div>

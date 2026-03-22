@@ -2,46 +2,22 @@
 
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
-import { BusinessInfo } from "@/components/sections/business-info";
-import { ServicesSection } from "@/components/sections/services-section";
-import { StaffSection } from "@/components/sections/staff-section";
-import { BusinessMap } from "@/components/sections/business-map";
 import { useTranslation } from "react-i18next";
 import { usePageTitle } from "@/context/PageTitleContext";
 import { BusinessHeader } from "@/components/sections/business-header";
-import callApi from "@/app/Api/callApi";
 import Chatbot from "@/components/chatBot/Chatbot";
+import callApi from "@/app/Api/callApi";
+import { useRouter } from "next/navigation";
+import { LocationsSection } from "@/components/sections/locations-section";
+import { Business, Location } from "@/Global/Types/types";
 
-export interface BusinessData {
-  _id: string;
-  owner: string;
-  aboutUs: string;
-  businessName: string;
-  phone: string;
-  qrCodeUrl: string;
-  address: string;
-  addressLine2: string;
-  businessImageUrl: string;
-  category: string;
-  city: string;
-  country: string;
-  email: string;
-  postalCode: string;
-  website: string;
-  schedule: {
-    monday: string;
-    tuesday: string;
-    wednesday: string;
-    thursday: string;
-    friday: string;
-    saturday: string;
-    sunday: string;
-  };
-}
 function PublicBusinessPageContent() {
   const params = useParams();
-  const [businessData, setBusinessData] = useState<BusinessData | null>(null);
+  const [businessData, setBusinessData] = useState<Business | null>(null);
+  const [locations, setLocations] = useState<Location[]>([]);
+  const [selectedLocationId, setSelectedLocationId] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const router = useRouter();
   const [error, setError] = useState<string | null>(null);
   const { t } = useTranslation();
   const { setPageTitle } = usePageTitle();
@@ -64,11 +40,15 @@ function PublicBusinessPageContent() {
       setIsLoading(true);
       setError(null);
       try {
-        const backendData: BusinessData = await callApi(
-          `/api/business/${resolvedBusinessId}`,
-          "GET"
-        );
+        const [backendData, locationsData]: [Business, Location[]] = await Promise.all([
+          callApi(`/api/business/${resolvedBusinessId}`, "GET"),
+          callApi(`/api/locations?businessId=${resolvedBusinessId}`, "GET")
+        ]);
         setBusinessData(backendData);
+        setLocations(locationsData);
+        if (locationsData.length > 0) {
+          setSelectedLocationId(locationsData[0]?._id || "");
+        }
       } catch (e) {
         console.error("Failed to fetch business configuration:", e);
         setError(t("Failed to load business configuration."));
@@ -95,14 +75,22 @@ function PublicBusinessPageContent() {
     );
   }
 
+  const selectedLocation = locations.find(l => l._id === selectedLocationId) || locations[0];
+
   return (
-    <div className="container mx-auto px-4 min-h-screen">
+    <div >
       <div className="space-y-10">
         <BusinessHeader business={businessData} />
-        <BusinessInfo business={businessData} />
-        <ServicesSection businessId={businessData._id} />
-        <StaffSection businessId={businessData._id} />
-        <BusinessMap business={businessData} />
+        {locations.length > 0 && (
+          <LocationsSection 
+            locations={locations} 
+            selectedLocationId={selectedLocationId}
+            onLocationSelect={(id) => {
+              router.push(`/business/${resolvedBusinessId}/location/${id}`);
+            }}
+          />
+        )}
+
       </div>
       <Chatbot businessId={businessData._id} />
     </div>

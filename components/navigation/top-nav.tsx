@@ -35,11 +35,13 @@ interface Alert {
 interface TopNavProps {
   onToggleLeftNav: () => void;
   isLeftNavOpen: boolean;
+  hideLeftNav?: boolean;
 }
 
 export default function TopNav({
   onToggleLeftNav,
   isLeftNavOpen,
+  hideLeftNav = false,
 }: TopNavProps) {
   const { t, i18n } = useTranslation();
   const { pageTitle } = usePageTitle();
@@ -156,17 +158,18 @@ export default function TopNav({
     <nav className="fixed top-0 left-0 right-0 z-50 bg-primary-foreground backdrop-blur-xl">
       <div className="flex items-center justify-between px-6 py-2">
         <div className="flex items-center space-x-4">
-          {/* {user && ( */}
-          <button
-            onClick={onToggleLeftNav}
-            className="p-2 rounded-lg bg-primary border-white/20 hover:bg-primary-dark hover:border-white/40 transition-all duration-200"
-          >
-            {isLeftNavOpen ? (
-              <X className="w-5 h-5 text-white" />
-            ) : (
-              <Menu className="w-5 h-5 text-white" />
-            )}
-          </button>
+          {!hideLeftNav && (
+            <button
+              onClick={onToggleLeftNav}
+              className="p-2 rounded-lg bg-primary border-white/20 hover:bg-primary-dark hover:border-white/40 transition-all duration-200"
+            >
+              {isLeftNavOpen ? (
+                <X className="w-5 h-5 text-white" />
+              ) : (
+                <Menu className="w-5 h-5 text-white" />
+              )}
+            </button>
+          )}
           <h1 className="flex align-end text-l font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
             <Image
               src="/AppointmantPro.png"

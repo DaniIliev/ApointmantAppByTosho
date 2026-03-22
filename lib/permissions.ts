@@ -185,7 +185,7 @@ export const ROUTE_PERMISSIONS: RoutePermission[] = [
   },
   {
     path: "/performance",
-    allowedRoles: ["business"],
+    allowedRoles: ["business", 'staff'],
     requiresAuth: true,
     requiredFeature: "analytics",
   },

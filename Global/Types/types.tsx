@@ -57,13 +57,164 @@ export interface AppointmentType {
   color: string;
   staffs: { _id: string; name: string }[]; // Променено на staffIds
   paymentOption?: "cash" | "card" | "cash_and_card";
+  locationId: string;
 }
 
 export interface Staff {
-  _id: string;
+  _id?: string;
   firstName: string;
   lastName: string;
   email: string;
+  role: "staff" | "admin";
+  locationId: string;
+}
+
+export interface Business {
+  _id?: string;
+  owner?: string;
+  businessName?: string;
+  category?: string;
+  aboutUs?: string;
+  openingHours?: string;
+  businessImageUrl?: string;
+  qrCodeUrl?: string;
+  plan?:
+    | "none"
+    | "Starter_Monthly"
+    | "Professional_Monthly"
+    | "Enterprise_Monthly"
+    | "Starter_Annual"
+    | "Professional_Annual"
+    | "Enterprise_Annual";
+  subscriptionStatus?:
+    | "active"
+    | "past_due"
+    | "canceled"
+    | "unpaid"
+    | "incomplete"
+    | "none";
+  stripeCustomerId?: string;
+  stripeSubscriptionId?: string;
+  planExpiresAt?: string | Date;
+  stripeConnectAccountId?: string;
+  stripeConnectChargesEnabled?: boolean;
+  stripeConnectDetailsSubmitted?: boolean;
+  email?: string;
+  phone?: string;
+  website?: string;
+  address?: string;
+  addressLine2?: string;
+  postalCode?: string;
+  city?: string;
+  country?: string;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+export interface Location {
+  _id?: string;
+  imageUrl?: string;
+  businessId?: string;
+  name: string;
+  address: string;
+  addressLine2?: string;
+  postalCode?: string;
+  city: string;
+  country?: string;
+  phone: string;
+  email?: string;
+  website?: string;
+  isDefault?: boolean;
+  createdAt?: string;
+  updatedAt?: string;
+  schedule?: {
+    monday: string;
+    tuesday: string;
+    wednesday: string;
+    thursday: string;
+    friday: string;
+    saturday: string;
+    sunday: string;
+  } | string;
+}
+
+export interface Service {
+  _id?: string;
+  business?: string;
+  staffs?: { _id: string; name: string }[];
+  name: string;
+  description?: string;
+  duration: number;
+  price: number;
+  category: string;
+  imageUrl?: File | string | null;
+  paymentOption?: "cash" | "card" | "cash_and_card";
+  locationId?: string;
+  color?: string; // Kept for UI
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+export interface TimeRange {
+  start: string | null;
+  end: string | null;
+}
+
+export interface WorkHour {
+  day: string;
+  date: string | Date;
+  isDayOff: boolean;
+  workTime?: TimeRange;
+  breaks?: TimeRange[];
+}
+
+export type LocationsOpeningHours = Record<string, LocationOpeningHours>;
+
+export interface LocationOpeningHours {
+  _id?: string;
+  workTime: TimeRange;
+  isDayOff: {
+    monday: boolean;
+    tuesday: boolean;
+    wednesday: boolean;
+    thursday: boolean;
+    friday: boolean;
+    saturday: boolean;
+    sunday: boolean;
+  };
+  break1: TimeRange;
+  break2: TimeRange;
+  break3: TimeRange;
+}
+
+export interface DailySchedule {
+  _id?: string;
+  workHours: WorkHour[];
+}
+
+export interface StaffSchedule {
+  _id?: string;
+  startDate: string;
+  endDate: string;
+  workTime: TimeRange;
+  isDayOff: {
+    monday: boolean;
+    tuesday: boolean;
+    wednesday: boolean;
+    thursday: boolean;
+    friday: boolean;
+    saturday: boolean;
+    sunday: boolean;
+  };
+  break1?: TimeRange;
+  break2?: TimeRange;
+  break3?: TimeRange;
+  staff?: string; // Optional for location schedules
+  location: string;
+  business: string;
+  dailySchedule?: string;
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 export interface SelectOption {

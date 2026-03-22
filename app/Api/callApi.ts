@@ -12,6 +12,7 @@ const callApi = async (
 
   if (token) {
     headers["x-auth-token"] = token;
+    headers["Authorization"] = `Bearer ${token}`
   }
 
   let body: BodyInit | null = null;
@@ -39,12 +40,8 @@ const callApi = async (
     }
   }
 
-  // Dynamically set API URL based on environment
-  // const url =
-  //   process.env.NODE_ENV === "production"
-  //     ? "https://apointmantappservice-production.up.railway.app"
-  //     : "http://localhost:8080";
   const url = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
+
   const result: any = await fetch(`${url}${endpoint}`, {
     method: method,
     headers: headers,

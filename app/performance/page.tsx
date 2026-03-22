@@ -24,6 +24,7 @@ import { useDashboardDate } from "@/context/DashboardDateContext";
 import callApi from "@/app/Api/callApi";
 import { Modal } from "@/components/customUIComponents/Modal";
 import { formatDateAndTime } from "@/Global/Utils/commonFn";
+import { Skeleton } from "@/components/ui/skeleton";
 
 interface ChangeMetric {
   value: number;
@@ -1002,8 +1003,13 @@ function PerformancePageContent() {
         {/* Dashboard Grid Section */}
         <div className="flex-1 overflow-auto">
           {isLoading && (
-            <div className="flex items-center justify-center py-8">
-              <Loader2 className="h-8 w-8 animate-spin text-primary" />
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 p-4">
+              <Skeleton className="h-32 w-full rounded-xl" />
+              <Skeleton className="h-32 w-full rounded-xl" />
+              <Skeleton className="h-32 w-full rounded-xl" />
+              <Skeleton className="h-32 w-full rounded-xl" />
+              <Skeleton className="h-[300px] w-full rounded-xl col-span-2" />
+              <Skeleton className="h-[300px] w-full rounded-xl col-span-2" />
             </div>
           )}
           {error && (
@@ -1053,7 +1059,7 @@ function PerformancePageContent() {
 export default function PerformancePage() {
   return (
     <ProtectedRoute
-      requiredRoles={["business"]}
+      requiredRoles={["business", "staff"]}
       requiredPlan={["starter", "professional", "enterprise"]}
     >
       <DashboardDateProvider>

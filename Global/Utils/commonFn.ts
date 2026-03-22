@@ -1,7 +1,7 @@
-import { BusinessData } from "@/app/business/[id]/page";
 import { parseISO } from "date-fns";
 import { format } from "date-fns/format";
 import { isValid } from "date-fns/isValid";
+import { Location } from "../Types/types";
 
 export const getWeekDates = (date: Date) => {
   const week: Date[] = [];
@@ -105,29 +105,23 @@ export const capitalizeFirstLetter = (text: string) => {
 };
 
 export const isBusinessOpenNow = (
-  schedule: BusinessData["schedule"]
+  schedule: Location["schedule"]
 ): boolean => {
+  if (!schedule || typeof schedule !== "object") {
+    return false;
+  }
+
   // 1. Вземане на текущия ден и час
   const now = new Date();
-  const dayIndex = now.getDay(); // 0 = Sunday, 1 = Monday, ..., 6 = Saturday
   const currentHours = now.getHours();
   const currentMinutes = now.getMinutes();
   const currentTimeInMinutes = currentHours * 60 + currentMinutes;
 
-  // 2. Съпоставяне на индекса с името на деня
-  const days: (keyof BusinessData["schedule"])[] = [
-    "sunday",
-    "monday",
-    "tuesday",
-    "wednesday",
-    "thursday",
-    "friday",
-    "saturday",
-  ];
-  const todayName = days[dayIndex];
+  // 2. Вземане на името на деня
+  const todayName = getTodayDayName();
 
   // 3. Вземане на работното време за днес
-  const hoursString = schedule[todayName]; // e.g., "08:00-17:00", "Почивен Ден", or "Няма зададен график"
+  const hoursString = (schedule as any)[todayName]; // e.g., "08:00-17:00", "Почивен Ден", or "Няма зададен график"
 
   // Проверка за почивен ден или липса на график
   if (

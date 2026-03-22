@@ -27,6 +27,8 @@ import AppointmentForm, {
 } from "./Forms/CreateAppointmant";
 import { AppointmentEditModal } from "./Forms/AppointmentEditModal";
 
+import { Skeleton } from "@/components/ui/skeleton";
+
 type CreateNewDashboardMenuProps = {
   onOpenModal: () => void;
 };
@@ -47,6 +49,7 @@ const CreateNewDashboardMenu = ({
 function DashboardPageContent() {
   const { t } = useTranslation();
   const { user } = useAuthContext();
+  const [isLoading, setIsLoading] = useState(true);
 
   const [appointments, setAppointments] = useState<Appointment[]>([]);
   const [appointmentTypes, setAppointmentTypes] = useState<
@@ -102,8 +105,17 @@ function DashboardPageContent() {
   }, []);
 
   useEffect(() => {
-    getDashboardData();
-    fetchServices();
+    const loadData = async () => {
+      setIsLoading(true);
+      try {
+        await Promise.all([getDashboardData(), fetchServices()]);
+      } catch (error) {
+        console.error("Error loading dashboard data:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    loadData();
   }, [fetchServices, getDashboardData]);
 
   // Global auto-completion now handled by AutoCompletePastAppointments component
@@ -213,6 +225,27 @@ function DashboardPageContent() {
       toast.error(t("Failed to create appointment. Please try again."));
     }
   };
+
+  if (isLoading) {
+    return (
+      <div className="p-6 space-y-6">
+        <div className="flex gap-4 justify-center">
+          <Skeleton className="h-10 w-32" />
+          <Skeleton className="h-10 w-32" />
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <Skeleton className="h-48 rounded-xl col-span-2" />
+          <Skeleton className="h-48 rounded-xl" />
+        </div>
+        <div className="space-y-4">
+          <Skeleton className="h-10 w-full" />
+          <Skeleton className="h-20 w-full" />
+          <Skeleton className="h-20 w-full" />
+          <Skeleton className="h-20 w-full" />
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="relative  md:pb-0 h-full overflow-hidden">

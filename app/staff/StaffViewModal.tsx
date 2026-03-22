@@ -9,12 +9,14 @@ type StaffViewModalProps = {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   staff: StaffMember | null;
+  locations: any[];
 };
 
 export const StaffViewModal: React.FC<StaffViewModalProps> = ({
   open,
   onOpenChange,
   staff,
+  locations,
 }) => {
   const { t } = useTranslation();
 
@@ -82,12 +84,20 @@ export const StaffViewModal: React.FC<StaffViewModalProps> = ({
             <p className="text-base font-semibold">{staff.phone}</p>
           </div>
         </div>
-
         <div className="space-y-1">
           <label className="text-sm font-medium text-muted-foreground">
             {t("Role")}
           </label>
           <p className="text-base font-semibold capitalize">{staff.role}</p>
+        </div>
+
+        <div className="space-y-1">
+          <label className="text-sm font-medium text-muted-foreground">
+            {t("Location")}
+          </label>
+          <p className="text-base font-semibold">
+            {locations.find((l) => l._id === staff.locationId)?.name || "-"}
+          </p>
         </div>
       </div>
     </Modal>

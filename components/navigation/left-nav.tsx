@@ -5,13 +5,8 @@ import { usePathname, useRouter } from "next/navigation";
 import { useTranslation } from "react-i18next";
 import { useEffect, useRef, useState } from "react";
 import {
-  // Original Icons
   LayoutDashboard,
   LogIn,
-  ClipboardList,
-  TrendingUp,
-  ListTodo,
-  Calendar,
   Users,
   House,
   Briefcase,
@@ -22,13 +17,14 @@ import {
   // New Icons for better context
   Info, // For Business Information
   BarChart3, // For Performance
-  CircleDollarSign, // For Types (Services/Pricing)
+  CircleDollarSign,
   Info as InfoIcon,
   User as UserIcon,
   QrCode,
   LogOut,
   LayoutList,
   ShieldCheck, // For QR Code page
+  MapPin,
 } from "lucide-react";
 
 import { useAuthContext } from "@/context/AuthContext";
@@ -181,16 +177,9 @@ export default function LeftNav({ isOpen }: LeftNavProps) {
   const [isLangOpen, setIsLangOpen] = useState(false);
   const langRef = useRef<HTMLDivElement>(null);
   useClickOutside(langRef, () => setIsLangOpen(false));
-  // Close language dropdown when the left nav closes
   useEffect(() => {
     if (!isOpen) setIsLangOpen(false);
   }, [isOpen]);
-  const changeLanguage = (lng: string) => {
-    i18n.changeLanguage(lng);
-    const newPathname = pathname.replace(`/${i18n.language}`, `/${lng}`);
-    router.push(newPathname);
-    setIsLangOpen(false);
-  };
 
   const navItems: NavItem[] =
     user?.role === "business" ||
@@ -229,6 +218,11 @@ export default function LeftNav({ isOpen }: LeftNavProps) {
                     href: "/business/business-information",
                     label: t("Business Info"),
                     icon: Info,
+                  },
+                  {
+                    href: "/business/locations",
+                    label: t("Locations"),
+                    icon: MapPin,
                   },
                   { href: "/schedule", label: t("Schedule"), icon: Clock },
                   {

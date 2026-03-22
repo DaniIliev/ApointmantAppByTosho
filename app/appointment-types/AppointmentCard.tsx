@@ -1,10 +1,13 @@
-import React, { useState } from "react";
+"use client";
+
+import React from "react";
 import { Card, CardContent } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Edit, Trash2, Clock, Euro, Settings } from "lucide-react";
+import { Pencil, Trash2, Clock, Euro, Tag } from "lucide-react";
 import { formatPriceEUR } from "@/Global/Utils/commonFn";
 import { CustomTooltip } from "@/components/customUIComponents/CustomTooltip";
 import { AppointmentType } from "@/Global/Types/types";
+import { cn } from "@/lib/utils";
+import { useTranslation } from "react-i18next";
 
 type AppointmentCardProps = {
   type: AppointmentType;
@@ -12,6 +15,7 @@ type AppointmentCardProps = {
   handleDelete: (type: AppointmentType) => void;
   formatDuration: (minutes: number) => string;
   setSelectedType: (type: AppointmentType) => void;
+  className?: string;
 };
 
 const AppointmentCard = ({
@@ -20,90 +24,82 @@ const AppointmentCard = ({
   handleDelete,
   formatDuration,
   setSelectedType,
+  className,
 }: AppointmentCardProps) => {
-  const [openMenuId, setOpenMenuId] = useState<string | null>(null);
+  const { t } = useTranslation();
 
-  const toggleMenu = (typeId: string) => {
-    setOpenMenuId(openMenuId === typeId ? null : typeId);
-  };
+  // Handle image URL - in the type it's File | null, but in the DB it's a string
+  const imageUrl = typeof type.imageUrl === 'string' ? type.imageUrl : undefined;
 
   return (
     <Card
       key={type._id}
       onClick={() => setSelectedType(type)}
-      className="border-2 shadow-2xl bg-card/70 backdrop-blur-lg border-primary/20 hover:scale-[1.02] hover:shadow-3xl transition-all duration-300 transform cursor-pointer flex flex-col overflow-hidden max-h-86"
+      className={cn(
+        "bg-white dark:bg-gray-800 border-[1.5px] border-primary/10 shadow-lg hover:shadow-2xl transition-all duration-300 overflow-hidden group flex flex-col h-full cursor-pointer",
+        className
+      )}
     >
-      <div className="relative w-full h-[70%] bg-gray-200">
-        {type.imageUrl && (
-          <img
-            src={type.imageUrl}
-            alt={type.name}
-            className="w-full h-full object-contain"
-          />
-        )}
-        <div
-          className="absolute top-4 right-4 z-10"
-          onClick={(e) => e.stopPropagation()}
-        >
-          <CustomTooltip
-            onClick={() => {
-              toggleMenu(type._id);
-            }}
-            tooltipText="Settings"
-            icon={
-              <Settings className="text-black hover:text-gray-500 transition-colors" />
-            }
-          />
-          {openMenuId === type._id && (
-            <div className="absolute top-full right-0 mt-2 bg-card/90 backdrop-blur-md p-2 rounded-md shadow-lg flex gap-2">
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  openModal(type);
-                  setOpenMenuId(null);
-                }}
-                className="rounded-xl p-2 h-auto hover:bg-muted"
-              >
-                <Edit className="h-4 w-4 text-primary" />
-              </Button>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  handleDelete(type);
-                  setOpenMenuId(null);
-                }}
-                className="rounded-xl p-2 h-auto hover:bg-muted"
-              >
-                <Trash2 className="h-4 w-4 text-red-500" />
-              </Button>
+      <div className="relative w-full h-56 overflow-hidden bg-gray-100 dark:bg-gray-900">
+        <img
+          src={imageUrl || "https://images.unsplash.com/photo-1516549655169-df83a0774514?auto=format&fit=crop&w=800&q=80"}
+          alt={type.name}
+          className="w-full h-full object-contain transition-transform duration-500 ease-out"
+        />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent flex flex-col justify-end p-4">
+          <div className="flex justify-between items-end w-full">
+            <h3 className="text-2xl font-bold text-white drop-shadow-md">{type.name}</h3>
+            <div 
+              className="flex gap-2 backdrop-blur-md bg-white/20 p-1.5 rounded-full" 
+              onClick={(e) => e.stopPropagation()}
+            >
+              <CustomTooltip 
+                onClick={() => openModal(type)} 
+                tooltipText={t("Edit")} 
+                icon={<Pencil className="h-4 w-4 text-white hover:text-primary transition-colors cursor-pointer" />} 
+              />
+              <CustomTooltip 
+                onClick={() => handleDelete(type)} 
+                tooltipText={t("Delete")} 
+                icon={<Trash2 className="h-4 w-4 text-red-400 hover:text-red-500 transition-colors cursor-pointer" />} 
+              />
             </div>
-          )}
-        </div>
-      </div>
-      <CardContent className="px-6 flex flex-col flex-grow">
-        <div
-          className={`h-3 w-full bg-gradient-to-r ${type.color} rounded-full`}
-        ></div>
-        <div className="space-y-2">
-          <h3 className="text-xl font-bold text-foreground">{type.name}</h3>
-          <p className="text-sm text-muted-foreground line-clamp-3 overflow-hidden">
-            {type.description?.length > 40
-              ? type.description.slice(0, 40) + "..."
-              : type.description}
-          </p>
-        </div>
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2 text-sm text-muted-foreground">
-            <Clock className="h-4 w-4" />
-            {formatDuration(type.duration)}
           </div>
-          <div className="flex items-center gap-2 text-lg font-bold text-primary">
-            <Euro className="h-5 w-5" />
-            {formatPriceEUR(type.price)}
+        </div>
+        {/* Category Badge on Top-Left */}
+        {type.category && (
+          <div className="absolute top-4 left-4 z-10">
+            <span className="bg-primary/90 backdrop-blur-sm text-white text-[10px] uppercase font-bold px-3 py-1 rounded-full shadow-lg">
+              {type.category}
+            </span>
+          </div>
+        )}
+      </div>
+
+      <CardContent className="p-5 flex-grow space-y-4">
+        {/* Color stripe like in original AppointmentCard but integrated into the design */}
+        <div className={cn("h-1.5 w-full rounded-full bg-gradient-to-r", type.color)} />
+        
+        <div className="space-y-3 pt-2">
+          {type.description && (
+            <p className="text-sm text-muted-foreground line-clamp-2 min-h-[2.5rem]">
+              {type.description}
+            </p>
+          )}
+
+          <div className="grid grid-cols-2 gap-3 pt-2">
+            <div className="flex items-center gap-3 text-sm text-gray-700 dark:text-gray-300">
+              <div className="bg-primary/10 p-2 rounded-full shrink-0">
+                <Clock className="h-4 w-4 text-primary" />
+              </div>
+              <span className="font-medium whitespace-nowrap">{formatDuration(type.duration)}</span>
+            </div>
+            <div className="flex items-center gap-3 text-sm text-gray-700 dark:text-gray-300">
+              <div className="bg-primary/10 p-2 rounded-full shrink-0">
+                <Euro className="h-4 w-4 text-primary" />
+              </div>
+              <span className="font-bold text-lg text-primary">{formatPriceEUR(type.price)}</span>
+            </div>
           </div>
         </div>
       </CardContent>

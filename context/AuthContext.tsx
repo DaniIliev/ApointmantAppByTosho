@@ -9,6 +9,12 @@ import LoadingBackdrop from "@/components/ui/LoadingBackdrop";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 
+interface DecodedToken {
+  id: string;
+  _id?: string;
+  role?: string;
+}
+
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
@@ -23,7 +29,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     otp?: string;
   }) => {
     try {
-      let authedUser: any;
+      let authedUser: { token: string };
       if (formData.otp) {
         // OTP login
         authedUser = await callApi("/api/auth/otp-login", "POST", {
@@ -41,20 +47,30 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       setToken(authedUser.token);
       localStorage.setItem("token", authedUser.token);
 
-      const decodedUser = jwtDecode<any>(authedUser.token);
+      const decodedUser = jwtDecode<DecodedToken>(authedUser.token);
       const userId = decodedUser._id || decodedUser.id;
       if (userId) {
         findUserByID(userId)
           .then((fetchedUser) => {
             setUser(fetchedUser);
+            if (
+              !fetchedUser.role ||
+              !["personal", "business", "staff", "admin"].includes(
+                fetchedUser.role
+              )
+            ) {
+              router.push("/onboarding");
+            } else {
+              router.push("/dashboard");
+            }
           })
           .catch((error) => {
             console.error("Error fetching user after login:", error);
             setUser(null);
+            router.push("/login");
           });
       }
-      router.push("/dashboard");
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Invalid token:", error);
       setUser(null);
     }
@@ -67,17 +83,48 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     router.push("/login");
   };
 
+  const refreshToken = async () => {
+    try {
+      const data = await callApi("/api/auth/refresh-token", "GET");
+      if (data.token) {
+        setToken(data.token);
+        localStorage.setItem("token", data.token);
+        setUser(data.user);
+      }
+    } catch (error) {
+      console.error("Failed to refresh token:", error);
+    }
+  };
+
   useEffect(() => {
     const fetchUser = async () => {
       setIsLoading(true);
       const storedToken = localStorage.getItem("token");
       if (storedToken) {
         try {
-          const decodedUser = jwtDecode<any>(storedToken);
+          const decodedUser = jwtDecode<DecodedToken>(storedToken);
           if (decodedUser && decodedUser.id) {
             const fetchedUser: User = await findUserByID(decodedUser.id);
             setUser(fetchedUser);
             setToken(storedToken);
+
+            const isPublicRoute =
+              window.location.pathname === "/" ||
+              window.location.pathname === "/login" ||
+              window.location.pathname === "/register" ||
+              window.location.pathname.startsWith("/business/");
+
+            if (
+              !isPublicRoute &&
+              (!fetchedUser.role ||
+                !["personal", "business", "staff", "admin"].includes(
+                  fetchedUser.role
+                ))
+            ) {
+              if (window.location.pathname !== "/onboarding") {
+                router.push("/onboarding");
+              }
+            }
           } else {
             console.warn("Invalid token or missing _id in token.");
             logout();
@@ -93,7 +140,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       } else {
         setUser(null);
         setIsLoading(false);
-        // redirect("/login");
       }
       setIsLoading(false);
     };
@@ -110,7 +156,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   //   });
   // };
   return (
-    <AuthContext.Provider value={{ user, setUser, token, login, logout }}>
+    <AuthContext.Provider value={{ user, setUser, token, login, logout, refreshToken }}>
       {isLoading ? <LoadingBackdrop loading={true} /> : children}
     </AuthContext.Provider>
   );

@@ -24,9 +24,8 @@ import { Badge } from "@/components/ui/badge"; // Assuming you have Badge compon
 
 import { cn } from "@/lib/utils";
 import callApi from "../Api/callApi";
-import { getCategoryOptions, SelectOption } from "@/Global/Types/types";
+import { getCategoryOptions } from "@/Global/Types/types";
 import { useTranslation } from "react-i18next";
-import { MultiSelectCombobox } from "@/components/customUIComponents/MultiSelectCombobox";
 import { useAuthContext } from "@/context/AuthContext";
 import {
   Dialog,
@@ -120,6 +119,7 @@ const CreateAppointmentModal = ({
   const [showStripePrompt, setShowStripePrompt] = useState(false);
   const [pendingPaymentOption, setPendingPaymentOption] =
     useState<PaymentOption | null>(null);
+  const [locations, setLocations] = useState<any[]>([]);
 
   const paymentOptions = useMemo(
     () => [
@@ -156,7 +156,19 @@ const CreateAppointmentModal = ({
           console.error("Failed to fetch staff members:", error);
         }
       };
+      const fetchLocations = async () => {
+        try {
+          const locs = await callApi(
+            `/api/locations?businessId=${user?.businessId}`,
+            "GET"
+          );
+          setLocations(locs.map((l: any) => ({ id: l._id, name: l.name })));
+        } catch (error) {
+          console.error("Failed to fetch locations:", error);
+        }
+      };
       fetchStaff();
+      fetchLocations();
 
       // Ensure a default payment option is present
       if (!formData.paymentOption) {
@@ -241,21 +253,17 @@ const CreateAppointmentModal = ({
             onValueChange={handleCategoryChange}
             placeholder="Select a category"
             options={categoryOptions}
-            // isSearchable={true}
-            // isMulti={true}
           />
-
-          {/* <LabeledSelect<string>
-            id="subCategory"
-            label="Subcategory"
-            value={formData.subCategory}
-            onValueChange={(value) =>
-              setFormData((prev: any) => ({ ...prev, subCategory: value }))
-            }
-            placeholder="Select a subcategory"
-            options={currentSubCategoryOptions}
-          /> */}
         </div>
+
+        <LabeledSelect<string>
+          id="locationId"
+          label={t("Location")}
+          value={formData.locationId}
+          onValueChange={(val) => setFormData((prev: any) => ({ ...prev, locationId: val }))}
+          placeholder={t("Select a location")}
+          options={locations}
+        />
 
         <LabeledInput
           id="name"
