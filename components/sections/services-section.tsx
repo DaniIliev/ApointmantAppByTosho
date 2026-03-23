@@ -130,14 +130,15 @@ export function ServicesSection({ businessId, locationId }: { businessId: string
                   services[category].map((service) => (
                     <div
                       key={service._id}
-                      className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 md:gap-6 p-4 rounded-xl bg-background/60 border border-border/70 hover:border-primary/50 transition-all shadow-sm hover:shadow-md hover:scale-[1.01]"
+                      className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 md:gap-6 p-5 rounded-2xl bg-white dark:bg-gray-800 border-[1.5px] border-primary/10 shadow-md hover:shadow-xl transition-all duration-300 group hover:scale-[1.01] cursor-pointer"
+                      onClick={() => handleBookService(service)}
                     >
-                      <div className="flex-1 w-full flex items-start gap-3 md:gap-4">
-                        <div className="flex-shrink-0 w-16 h-16 rounded-full overflow-hidden border-2 border-primary/20 shadow-md">
+                      <div className="flex-1 w-full flex items-start gap-4 md:gap-6">
+                        <div className="flex-shrink-0 w-20 h-20 rounded-2xl overflow-hidden border-2 border-primary/10 shadow-sm group-hover:border-primary/30 transition-colors">
                         <img
                           src={service.imageUrl || "/default-service.png"}
                           alt={service.name}
-                            className="w-full h-full object-cover"
+                            className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                         />
                         </div>
 
