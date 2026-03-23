@@ -46,11 +46,11 @@ export default function BusinessInfoStep({ onNext, onBack, initialData }: Busine
       const payload = { ...formData };
       const useMultipart = formData.businessImageUrl instanceof File;
       
-      const response = await callApi(endpoint, method, payload, useMultipart);
+      const response = await callApi(endpoint, method, payload, !!formData.businessImageUrl);
       if (!isUpdate) {
         await refreshToken();
       }
-      onNext({ ...formData, ...response });
+      onNext({ ...formData, ...(response || {}) });
     } catch (error) {
       console.error("Failed to save business info:", error);
       onNext(formData as any); // Fallback
@@ -114,15 +114,16 @@ export default function BusinessInfoStep({ onNext, onBack, initialData }: Busine
             />
           </div>
 
-          <div className="space-y-6">
+          <div className="space-y-6 m-auto">
             <ImageUpload
-              label={t("Business Photo")}
+              label={t("")}
               value={formData.businessImageUrl}
               onChange={(file) => setFormData(prev => ({ ...prev, businessImageUrl: file }))}
               onRemove={() => setFormData(prev => ({ ...prev, businessImageUrl: "" }))}
             />
-
-            <div className="space-y-2">
+          </div>
+        </div>  
+        <div className="space-y-2">
               <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
                 {t("About Us")}
               </label>
@@ -137,9 +138,6 @@ export default function BusinessInfoStep({ onNext, onBack, initialData }: Busine
                 {formData.aboutUs.length}/500
               </p>
             </div>
-          </div>
-        </div>
-
         <div className="flex justify-between pt-6">
           <Button
             type="button"

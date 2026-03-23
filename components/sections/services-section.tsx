@@ -19,8 +19,10 @@ import { useAuthContext } from "@/context/AuthContext";
 import { toast } from "sonner";
 
 const groupServicesByCategory = (services: AppointmentType[]) => {
+  if (!services || !Array.isArray(services)) return {};
   return services.reduce((acc, service) => {
-    const category = service.category;
+    if (!service) return acc;
+    const category = service.category || "Other";
     if (!acc[category]) acc[category] = [];
     acc[category].push(service);
     return acc;

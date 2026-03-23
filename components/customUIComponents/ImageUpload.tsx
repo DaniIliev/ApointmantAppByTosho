@@ -65,7 +65,7 @@ export function ImageUpload({ value, onChange, onRemove, label, className }: Ima
             </div>
           </div>
         ) : (
-          <label className="flex flex-col items-center justify-center w-full aspect-[16/10] rounded-2xl border-2 border-dashed border-border cursor-pointer hover:bg-slate-50 dark:hover:bg-white/5 transition-all group">
+          <label className="flex flex-col items-center justify-center w-full aspect-[16/10] rounded-2xl cursor-pointer hover:bg-slate-50 dark:hover:bg-white/5 transition-all group">
             <div className="p-4 rounded-full bg-primary/10 mb-2 group-hover:scale-110 transition-transform">
               <Upload className="h-8 w-8 text-primary" />
             </div>

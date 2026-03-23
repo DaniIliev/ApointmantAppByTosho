@@ -51,7 +51,7 @@ export default function ServicesSetup({ locations, staff, onFinish, onBack, init
     const service = services[serviceIndex];
     if (!service) return;
     
-    const currentStaffs = service.staffs || [];
+    const currentStaffs = service?.staffs || [];
     const isAssigned = currentStaffs.some(s => s._id === staffMember._id);
     
     let newStaffs;
@@ -188,9 +188,9 @@ export default function ServicesSetup({ locations, staff, onFinish, onBack, init
                   <LabeledSelect
                     id={`service-location-${index}`}
                     label={t("Location")}
-                    value={ser.locationId || ""}
+                    value={ser?.locationId || ""}
                     onValueChange={(val) => updateService(index, "locationId", val)}
-                    options={locations.map((loc, i) => ({ id: loc._id || i.toString(), name: loc.name }))}
+                    options={locations.map((loc, i) => ({ id: loc?._id || i.toString(), name: loc?.name || `Location ${i + 1}` }))}
                     placeholder={t("Select location")}
                   />
                 </div>

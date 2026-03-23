@@ -5,7 +5,7 @@ import SignInForm from "./SignInForm";
 
 export default function LoginPage() {
   return (
-    <div className="h-full flex flex-col items-center justify-center ">
+    <div className="flex flex-col items-center justify-center ">
       <SignInForm />
     </div>
   );

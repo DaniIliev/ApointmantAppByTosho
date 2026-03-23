@@ -67,7 +67,7 @@ const AppointmentCard = ({
           </div>
         </div>
         {/* Category Badge on Top-Left */}
-        {type.category && (
+        {type?.category && (
           <div className="absolute top-4 left-4 z-10">
             <span className="bg-primary/90 backdrop-blur-sm text-white text-[10px] uppercase font-bold px-3 py-1 rounded-full shadow-lg">
               {type.category}

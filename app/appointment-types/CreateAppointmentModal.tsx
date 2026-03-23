@@ -112,7 +112,7 @@ const CreateAppointmentModal = ({
   const [staffMembers, setStaffMembers] = useState<StaffMember[]>([]);
   const [open, setOpen] = useState(false); // State for Popover visibility
   const [selectedCategory, setSelectedCategory] = useState<string>(
-    formData.category || ""
+    formData?.category || ""
   );
   const [checkingStripe, setCheckingStripe] = useState(false);
   const [stripeMessage, setStripeMessage] = useState<string | null>(null);
@@ -249,7 +249,7 @@ const CreateAppointmentModal = ({
           <LabeledSelect<string>
             id="category"
             label="Category"
-            value={formData.category}
+            value={formData?.category || ""}
             onValueChange={handleCategoryChange}
             placeholder="Select a category"
             options={categoryOptions}

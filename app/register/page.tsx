@@ -76,40 +76,43 @@ export default function RegisterPage() {
   };
 
   return (
-    <div className="min-h-full flex items-center justify-center p-4 relative overflow-hidden">
-      <div className="w-full max-w-2xl mx-auto z-10 flex flex-col items-center">
-        <div className="relative w-full max-w-xl">
-          <div className="absolute -inset-0.5 bg-gradient-to-br from-cyan-500 via-primary to-pink-500 rounded-3xl opacity-75 blur-sm" />
-          <div className="w-full relative bg-white dark:bg-gray-900 backdrop-blur-xl rounded-3xl p-8 border border-primary/20 shadow-6xl">
-            <div className="flex justify-center mb-6">
+    <div className="w-full flex items-center justify-center p-3 animate-in fade-in duration-700">
+      <div className="relative w-full max-w-md">
+        {/* Animated Background Glow */}
+        <div className="absolute -inset-1 bg-gradient-to-br from-cyan-500 via-primary to-pink-500 rounded-[2.5rem] opacity-70 blur-md dark:blur-2xl" />
+        
+        <div className="w-full relative bg-white/90 dark:bg-gray-900/90 backdrop-blur-2xl rounded-[2.5rem] p-8 md:p-10 border border-primary/10 shadow-2xl overflow-hidden">
+          {/* Top Logo */}
+          <div className="flex flex-col items-center mb-8">
+            <div className="p-3 bg-primary/5 rounded-2xl mb-4 border border-primary/10">
               <Image
                 src="/AppointmantPro.png"
                 alt="logo"
-                width={48}
-                height={48}
-                className="w-12 h-auto"
+                width={44}
+                height={44}
+                className="w-11 h-auto"
               />
             </div>
-
-            <div className="text-center mb-8">
-              <h1 className="text-4xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent tracking-tight mb-2">
-                {t("Join AppointDI")}
+            <div className="text-center">
+              <h1 className="text-3xl font-extrabold tracking-tight theme-text-gradient mb-1">
+                {t("Join AppointDI®")}
               </h1>
-              <p className="text-sm text-muted-foreground">
+              <p className="text-sm text-muted-foreground font-medium">
                 {t("Create your account and start scheduling")}
               </p>
             </div>
+          </div>
 
-            <form onSubmit={handleSubmit} className="space-y-4">
+          <form onSubmit={handleSubmit} className="space-y-6">
+            <div className="space-y-5">
               <LabeledInput
                 id="email"
                 label={t("Email Address")}
                 type="email"
                 value={formData.email}
                 onChange={(e) => handleInputChange("email", e.target.value)}
-                placeholder={t("Enter your email address")}
+                placeholder={t("Enter your email")}
                 onClear={() => handleInputChange("email", "")}
-                className="!bg-transparent"
                 required
               />
               
@@ -120,8 +123,6 @@ export default function RegisterPage() {
                   value={formData.firstName}
                   onChange={(e) => handleInputChange("firstName", e.target.value)}
                   placeholder={t("First name")}
-                  onClear={() => handleInputChange("firstName", "")}
-                  className="!bg-transparent"
                   required
                 />
                 <LabeledInput
@@ -130,117 +131,125 @@ export default function RegisterPage() {
                   value={formData.lastName}
                   onChange={(e) => handleInputChange("lastName", e.target.value)}
                   placeholder={t("Last name")}
-                  onClear={() => handleInputChange("lastName", "")}
-                  className="!bg-transparent"
                   required
                 />
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div className="relative">
+                <div className="relative group">
                   <LabeledInput
                     id="password"
                     label={t("Password")}
                     type={showPassword ? "text" : "password"}
                     value={formData.password}
                     onChange={(e) => handleInputChange("password", e.target.value)}
-                    placeholder={t("Create a password")}
-                    className="!bg-transparent"
+                    placeholder={t("••••••••")}
                     required
                   />
-                  <button
-                    type="button"
-                    onClick={() => setShowPassword((p) => !p)}
-                    className="absolute right-2 top-[38px] text-muted-foreground hover:text-foreground transition-colors"
-                  >
-                    {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
-                  </button>
                 </div>
-                <div className="relative">
+                <div className="relative group">
                   <LabeledInput
                     id="repassword"
                     label={t("Confirm Password")}
                     type={showConfirmPassword ? "text" : "password"}
                     value={formData.repassword}
                     onChange={(e) => handleInputChange("repassword", e.target.value)}
-                    placeholder={t("Confirm password")}
-                    className="!bg-transparent"
+                    placeholder={t("••••••••")}
                     required
                   />
-                  <button
-                    type="button"
-                    onClick={() => setShowConfirmPassword((p) => !p)}
-                    className="absolute right-2 top-[38px] text-muted-foreground hover:text-foreground transition-colors"
-                  >
-                    {showConfirmPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
-                  </button>
                 </div>
               </div>
+            </div>
 
-              {error && (
-                <p className="text-xs text-red-500 font-medium">{error}</p>
+            {error && (
+              <div className="bg-red-50 dark:bg-red-500/10 border border-red-200 dark:border-red-500/20 rounded-xl p-3 text-xs text-red-600 dark:text-red-400 font-medium animate-in fade-in slide-in-from-top-1">
+                {error}
+              </div>
+            )}
+
+            <Button
+              type="submit"
+              disabled={loading}
+              className="w-full rounded-2xl py-6 text-lg font-bold shadow-lg shadow-primary/20 hover:shadow-xl hover:shadow-primary/30 transition-all flex justify-center items-center gap-2 group"
+            >
+              {loading ? (
+                t("Creating account...")
+              ) : (
+                <>
+                  {t("Sign up")}
+                  <div className="w-5 h-5 bg-white/20 rounded-full flex items-center justify-center group-hover:translate-x-1 transition-transform">
+                    <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+                      <path d="M4 3L7 6L4 9" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                    </svg>
+                  </div>
+                </>
               )}
+            </Button>
 
-              <div className="w-full flex justify-center pt-4">
-                <Button
-                  type="submit"
-                  disabled={loading}
-                  iconType="send"
-                  className="rounded-full w-full py-6 flex justify-center items-center text-lg font-bold"
-                >
-                  {loading ? t("Creating account...") : t("Sign up")}
-                </Button>
+            <div className="relative my-6">
+              <div className="absolute inset-0 flex items-center px-2">
+                <span className="w-full border-t border-muted/50"></span>
               </div>
+              <div className="relative flex justify-center text-xs uppercase tracking-widest font-bold">
+                <span className="bg-white dark:bg-gray-900 px-4 text-muted-foreground/60">
+                  {t("Or connect with")}
+                </span>
+              </div>
+            </div>
 
-              <div className="relative my-8">
-                <div className="absolute inset-0 flex items-center">
-                  <span className="w-full border-t border-muted/50"></span>
+            <div className="flex justify-center gap-6">
+              <button
+                type="button"
+                className="group relative flex flex-col items-center gap-2"
+                onClick={() => {
+                  window.location.href = `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080"}/api/auth/google`;
+                }}
+              >
+                <div className="w-14 h-14 rounded-2xl bg-white dark:bg-gray-800 border border-primary/10 shadow-sm flex items-center justify-center group-hover:shadow-md group-hover:border-primary/20 transition-all group-hover:-translate-y-1">
+                   <Image
+                      src="/google.png"
+                      alt="Google"
+                      width={28}
+                      height={28}
+                      className="w-12 h-12 object-contain"
+                    />
                 </div>
-                <div className="relative flex justify-center text-xs uppercase">
-                  <span className="bg-white dark:bg-gray-900 px-2 text-muted-foreground">
-                    {t("Or continue with")}
-                  </span>
+                <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-tight">{t("Google")}</span>
+              </button>
+              
+              <button
+                type="button"
+                className="group relative flex flex-col items-center gap-2"
+                onClick={() => {
+                  window.location.href = `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080"}/api/auth/facebook`;
+                }}
+              >
+                <div className="w-14 h-14 rounded-2xl bg-white dark:bg-gray-800 border border-primary/10 shadow-sm flex items-center justify-center group-hover:shadow-md group-hover:border-primary/20 transition-all group-hover:-translate-y-1">
+                   <Image
+                      src="/Facebook.png"
+                      alt="Facebook"
+                      width={28}
+                      height={28}
+                      className="w-7 h-7 object-contain"
+                    />
                 </div>
-              </div>
+                <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-tight">{t("Facebook")}</span>
+              </button>
+            </div>
 
-              <div className="grid grid-cols-2 gap-4">
-                <Button
-                  type="button"
-                  variant="outline"
-                  className="w-full flex items-center justify-center gap-2 py-6 rounded-2xl border-primary/20 hover:bg-primary/5"
-                  onClick={() => {
-                    window.location.href = `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080"}/api/auth/google`;
-                  }}
-                >
-                  <Image src="/google.svg" alt="Google" width={20} height={20} className="w-5 h-5" />
-                  <span className="font-semibold">Google</span>
-                </Button>
-                <Button
-                  type="button"
-                  variant="outline"
-                  className="w-full flex items-center justify-center gap-2 py-6 rounded-2xl border-primary/20 hover:bg-primary/5"
-                  onClick={() => {
-                    window.location.href = `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080"}/api/auth/facebook`;
-                  }}
-                >
-                  <Image src="/facebook.svg" alt="Facebook" width={20} height={20} className="w-5 h-5" />
-                  <span className="font-semibold">Facebook</span>
-                </Button>
-              </div>
-
-              <div className="text-center text-md text-muted-foreground mt-8">
-                {t("Already have an account?")}{" "}
-                <a
-                  href="/login"
-                  className="text-primary hover:text-accent font-bold hover:underline transition-all duration-300"
-                >
-                  {t("Sign in here")}
-                </a>
-              </div>
-            </form>
-          </div>
+            <p className="mt-6 text-center text-sm text-muted-foreground">
+              {t("Already have an account?")}{" "}
+              <a
+                href="/login"
+                className="text-primary hover:text-accent font-bold transition-colors hover:underline underline-offset-4"
+              >
+                {t("Sign in here")}
+              </a>
+            </p>
+          </form>
         </div>
       </div>
     </div>
   );
+  
 }
