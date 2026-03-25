@@ -4,7 +4,7 @@ import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { useTranslation } from "react-i18next";
 import { cn } from "@/lib/utils";
-import { Clock, Plus, Trash } from "lucide-react";
+import { Clock, Trash } from "lucide-react";
 import callApi from "@/app/Api/callApi";
 import { TimeRangePicker } from "@/components/customUIComponents/TimeRangePicker";
 import { CustomTooltip } from "@/components/customUIComponents/CustomTooltip";
@@ -278,7 +278,7 @@ export default function HoursSetup({ locations, staff, onNext, onBack, initialDa
                         )}
                       </div>
                       
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <div className="grid grid-cols-1 sm:grid-cols-1 gap-4">
                         {activeBreaks.map((b) => (
                           <div key={b.key} className="flex flex-row gap-2 items-center bg-white dark:bg-gray-800 p-2 rounded-2xl border border-border/50 shadow-sm">
                             <TimeRangePicker

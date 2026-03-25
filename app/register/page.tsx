@@ -15,8 +15,8 @@ export default function RegisterPage() {
   const { t } = useTranslation();
   const router = useRouter();
   const { setUser } = useAuthContext();
-  const [showPassword, setShowPassword] = useState(false);
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  // const [showPassword, setShowPassword] = useState(false);
+  // const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -140,7 +140,7 @@ export default function RegisterPage() {
                   <LabeledInput
                     id="password"
                     label={t("Password")}
-                    type={showPassword ? "text" : "password"}
+                    type={"password"}
                     value={formData.password}
                     onChange={(e) => handleInputChange("password", e.target.value)}
                     placeholder={t("••••••••")}
@@ -151,7 +151,7 @@ export default function RegisterPage() {
                   <LabeledInput
                     id="repassword"
                     label={t("Confirm Password")}
-                    type={showConfirmPassword ? "text" : "password"}
+                    type={"password"}
                     value={formData.repassword}
                     onChange={(e) => handleInputChange("repassword", e.target.value)}
                     placeholder={t("••••••••")}

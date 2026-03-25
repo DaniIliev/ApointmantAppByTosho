@@ -133,7 +133,7 @@ function StaffPageContent() {
   const handleInviteStaff = async () => {
     try {
       const result = await callApi(
-        "/api/staff/invite-staff",
+        "/api/staff/invite",
         "POST",
         newStaffMember
       );
