@@ -46,6 +46,7 @@ const callApi = async (
     method: method,
     headers: headers,
     body: body,
+    cache: "no-store",
   });
 
   if (!result.ok) {
