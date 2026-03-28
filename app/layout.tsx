@@ -14,6 +14,8 @@ export const metadata: Metadata = {
   generator: "Next.js",
 };
 
+import { LocationProvider } from "@/context/LocationContext";
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -50,15 +52,17 @@ html {
       </head>
       <body>
         <AuthProvider>
-          <NextThemesProvider
-            attribute="class"
-            defaultTheme="dark"
-            enableSystem={false}
-          >
-            <ThemeProvider>
-              <ClientLayoutWrapper>{children}</ClientLayoutWrapper>
-            </ThemeProvider>
-          </NextThemesProvider>
+          <LocationProvider>
+            <NextThemesProvider
+              attribute="class"
+              defaultTheme="dark"
+              enableSystem={false}
+            >
+              <ThemeProvider>
+                <ClientLayoutWrapper>{children}</ClientLayoutWrapper>
+              </ThemeProvider>
+            </NextThemesProvider>
+          </LocationProvider>
         </AuthProvider>
       </body>
     </html>

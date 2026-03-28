@@ -33,9 +33,12 @@ const CreateNewTypeMenu = ({ onOpenModal }: CreateNewDashboardMenuProps) => {
   );
 };
 
+import { useLocationContext } from "@/context/LocationContext";
+
 function AppointmentTypesPageContent() {
   const { t } = useTranslation();
   const { user } = useAuthContext();
+  const { selectedLocation } = useLocationContext();
   const [appointmentTypes, setAppointmentTypes] = useState<AppointmentType[]>(
     []
   );
@@ -96,14 +99,17 @@ function AppointmentTypesPageContent() {
     setPageTitle(t("Appointment Types"));
     setExtraRightNavMenu(<CreateNewTypeMenu onOpenModal={() => openModal()} />);
     setIsRightNavVisible(true);
-    fetchServices();
-
+    
     return () => {
       setPageTitle(null);
       setExtraRightNavMenu(null);
       setIsRightNavVisible(false);
     };
-  }, [setPageTitle, setExtraRightNavMenu, setIsRightNavVisible]);
+  }, [setPageTitle, setExtraRightNavMenu, setIsRightNavVisible, t]);
+
+  useEffect(() => {
+    fetchServices();
+  }, [user?.businessId, selectedLocation?._id]);
 
   const colorOptions = [
     "from-blue-500 to-cyan-500",
@@ -127,7 +133,12 @@ function AppointmentTypesPageContent() {
         price: type.price.toString(),
         color: type.color || "from-blue-500 to-cyan-500",
         imageUrl: type.imageUrl || null,
-        staffMembers: type.staffs || [],
+        staffMembers:
+          type.staffMembers?.map((s: any) => ({
+            _id: s._id,
+            name:
+              s.name || `${s.firstName || ""} ${s.lastName || ""}`.trim(),
+          })) || [],
         paymentOption: (type as any).paymentOption || "cash",
         locationId: type.locationId || "",
       });
@@ -165,7 +176,7 @@ function AppointmentTypesPageContent() {
         color: formData.color,
         imageUrl: formData.imageUrl,
         category: formData.category,
-        staffs: JSON.stringify(formData.staffMembers),
+        staffMembers: JSON.stringify(formData.staffMembers),
         paymentOption: formData.paymentOption,
         locationId: formData.locationId,
         businessId: user?.businessId,

@@ -3,15 +3,6 @@
 import { LabeledInput } from "@/components/customUIComponents/LabeledInput";
 import { LabeledTextarea } from "@/components/customUIComponents/LabeledTextarea";
 import { LabeledSelect } from "@/components/customUIComponents/LabeledSelect";
-import {
-  ArrowDown,
-  ArrowRight,
-  ArrowUp,
-  Flame,
-  ClipboardList,
-  Settings,
-  CheckCircle2,
-} from "lucide-react";
 import { Priority } from "../../types";
 
 interface CardDetailsProps {

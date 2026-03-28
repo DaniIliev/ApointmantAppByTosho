@@ -122,7 +122,7 @@ const KanbanBoard = <T extends IBaseKanbanCard>({
   return (
     <div className="z-50 flex flex-col items-center w-full overflow-x-auto">
       <div
-        className={`flex w-full items-start h-screen overflow-y-hidden p-5 ${
+        className={`flex w-full items-start h-full overflow-y-hidden p-5 ${
           isAppointmentsBoard ? "justify-center" : "justify-start"
         }`}
       >

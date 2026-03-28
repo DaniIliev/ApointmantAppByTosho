@@ -147,7 +147,7 @@ export const Modal = ({
       <Dialog open={open} onOpenChange={handleOpenChange}>
         <DialogContent
           className={`${widthClass} md:max-h-[90vh] h-full md:h-auto max-h-screen flex flex-col ${
-            centerContentOnMobile ? "items-center md:items-stretch" : ""
+            centerContentOnMobile ? "items-stretch md:items-stretch" : ""
           } bg-card/95 backdrop-blur-lg border-2 border-primary/20 [&>button]:hidden md:rounded-lg rounded-none p-0 md:p-6`}
         >
           <DialogHeader

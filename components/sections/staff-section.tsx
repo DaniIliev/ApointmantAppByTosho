@@ -12,7 +12,7 @@ export function StaffSection({ businessId, locationId }: { businessId: string; l
   useEffect(() => {
     const fetchStaff = async () => {
       try {
-        let url = `/api/staff/staff-list?businessId=${businessId}`;
+        let url = `/api/staff/staff-list?businessId=${businessId}&onlyWithServices=true`;
         if (locationId) {
           url += `&locationId=${locationId}`;
         }
@@ -41,7 +41,13 @@ export function StaffSection({ businessId, locationId }: { businessId: string; l
             >
               <div className="relative w-24 h-24 mb-3 rounded-full overflow-hidden shadow-md border-2 border-primary/30">
                 <Image
-                  src={member.profilePictureUrl || "/placeholder.png"}
+                  src={
+                    member.profilePictureUrl
+                      ? member.profilePictureUrl.startsWith("http")
+                        ? member.profilePictureUrl
+                        : `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080"}/${member.profilePictureUrl.replace(/^\/+/, "")}`
+                      : "/placeholder.png"
+                  }
                   alt={member.firstName}
                   className="w-full h-full object-cover"
                   width={96}

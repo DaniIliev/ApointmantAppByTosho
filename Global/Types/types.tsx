@@ -44,6 +44,7 @@ export interface Appointment {
   stripePaymentIntentId?: string;
   stripePaymentMethodId?: string;
   stripePaymentAmount?: number;
+  locationId?: string | any;
 }
 
 export interface AppointmentType {
@@ -55,7 +56,7 @@ export interface AppointmentType {
   duration: number;
   price: number;
   color: string;
-  staffs: { _id: string; name: string }[]; // Променено на staffIds
+  staffMembers: { _id: string; name: string }[]; // Unified field name
   paymentOption?: "cash" | "card" | "cash_and_card";
   locationId: string;
 }
@@ -141,7 +142,7 @@ export interface Location {
 export interface Service {
   _id?: string;
   business?: string;
-  staffs?: { _id: string; name: string }[];
+  staffMembers?: { _id: string; name: string }[];
   name: string;
   description?: string;
   duration: number;

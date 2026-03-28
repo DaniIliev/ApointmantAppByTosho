@@ -46,9 +46,12 @@ const CreateNewDashboardMenu = ({
   );
 };
 
+import { useLocationContext } from "@/context/LocationContext";
+
 function DashboardPageContent() {
   const { t } = useTranslation();
   const { user } = useAuthContext();
+  const { selectedLocation } = useLocationContext();
   const [isLoading, setIsLoading] = useState(true);
 
   const [appointments, setAppointments] = useState<Appointment[]>([]);
@@ -116,7 +119,7 @@ function DashboardPageContent() {
       }
     };
     loadData();
-  }, [fetchServices, getDashboardData]);
+  }, [fetchServices, getDashboardData, selectedLocation?._id]);
 
   // Global auto-completion now handled by AutoCompletePastAppointments component
 
@@ -200,6 +203,7 @@ function DashboardPageContent() {
       email: appointmentData.email,
       staff: appointmentData.staff._id,
       notes: appointmentData.notes,
+      locationId: selectedLocation?._id,
     };
     try {
       const appointment: Appointment = await callApi(
@@ -248,8 +252,8 @@ function DashboardPageContent() {
   }
 
   return (
-    <div className="relative  md:pb-0 h-full overflow-hidden">
-      <Tabs defaultValue="calendar" className="w-full h-full flex flex-col">
+    <div className="relative h-[calc(100dvh-9.5rem)] md:h-full md:pb-0 overflow-hidden flex flex-col">
+      <Tabs defaultValue="calendar" className="w-full h-full flex flex-col pb-0 md:pb-0">
         {/* Desktop Tabs - Top */}
         <TabsList className="hidden md:flex mb-4 bg-transparent p-0 mx-auto w-fit flex-shrink-0">
           <TabsTrigger
@@ -282,7 +286,7 @@ function DashboardPageContent() {
           </TabsTrigger>
         </TabsList>
 
-        <TabsContent value="calendar" className="flex-1 overflow-auto">
+        <TabsContent value="calendar" className="flex-1 overflow-hidden">
           <Calendar
             appointments={appointments}
             getStatusColor={getStatusColor}
@@ -293,7 +297,7 @@ function DashboardPageContent() {
           />
         </TabsContent>
 
-        <TabsContent value="table" className="space-y-4 flex-1 overflow-auto">
+        <TabsContent value="table" className="flex-1 overflow-hidden">
           <AppointmentsTable
             data={appointments}
             onOpenViewModal={openViewModal}
@@ -316,7 +320,7 @@ function DashboardPageContent() {
           />
         </TabsContent>
 
-        <TabsContent value="board" className="flex-1 overflow-auto">
+        <TabsContent value="board" className="flex-1 overflow-hidden">
           <AppointmentsBoardView
             onOpenModal={() => setIsCreateModalOpen(true)}
           />
@@ -359,14 +363,15 @@ function DashboardPageContent() {
         open={isCreateModalOpen}
         onOpenChange={setIsCreateModalOpen}
       >
-        <AppointmentForm // Използваме универсалния компонент
-          mode="create" // Задаваме режим CREATE
-          handleSubmit={handleCreateAppointment} // Използваме функцията за CREATE
+        <AppointmentForm  
+          mode="create" 
+          handleSubmit={handleCreateAppointment} 
           appointmentData={newAppointment}
           setAppointmentData={setNewAppointment}
-          onClose={() => setIsCreateModalOpen(false)} // Обща функция за затваряне
+          onClose={() => setIsCreateModalOpen(false)} 
           appoitmentTypesOptions={appoitmentTypesOptions}
           appointmentTypes={appointmentTypes}
+          locationId={selectedLocation?._id}
         />
       </Modal>
     </div>

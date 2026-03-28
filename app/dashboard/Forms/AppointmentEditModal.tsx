@@ -114,9 +114,9 @@ export const AppointmentEditModal: React.FC<AppointmentEditModalProps> = ({
   // Fetch available slots when staff and date change
   useEffect(() => {
     const fetchSlots = async () => {
-      if (formData.staffId && formData.date && formData.appointmentTypeId) {
+      if (formData.staffId && formData.date && formData.appointmentTypeId && appointment) {
         const slots = await callApi(
-          `/api/appointment/availability?staffId=${formData.staffId}&date=${formData.date}&serviceId=${formData.appointmentTypeId}`,
+          `/api/appointment/availability?staffId=${formData.staffId}&date=${formData.date}&serviceId=${formData.appointmentTypeId}&locationId=${appointment.locationId?._id || appointment.locationId}`,
           "GET"
         );
 

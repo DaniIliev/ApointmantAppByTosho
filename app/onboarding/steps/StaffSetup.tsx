@@ -46,11 +46,35 @@ export default function StaffSetup({ locations, onNext, onBack, initialData }: S
     e.preventDefault();
     setLoading(true);
     try {
-      // Logic for staff invites (only for new staff)
+      // Group staff by normalized email to avoid duplicate parallel requests for the same person
+      const staffMap = new Map<string, Staff & { allLocations: string[] }>();
+      
+      staff.forEach(s => {
+        if (!s.email) return;
+        const normalizedEmail = s.email.trim().toLowerCase();
+        if (staffMap.has(normalizedEmail)) {
+          const existing = staffMap.get(normalizedEmail)!;
+          if (s.locationId && !existing.allLocations.includes(s.locationId)) {
+            existing.allLocations.push(s.locationId);
+          }
+        } else {
+          staffMap.set(normalizedEmail, { 
+            ...s, 
+            allLocations: s.locationId ? [s.locationId] : [] 
+          });
+        }
+      });
+
+      // Send invitations for new staff (only once per email)
+      const uniqueStaffToInvite = Array.from(staffMap.values()).filter(s => !s._id);
+      
       await Promise.all(
-        staff
-          .filter(s => !s._id)
-          .map(s => callApi("/api/staff/invite", "POST", s))
+        uniqueStaffToInvite.map(s => 
+          // Note: The backend currently expects a single locationId, 
+          // so we send the first one. Our backend logic is already updated to handle 
+          // subsequent invitations for the same email gracefully.
+          callApi("/api/staff/invite", "POST", s)
+        )
       );
       onNext(staff);
     } catch (error) {

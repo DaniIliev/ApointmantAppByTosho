@@ -36,11 +36,14 @@ const AddStaffNav = ({ onOpenModal }: AddStaffNavProps) => {
   );
 };
 
+import { useLocationContext } from "@/context/LocationContext";
+
 function StaffPageContent() {
   const { t } = useTranslation();
   const { setPageTitle } = usePageTitle();
   const { setExtraRightNavMenu, setIsRightNavVisible } = useRightNav();
   const { user } = useAuthContext();
+  const { selectedLocation } = useLocationContext();
   const [staff, setStaff] = useState<StaffMember[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isViewModalOpen, setIsViewModalOpen] = useState(false);
@@ -88,7 +91,7 @@ function StaffPageContent() {
     };
 
     loadData();
-  }, [user?.businessId, t]);
+  }, [user?.businessId, t, selectedLocation?._id]);
 
   // Open staff details modal
   const openStaffDetailsModal = (staffId: string) => {

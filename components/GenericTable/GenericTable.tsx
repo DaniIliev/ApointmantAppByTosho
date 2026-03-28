@@ -532,7 +532,7 @@ export const GenericTable = <T extends Record<string, any>>({
 
   return (
     <div
-      className={`p-4 transition-all duration-300 ${
+      className={`p-0 transition-all duration-300 ${
         isFullScreen
           ? "fixed inset-0 z-50 bg-white dark:bg-gray-900 overflow-auto"
           : ""

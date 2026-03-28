@@ -33,7 +33,7 @@ const AppointmentsBoardView = ({ onOpenModal }: AppointmentsBoardViewProps) => {
     share: true,
   };
   return (
-    <div className="w-full min-h-[400px]">
+    <div className="w-full h-full">
       <KanbanBoard
         tasks={tasks}
         columns={columns}

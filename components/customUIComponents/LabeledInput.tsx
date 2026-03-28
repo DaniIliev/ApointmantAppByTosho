@@ -67,7 +67,7 @@ export const LabeledInput = forwardRef<
     const inputType = isPassword ? (showPassword ? "text" : "password") : type;
 
     const baseClasses = cn(
-      "peer w-full bg-card/80 focus:bg-card/90 text-text-primary/75 focus:text-text-primary rounded-t-md transition-all duration-300 px-4 pt-4 pb-1",
+      "peer w-full bg-gray-100 dark:bg-card/80 focus:bg-gray-200 dark:focus:bg-card/90 text-text-primary/75 focus:text-text-primary rounded-t-md transition-all duration-300 px-4 pt-4 pb-1",
       "border-b-2",
       isErroredEmpty ? "border-red-500" : "border-transparent",
       "outline-none",

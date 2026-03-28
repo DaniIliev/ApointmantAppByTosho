@@ -58,18 +58,12 @@ type StaffMember = {
 type PaymentOption = "cash" | "card" | "cash_and_card";
 
 const StaffAvatarsDisplay = ({
-  selectedStaffIds,
-  staffMembers,
+  selectedStaff,
   onRemove,
 }: {
-  selectedStaffIds: string[];
-  staffMembers: StaffMember[];
+  selectedStaff: { _id: string; name: string }[];
   onRemove: (staffId: string) => void;
 }) => {
-  const selectedStaff = useMemo(() => {
-    return staffMembers.filter((s) => selectedStaffIds.includes(s._id));
-  }, [selectedStaffIds, staffMembers]);
-
   if (selectedStaff.length === 0) return null;
 
   return (
@@ -82,11 +76,17 @@ const StaffAvatarsDisplay = ({
         >
           <Avatar className="h-6 w-6 mr-1">
             <AvatarFallback className="bg-primary text-primary-foreground text-xs">
-              {staff.firstName[0]}
-              {staff.lastName[0]}
+              {staff.name
+                ? staff.name
+                    .split(" ")
+                    .map((n) => n[0])
+                    .join("")
+                    .substring(0, 2)
+                    .toUpperCase()
+                : "?"}
             </AvatarFallback>
           </Avatar>
-          {staff.firstName}
+          {staff.name}
           <X className="ml-1 h-3 w-3" />{" "}
           {/* Add an 'X' icon for visual removal cue */}
         </Badge>
@@ -190,7 +190,7 @@ const CreateAppointmentModal = ({
   const handleRemoveStaff = (staffId: string) => {
     setFormData((prev: any) => ({
       ...prev,
-      staffMembers: prev.staffMembers.filter((id: string) => id !== staffId),
+      staffMembers: prev.staffMembers.filter((s: any) => s._id !== staffId),
     }));
   };
 
@@ -424,8 +424,7 @@ const CreateAppointmentModal = ({
             </PopoverContent>
           </Popover>
           <StaffAvatarsDisplay
-            selectedStaffIds={formData.staffMembers}
-            staffMembers={staffMembers}
+            selectedStaff={formData.staffMembers}
             onRemove={handleRemoveStaff}
           />
         </div>

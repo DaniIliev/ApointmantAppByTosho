@@ -74,9 +74,12 @@ const AppointmentForm = ({
         const selectedService = appointmentTypes?.find(
           (type) => type._id === appointmentData.appointmentTypeId
         );
-        if (selectedService && selectedService.staffs) {
+        if (selectedService && selectedService.staffMembers) {
+          const staffIdsArray = selectedService.staffMembers.map((s: any) =>
+            typeof s === "string" ? s : s._id || s
+          );
           const staffDetails = await callApi(`/api/staff/by-ids`, "POST", {
-            staffIds: selectedService.staffs,
+            staffIds: staffIdsArray,
           });
           setAvailableStaff(staffDetails);
         }
@@ -96,7 +99,7 @@ const AppointmentForm = ({
         appointmentData.appointmentTypeId
       ) {
         const slots = await callApi(
-          `/api/appointment/availability?staffId=${appointmentData.staff._id}&date=${appointmentData.date}&serviceId=${appointmentData.appointmentTypeId}`,
+          `/api/appointment/availability?staffId=${appointmentData.staff._id}&date=${appointmentData.date}&serviceId=${appointmentData.appointmentTypeId}&locationId=${locationId}`,
           "GET"
         );
         setAvailableSlots(slots.slots);
@@ -124,7 +127,7 @@ const AppointmentForm = ({
         if (appointmentData.time) return;
 
         // Ако има избрана дата, зареди най-близкия час за тази дата
-        let endpoint = `/api/appointment/closest-slot?staffId=${appointmentData.staff._id}&serviceId=${appointmentData.appointmentTypeId}`;
+        let endpoint = `/api/appointment/closest-slot?staffId=${appointmentData.staff._id}&serviceId=${appointmentData.appointmentTypeId}&locationId=${locationId}`;
         if (appointmentData.date) {
           endpoint += `&date=${appointmentData.date}`;
         }
@@ -245,7 +248,7 @@ const AppointmentForm = ({
     setAppointmentData((prev) => ({
       ...prev,
       appointmentTypeId: value,
-      staffId: "",
+      staff: { _id: "", name: "" },
       date: "",
       time: "",
     }));
@@ -265,7 +268,7 @@ const AppointmentForm = ({
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 w-full px-2 md:px-0">
       <FormGrid>
         <LabeledInput
           label={t("Client Name")}

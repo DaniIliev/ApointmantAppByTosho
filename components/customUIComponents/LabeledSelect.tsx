@@ -52,7 +52,7 @@ export function LabeledSelect<T extends string>({
           onFocus={() => setIsFocused(true)}
           onBlur={() => setIsFocused(false)}
           className={cn(
-            "text-text-primary peer w-full h-12 bg-card/80 focus:bg-card/90 rounded-t-md transition-all duration-300 px-4 pt-4 pb-1",
+            "text-text-primary peer w-full h-12 bg-gray-100 dark:bg-card/80 focus:bg-gray-200 dark:focus:bg-card/90 rounded-t-md transition-all duration-300 px-4 pt-4 pb-1",
             "border-b-2 border-card",
             "outline-none",
             "appearance-none", // Премахва стрелката

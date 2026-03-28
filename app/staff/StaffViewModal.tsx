@@ -36,7 +36,11 @@ export const StaffViewModal: React.FC<StaffViewModalProps> = ({
           <div className="h-16 w-16 overflow-hidden rounded-full border border-muted bg-muted flex items-center justify-center text-lg font-semibold text-muted-foreground">
             {staff.profilePictureUrl ? (
               <img
-                src={staff.profilePictureUrl}
+                src={
+                  staff.profilePictureUrl.startsWith("http")
+                    ? staff.profilePictureUrl
+                    : `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080"}/${staff.profilePictureUrl.replace(/^\/+/, "")}`
+                }
                 alt={`${staff.firstName} ${staff.lastName}`}
                 className="h-full w-full object-cover"
               />

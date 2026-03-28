@@ -7,12 +7,17 @@ const callApi = async (
   multipartForm: boolean = false
 ) => {
   const token = localStorage.getItem("token");
+  const selectedLocationId = localStorage.getItem("selectedLocationId");
 
   let headers: HeadersInit = {};
 
   if (token) {
     headers["x-auth-token"] = token;
-    headers["Authorization"] = `Bearer ${token}`
+    headers["Authorization"] = `Bearer ${token}`;
+  }
+
+  if (selectedLocationId) {
+    headers["x-location-id"] = selectedLocationId;
   }
 
   let body: BodyInit | null = null;

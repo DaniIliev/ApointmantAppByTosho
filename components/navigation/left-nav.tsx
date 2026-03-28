@@ -39,6 +39,7 @@ interface NavItem {
 
 interface LeftNavProps {
   isOpen: boolean;
+  onClose?: () => void;
 }
 
 // --- SubMenu Component ---
@@ -51,7 +52,6 @@ const SubMenu = ({
   pathname: string;
   isOpen: boolean;
 }) => {
-  // Use a sensible default: initialize open if an active child is found
   const hasActiveChild = item.children?.some(
     (child) =>
       pathname === child.href ||
@@ -169,17 +169,44 @@ const SubMenu = ({
   );
 };
 
-export default function LeftNav({ isOpen }: LeftNavProps) {
+import { LocationSelector } from "./LocationSelector";
+
+export default function LeftNav({ isOpen, onClose }: LeftNavProps) {
   const { t, i18n } = useTranslation();
   const pathname = usePathname();
   const router = useRouter();
   const { user, logout } = useAuthContext();
   const [isLangOpen, setIsLangOpen] = useState(false);
   const langRef = useRef<HTMLDivElement>(null);
+  const touchStartX = useRef<number>(0);
+  const touchCurrentX = useRef<number>(0);
+
+  // ... (rest of the component logic)
+
   useClickOutside(langRef, () => setIsLangOpen(false));
+
+  // ... (rest of the component logic)
+
   useEffect(() => {
     if (!isOpen) setIsLangOpen(false);
   }, [isOpen]);
+
+  const handleTouchStart = (e: React.TouchEvent) => {
+    touchStartX.current = e.touches[0].clientX;
+    touchCurrentX.current = e.touches[0].clientX;
+  };
+
+  const handleTouchMove = (e: React.TouchEvent) => {
+    touchCurrentX.current = e.touches[0].clientX;
+  };
+
+  const handleTouchEnd = () => {
+    const diff = touchStartX.current - touchCurrentX.current;
+    if (diff > 50 && onClose) {
+      // Swiped left more than 50px
+      onClose();
+    }
+  };
 
   const navItems: NavItem[] =
     user?.role === "business" ||
@@ -268,12 +295,21 @@ export default function LeftNav({ isOpen }: LeftNavProps) {
 
   return (
     <nav
-      className={`zIndex-100 bg-primary-foreground fixed left-0 top-17.5 bottom-0 backdrop-blur-xl  z-40 transition-all duration-300 
-        ${isOpen ? "w-64 translate-x-0" : "w-64 -translate-x-full"}
-        ${isOpen ? "lg:w-64 lg:translate-x-0" : "lg:w-20 lg:translate-x-0"}
-      `}
+      className={`zIndex-100 bg-primary-foreground fixed left-0 top-17.5 bottom-0 backdrop-blur-xl z-40 transition-all duration-300 
+        ${
+          isOpen
+            ? "w-64 translate-x-0 shadow-2xl md:shadow-none"
+            : "w-64 -translate-x-full"
+        }
+        ${isOpen ? "lg:w-64 lg:translate-x-0" : "lg:w-20 lg:translate-x-0"}
+      `}
+      onClick={(e) => e.stopPropagation()}
+      onTouchStart={handleTouchStart}
+      onTouchMove={handleTouchMove}
+      onTouchEnd={handleTouchEnd}
     >
       <div className={`p-4 h-full flex flex-col relative`}>
+        <LocationSelector isOpen={isOpen} />
         <div className="space-y-2 flex-1 overflow-y-auto pb-20">
           {navItems.map((item) => (
             <SubMenu

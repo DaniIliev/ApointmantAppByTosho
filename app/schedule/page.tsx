@@ -49,6 +49,8 @@ export type Schedule = {
   locationId?: string;
 };
 
+import { useLocationContext } from "@/context/LocationContext";
+
 function StaffSchedulePageContent() {
   type CreateNewDashboardMenuProps = {
     onOpenModal: () => void;
@@ -68,6 +70,7 @@ function StaffSchedulePageContent() {
   const { t } = useTranslation();
   const { setPageTitle } = usePageTitle();
   const { setExtraRightNavMenu, setIsRightNavVisible } = useRightNav();
+  const { selectedLocation } = useLocationContext();
 
   const [selectedScheduleId, setSelectedScheduleId] = useState<string | null>(
     null
@@ -75,9 +78,9 @@ function StaffSchedulePageContent() {
   const [schedules, setSchedules] = useState<Schedule[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isApplyToAllModalOpen, setIsApplyToAllModalOpen] = useState(false);
-  const [selectedLocationId, setSelectedLocationId] = useState<string>("");
+  // We'll keep locations for the modal, but remove selectedLocationId local state
   const [locations, setLocations] = useState<any[]>([]);
-  const [scheduleToEdit, setScheduleToEdit] = useState<Schedule | null>(null); // Ново състояние за редактиране
+  const [scheduleToEdit, setScheduleToEdit] = useState<Schedule | null>(null);
   const [isPageLoading, setIsPageLoading] = useState(true);
 
   const router = useRouter();
@@ -105,11 +108,8 @@ function StaffSchedulePageContent() {
   useEffect(() => {
     const fetchSchedules = async () => {
       try {
-        let url = "/api/staff-schedules";
-        if (selectedLocationId) {
-          url += `?locationId=${selectedLocationId}`;
-        }
-        const data = await callApi(url, "GET");
+        // x-location-id header is now automatically added by callApi
+        const data = await callApi("/api/staff-schedules", "GET");
         setSchedules(data);
       } catch (error) {
         toast.error(t("Failed to load schedules."));
@@ -138,7 +138,7 @@ function StaffSchedulePageContent() {
     };
 
     loadData();
-  }, [selectedLocationId, t]);
+  }, [selectedLocation?._id, t]);
 
   const handleSave = async (updatedData: Schedule[]) => {
     try {
@@ -602,19 +602,6 @@ function StaffSchedulePageContent() {
 
   return (
     <>
-      <div className="mb-6 max-w-xs">
-        <LabeledSelect<string>
-          id="filterLocation"
-          label={t("Filter by Location")}
-          value={selectedLocationId}
-          onValueChange={setSelectedLocationId}
-          placeholder={t("All Locations")}
-          options={[
-            { id: "", name: t("All Locations") },
-            ...locations.map(l => ({ id: l._id, name: l.name }))
-          ]}
-        />
-      </div>
       <GenericTable
         data={schedules}
         columns={columns}

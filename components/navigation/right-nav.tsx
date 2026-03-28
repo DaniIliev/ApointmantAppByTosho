@@ -42,12 +42,15 @@ function RightNavBubbles({ content }: { content: React.ReactNode }) {
 
   const onPointerMove = (e: React.PointerEvent) => {
     if (!isDragging) return;
-    if (Math.abs(e.clientY - startYRef.current) > 3) movedRef.current = true;
+    if (Math.abs(e.clientY - startYRef.current) > 5) movedRef.current = true;
     const newTop = e.clientY - 20; // center the 40px bubble
     const vh = window.innerHeight;
     const clamped = Math.min(Math.max(newTop, 40), vh - 40);
     setTop(clamped);
   };
+
+  const childArray = React.Children.toArray(content).filter(Boolean);
+  const isMultiple = childArray.length > 1;
 
   const triggerPrimaryAction = () => {
     const host = hiddenHostRef.current;
@@ -61,12 +64,12 @@ function RightNavBubbles({ content }: { content: React.ReactNode }) {
 
   const onPointerUp = (e: React.PointerEvent) => {
     setIsDragging(false);
-    // Toggle only if it wasn't a drag
+    try { (e.target as Element).releasePointerCapture?.(e.pointerId); } catch(e){}
+    
     if (!movedRef.current) {
-      if (React.Children.count(content) === 1) {
-        // Single action: trigger directly
+      if (!isMultiple && childArray.length > 0) {
         triggerPrimaryAction();
-      } else {
+      } else if (isMultiple) {
         setOpen((v) => !v);
       }
     }
@@ -77,12 +80,12 @@ function RightNavBubbles({ content }: { content: React.ReactNode }) {
   };
 
   return (
-    <div>
+    <>
       <div
         ref={containerRef}
-        style={{ top, right: 4 }}
+        style={{ top, right: 8 }}
         className={cn(
-          "absolute z-40 select-none touch-none",
+          "fixed z-50 select-none touch-none", // ensure layout over everything
           "transition-shadow",
           isDragging ? "cursor-grabbing" : "cursor-grab"
         )}
@@ -96,45 +99,66 @@ function RightNavBubbles({ content }: { content: React.ReactNode }) {
           aria-label="Open quick actions"
           tabIndex={0}
           className={cn(
-            "h-10 w-10 rounded-full shadow-lg border border-border overflow-hidden",
-            "bg-primary text-white flex items-center justify-center",
-            "active:scale-95 transition-transform focus:outline-none focus-visible:outline-none"
+            "h-[42px] w-[42px] rounded-full shadow-lg border border-border/20 overflow-hidden",
+            "bg-primary text-primary-foreground flex items-center justify-center",
+            "active:scale-95 transition-all duration-200 focus:outline-none focus-visible:outline-none focus:ring-2 focus:ring-primary ring-offset-2",
+            open && "ring-2 ring-primary ring-offset-2"
           )}
           onKeyDown={(e) => {
             if (e.key === "Enter" || e.key === " ") {
               e.preventDefault();
-              if (React.Children.count(content) === 1) triggerPrimaryAction();
-              else setOpen((v) => !v);
+              if (!isMultiple && childArray.length > 0) triggerPrimaryAction();
+              else if (isMultiple) setOpen((v) => !v);
             }
           }}
         >
-          {React.Children.count(content) === 1 ? (
-            <div className="pointer-events-none flex items-center justify-center h-full w-full scale-90 text-white">
+          {!isMultiple && childArray.length > 0 ? (
+            <div className="pointer-events-none flex items-center justify-center h-full w-full scale-90">
               {content}
             </div>
           ) : open ? (
-            <ChevronRight className="h-5 w-5 text-white" />
+            <ChevronRight className="h-5 w-5" />
           ) : (
-            <MoreVertical className="h-5 w-5 text-white" />
+            <MoreVertical className="h-5 w-5" />
           )}
         </div>
 
+        {/* Hidden host to facilitate direct click triggering for singular tasks */}
         <div ref={hiddenHostRef} className="hidden">
           {content}
         </div>
-        {open && (
-          <div
-            className={cn(
-              "absolute right-16 top-1/2 -translate-y-1/2",
-              "bg-primary-foreground border border-border rounded-2xl shadow-xl",
-              "p-2 max-w-[70vw] text-white"
-            )}
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="flex items-center gap-2 text-white">{content}</div>
-          </div>
-        )}
       </div>
-    </div>
+
+      {/* Popover Menu rendering Generic Vertical List of actions */}
+      {open && isMultiple && (
+        <div
+          className={cn(
+            "fixed z-50 -translate-y-1/2",
+            "bg-popover border border-border/40 rounded-xl shadow-2xl",
+            "p-1.5 min-w-[200px] origin-right animate-in fade-in zoom-in-95 duration-150"
+          )}
+          style={{ top: top + 21, right: 60 }}
+          onClick={(e) => {
+            e.stopPropagation();
+          }}
+        >
+          <div className="flex flex-col items-stretch gap-1">
+            {childArray.map((child, index) => (
+              <div key={index} onClick={() => setOpen(false)}>
+                {child}
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Backdrop to dismiss popover */}
+      {open && isMultiple && (
+        <div 
+          className="fixed inset-0 z-40 bg-transparent/5" 
+          onClick={() => setOpen(false)} 
+        />
+      )}
+    </>
   );
 }
