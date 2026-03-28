@@ -12,6 +12,8 @@ interface DashboardDateContextType {
   endDate: string;
   groupBy: "day" | "week" | "month";
   setGroupBy: (groupBy: "day" | "week" | "month") => void;
+  locationId: string | null;
+  setLocationId: (id: string | null) => void;
 }
 
 const DashboardDateContext = createContext<
@@ -35,6 +37,7 @@ export const DashboardDateProvider: React.FC<{ children: React.ReactNode }> = ({
   });
 
   const [groupBy, setGroupBy] = useState<"day" | "week" | "month">("day");
+  const [locationId, setLocationId] = useState<string | null>(null);
 
   // Format dates to ISO string (YYYY-MM-DD)
   const formatDate = (date: Date | undefined): string => {
@@ -54,6 +57,8 @@ export const DashboardDateProvider: React.FC<{ children: React.ReactNode }> = ({
         endDate,
         groupBy,
         setGroupBy,
+        locationId,
+        setLocationId,
       }}
     >
       {children}

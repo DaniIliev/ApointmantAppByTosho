@@ -98,9 +98,9 @@ export const AppointmentEditModal: React.FC<AppointmentEditModalProps> = ({
         const selectedService = appointmentTypes?.find(
           (type) => type._id === formData.appointmentTypeId
         );
-        if (selectedService && selectedService.staffs) {
+        if (selectedService && selectedService.staffMembers) {
           const staffDetails = await callApi(`/api/staff/by-ids`, "POST", {
-            staffIds: selectedService.staffs,
+            staffIds: selectedService.staffMembers.map((s: any) => s._id),
           });
           setAvailableStaff(staffDetails);
         }

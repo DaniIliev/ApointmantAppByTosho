@@ -13,6 +13,7 @@ import { LabeledInput } from "@/components/customUIComponents/LabeledInput";
 import { LabeledSelect } from "@/components/customUIComponents/LabeledSelect";
 import { Modal } from "../customUIComponents/Modal";
 import { useTranslation } from "react-i18next";
+import { useLocationOptions } from "./useLocationOptions";
 
 interface LineBarChartConfigFormProps {
   open: boolean;
@@ -37,6 +38,7 @@ interface LineBarConfig {
   metric: LineBarMetric;
   compareWeeks: boolean; // Compare current vs previous week
   staffId?: string;
+  locationId?: string;
 }
 
 export function LineBarChartConfigForm({
@@ -47,6 +49,7 @@ export function LineBarChartConfigForm({
 }: LineBarChartConfigFormProps) {
   const { startDate, endDate, groupBy } = useDashboardDate();
   const { staffOptions, loadingStaff } = useStaffOptions();
+  const { locationOptions, loadingLocations } = useLocationOptions();
   const { t } = useTranslation();
 
   const [config, setConfig] = useState<LineBarConfig>({
@@ -55,6 +58,7 @@ export function LineBarChartConfigForm({
     metric: "count",
     compareWeeks: true,
     staffId: "",
+    locationId: "",
   });
 
   const [previewData, setPreviewData] = useState<Record<string, unknown>[]>([]);
@@ -75,6 +79,7 @@ export function LineBarChartConfigForm({
           dataSource: config.dataSource,
           metric: config.metric,
           staffId: config.staffId || undefined,
+          locationId: config.locationId || undefined,
           groupBy,
           startDate,
           endDate,
@@ -117,7 +122,9 @@ export function LineBarChartConfigForm({
     config.compareWeeks,
     groupBy,
     startDate,
+    startDate,
     endDate,
+    config.locationId,
   ]);
 
   const getDataKeys = () => {
@@ -174,6 +181,7 @@ export function LineBarChartConfigForm({
         dataSource: config.dataSource,
         metric: config.metric,
         staffId: config.staffId?.trim() || undefined,
+        locationId: config.locationId?.trim() || undefined,
         compareWeeks: config.compareWeeks,
       },
     };

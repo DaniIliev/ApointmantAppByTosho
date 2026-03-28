@@ -16,28 +16,32 @@ export const LocationSelector = ({ isOpen }: { isOpen: boolean }) => {
   const { locations, selectedLocation, setSelectedLocation } = useLocationContext();
 
   if (locations.length <= 1) {
-    if (locations.length === 1 && isOpen) {
-        return (
-            <div className="px-4 mb-4">
-                <div className="flex items-center gap-2 px-3 py-3 rounded-xl bg-primary/5 border border-primary/10 text-text-primary">
-                    <MapPin className="w-5 h-5 text-primary flex-shrink-0" />
-                    <span className="font-medium truncate text-sm">
-                        {locations[0].name}
-                    </span>
-                </div>
-            </div>
-        );
+    if (locations.length === 1) {
+      return (
+        <div className={`mb-4 transition-all duration-300 ${!isOpen ? "px-0" : "px-4"}`}>
+          <div className={`flex items-center gap-2 py-3 rounded-xl bg-primary/5 border border-primary/10 text-text-primary ${!isOpen ? "justify-center" : "px-3"}`}>
+            <MapPin className="w-5 h-5 text-primary flex-shrink-0" />
+            {isOpen && (
+              <span className="font-medium truncate text-sm">
+                {locations[0].name}
+              </span>
+            )}
+          </div>
+        </div>
+      );
     }
     return null;
   }
 
   return (
-    <div className={`px-4 mb-4 transition-all duration-300 ${!isOpen ? "px-2" : "px-4"}`}>
+    <div className={`mb-4 transition-all duration-300 p-0`}>
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <Button
             variant="outline"
-            className={`w-full justify-between gap-2 bg-primary/5 border-primary/10 hover:bg-primary/10 text-text-primary h-auto py-3 rounded-xl ${!isOpen ? "px-2 justify-center" : "px-3"}`}
+            className={`w-full justify-between gap-2 bg-primary/5 border-primary/10 hover:bg-primary/10 text-text-primary h-auto py-3 rounded-xl ${
+              !isOpen ? "px-0 justify-center" : "px-3"
+            }`}
           >
             <div className="flex items-center gap-2 overflow-hidden">
               <MapPin className="w-5 h-5 text-primary flex-shrink-0" />
@@ -50,7 +54,7 @@ export const LocationSelector = ({ isOpen }: { isOpen: boolean }) => {
             {isOpen && <ChevronDown className="w-4 h-4 text-muted-foreground flex-shrink-0" />}
           </Button>
         </DropdownMenuTrigger>
-        <DropdownMenuContent className="w-56" align="start">
+        <DropdownMenuContent className="w-56 bg-white dark:bg-slate-900 opacity-100 shadow-2xl" align="start">
           {locations.map((loc) => (
             <DropdownMenuItem
               key={loc._id}

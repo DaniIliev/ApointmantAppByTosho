@@ -104,9 +104,8 @@ function KanbanPageContent() {
         const fullBoard = await callApi(`/api/kanban/boards/${firstBoard._id}`, "GET");
         setColumns(fullBoard.columns || []);
       } else {
-        const newBoard = await callApi("/api/kanban/boards", "POST", { title: t("My Board"), description: "", businessId: user.businessId });
-        setBoards([newBoard]);
-        setSelectedBoardId(newBoard._id);
+        setBoards([]);
+        setSelectedBoardId(null);
         setColumns([]);
       }
 
@@ -463,41 +462,62 @@ function KanbanPageContent() {
 
   return (
     <div className="h-full flex flex-col p-2 space-y-4 bg-background z-0 relative">
-      <div className="flex flex-col md:flex-row items-center justify-between gap-4 p-4 rounded-xl border border-border/40 bg-card shadow-sm">
-        <div className="flex-shrink-0 min-w-[200px] z-10 w-full md:w-auto">
-          <LabeledSelect
-            id="board-selector"
-            label={t("Active Board")}
-            placeholder={t("Select a board")}
-            options={boards.map(b => ({ name: b.title, id: b._id }))}
-            value={selectedBoardId || ""}
-            onValueChange={handleSelectBoard}
-          />
+      {boards.length === 0 ? (
+        <div className="flex-1 flex items-center justify-center p-4">
+          <div className="max-w-md w-full p-8 rounded-xl border border-border/40 bg-card shadow-sm text-center space-y-4">
+            <h3 className="text-xl font-semibold">{t("No Boards Created")}</h3>
+            <p className="text-muted-foreground">
+              {t("You don't have any Kanban boards yet. Create one to get started and manage your tasks efficiently.")}
+            </p>
+            <Button onClick={() => {
+              setBoardModalMode("create");
+              setBoardTitle("");
+              setBoardModalOpen(true);
+            }} className="w-full sm:w-auto">
+              <Plus className="w-4 h-4 mr-2" />
+              {t("Create Board")}
+            </Button>
+          </div>
         </div>
+      ) : (
+        <>
+          <div className="flex flex-col md:flex-row items-center justify-between gap-4 p-4 rounded-xl border border-border/40 bg-card shadow-sm">
+            <div className="flex-shrink-0 min-w-[200px] z-10 w-full md:w-auto">
+              <LabeledSelect
+                id="board-selector"
+                label={t("Active Board")}
+                placeholder={t("Select a board")}
+                options={boards.map(b => ({ name: b.title, id: b._id }))}
+                value={selectedBoardId || ""}
+                onValueChange={handleSelectBoard}
+              />
+            </div>
 
-        <div className="flex-1 w-full flex justify-start z-20">
-          <GenericFilters<KanbanFiltersData>
-            filters={filters}
-            setFilters={setFilters}
-            filterConfigs={filterConfigs}
-            dateFilters={true}
-            className="w-full md:w-auto z-20"
-          />
-        </div>
-      </div>
+            <div className="flex-1 w-full flex justify-start z-20">
+              <GenericFilters<KanbanFiltersData>
+                filters={filters}
+                setFilters={setFilters}
+                filterConfigs={filterConfigs}
+                dateFilters={true}
+                className="w-full md:w-auto z-20"
+              />
+            </div>
+          </div>
 
-      <div className="flex-1 overflow-hidden">
-        <KanbanBoardComponent
-          columns={filteredColumns}
-          onColumnsChange={handleColumnsChange}
-          onAddColumn={handleAddColumn}
-          onEditColumn={handleEditColumn}
-          onDeleteColumn={handleDeleteColumn}
-          onAddCard={handleAddCard}
-          onEditCard={handleEditCard}
-          onDeleteCard={handleDeleteCard}
-        />
-      </div>
+          <div className="flex-1 overflow-hidden">
+            <KanbanBoardComponent
+              columns={filteredColumns}
+              onColumnsChange={handleColumnsChange}
+              onAddColumn={handleAddColumn}
+              onEditColumn={handleEditColumn}
+              onDeleteColumn={handleDeleteColumn}
+              onAddCard={handleAddCard}
+              onEditCard={handleEditCard}
+              onDeleteCard={handleDeleteCard}
+            />
+          </div>
+        </>
+      )}
 
       <CardModal
         open={cardModalOpen}

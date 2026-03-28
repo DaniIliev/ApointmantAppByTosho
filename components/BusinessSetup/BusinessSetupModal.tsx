@@ -413,7 +413,7 @@ export default function BusinessSetupModal({
           color: t.color,
           imageUrl: t.imageUrl,
           category: t.category,
-          staffs: JSON.stringify(t.staffMembers),
+          staffMembers: JSON.stringify(t.staffMembers),
         };
         await callApi(
           `/api/service`,

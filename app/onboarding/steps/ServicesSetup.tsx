@@ -28,11 +28,11 @@ export default function ServicesSetup({ locations, staff, onFinish, onBack, init
   const [services, setServices] = useState<Service[]>(
     initialData && initialData.length > 0
       ? initialData
-      : [{ name: "", duration: 30, price: 0, category: "", locationId: locations[0]?._id || "", staffs: [] }]
+      : [{ name: "", duration: 30, price: 0, category: "", locationId: locations[0]?._id || "", staffMembers: [] }]
   );
 
   const addService = () => {
-    setServices([...services, { name: "", duration: 30, price: 0, category: "", locationId: locations[0]?._id || "", staffs: [] }]);
+    setServices([...services, { name: "", duration: 30, price: 0, category: "", locationId: locations[0]?._id || "", staffMembers: [] }]);
   };
 
   const removeService = (index: number) => {
@@ -51,17 +51,17 @@ export default function ServicesSetup({ locations, staff, onFinish, onBack, init
     const service = services[serviceIndex];
     if (!service) return;
     
-    const currentStaffs = service?.staffs || [];
-    const isAssigned = currentStaffs.some(s => s._id === staffMember._id);
+    const currentStaffMembers = service?.staffMembers || [];
+    const isAssigned = currentStaffMembers.some(s => s._id === staffMember._id);
     
-    let newStaffs;
+    let newStaffMembers;
     if (isAssigned) {
-      newStaffs = currentStaffs.filter(s => s._id !== staffMember._id);
+      newStaffMembers = currentStaffMembers.filter(s => s._id !== staffMember._id);
     } else {
-      newStaffs = [...currentStaffs, { _id: staffMember._id!, name: `${staffMember.firstName} ${staffMember.lastName}` }];
+      newStaffMembers = [...currentStaffMembers, { _id: staffMember._id!, name: `${staffMember.firstName} ${staffMember.lastName}` }];
     }
     
-    updateService(serviceIndex, "staffs", newStaffs);
+    updateService(serviceIndex, "staffMembers", newStaffMembers);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -133,7 +133,7 @@ export default function ServicesSetup({ locations, staff, onFinish, onBack, init
                         <div key={s._id} className="flex items-center space-x-2 p-1 hover:bg-slate-50 dark:hover:bg-white/5 rounded-lg transition-colors">
                           <Checkbox 
                             id={`staff-${index}-${s._id}`}
-                            checked={(ser.staffs || []).some(assigned => assigned._id === s._id)}
+                            checked={(ser.staffMembers || []).some(assigned => assigned._id === s._id)}
                             onCheckedChange={() => toggleStaff(index, s)}
                           />
                           <label 

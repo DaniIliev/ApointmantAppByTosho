@@ -153,7 +153,7 @@ export const DateRangeSelector: React.FC = () => {
     computeIsSelected();
 
   return (
-    <div className="relative flex flex-col gap-3 sm:flex-row sm:flex-nowrap sm:items-center bg-card p-4 rounded-lg border z-[3000]">
+    <div className="relative flex flex-col gap-3 sm:flex-row sm:flex-nowrap sm:items-center bg-card p-4 rounded-lg border ">
       <div className="flex w-full flex-wrap items-center gap-2 sm:flex-nowrap">
         <div className="flex-1 min-w-[220px] sm:flex-initial">
           <DateRangePicker

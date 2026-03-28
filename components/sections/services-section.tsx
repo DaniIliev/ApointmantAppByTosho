@@ -159,7 +159,7 @@ export function ServicesSection({ businessId, locationId }: { businessId: string
                               <Euro className="h-4 w-4" />
                               <span>{formatPriceEUR(service.price)}</span>
                             </div>
-                          {service.staffs && service.staffs.length > 0 && (
+                          {service.staffMembers && service.staffMembers.length > 0 && (
                               <>
                                 {/* Mobile: left-aligned avatar group with initials only */}
                                 <div className="flex items-center justify-start gap-2 w-full md:hidden">
@@ -167,7 +167,7 @@ export function ServicesSection({ businessId, locationId }: { businessId: string
                                     {t("Performed by")}:
                                   </span>
                               <div className="flex -space-x-2">
-                                {service.staffs.map((staff) => (
+                                {service.staffMembers.map((staff) => (
                                   <Avatar
                                     key={staff._id}
                                         className="h-7 w-7 ring-2 ring-background border border-primary/40"
@@ -185,7 +185,7 @@ export function ServicesSection({ businessId, locationId }: { businessId: string
                                   <span className="text-sm text-muted-foreground mr-2">
                                     {t("Performed by")}:
                                   </span>
-                                  {service.staffs.map((staff) => (
+                                  {service.staffMembers.map((staff) => (
                                     <div
                                       key={staff._id}
                                       className="flex items-center gap-2 bg-gradient-to-tr from-primary/10 to-primary/20 border border-primary/20 rounded-full px-3 py-1.5 shadow-sm hover:shadow-md hover:from-primary/20 hover:to-primary/30 transition-all duration-300 cursor-pointer group"

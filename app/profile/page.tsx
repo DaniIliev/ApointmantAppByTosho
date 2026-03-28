@@ -440,7 +440,7 @@ export default function SettingsPage() {
         {(!userData.authProvider || userData.authProvider === "local") && (
           <Card>
             <CardHeader>
-              <CardTitle className="text-secondary text-2xl">
+              <CardTitle className="text-primary text-2xl">
                 {t("Change Password")}
               </CardTitle>
               <CardDescription>
@@ -475,8 +475,8 @@ export default function SettingsPage() {
                   onChange={() => {}}
                 />
               </div>
-              <div className="flex justify-start">
-                <Button variant="outline" className="mt-2 text-secondary">
+              <div className="flex justify-center">
+                <Button variant="outline" className="mt-2 text-primary">
                   {t("Update Password")}
                 </Button>
               </div>

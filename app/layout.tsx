@@ -55,7 +55,7 @@ html {
           <LocationProvider>
             <NextThemesProvider
               attribute="class"
-              defaultTheme="dark"
+              defaultTheme="light"
               enableSystem={false}
             >
               <ThemeProvider>

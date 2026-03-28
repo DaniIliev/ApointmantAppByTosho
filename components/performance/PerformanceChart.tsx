@@ -1,7 +1,7 @@
 "use client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
-import { useMemo } from "react";
+import { useMemo, useState, useEffect } from "react";
 import dynamic from "next/dynamic";
 
 // Dynamic import to avoid SSR issues
@@ -52,6 +52,15 @@ export function PerformanceChart({
   dateTo,
   seriesConfig,
 }: PerformanceChartProps) {
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth < 768);
+    checkMobile();
+    window.addEventListener("resize", checkMobile);
+    return () => window.removeEventListener("resize", checkMobile);
+  }, []);
+
   const option = useMemo(() => {
     const finalDataKeys =
       dataKeys && dataKeys.length > 0 ? dataKeys : [dataKey];
@@ -88,18 +97,21 @@ export function PerformanceChart({
             },
           },
           legend: {
+            type: isMobile ? "scroll" : "plain",
             data: finalDataKeys.map(
               (key) => key.charAt(0).toUpperCase() + key.slice(1)
             ),
             textStyle: {
               color: "#999",
+              fontSize: isMobile ? 10 : 12,
             },
             bottom: 0,
+            padding: [5, 10],
           },
           grid: {
             left: "3%",
             right: "4%",
-            bottom: showSlider ? "22%" : "15%",
+            bottom: isMobile ? (showSlider ? "28%" : "20%") : (showSlider ? "22%" : "15%"),
             top: "10%",
             containLabel: true,
           },
@@ -193,18 +205,21 @@ export function PerformanceChart({
             },
           },
           legend: {
+            type: isMobile ? "scroll" : "plain",
             data: finalDataKeys.map(
               (key) => key.charAt(0).toUpperCase() + key.slice(1)
             ),
             textStyle: {
               color: "#999",
+              fontSize: isMobile ? 10 : 12,
             },
             bottom: 0,
+            padding: [5, 10],
           },
           grid: {
             left: "3%",
             right: "4%",
-            bottom: showSlider ? "22%" : "15%",
+            bottom: isMobile ? (showSlider ? "28%" : "20%") : (showSlider ? "22%" : "15%"),
             top: "10%",
             containLabel: true,
           },
@@ -299,18 +314,21 @@ export function PerformanceChart({
             },
           },
           legend: {
+            type: isMobile ? "scroll" : "plain",
             data: finalDataKeys.map(
               (key) => key.charAt(0).toUpperCase() + key.slice(1)
             ),
             textStyle: {
               color: "#999",
+              fontSize: isMobile ? 10 : 12,
             },
             bottom: 0,
+            padding: [5, 10],
           },
           grid: {
-            left: "8%",
+            left: isMobile ? "12%" : "8%",
             right: "4%",
-            bottom: showSlider ? "22%" : "15%",
+            bottom: isMobile ? (showSlider ? "28%" : "20%") : (showSlider ? "22%" : "15%"),
             top: "10%",
             containLabel: true,
           },
@@ -405,18 +423,21 @@ export function PerformanceChart({
             },
           },
           legend: {
+            type: isMobile ? "scroll" : "plain",
             data: finalDataKeys.map(
               (key) => key.charAt(0).toUpperCase() + key.slice(1)
             ),
             textStyle: {
               color: "#999",
+              fontSize: isMobile ? 10 : 12,
             },
             bottom: 0,
+            padding: [5, 10],
           },
           grid: {
             left: "3%",
             right: "4%",
-            bottom: showSlider ? "22%" : "15%",
+            bottom: isMobile ? (showSlider ? "28%" : "20%") : (showSlider ? "22%" : "15%"),
             top: "10%",
             containLabel: true,
           },
@@ -496,16 +517,19 @@ export function PerformanceChart({
             formatter: "{b}: {c} ({d}%)",
           },
           legend: {
+            type: isMobile ? "scroll" : "plain",
             orient: "horizontal",
             bottom: 0,
             textStyle: {
               color: "#999",
+              fontSize: isMobile ? 10 : 12,
             },
+            padding: [5, 10],
           },
           series: [
             {
               type: "pie",
-              radius: ["40%", "70%"],
+              radius: isMobile ? ["35%", "60%"] : ["40%", "70%"],
               center: ["50%", "50%"],
               avoidLabelOverlap: true,
               itemStyle: {
@@ -515,8 +539,19 @@ export function PerformanceChart({
               },
               label: {
                 show: true,
-                formatter: "{b}: {d}%",
+                formatter: isMobile ? "{d}%" : "{b}: {d}%",
                 color: "#666",
+                fontSize: isMobile ? 10 : 12,
+                position: isMobile ? "outside" : "outside",
+              },
+              labelLine: {
+                length: isMobile ? 5 : 15,
+                length2: isMobile ? 5 : 15,
+                smooth: true,
+              },
+              labelLayout: {
+                hideOverlap: true,
+                moveOverlap: "shiftY",
               },
               emphasis: {
                 label: {
@@ -625,6 +660,7 @@ export function PerformanceChart({
             },
           },
           legend: {
+            type: isMobile ? "scroll" : "plain",
             data: [
               ...barKeys.map(
                 (key) =>
@@ -639,13 +675,15 @@ export function PerformanceChart({
             ],
             textStyle: {
               color: "#999",
+              fontSize: isMobile ? 10 : 12,
             },
             bottom: 0,
+            padding: [5, 10],
           },
           grid: {
             left: "3%",
             right: "4%",
-            bottom: showSlider ? "22%" : "15%",
+            bottom: isMobile ? (showSlider ? "28%" : "20%") : (showSlider ? "22%" : "15%"),
             top: "10%",
             containLabel: true,
           },
@@ -739,18 +777,21 @@ export function PerformanceChart({
             },
           },
           legend: {
+            type: isMobile ? "scroll" : "plain",
             data: finalDataKeys.map(
               (key) => key.charAt(0).toUpperCase() + key.slice(1)
             ),
             textStyle: {
               color: "#999",
+              fontSize: isMobile ? 10 : 12,
             },
             bottom: 0,
+            padding: [5, 10],
           },
           grid: {
-            left: "15%",
+            left: isMobile ? "12%" : "15%",
             right: "4%",
-            bottom: "15%",
+            bottom: isMobile ? "20%" : "15%",
             top: "10%",
             containLabel: true,
           },
@@ -806,21 +847,27 @@ export function PerformanceChart({
           className
         )}
       >
-        <CardHeader>
-          <div className="flex flex-col gap-2">
-            <CardTitle className="theme-text-gradient py-2">{title}</CardTitle>
-            {(dateFrom || dateTo) && (
-              <p className="text-xs text-slate-500 dark:text-slate-400">
-                {dateFrom && dateTo
-                  ? `${dateFrom} - ${dateTo}`
-                  : dateFrom
-                  ? `From ${dateFrom}`
-                  : `To ${dateTo}`}
-              </p>
-            )}
-          </div>
-        </CardHeader>
-        <CardContent className="flex-1 overflow-hidden">
+        {(title || dateFrom || dateTo) && (
+          <CardHeader className="pb-2">
+            <div className="flex flex-col gap-2">
+              {title && (
+                <CardTitle className="theme-text-gradient py-1">
+                  {title}
+                </CardTitle>
+              )}
+              {(dateFrom || dateTo) && (
+                <p className="text-xs text-slate-500 dark:text-slate-400">
+                  {dateFrom && dateTo
+                    ? `${dateFrom} - ${dateTo}`
+                    : dateFrom
+                    ? `From ${dateFrom}`
+                    : `To ${dateTo}`}
+                </p>
+              )}
+            </div>
+          </CardHeader>
+        )}
+        <CardContent className={cn("flex-1 overflow-hidden", !title && "p-0")}>
           <ReactECharts
             option={option}
             style={{ height: "100%", width: "100%" }}
