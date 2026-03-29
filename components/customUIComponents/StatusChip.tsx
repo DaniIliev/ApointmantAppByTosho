@@ -13,12 +13,14 @@ interface StatusChipProps {
 const getStatusProps = (status: AppointmentStatus) => {
   switch (status) {
     case "completed":
+    case "active":
       return {
         icon: <Check size={16} />,
         className:
           "bg-card/50 border-2 border-green-500 text-green-600 dark:text-green-400",
       };
     case "cancelled":
+    case "expired":
       return {
         icon: <X size={16} />,
         className:
@@ -31,6 +33,7 @@ const getStatusProps = (status: AppointmentStatus) => {
           "bg-card/50 border-2 border-yellow-500 text-yellow-600 dark:text-yellow-400",
       };
     case "confirmed":
+    case "upcoming":
       return {
         icon: <Clock size={16} />,
         className:
@@ -45,8 +48,8 @@ const getStatusProps = (status: AppointmentStatus) => {
   }
 };
 
+
 export const StatusChip = ({ status }: StatusChipProps) => {
-  console.log("status", status);
   const { t } = useTranslation();
   const statusProps = getStatusProps(status);
 

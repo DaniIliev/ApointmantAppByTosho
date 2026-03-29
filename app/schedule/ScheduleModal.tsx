@@ -7,7 +7,6 @@ import { Button } from "@/components/ui/button";
 import { Plus, Trash } from "lucide-react";
 import { Schedule, TimeRange } from "./page";
 import { CustomTooltip } from "@/components/customUIComponents/CustomTooltip";
-import { LabeledSelect } from "@/components/customUIComponents/LabeledSelect";
 
 type ScheduleModalProps = {
   isOpen: boolean;
@@ -15,6 +14,15 @@ type ScheduleModalProps = {
   onSave: (scheduleData: Schedule) => void;
   schedule: Schedule | null;
   locations: any[];
+};
+
+
+// Функция за филтриране на празните почивки за показване
+const getActiveBreaks = (schedule: Schedule): TimeRange[] => {
+  const breaks = [schedule.break1, schedule.break2, schedule.break3];
+  // Връща само тези, които имат поне 'start' или 'end' стойност, или поне един елемент, ако всички са празни (за да има поне един ред за въвеждане)
+  const active = breaks.filter((b) => b.start || b.end);
+  return active.length > 0 ? active : [{ start: null, end: null }];
 };
 
 const initialNewSchedule: Schedule = {
@@ -37,20 +45,11 @@ const initialNewSchedule: Schedule = {
   locationId: "",
 };
 
-// Функция за филтриране на празните почивки за показване
-const getActiveBreaks = (schedule: Schedule): TimeRange[] => {
-  const breaks = [schedule.break1, schedule.break2, schedule.break3];
-  // Връща само тези, които имат поне 'start' или 'end' стойност, или поне един елемент, ако всички са празни (за да има поне един ред за въвеждане)
-  const active = breaks.filter((b) => b.start || b.end);
-  return active.length > 0 ? active : [{ start: null, end: null }];
-};
-
 export const ScheduleModal = ({
   isOpen,
   onOpenChange,
   onSave,
   schedule,
-  locations,
 }: ScheduleModalProps) => {
   const { t } = useTranslation();
   const [localSchedule, setLocalSchedule] =
@@ -60,7 +59,6 @@ export const ScheduleModal = ({
   ]);
 
   const isEditMode = !!schedule?._id;
-  console.log("shedule", schedule);
   useEffect(() => {
     if (isOpen) {
       if (schedule) {
@@ -78,20 +76,6 @@ export const ScheduleModal = ({
       }
     }
   }, [isOpen, schedule]);
-
-  // Removed unused handleInputChange
-
-  // Removed unused handleWorkTimeChange
-
-  const handleBreakChange = (
-    index: number,
-    type: "start" | "end",
-    value: string
-  ) => {
-    const newBreaks = [...breaks];
-    newBreaks[index] = { ...newBreaks[index], [type]: value };
-    setBreaks(newBreaks);
-  };
 
   const addBreak = () => {
     if (breaks.length < 3) {
@@ -262,18 +246,6 @@ export const ScheduleModal = ({
                 key.slice(2, 3)}
             </button>
           ))}
-        </div>
-
-        {/* Location Selection */}
-        <div className="pt-2">
-          <LabeledSelect<string>
-            id="locationId"
-            label={t("Location")}
-            value={localSchedule.locationId || ""}
-            onValueChange={(val) => setLocalSchedule(prev => ({ ...prev, locationId: val }))}
-            placeholder={t("Select a location")}
-            options={locations.map(l => ({ id: l._id, name: l.name }))}
-          />
         </div>
 
         {/* Action buttons */}

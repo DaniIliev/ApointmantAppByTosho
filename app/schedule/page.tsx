@@ -15,11 +15,11 @@ import { Switch } from "@/components/ui/switch";
 import { useTranslation } from "react-i18next";
 import { CustomTooltip } from "@/components/customUIComponents/CustomTooltip";
 import { Modal } from "@/components/customUIComponents/Modal";
-import { Checkbox } from "@/components/ui/checkbox";
+import { LabeledSelect } from "@/components/customUIComponents/LabeledSelect";
+import { StatusChip } from "@/components/customUIComponents/StatusChip";
 import callApi from "../Api/callApi";
 import { jwtDecode } from "jwt-decode";
 import { ScheduleModal } from "./ScheduleModal";
-import { LabeledSelect } from "@/components/customUIComponents/LabeledSelect";
 
 import { Skeleton } from "@/components/ui/skeleton";
 
@@ -76,7 +76,6 @@ function StaffSchedulePageContent() {
   const { setPageTitle } = usePageTitle();
   const { setExtraRightNavMenu, setIsRightNavVisible } = useRightNav();
   const { selectedLocation } = useLocationContext();
-
   const [selectedScheduleId, setSelectedScheduleId] = useState<string | null>(
     null
   );
@@ -184,9 +183,37 @@ function StaffSchedulePageContent() {
     }
   };
 
-  // Нова функция, която обединява създаването и редактирането от модала
   const handleCreateOrEdit = async (scheduleData: Schedule) => {
     const isEditing = !!scheduleData._id;
+
+    // Валидация за препокриване на графици
+    const newStart = new Date(scheduleData.startDate);
+    const newEnd = new Date(scheduleData.endDate);
+    
+    const targetStaff = typeof scheduleData.staff === "object" 
+      ? (scheduleData.staff as any)?._id 
+      : scheduleData.staff;
+    
+    const hasOverlap = schedules.some(s => {
+      if (isEditing && s._id === scheduleData._id) return false;
+      
+      const sTarget = typeof s.staff === "object" 
+        ? (s.staff as any)?._id 
+        : s.staff;
+      
+      // Проверяваме дали са за същия човек (или и двата са за локацията)
+      if (sTarget !== targetStaff) return false;
+      
+      const sStart = new Date(s.startDate);
+      const sEnd = new Date(s.endDate);
+      
+      return (newStart <= sEnd && newEnd >= sStart);
+    });
+
+    if (hasOverlap) {
+      toast.error(t("This schedule overlaps with an existing one for the same period."));
+      return;
+    }
 
     try {
       let result: Schedule;
@@ -202,23 +229,31 @@ function StaffSchedulePageContent() {
         );
         toast.success(t("Schedule updated successfully!"));
       } else {
-        // Създаване
-        result = await callApi("/api/staff-schedules", "POST", scheduleData);
+        const payload = {
+          ...scheduleData,
+          locationId: selectedLocation?._id,
+        }
+        result = await callApi("/api/staff-schedules", "POST", payload);
         setSchedules((prev) => [...prev, result]);
-        setSelectedScheduleId(result._id);
         toast.success(t("Schedule created successfully!"));
+      }
 
-        // Проверка дали да отвори модала за прилагане към всички
+      // Проверка дали да отвори модала за прилагане към всички
+      // Само ако това е глобалният график (staff: null/undefined)
+      if (!scheduleData.staff) {
+        setSelectedScheduleId(result._id);
         const storedToken = localStorage.getItem("token");
-        const decodedUser = jwtDecode<any>(storedToken!);
+        if (storedToken) {
+          const decodedUser = jwtDecode<any>(storedToken);
 
-        if (decodedUser.role === "business") {
-          const data = await callApi(
-            `/api/staff/staff-list?businessId=${decodedUser.businessId}`,
-            "GET"
-          );
-          if (data.length > 1) {
-            setIsApplyToAllModalOpen(true);
+          if (decodedUser.role === "business") {
+            const data = await callApi(
+              `/api/staff/staff-list?businessId=${decodedUser.businessId}`,
+              "GET"
+            );
+            if (data.length > 1) {
+              setIsApplyToAllModalOpen(true);
+            }
           }
         }
       }
@@ -255,6 +290,7 @@ function StaffSchedulePageContent() {
     {
       accessorKey: "staff",
       header: t("Staff Member"),
+      defaultWidth: 190,
       cell: ({ row }) => (
         <span className="font-medium">
           {row.original.staff 
@@ -266,8 +302,9 @@ function StaffSchedulePageContent() {
     {
       accessorKey: "period",
       header: t("Schedule Period"),
+      defaultWidth: 260,
       cell: ({ row }) => (
-        <div className="min-w-[200px]">
+        <>
           {row.original.startDate
             ? format(new Date(row.original.startDate), "dd.MM.yyyy")
             : "-"}{" "}
@@ -275,7 +312,7 @@ function StaffSchedulePageContent() {
           {row.original.endDate
             ? format(new Date(row.original.endDate), "dd.MM.yyyy")
             : "-"}
-        </div>
+        </>
       ),
       editableCell: ({ row }, onUpdate) => (
         <div className="flex space-x-2 min-w-[200px]">
@@ -297,8 +334,36 @@ function StaffSchedulePageContent() {
       ),
     },
     {
+      accessorKey: "status",
+      header: t("Status"),
+      defaultWidth: 130,
+      cell: ({ row }) => {
+        const now = new Date();
+        const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+        const start = new Date(row.original.startDate);
+        const startPure = new Date(start.getFullYear(), start.getMonth(), start.getDate());
+        const end = new Date(row.original.endDate);
+        const endPure = new Date(end.getFullYear(), end.getMonth(), end.getDate());
+
+        let status = "active";
+
+        if (today > endPure) {
+          status = "expired";
+        } else if (today < startPure) {
+          status = "upcoming";
+        }
+
+        return (
+          <div className="flex items-center gap-2">
+            <StatusChip status={status} />
+          </div>
+        );
+      },
+    },
+    {
       accessorKey: "workTime",
       header: t("Work Time"),
+      defaultWidth: 150,
       cell: ({ row }) => (
         <span>
           {row.original.workTime.start} - {row.original.workTime.end}
@@ -336,6 +401,7 @@ function StaffSchedulePageContent() {
     {
       accessorKey: "isDayOff.monday",
       header: t("Mon"),
+      defaultWidth: 80,
       cell: ({ row }) => (
         <span className="font-medium">
           {row.original.isDayOff.monday ? t("Day Off") : t("Working")}
@@ -353,6 +419,7 @@ function StaffSchedulePageContent() {
     {
       accessorKey: "isDayOff.tuesday",
       header: t("Tue"),
+      defaultWidth: 80,
       cell: ({ row }) => (
         <span className="font-medium">
           {row.original.isDayOff.tuesday ? t("Day Off") : t("Working")}
@@ -373,6 +440,7 @@ function StaffSchedulePageContent() {
     {
       accessorKey: "isDayOff.wednesday",
       header: t("Wed"),
+      defaultWidth: 80,
       cell: ({ row }) => (
         <span className="font-medium">
           {row.original.isDayOff.wednesday ? t("Day Off") : t("Working")}
@@ -393,6 +461,7 @@ function StaffSchedulePageContent() {
     {
       accessorKey: "isDayOff.thursday",
       header: t("Thu"),
+      defaultWidth: 80,
       cell: ({ row }) => (
         <span className="font-medium">
           {row.original.isDayOff.thursday ? t("Day Off") : t("Working")}
@@ -413,6 +482,7 @@ function StaffSchedulePageContent() {
     {
       accessorKey: "isDayOff.friday",
       header: t("Fri"),
+      defaultWidth: 80,
       cell: ({ row }) => (
         <span className="font-medium">
           {row.original.isDayOff.friday ? t("Day Off") : t("Working")}
@@ -430,6 +500,7 @@ function StaffSchedulePageContent() {
     {
       accessorKey: "isDayOff.saturday",
       header: t("Sat"),
+      defaultWidth: 80,
       cell: ({ row }) => (
         <span className="font-medium">
           {row.original.isDayOff.saturday ? t("Day Off") : t("Working")}
@@ -450,6 +521,7 @@ function StaffSchedulePageContent() {
     {
       accessorKey: "isDayOff.sunday",
       header: t("Sun"),
+      defaultWidth: 80,
       cell: ({ row }) => (
         <span className="font-medium">
           {row.original.isDayOff.sunday ? t("Day Off") : t("Working")}
