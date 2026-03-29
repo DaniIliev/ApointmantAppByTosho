@@ -47,6 +47,11 @@ export type Schedule = {
   break2: TimeRange;
   break3: TimeRange;
   locationId?: string;
+  staff?: {
+    firstName: string;
+    lastName: string;
+    email: string;
+  } | string;
 };
 
 import { useLocationContext } from "@/context/LocationContext";
@@ -108,8 +113,9 @@ function StaffSchedulePageContent() {
   useEffect(() => {
     const fetchSchedules = async () => {
       try {
-        // x-location-id header is now automatically added by callApi
-        const data = await callApi("/api/staff-schedules", "GET");
+        const locId = selectedLocation?._id || localStorage.getItem("selectedLocationId");
+        const query = locId ? `?locationId=${locId}` : "";
+        const data = await callApi(`/api/staff-schedules${query}`, "GET");
         setSchedules(data);
       } catch (error) {
         toast.error(t("Failed to load schedules."));
@@ -246,7 +252,17 @@ function StaffSchedulePageContent() {
   };
 
   const columns: Column<Schedule>[] = [
-    // ... (Оставяме колоните както са, но добавяме бутон за редактиране)
+    {
+      accessorKey: "staff",
+      header: t("Staff Member"),
+      cell: ({ row }) => (
+        <span className="font-medium">
+          {row.original.staff 
+            ? `${(row.original.staff as any).firstName} ${(row.original.staff as any).lastName}`
+            : t("Location Default")}
+        </span>
+      ),
+    },
     {
       accessorKey: "period",
       header: t("Schedule Period"),

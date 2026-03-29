@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { LabeledInput } from "@/components/customUIComponents/LabeledInput";
 import { useTranslation } from "react-i18next";
@@ -9,6 +9,7 @@ import callApi from "@/app/Api/callApi";
 import { LabeledSelect } from "@/components/customUIComponents/LabeledSelect";
 
 import { Location, Staff } from "@/Global/Types/types";
+import { MultiSelectCombobox } from "@/components/customUIComponents/MultiSelectCombobox";
 
 interface StaffSetupProps {
   locations: Location[];
@@ -23,11 +24,17 @@ export default function StaffSetup({ locations, onNext, onBack, initialData }: S
   const [staff, setStaff] = useState<Staff[]>(
     initialData && initialData.length > 0
       ? initialData
-      : [{ firstName: "", lastName: "", email: "", role: "staff", locationId: locations[0]?._id || "" }]
+      : [{ firstName: "", lastName: "", email: "", role: "staff", locationIds: [locations[0]?._id || ""] }]
   );
 
+  useEffect(() => {
+    if (initialData && initialData.length > 0) {
+      setStaff(initialData);
+    }
+  }, [initialData]);
+
   const addStaffMember = () => {
-    setStaff([...staff, { firstName: "", lastName: "", email: "", role: "staff", locationId: locations[0]?._id || "" }]);
+    setStaff([...staff, { firstName: "", lastName: "", email: "", role: "staff", locationIds: [locations[0]?._id || ""] }]);
   };
 
   const removeStaffMember = (index: number) => {
@@ -36,7 +43,7 @@ export default function StaffSetup({ locations, onNext, onBack, initialData }: S
     }
   };
 
-  const updateStaff = (index: number, field: keyof Staff, value: string) => {
+  const updateStaff = (index: number, field: keyof Staff, value: any) => {
     const newStaff = [...staff];
     newStaff[index] = { ...newStaff[index], [field]: value } as Staff;
     setStaff(newStaff);
@@ -47,36 +54,68 @@ export default function StaffSetup({ locations, onNext, onBack, initialData }: S
     setLoading(true);
     try {
       // Group staff by normalized email to avoid duplicate parallel requests for the same person
-      const staffMap = new Map<string, Staff & { allLocations: string[] }>();
+      const staffMap = new Map<string, Staff>();
       
       staff.forEach(s => {
         if (!s.email) return;
         const normalizedEmail = s.email.trim().toLowerCase();
         if (staffMap.has(normalizedEmail)) {
           const existing = staffMap.get(normalizedEmail)!;
-          if (s.locationId && !existing.allLocations.includes(s.locationId)) {
-            existing.allLocations.push(s.locationId);
-          }
+          s.locationIds.forEach(locId => {
+            if (locId && !existing.locationIds.includes(locId)) {
+              existing.locationIds.push(locId);
+            }
+          });
         } else {
           staffMap.set(normalizedEmail, { 
             ...s, 
-            allLocations: s.locationId ? [s.locationId] : [] 
+            locationIds: [...s.locationIds] 
           });
         }
       });
 
-      // Send invitations for new staff (only once per email)
-      const uniqueStaffToInvite = Array.from(staffMap.values()).filter(s => !s._id);
-      
-      await Promise.all(
-        uniqueStaffToInvite.map(s => 
-          // Note: The backend currently expects a single locationId, 
-          // so we send the first one. Our backend logic is already updated to handle 
-          // subsequent invitations for the same email gracefully.
-          callApi("/api/staff/invite", "POST", s)
-        )
-      );
-      onNext(staff);
+      // Send invitations for staff (only for newly added locations to avoid redundant API calls)
+      const invitedStaffMap = new Map<string, any>();
+
+      for (const s of Array.from(staffMap.values())) {
+        let lastResStaff = null;
+        
+        // Find existing locationIds for this staff if from initialData
+        const originalStaff = (initialData || []).find(o => o.email.toLowerCase() === s.email.toLowerCase());
+        const originalLocIds = (originalStaff?.locationIds || []).map(id => id.toString());
+        
+        // Identify new locations that need an invite/assignment call
+        const newLocIds = s.locationIds.filter(locId => !originalLocIds.includes(locId.toString()));
+
+        for (const locId of newLocIds) {
+          try {
+            const res = await callApi("/api/staff/invite", "POST", { ...s, locationId: locId });
+            if (res.staff) {
+              lastResStaff = res.staff;
+            }
+          } catch (err) {
+            console.error(`Failed to invite ${s.email} to location ${locId}:`, err);
+          }
+        }
+        
+        if (lastResStaff) {
+          invitedStaffMap.set(lastResStaff.email.toLowerCase(), lastResStaff);
+        } else if (originalStaff) {
+          // If no new locations were added, keep the original staff data with updated local state
+          invitedStaffMap.set(s.email.toLowerCase(), { ...originalStaff, ...s });
+        }
+      }
+
+      // Update the original staff array with IDs
+      const finalStaff = staff.map(s => {
+        const invited = invitedStaffMap.get(s.email.toLowerCase());
+        if (invited) {
+          return { ...s, _id: invited._id, locationIds: invited.locationIds || s.locationIds };
+        }
+        return s;
+      });
+
+      onNext(finalStaff);
     } catch (error) {
       console.error("Failed to invite staff:", error);
       onNext(staff);
@@ -155,14 +194,18 @@ export default function StaffSetup({ locations, onNext, onBack, initialData }: S
                   ]}
                   placeholder={t("Select role")}
                 />
-                <LabeledSelect
-                  id={`locationId-${index}`}
-                  label={t("Location")}
-                  value={s.locationId}
-                  onValueChange={(val) => updateStaff(index, "locationId", val)}
-                  options={locations.map(loc => ({ id: loc._id || index.toString(), name: loc.name }))}
-                  placeholder={t("Assign to location")}
-                />
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">{t("Locations")}</label>
+                  <MultiSelectCombobox
+                    items={locations.map(loc => ({ id: loc._id!, name: loc.name }))}
+                    selectedIds={s.locationIds}
+                    onSelectIdsChange={(newIds) => updateStaff(index, "locationIds", newIds)}
+                    getLabel={(item) => item.name}
+                    triggerPlaceholder={t("Select locations")}
+                    searchPlaceholder={t("Search locations...")}
+                    emptyMessage={t("No locations found.")}
+                  />
+                </div>
               </div>
             </div>
           ))}

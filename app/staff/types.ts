@@ -6,7 +6,7 @@ export type StaffMember = {
   phone: string;
   role: string;
   profilePictureUrl?: string;
-  locationId?: string;
+  locationIds: string[];
 };
 
 export type NewStaffMember = {

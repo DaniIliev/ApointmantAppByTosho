@@ -9,6 +9,7 @@ import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 import callApi from "../Api/callApi";
 import { LabeledSelect } from "@/components/customUIComponents/LabeledSelect";
+import { MultiSelectCombobox } from "@/components/customUIComponents/MultiSelectCombobox";
 
 type StaffEditModalProps = {
   open: boolean;
@@ -33,7 +34,7 @@ export const StaffEditModal: React.FC<StaffEditModalProps> = ({
     email: "",
     phone: "",
     role: "",
-    locationId: "",
+    locationIds: [] as string[],
   });
 
   // Reset form when staff changes or modal opens
@@ -45,7 +46,7 @@ export const StaffEditModal: React.FC<StaffEditModalProps> = ({
         email: staff.email,
         phone: staff.phone,
         role: staff.role,
-        locationId: staff.locationId || "",
+        locationIds: staff.locationIds || [],
       });
     }
   }, [staff, open]);
@@ -128,14 +129,18 @@ export const StaffEditModal: React.FC<StaffEditModalProps> = ({
           id="role"
         />
 
-        <LabeledSelect<string>
-          id="locationId"
-          label={t("Location")}
-          value={formData.locationId}
-          onValueChange={(val) => setFormData({ ...formData, locationId: val })}
-          placeholder={t("Select a location")}
-          options={locations.map(l => ({ id: l._id, name: l.name }))}
-        />
+        <div className="space-y-1">
+          <label className="text-sm font-medium">{t("Locations")}</label>
+          <MultiSelectCombobox
+            items={locations.map(l => ({ id: l._id, name: l.name }))}
+            selectedIds={formData.locationIds}
+            onSelectIdsChange={(newIds) => setFormData({ ...formData, locationIds: newIds })}
+            getLabel={(item) => item.name}
+            triggerPlaceholder={t("Select locations")}
+            searchPlaceholder={t("Search locations...")}
+            emptyMessage={t("No locations found.")}
+          />
+        </div>
 
         <div className="flex justify-center gap-2 pt-4">
           <Button

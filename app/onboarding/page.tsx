@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useAuthContext } from "@/context/AuthContext";
 import { useTranslation } from "react-i18next";
 import RoleSelection from "./steps/RoleSelection";
@@ -29,7 +29,6 @@ interface OnboardingData {
 export default function OnboardingPage() {
   const { user} = useAuthContext();
   const router = useRouter();
-  const { t } = useTranslation();
   const [currentStep, setCurrentStep] = useState(1);
   const [onboardingData, setOnboardingData] = useState<OnboardingData>({
     role: (user?.role as UserRole) || "personal",
@@ -45,26 +44,21 @@ export default function OnboardingPage() {
     hours: {},
     services: [],
   });
-
   // Simple step orchestration
   const nextStep = () => setCurrentStep((prev) => prev + 1);
   const prevStep = () => setCurrentStep((prev) => Math.max(1, prev - 1));
 
+  const hasFetched = useRef(false);
+
   useEffect(() => {
     const fetchData = async () => {
-      if (!user) return;
+      if (!user || !user.businessId || hasFetched.current) return;
+      hasFetched.current = true;
       
       try {
         // 1. Fetch Business
-        let businessData: Business | null = null;
-        if (user.businessId) {
-          businessData = await callApi(`/api/business/${user.businessId}`, "GET");
-        } else {
-          // Try to find by owner if businessId not in user object yet
-          const businesses = await callApi("/api/business", "GET");
-          businessData = businesses.find((b: any) => b.owner === user._id) || null;
-        }
-
+        const businessData: Business = await callApi(`/api/business/${user.businessId}`, "GET");
+        
         if (businessData) {
           const bizId = businessData._id;
           
@@ -75,24 +69,35 @@ export default function OnboardingPage() {
           const staffData = await callApi(`/api/staff/staff-list?businessId=${bizId}`, "GET");
           
           // 4. Fetch Services
-          const servicesData = await callApi(`/api/service/list?businessId=${bizId}`, "GET");
+          const servicesData = await callApi(`/api/service?businessId=${bizId}`, "GET");
 
           // 5. Fetch Location Schedules (Opening Hours)
           const hoursData: LocationsOpeningHours = {};
           
           // We can fetch all schedules for the business and filter for location schedules (staff: null)
-          const allSchedules = await callApi(`/api/staff-schedules?staffId=null`, "GET");
+          // The backend will use req.user property to filter by business
+          // Fetch all schedules for the business, explicitly ignoring the x-location-id header
+          const allSchedules = await callApi(`/api/staff-schedules?locationId=null&staffId=null`, "GET");
           
           allSchedules.forEach((sch: any) => {
-            if (sch.location) {
-              hoursData[sch.location] = {
+            // Only use location-level schedules (where staff is null) for opening hours
+            // And use the location ID as the key
+            const locId = sch.location?._id || sch.location;
+            
+            if (!sch.staff && locId) {
+              const startDateStr = sch.startDate ? sch.startDate.split("T")[0] : new Date().toISOString().split("T")[0];
+              const endDateStr = sch.endDate ? sch.endDate.split("T")[0] : new Date(new Date().setFullYear(new Date().getFullYear() + 10)).toISOString().split("T")[0];
+
+              hoursData[locId] = {
                 _id: sch._id,
                 workTime: sch.workTime,
                 isDayOff: sch.isDayOff,
                 break1: sch.break1 || { start: null, end: null },
                 break2: sch.break2 || { start: null, end: null },
                 break3: sch.break3 || { start: null, end: null },
-              };
+                startDate: startDateStr,
+                endDate: endDateStr,
+              } as any;
             }
           });
 
@@ -104,19 +109,6 @@ export default function OnboardingPage() {
             hours: hoursData,
             services: servicesData,
           });
-
-          // Determine current step
-          if (servicesData.length > 0) {
-            setCurrentStep(6);
-          } else if (Object.keys(hoursData).length > 0) {
-            setCurrentStep(6); // Go to services if hours are set
-          } else if (staffData.length > 0) {
-            setCurrentStep(5);
-          } else if (locationsData.length > 0) {
-            setCurrentStep(4);
-          } else {
-            setCurrentStep(3);
-          }
         }
       } catch (error) {
         console.error("Failed to fetch onboarding data:", error);
@@ -124,7 +116,7 @@ export default function OnboardingPage() {
     };
 
     fetchData();
-  }, [user]);
+  }, [user?.businessId]);
 
   const renderStep = () => {
     switch (currentStep) {

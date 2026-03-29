@@ -173,7 +173,7 @@ export function ServicesSection({ businessId, locationId }: { businessId: string
                                         className="h-7 w-7 ring-2 ring-background border border-primary/40"
                                   >
                                     <AvatarFallback className="bg-primary text-white text-[10px] font-semibold">
-                                      {getInitials(staff.name)}
+                                      {getInitials(staff.firstName + " " + staff.lastName)}
                                     </AvatarFallback>
                                   </Avatar>
                                 ))}
@@ -193,15 +193,15 @@ export function ServicesSection({ businessId, locationId }: { businessId: string
                                       <Avatar className="h-6 w-6 border border-primary/40 shadow-sm">
                                         <AvatarImage
                                           src={(staff as any).imageUrl}
-                                          alt={staff.name}
+                                          alt={staff.firstName + " " + staff.lastName}
                                           className="object-cover"
                                         />
                                         <AvatarFallback className="bg-primary text-white text-xs font-semibold">
-                                          {getInitials(staff.name)}
+                                          {getInitials(staff.firstName + " " + staff.lastName)}
                                         </AvatarFallback>
                                       </Avatar>
                                       <span className="text-sm font-medium text-foreground group-hover:text-primary transition-colors">
-                                        {staff.name}
+                                        {staff.firstName + " " + staff.lastName}
                                 </span>
                               </div>
                                   ))}

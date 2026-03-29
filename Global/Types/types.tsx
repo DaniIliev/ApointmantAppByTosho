@@ -56,7 +56,17 @@ export interface AppointmentType {
   duration: number;
   price: number;
   color: string;
-  staffMembers: { _id: string; name: string }[]; // Unified field name
+  staffMembers: {     
+    
+        _id: string,
+        email: string,
+        firstName: string,
+        lastName: string,
+        role: string,
+        locationIds: string[]
+    
+ 
+}[]; // Unified field name
   paymentOption?: "cash" | "card" | "cash_and_card";
   locationId: string;
 }
@@ -67,7 +77,7 @@ export interface Staff {
   lastName: string;
   email: string;
   role: "staff" | "admin";
-  locationId: string;
+  locationIds: string[];
 }
 
 export interface Business {

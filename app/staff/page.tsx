@@ -12,6 +12,7 @@ import { LabeledInput } from "@/components/customUIComponents/LabeledInput";
 import { useTranslation } from "react-i18next";
 import { CustomTooltip } from "@/components/customUIComponents/CustomTooltip";
 import { Modal } from "@/components/customUIComponents/Modal";
+import { MultiSelectCombobox } from "@/components/customUIComponents/MultiSelectCombobox";
 import callApi from "../Api/callApi";
 import { StaffMember } from "./types";
 import { StaffViewModal } from "./StaffViewModal";
@@ -56,7 +57,7 @@ function StaffPageContent() {
     lastName: "",
     email: "",
     phone: "",
-    locationId: "",
+    locationIds: [] as string[],
   });
 
   useEffect(() => {
@@ -155,7 +156,7 @@ function StaffPageContent() {
         lastName: "",
         email: "",
         phone: "",
-        locationId: "",
+        locationIds: [],
       });
     } catch (error) {
       toast.error(t("Failed to invite staff member"));
@@ -184,11 +185,15 @@ function StaffPageContent() {
       cell: ({ row }) => <span>{row.original.phone}</span>,
     },
     {
-      accessorKey: "locationId",
+      accessorKey: "locationIds",
       header: t("Location"),
       cell: ({ row }) => {
-        const location = locations.find(l => l._id === row.original.locationId);
-        return <span>{location ? location.name : "-"}</span>;
+        const staffLocations = row.original.locationIds || [];
+        const names = staffLocations
+          .map(id => locations.find(l => l._id === id)?.name)
+          .filter(Boolean)
+          .join(", ");
+        return <span className="truncate max-w-[200px] block">{names || "-"}</span>;
       }
     },
     {
@@ -285,14 +290,18 @@ function StaffPageContent() {
             id="phone"
           />
 
-          <LabeledSelect<string>
-            id="locationId"
-            label={t("Location")}
-            value={newStaffMember.locationId}
-            onValueChange={(val) => setNewStaffMember({ ...newStaffMember, locationId: val })}
-            placeholder={t("Select a location")}
-            options={locations.map(l => ({ id: l._id, name: l.name }))}
-          />
+          <div className="space-y-1">
+            <label className="text-sm font-medium">{t("Locations")}</label>
+            <MultiSelectCombobox
+              items={locations.map(l => ({ id: l._id, name: l.name }))}
+              selectedIds={newStaffMember.locationIds}
+              onSelectIdsChange={(newIds) => setNewStaffMember({ ...newStaffMember, locationIds: newIds })}
+              getLabel={(item) => item.name}
+              triggerPlaceholder={t("Select locations")}
+              searchPlaceholder={t("Search locations...")}
+              emptyMessage={t("No locations found.")}
+            />
+          </div>
 
           <div className="flex justify-end gap-2 pt-4">
             <Button variant="outline" onClick={() => setIsModalOpen(false)}>

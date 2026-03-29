@@ -4,6 +4,7 @@ import React from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { User, Building2 } from "lucide-react";
 import { useTranslation } from "react-i18next";
+import { cn } from "@/lib/utils";
 import callApi from "@/app/Api/callApi";
 import { useAuthContext } from "@/context/AuthContext";
 
@@ -16,10 +17,15 @@ export default function RoleSelection({ onNext }: RoleSelectionProps) {
   const { user, setUser } = useAuthContext();
 
   const handleSelectRole = async (role: "personal" | "business") => {
+    if (user?.role === role) {
+      onNext(role);
+      return;
+    }
+    
     try {
       // Update role on backend
       const updatedUser = await callApi("/api/auth/update-role", "PUT", { role });
-      if (setUser) setUser(updatedUser);
+      if (setUser) setUser(updatedUser.user);
       onNext(role);
     } catch (error) {
       console.error("Failed to update role:", error);
@@ -43,7 +49,10 @@ export default function RoleSelection({ onNext }: RoleSelectionProps) {
           onClick={() => handleSelectRole("personal")}
         >
           <div className="absolute -inset-0.5 bg-gradient-to-br from-cyan-500 via-primary to-pink-500 rounded-3xl opacity-40 blur-sm group-hover:opacity-75 transition-opacity" />
-          <Card className="relative h-full transition-all duration-300 hover:scale-[1.02] backdrop-blur-sm bg-white dark:bg-gray-900 border border-primary/20">
+          <Card className={cn(
+            "relative h-full transition-all duration-300 hover:scale-[1.02] backdrop-blur-sm bg-white dark:bg-gray-900 border",
+            user?.role === "personal" ? "border-primary ring-2 ring-primary/20" : "border-primary/20"
+          )}>
             <CardContent className="flex flex-col items-center p-10 space-y-6">
               <div className="p-6 rounded-3xl bg-gradient-to-br from-primary/10 to-accent/10 text-primary group-hover:scale-110 transition-transform">
                 <User className="h-16 w-16" />
@@ -63,7 +72,10 @@ export default function RoleSelection({ onNext }: RoleSelectionProps) {
           onClick={() => handleSelectRole("business")}
         >
           <div className="absolute -inset-0.5 bg-gradient-to-br from-cyan-500 via-primary to-pink-500 rounded-3xl opacity-40 blur-sm group-hover:opacity-75 transition-opacity" />
-          <Card className="relative h-full transition-all duration-300 hover:scale-[1.02] backdrop-blur-sm bg-white dark:bg-gray-900 border border-primary/20">
+          <Card className={cn(
+            "relative h-full transition-all duration-300 hover:scale-[1.02] backdrop-blur-sm bg-white dark:bg-gray-900 border",
+            user?.role === "business" ? "border-primary ring-2 ring-primary/20" : "border-primary/20"
+          )}>
             <CardContent className="flex flex-col items-center p-10 space-y-6">
               <div className="p-6 rounded-3xl bg-gradient-to-br from-primary/10 to-accent/10 text-primary group-hover:scale-110 transition-transform">
                 <Building2 className="h-16 w-16" />

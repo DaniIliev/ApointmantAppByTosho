@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { LabeledInput } from "@/components/customUIComponents/LabeledInput";
 import { useTranslation } from "react-i18next";
@@ -31,6 +31,12 @@ export default function ServicesSetup({ locations, staff, onFinish, onBack, init
       : [{ name: "", duration: 30, price: 0, category: "", locationId: locations[0]?._id || "", staffMembers: [] }]
   );
 
+  useEffect(() => {
+    if (initialData && initialData.length > 0) {
+      setServices(initialData);
+    }
+  }, [initialData]);
+
   const addService = () => {
     setServices([...services, { name: "", duration: 30, price: 0, category: "", locationId: locations[0]?._id || "", staffMembers: [] }]);
   };
@@ -52,13 +58,19 @@ export default function ServicesSetup({ locations, staff, onFinish, onBack, init
     if (!service) return;
     
     const currentStaffMembers = service?.staffMembers || [];
-    const isAssigned = currentStaffMembers.some(s => s._id === staffMember._id);
+    // Use email as fallback for ID during onboarding
+    const staffId = staffMember._id || staffMember.email;
+    const isAssigned = currentStaffMembers.some(s => (s._id || (s as any).email) === staffId);
     
     let newStaffMembers;
     if (isAssigned) {
-      newStaffMembers = currentStaffMembers.filter(s => s._id !== staffMember._id);
+      newStaffMembers = currentStaffMembers.filter(s => (s._id || (s as any).email) !== staffId);
     } else {
-      newStaffMembers = [...currentStaffMembers, { _id: staffMember._id!, name: `${staffMember.firstName} ${staffMember.lastName}` }];
+      newStaffMembers = [...currentStaffMembers, { 
+        _id: staffMember._id!, 
+        name: `${staffMember.firstName} ${staffMember.lastName}`,
+        email: staffMember.email // Keep email for matching if _id is missing
+      } as any];
     }
     
     updateService(serviceIndex, "staffMembers", newStaffMembers);
@@ -69,9 +81,27 @@ export default function ServicesSetup({ locations, staff, onFinish, onBack, init
     setLoading(true);
     try {
       await Promise.all(
-        services.map(ser => {
-          const method = ser._id ? "PUT" : "POST";
-          const endpoint = ser._id ? `/api/service/${ser._id}` : "/api/service";
+        services.map(async (ser) => {
+          const isNew = !ser._id;
+          
+          if (!isNew) {
+            const original = (initialData || []).find(o => o._id === ser._id);
+            if (original) {
+              const hasChanged = 
+                ser.name !== original.name ||
+                ser.duration !== original.duration ||
+                ser.price !== original.price ||
+                ser.category !== original.category ||
+                ser.locationId !== original.locationId ||
+                (ser.imageUrl instanceof File) ||
+                JSON.stringify(ser.staffMembers) !== JSON.stringify(original.staffMembers);
+              
+              if (!hasChanged) return ser;
+            }
+          }
+
+          const method = isNew ? "POST" : "PUT";
+          const endpoint = isNew ? "/api/service" : `/api/service/${ser._id}`;
           const useMultipart = (ser.imageUrl as any) instanceof File;
           
           return callApi(endpoint, method, ser, useMultipart);
@@ -130,14 +160,14 @@ export default function ServicesSetup({ locations, staff, onFinish, onBack, init
                     <label className="text-sm font-medium block">{t("Assign Staff")}</label>
                     <div className="grid grid-cols-1 gap-2 max-h-48 overflow-y-auto p-2 border rounded-xl bg-white dark:bg-gray-900">
                       {staff.length > 0 ? staff.map(s => (
-                        <div key={s._id} className="flex items-center space-x-2 p-1 hover:bg-slate-50 dark:hover:bg-white/5 rounded-lg transition-colors">
+                        <div key={s._id || s.email} className="flex items-center space-x-2 p-1 hover:bg-slate-50 dark:hover:bg-white/5 rounded-lg transition-colors">
                           <Checkbox 
-                            id={`staff-${index}-${s._id}`}
-                            checked={(ser.staffMembers || []).some(assigned => assigned._id === s._id)}
+                            id={`staff-${index}-${s._id || s.email}`}
+                            checked={(ser.staffMembers || []).some(assigned => (assigned._id || (assigned as any).email) === (s._id || s.email))}
                             onCheckedChange={() => toggleStaff(index, s)}
                           />
                           <label 
-                            htmlFor={`staff-${index}-${s._id}`}
+                            htmlFor={`staff-${index}-${s._id || s.email}`}
                             className="text-sm cursor-pointer select-none truncate"
                           >
                             {s.firstName} {s.lastName}
@@ -179,7 +209,7 @@ export default function ServicesSetup({ locations, staff, onFinish, onBack, init
                   />
                   <LabeledInput
                     id={`service-price-${index}`}
-                    label={t("Price")}
+                    label={`${t("Price")} (€)`}
                     type="number"
                     value={ser.price.toString()}
                     onChange={(e) => updateService(index, "price", parseFloat(e.target.value))}

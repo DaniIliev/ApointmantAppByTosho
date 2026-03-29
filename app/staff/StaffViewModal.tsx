@@ -97,10 +97,13 @@ export const StaffViewModal: React.FC<StaffViewModalProps> = ({
 
         <div className="space-y-1">
           <label className="text-sm font-medium text-muted-foreground">
-            {t("Location")}
+            {t("Locations")}
           </label>
           <p className="text-base font-semibold">
-            {locations.find((l) => l._id === staff.locationId)?.name || "-"}
+            {(staff.locationIds || [])
+              .map(id => locations.find(l => l._id === id)?.name)
+              .filter(Boolean)
+              .join(", ") || "-"}
           </p>
         </div>
       </div>

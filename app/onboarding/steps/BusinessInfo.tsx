@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { LabeledInput } from "@/components/customUIComponents/LabeledInput";
 import { useTranslation } from "react-i18next";
@@ -35,6 +35,20 @@ export default function BusinessInfoStep({ onNext, onBack, initialData }: Busine
     businessImageUrl: initialData?.businessImageUrl || "" as any,
   });
 
+  useEffect(() => {
+    if (initialData) {
+      setFormData({
+        businessName: initialData.businessName || "",
+        category: initialData.category || "",
+        aboutUs: initialData.aboutUs || "",
+        email: initialData.email || "",
+        phone: initialData.phone || "",
+        website: initialData.website || "",
+        businessImageUrl: initialData.businessImageUrl || "" as any,
+      });
+    }
+  }, [initialData]);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
@@ -44,9 +58,26 @@ export default function BusinessInfoStep({ onNext, onBack, initialData }: Busine
       const endpoint = isUpdate ? `/api/business/${initialData._id}` : "/api/business";
       
       const payload = { ...formData };
-      const useMultipart = formData.businessImageUrl instanceof File;
+
+      // Optional: Check for changes if it's an update
+      if (isUpdate) {
+        const hasChanged = 
+          formData.businessName !== initialData.businessName ||
+          formData.category !== initialData.category ||
+          formData.aboutUs !== (initialData.aboutUs || "") ||
+          formData.email !== (initialData.email || "") ||
+          formData.phone !== (initialData.phone || "") ||
+          formData.website !== (initialData.website || "") ||
+          (formData.businessImageUrl instanceof File); // If it's a File, it's a new upload
+
+        if (!hasChanged) {
+          onNext({ ...initialData, ...formData } as any);
+          setLoading(false);
+          return;
+        }
+      }
       
-      const response = await callApi(endpoint, method, payload, !!formData.businessImageUrl);
+      const response = await callApi(endpoint, method, payload, !!(formData.businessImageUrl instanceof File));
       if (!isUpdate) {
         await refreshToken();
       }

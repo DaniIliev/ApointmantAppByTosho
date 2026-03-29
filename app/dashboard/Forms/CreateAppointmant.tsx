@@ -123,8 +123,8 @@ const AppointmentForm = ({
         appointmentData.appointmentTypeId &&
         appointmentData.staff._id
       ) {
-        // Ако има избрана дата и час, не показвай модал
-        if (appointmentData.time) return;
+        // Ако има избрана дата или час, не показвай модал
+        if (appointmentData.time || appointmentData.date) return;
 
         // Ако има избрана дата, зареди най-близкия час за тази дата
         let endpoint = `/api/appointment/closest-slot?staffId=${appointmentData.staff._id}&serviceId=${appointmentData.appointmentTypeId}&locationId=${locationId}`;

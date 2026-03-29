@@ -14,7 +14,6 @@ import Calendar from "@/components/calendar/Calendar";
 import ViewDetails from "./Forms/ViewDetails";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useTranslation } from "react-i18next";
-import AppointmentsBoardView from "./Components/AppointmentsBoardView";
 import { CustomTooltip } from "@/components/customUIComponents/CustomTooltip";
 import { Modal } from "@/components/customUIComponents/Modal";
 import AppointmentsTable from "@/components/AppointmantTable/AppointmantTable";
@@ -317,12 +316,6 @@ function DashboardPageContent() {
                 );
               }
             }}
-          />
-        </TabsContent>
-
-        <TabsContent value="board" className="flex-1 overflow-hidden">
-          <AppointmentsBoardView
-            onOpenModal={() => setIsCreateModalOpen(true)}
           />
         </TabsContent>
       </Tabs>

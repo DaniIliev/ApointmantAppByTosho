@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { LabeledInput } from "@/components/customUIComponents/LabeledInput";
 import { useTranslation } from "react-i18next";
@@ -26,6 +26,12 @@ export default function LocationsSetup({ onNext, onBack, initialData }: Location
       : [{ name: "", address: "", city: "", phone: "", country: "България", isDefault: true, imageUrl: "" as any }]
   );
 
+  useEffect(() => {
+    if (initialData && initialData.length > 0) {
+      setLocations(initialData);
+    }
+  }, [initialData]);
+
   const addLocation = () => {
     setLocations([...locations, { name: "", address: "", city: "", phone: "", country: "България", isDefault: false, imageUrl: "" as any }]);
   };
@@ -48,9 +54,26 @@ export default function LocationsSetup({ onNext, onBack, initialData }: Location
     try {
       // Save each location (POST for new, PUT for existing)
       const savedLocations = await Promise.all(
-        locations.map(loc => {
-          const method = loc._id ? "PUT" : "POST";
-          const endpoint = loc._id ? `/api/locations/${loc._id}` : "/api/locations";
+        locations.map(async (loc) => {
+          const isNew = !loc._id;
+          
+          if (!isNew) {
+            const original = (initialData || []).find(o => o._id === loc._id);
+            if (original) {
+              const hasChanged = 
+                loc.name !== original.name ||
+                loc.address !== original.address ||
+                loc.city !== original.city ||
+                loc.phone !== original.phone ||
+                loc.postalCode !== original.postalCode ||
+                (loc.imageUrl instanceof File);
+              
+              if (!hasChanged) return loc; // Return original if no changes
+            }
+          }
+
+          const method = isNew ? "POST" : "PUT";
+          const endpoint = isNew ? "/api/locations" : `/api/locations/${loc._id}`;
           const useMultipart = (loc.imageUrl as any) instanceof File;
           
           return callApi(endpoint, method, loc, useMultipart);

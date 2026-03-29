@@ -50,7 +50,7 @@ export default function HoursSetup({ locations, staff, onNext, onBack, initialDa
   useEffect(() => {
     if (initialData && Object.keys(initialData).length > 0) {
       setHours(initialData);
-    } else {
+    } else if (locations.length > 0) {
       setHours(
         locations.reduce((acc, loc, idx) => {
           const locId = (loc._id || idx).toString();
@@ -68,28 +68,24 @@ export default function HoursSetup({ locations, staff, onNext, onBack, initialDa
   }, [initialData, locations]);
 
   const updateLocationField = (locId: string, field: string, val: any) => {
-    setHours(prev => ({
-      ...prev,
-      [locId]: { ...prev[locId], [field]: val }
-    }));
+    setHours(prev => {
+      const locData = prev[locId];
+      if (!locData) return prev;
+      
+      const newVal = typeof val === "function" ? val(locData[field as keyof LocationOpeningHours]) : val;
+      
+      return {
+        ...prev,
+        [locId]: { ...locData, [field]: newVal }
+      };
+    });
   };
 
   const handleDayToggle = (locId: string, day: keyof LocationOpeningHours["isDayOff"]) => {
-    const locHours = hours[locId];
-    if (!locHours) return;
-    updateLocationField(locId, "isDayOff", {
-      ...locHours.isDayOff,
-      [day]: !locHours.isDayOff[day]
-    });
-  };
-
-  const handleBreakChange = (locId: string, breakKey: "break1" | "break2" | "break3", type: "start" | "end", value: string | null) => {
-    const locHours = hours[locId];
-    if (!locHours) return;
-    updateLocationField(locId, breakKey, {
-      ...locHours[breakKey],
-      [type]: value
-    });
+    updateLocationField(locId, "isDayOff", (prevIsDayOff: any) => ({
+      ...prevIsDayOff,
+      [day]: !prevIsDayOff[day]
+    }));
   };
 
   const addBreak = (locId: string) => {
@@ -119,7 +115,7 @@ export default function HoursSetup({ locations, staff, onNext, onBack, initialDa
         // Create duplicate schedules for each staff member
         const staffSchedulePromises = staff.flatMap(s => {
           return Object.entries(pendingResults).map(([locId, h]) => {
-            if (s.locationId !== locId) return null; // Only apply if staff is assigned to this location
+            if (!s.locationIds?.includes(locId)) return null; // Only apply if staff is assigned to this location
             
             const payload = {
               startDate: (h as any).startDate,
@@ -153,7 +149,29 @@ export default function HoursSetup({ locations, staff, onNext, onBack, initialDa
     setLoading(true);
 
     try {
+      let totalChanges = 0;
       const schedulePromises = Object.entries(hours).map(async ([locId, h]) => {
+        const actualLoc = locations.find((l, idx) => (l._id || idx).toString() === locId);
+        
+        // Change detection
+        if (h._id) {
+          const original = initialData?.[locId];
+          if (original && original._id === h._id) {
+            const hasChanged = 
+              JSON.stringify(h.workTime) !== JSON.stringify(original.workTime) ||
+              JSON.stringify(h.isDayOff) !== JSON.stringify(original.isDayOff) ||
+              JSON.stringify(h.break1) !== JSON.stringify(original.break1) ||
+              JSON.stringify(h.break2) !== JSON.stringify(original.break2) ||
+              JSON.stringify(h.break3) !== JSON.stringify(original.break3) ||
+              (h as any).startDate !== (original as any).startDate ||
+              (h as any).endDate !== (original as any).endDate;
+            
+            if (!hasChanged) return h;
+          }
+        }
+
+        totalChanges++;
+
         const payload = {
           startDate: (h as any).startDate || new Date().toISOString(),
           endDate: (h as any).endDate || new Date(new Date().setFullYear(new Date().getFullYear() + 10)).toISOString(),
@@ -162,7 +180,7 @@ export default function HoursSetup({ locations, staff, onNext, onBack, initialDa
           break1: h.break1,
           break2: h.break2,
           break3: h.break3,
-          locationId: locId,
+          locationId: actualLoc?._id || locId,
           staffId: null,
         };
 
@@ -185,7 +203,7 @@ export default function HoursSetup({ locations, staff, onNext, onBack, initialDa
       });
 
       setPendingResults(updatedHours);
-      if (staff.length > 0) {
+      if (staff.length > 0 && totalChanges > 0) {
         setShowApplyToAllModal(true);
       } else {
         onNext(updatedHours);
@@ -198,7 +216,27 @@ export default function HoursSetup({ locations, staff, onNext, onBack, initialDa
     }
   };
 
-  if (Object.keys(hours).length === 0) return null;
+  if (locations.length === 0) {
+    return (
+      <div className="flex flex-col items-center justify-center p-12 text-center space-y-4">
+        <Clock className="h-12 w-12 text-muted-foreground animate-pulse" />
+        <h3 className="text-xl font-bold">{t("No locations found")}</h3>
+        <p className="text-muted-foreground">{t("Please go back and add at least one location first.")}</p>
+        <Button onClick={onBack} variant="outline" iconType="back">
+          {t("Back to Locations")}
+        </Button>
+      </div>
+    );
+  }
+
+  if (Object.keys(hours).length === 0) {
+    return (
+      <div className="flex flex-col items-center justify-center p-12 text-center space-y-4">
+        <div className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto" />
+        <p className="text-muted-foreground">{t("Initializing schedule...")}</p>
+      </div>
+    );
+  }
 
   return (
     <div>
@@ -284,8 +322,7 @@ export default function HoursSetup({ locations, staff, onNext, onBack, initialDa
                             <TimeRangePicker
                               value={{ startTime: b.data.start, endTime: b.data.end }}
                               onChange={({ startTime, endTime }) => {
-                                handleBreakChange(locId, b.key, "start", startTime);
-                                handleBreakChange(locId, b.key, "end", endTime);
+                                updateLocationField(locId, b.key, { start: startTime, end: endTime });
                               }}
                             />
                             <CustomTooltip
