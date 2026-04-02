@@ -53,7 +53,7 @@ export const DateFilter: React.FC<DateFilterProps> = ({
         <Calendar className="h-4 w-4" />
       </button>
       {isDropdownOpen && (
-        <div className="absolute right-0 top-full mt-2 w-48 rounded-xl border shadow-lg bg-white dark:bg-gray-800/70 z-10">
+        <div className="absolute right-0 top-full mt-2 w-48 rounded-xl border shadow-lg bg-white dark:bg-gray-800/70 z-50">
           <ul className="py-1">
             {filterOptions.map((option) => (
               <li

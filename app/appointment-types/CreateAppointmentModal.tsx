@@ -317,6 +317,57 @@ const CreateAppointmentModal = ({
           />
         </div>
 
+        {/* Group Appointment Settings */}
+        <div className="p-4 rounded-xl border border-primary/10 bg-primary/5 space-y-4">
+          <div className="flex items-center justify-between">
+            <div className="space-y-0.5">
+              <Label className="text-base font-semibold">{t("Group Appointment")}</Label>
+              <p className="text-xs text-muted-foreground">
+                {t("Allow multiple clients to book the same time slot.")}
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={() =>
+                setFormData((prev: any) => ({
+                  ...prev,
+                  isGroup: !prev.isGroup,
+                }))
+              }
+              className={cn(
+                "relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none",
+                formData.isGroup ? "bg-primary" : "bg-gray-300"
+              )}
+            >
+              <span
+                className={cn(
+                  "inline-block h-4 w-4 transform rounded-full bg-white transition-transform",
+                  formData.isGroup ? "translate-x-6" : "translate-x-1"
+                )}
+              />
+            </button>
+          </div>
+
+          {formData.isGroup && (
+            <div className="pt-2 animate-in fade-in slide-in-from-top-1 duration-200">
+              <LabeledInput
+                id="capacity"
+                label={t("Max Clients (Capacity)")}
+                value={formData.capacity}
+                onChange={(e) =>
+                  setFormData((prev: any) => ({
+                    ...prev,
+                    capacity: e.target.value,
+                  }))
+                }
+                placeholder="10"
+                type="number"
+                min="1"
+              />
+            </div>
+          )}
+        </div>
+
         <div className="space-y-3">
           <Label className="text-sm font-medium">Payment options</Label>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">

@@ -10,7 +10,7 @@ interface StatusChipProps {
   status: AppointmentStatus;
 }
 
-const getStatusProps = (status: AppointmentStatus) => {
+export const getStatusProps = (status: AppointmentStatus) => {
   switch (status) {
     case "completed":
     case "active":

@@ -2,7 +2,7 @@
 
 import React from "react";
 import { Card, CardContent } from "@/components/ui/card";
-import { Pencil, Trash2, Clock, Euro, Tag } from "lucide-react";
+import { Pencil, Trash2, Clock, Euro, Tag, Users } from "lucide-react";
 import { formatPriceEUR } from "@/Global/Utils/commonFn";
 import { CustomTooltip } from "@/components/customUIComponents/CustomTooltip";
 import { AppointmentType } from "@/Global/Types/types";
@@ -74,6 +74,13 @@ const AppointmentCard = ({
             </span>
           </div>
         )}
+        {type?.isGroup && (
+          <div className="absolute top-4 right-4 z-10">
+            <span className="bg-accent/90 backdrop-blur-sm text-white text-[10px] uppercase font-bold px-3 py-1 rounded-full shadow-lg">
+              {t("Group")}
+            </span>
+          </div>
+        )}
       </div>
 
       <CardContent className="p-5 flex-grow space-y-4">
@@ -87,7 +94,7 @@ const AppointmentCard = ({
             </p>
           )}
 
-          <div className="grid grid-cols-2 gap-3 pt-2">
+          <div className="grid grid-cols-1 gap-3 pt-2">
             <div className="flex items-center gap-3 text-sm text-gray-700 dark:text-gray-300">
               <div className="bg-primary/10 p-2 rounded-full shrink-0">
                 <Clock className="h-4 w-4 text-primary" />
@@ -100,6 +107,14 @@ const AppointmentCard = ({
               </div>
               <span className="font-bold text-lg text-primary">{formatPriceEUR(type.price)}</span>
             </div>
+            {type.isGroup && (
+              <div className="flex items-center gap-3 text-sm text-gray-700 dark:text-gray-300">
+                <div className="bg-accent/10 p-2 rounded-full shrink-0">
+                  <Users className="h-4 w-4 text-accent" />
+                </div>
+                <span className="font-medium">{type.capacity} {t("participants")}</span>
+              </div>
+            )}
           </div>
         </div>
       </CardContent>

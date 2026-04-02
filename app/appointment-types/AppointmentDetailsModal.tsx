@@ -1,7 +1,7 @@
 // components/AppointmentDetailsModal.tsx
 import React from "react";
 import { Modal } from "@/components/customUIComponents/Modal";
-import { Clock, Euro } from "lucide-react";
+import { Clock, Euro, Tag } from "lucide-react";
 import { formatPriceEUR } from "@/Global/Utils/commonFn";
 import { AppointmentType } from "@/Global/Types/types";
 import { useTranslation } from "react-i18next";
@@ -49,6 +49,13 @@ const AppointmentDetailsModal = ({
               <span className="font-medium">{t("Price")}:</span>{" "}
               {formatPriceEUR(selectedType.price)}
             </div>
+            {selectedType.isGroup && (
+              <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                <Tag className="h-4 w-4" />
+                <span className="font-medium">{t("Capacity")}:</span>{" "}
+                {selectedType.capacity} {t("participants")}
+              </div>
+            )}
           </div>
         </div>
 

@@ -81,6 +81,7 @@ function DashboardPageContent() {
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const { setPageTitle } = usePageTitle();
   const { setExtraRightNavMenu, setIsRightNavVisible } = useRightNav();
+  const [activeTab, setActiveTab] = useState("calendar");
 
   const fetchServices = useCallback(async () => {
     try {
@@ -251,8 +252,12 @@ function DashboardPageContent() {
   }
 
   return (
-    <div className="relative h-[calc(100dvh-9.5rem)] md:h-full md:pb-0 overflow-hidden flex flex-col">
-      <Tabs defaultValue="calendar" className="w-full h-full flex flex-col pb-0 md:pb-0">
+    <div className={`relative ${activeTab === "calendar" ? "h-[calc(100dvh-9.5rem)]" : ""} md:h-full md:pb-0 flex flex-col`}>
+      <Tabs 
+        value={activeTab} 
+        onValueChange={setActiveTab} 
+        className="w-full h-full flex flex-col pb-0 md:pb-0"
+      >
         {/* Desktop Tabs - Top */}
         <TabsList className="hidden md:flex mb-4 bg-transparent p-0 mx-auto w-fit flex-shrink-0">
           <TabsTrigger
@@ -296,7 +301,7 @@ function DashboardPageContent() {
           />
         </TabsContent>
 
-        <TabsContent value="table" className="flex-1 overflow-hidden">
+        <TabsContent value="table" className="flex-1">
           <AppointmentsTable
             data={appointments}
             onOpenViewModal={openViewModal}

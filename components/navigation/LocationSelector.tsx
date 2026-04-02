@@ -17,6 +17,7 @@ export const LocationSelector = ({ isOpen }: { isOpen: boolean }) => {
 
   if (locations.length <= 1) {
     if (locations.length === 1) {
+      setSelectedLocation(locations[0]);
       return (
         <div className={`mb-4 transition-all duration-300 p-0`}>
           <div className={`flex items-center gap-2 py-3 rounded-xl bg-primary/5 border border-primary/10 text-text-primary ${!isOpen ? "justify-center" : "px-3"}`}>

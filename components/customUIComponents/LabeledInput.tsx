@@ -20,6 +20,8 @@ interface LabeledInputProps {
   required?: boolean;
   errorText?: string;
   showError?: boolean;
+  min?: string | number;
+  max?: string | number;
 }
 
 export const LabeledInput = forwardRef<

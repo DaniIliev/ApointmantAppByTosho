@@ -12,8 +12,10 @@ import {
   getWeekDates,
   monthNames,
 } from "@/Global/Utils/commonFn";
+import { groupAppointments, GroupedAppointment } from "@/Global/Utils/groupingUtils";
 import MobileCalendar from "./MobileCalendar";
 import { LabeledInput } from "../customUIComponents/LabeledInput";
+import { Users, ChevronDown, ChevronUp } from "lucide-react";
 
 interface CalendarProps {
   appointments: Appointment[];
@@ -34,6 +36,7 @@ export default function Calendar({
   const [searchTerm, setSearchTerm] = useState("");
   const [isMobile, setIsMobile] = useState(false);
   const [detailLevel, setDetailLevel] = useState<number>(3); // 1=time, 2=time+service, 3=all
+  const [expandedGroups, setExpandedGroups] = useState<Record<string, boolean>>({});
 
   // Debug: Check if paymentStatus is coming through
   useEffect(() => {
@@ -87,16 +90,17 @@ export default function Calendar({
     });
 
     if (!term) {
-      return filteredByDate;
+      return groupAppointments(filteredByDate);
     }
 
-    return filteredByDate.filter(
+    const filteredTerm = filteredByDate.filter(
       (apt) =>
         apt.clientName?.toLowerCase().includes(term) ||
-        // **ПРОМЯНА:** Проверяваме за `serviceName` вместо `service`
         apt.serviceName?.toLowerCase().includes(term) ||
         apt.status?.toLowerCase().includes(term)
     );
+
+    return groupAppointments(filteredTerm);
   };
 
   const navigateWeek = (direction: "prev" | "next") => {
@@ -266,46 +270,84 @@ export default function Calendar({
                     >
                       <div className="space-y-2">
                         {dayAppointments.length ? (
-                          dayAppointments.map((apt) => (
-                            <div
-                              key={apt._id}
-                              onClick={() => handleOpenAppointmentModal(apt)}
-                              className={`text-xs p-2 rounded cursor-pointer hover:scale-[1.02] transition-transform ${getStatusColor(
-                                apt.status
-                              )}`}
-                            >
-                              <div className="font-medium flex items-center gap-1">
-                                {(apt.paymentStatus === "captured" ||
-                                  apt.paymentStatus === "authorized" ||
-                                  apt.serviceName === "card") && (
-                                  <CreditCard className="w-4 h-4 text-green-500 flex-shrink-0" />
-                                )}
-                                {formatDateAndTime(
-                                  apt.appointmentTime.start,
-                                  "time"
-                                )}{" "}
-                                -{" "}
-                                {formatDateAndTime(
-                                  apt.appointmentTime.end,
-                                  "time"
-                                )}
-                              </div>
-                              <div className="flex items-center gap-1">
-                                <div className="flex-1">
-                                  {detailLevel >= 2 && (
-                                    <div className="truncate font-semibold">
-                                      {apt.serviceName}
-                                    </div>
-                                  )}
-                                  {detailLevel >= 3 && (
-                                    <div className="truncate">
-                                      {apt.clientName}
+                          dayAppointments.map((apt: any) => {
+                            const isGroup = apt.isGroup;
+                            const groupData = apt as GroupedAppointment;
+                            const mainApt = isGroup ? groupData.mainAppointment : (apt as Appointment);
+                            
+                            return (
+                              <div
+                                key={mainApt._id}
+                                className={`text-xs p-2 rounded cursor-pointer hover:scale-[1.02] transition-all ${getStatusColor(
+                                  mainApt.status
+                                )}`}
+                                onClick={() => isGroup ? setExpandedGroups(prev => ({...prev, [mainApt._id]: !prev[mainApt._id]})) : handleOpenAppointmentModal(mainApt)}
+                              >
+                                <div className="font-medium flex items-center justify-between">
+                                  <div className="flex items-center gap-1">
+                                    {(mainApt.paymentStatus === "captured" ||
+                                      mainApt.paymentStatus === "authorized" ||
+                                      mainApt.serviceName === "card") && (
+                                      <CreditCard className="w-4 h-4 text-green-500 flex-shrink-0" />
+                                    )}
+                                    {formatDateAndTime(
+                                      mainApt.appointmentTime.start,
+                                      "time"
+                                    )}{" "}
+                                    -{" "}
+                                    {formatDateAndTime(
+                                      mainApt.appointmentTime.end,
+                                      "time"
+                                    )}
+                                  </div>
+                                  {isGroup && (
+                                    <div className="flex items-center gap-1 bg-primary/10 px-1.5 py-0.5 rounded-md text-[10px] font-bold">
+                                      <Users size={12} />
+                                      {groupData.count}
                                     </div>
                                   )}
                                 </div>
+                                
+                                <div className="flex items-center justify-between mt-0.5">
+                                  <div className="flex-1">
+                                    {detailLevel >= 2 && (
+                                      <div className="truncate font-semibold">
+                                        {mainApt.serviceName}
+                                      </div>
+                                    )}
+                                    {detailLevel >= 3 && !isGroup && (
+                                      <div className="truncate text-muted-foreground/80 font-medium">
+                                        {mainApt.clientName}
+                                      </div>
+                                    )}
+                                  </div>
+                                  {isGroup && (
+                                    <div className="text-muted-foreground">
+                                      {expandedGroups[mainApt._id] ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
+                                    </div>
+                                  )}
+                                </div>
+
+                                {isGroup && expandedGroups[mainApt._id] && (
+                                  <div className="mt-2 space-y-1.5 border-t border-primary/10 pt-2 animate-in fade-in slide-in-from-top-1 duration-200">
+                                    {groupData.appointments.map(participant => (
+                                      <div 
+                                        key={participant._id}
+                                        className="flex items-center justify-between hover:bg-white/10 p-1 rounded transition-colors"
+                                        onClick={(e) => {
+                                          e.stopPropagation();
+                                          handleOpenAppointmentModal(participant);
+                                        }}
+                                      >
+                                        <span className="truncate">{participant.clientName}</span>
+                                        <div className={`w-1.5 h-1.5 rounded-full ${getStatusColor(participant.status)}`} />
+                                      </div>
+                                    ))}
+                                  </div>
+                                )}
                               </div>
-                            </div>
-                          ))
+                            );
+                          })
                         ) : (
                           <div className="text-xs text-muted-foreground text-center py-4">
                             {t("No appointments")}
@@ -347,49 +389,80 @@ export default function Calendar({
                     </div>
                     <div className="space-y-1">
                       {dayAppointments.length
-                        ? dayAppointments.map((apt) => (
-                            <div
-                              key={apt._id}
-                              onClick={() => handleOpenAppointmentModal(apt)}
-                              className={`text-xs p-1 rounded cursor-pointer hover:scale-[1.02] transition-transform ${getStatusColor(
-                                apt.status
-                              )}`}
-                            >
-                              {/* **ПРОМЯНА:** Използваме appointmentTime за показване на интервала */}
-                              <div className="font-medium truncate flex items-center gap-1">
-                                {(apt.paymentStatus === "captured" ||
-                                  apt.paymentStatus === "authorized" ||
-                                  apt.serviceName === "card") && (
-                                  <CreditCard className="w-4 h-4 text-green-500 flex-shrink-0" />
-                                )}
-                                <span className="truncate">
-                                  {formatDateAndTime(
-                                    apt.appointmentTime.start,
-                                    "time"
-                                  )}{" "}
-                                  -{" "}
-                                  {formatDateAndTime(
-                                    apt.appointmentTime.end,
-                                    "time"
-                                  )}
-                                </span>
-                              </div>
-                              <div className="flex items-center gap-1">
-                                <div className="flex-1">
-                                  {detailLevel >= 2 && (
-                                    <div className="truncate font-semibold">
-                                      {apt.serviceName}
-                                    </div>
-                                  )}
-                                  {detailLevel >= 3 && (
-                                    <div className="truncate">
-                                      {apt.clientName}
+                        ? dayAppointments.map((apt: any) => {
+                            const isGroup = apt.isGroup;
+                            const groupData = apt as GroupedAppointment;
+                            const mainApt = isGroup ? groupData.mainAppointment : (apt as Appointment);
+
+                            return (
+                              <div
+                                key={mainApt._id}
+                                onClick={() => isGroup ? setExpandedGroups(prev => ({...prev, [mainApt._id]: !prev[mainApt._id]})) : handleOpenAppointmentModal(mainApt)}
+                                className={`text-xs p-1 rounded cursor-pointer hover:scale-[1.02] transition-transform ${getStatusColor(
+                                  mainApt.status
+                                )}`}
+                              >
+                                <div className="font-medium truncate flex items-center justify-between gap-1">
+                                  <div className="flex items-center gap-1 truncate">
+                                    {(mainApt.paymentStatus === "captured" ||
+                                      mainApt.paymentStatus === "authorized" ||
+                                      mainApt.serviceName === "card") && (
+                                      <CreditCard className="w-4 h-4 text-green-500 flex-shrink-0" />
+                                    )}
+                                    <span className="truncate">
+                                      {formatDateAndTime(
+                                        mainApt.appointmentTime.start,
+                                        "time"
+                                      )}{" "}
+                                      -{" "}
+                                      {formatDateAndTime(
+                                        mainApt.appointmentTime.end,
+                                        "time"
+                                      )}
+                                    </span>
+                                  </div>
+                                  {isGroup && (
+                                    <div className="flex items-center gap-0.5 bg-primary/20 px-1 py-0.5 rounded text-[9px] font-bold">
+                                      <Users size={10} />
+                                      {groupData.count}
                                     </div>
                                   )}
                                 </div>
+                                <div className="flex items-center justify-between gap-1">
+                                  <div className="flex-1 truncate">
+                                    {detailLevel >= 2 && (
+                                      <div className="truncate font-semibold text-[10px]">
+                                        {mainApt.serviceName}
+                                      </div>
+                                    )}
+                                    {detailLevel >= 3 && !isGroup && (
+                                      <div className="truncate text-[10px] opacity-80">
+                                        {mainApt.clientName}
+                                      </div>
+                                    )}
+                                  </div>
+                                </div>
+                                
+                                {isGroup && expandedGroups[mainApt._id] && (
+                                  <div className="mt-1 space-y-0.5 border-t border-primary/10 pt-1">
+                                    {groupData.appointments.map(participant => (
+                                      <div 
+                                        key={participant._id}
+                                        className="text-[9px] truncate opacity-80 flex items-center gap-1"
+                                        onClick={(e) => {
+                                          e.stopPropagation();
+                                          handleOpenAppointmentModal(participant);
+                                        }}
+                                      >
+                                        <div className={`w-1 h-1 rounded-full ${getStatusColor(participant.status)}`} />
+                                        {participant.clientName}
+                                      </div>
+                                    ))}
+                                  </div>
+                                )}
                               </div>
-                            </div>
-                          ))
+                            );
+                          })
                         : isCurrentMonth && (
                             <div className="text-xs text-muted-foreground text-center py-2 opacity-50">
                               {t("No appointments")}

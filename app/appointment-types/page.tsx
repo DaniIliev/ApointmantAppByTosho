@@ -55,6 +55,8 @@ function AppointmentTypesPageContent() {
     locationId: string;
     staffMembers: { _id: string; name: string }[];
     paymentOption: "cash" | "card" | "cash_and_card";
+    isGroup: boolean;
+    capacity: string;
   }>({
     name: "",
     category: "",
@@ -66,6 +68,8 @@ function AppointmentTypesPageContent() {
     imageUrl: null,
     staffMembers: [],
     paymentOption: "cash",
+    isGroup: false,
+    capacity: "1",
   });
 
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
@@ -141,6 +145,8 @@ function AppointmentTypesPageContent() {
           })) || [],
         paymentOption: (type as any).paymentOption || "cash",
         locationId: type.locationId || "",
+        isGroup: type.isGroup || false,
+        capacity: (type.capacity || 1).toString(),
       });
     } else {
       setEditingType(null);
@@ -155,6 +161,8 @@ function AppointmentTypesPageContent() {
         staffMembers: [],
         paymentOption: "cash",
         locationId: "",
+        isGroup: false,
+        capacity: "1",
       });
     }
     setIsModalOpen(true);
@@ -180,6 +188,8 @@ function AppointmentTypesPageContent() {
         paymentOption: formData.paymentOption,
         locationId: formData.locationId,
         businessId: user?.businessId,
+        isGroup: formData.isGroup,
+        capacity: Number(formData.capacity),
       };
       console.log("payload", dataToSend);
       await callApi(endpoint, method, dataToSend, isFile);
@@ -233,7 +243,7 @@ function AppointmentTypesPageContent() {
   return (
     <div>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {appointmentTypes.length > 0 ? (
+        {appointmentTypes.length > 0 &&(
           appointmentTypes.map((type) => (
             <AppointmentCard
               key={type._id}
@@ -244,11 +254,11 @@ function AppointmentTypesPageContent() {
               setSelectedType={setSelectedType}
             />
           ))
-        ) : (
-          <EmptyState onOpenModal={() => openModal()} />
-        )}
+        ) }
       </div>
-
+      {appointmentTypes.length === 0 && (
+        <EmptyState onOpenModal={() => openModal()} />
+      )}
       <CreateAppointmentModal
         isModalOpen={isModalOpen}
         setIsModalOpen={setIsModalOpen}

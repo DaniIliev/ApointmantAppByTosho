@@ -69,6 +69,8 @@ export interface AppointmentType {
 }[]; // Unified field name
   paymentOption?: "cash" | "card" | "cash_and_card";
   locationId: string;
+  isGroup?: boolean;
+  capacity?: number;
 }
 
 export interface Staff {

@@ -23,13 +23,20 @@ import {
   ChevronRight,
   CalendarDays,
   CreditCard,
+  Users,
+  ChevronDown,
+  ChevronUp,
 } from "lucide-react";
-import { Appointment } from "@/Global/Types/types";
-import { getStatusColor } from "@/Global/Utils/statusIndicator";
+import { Appointment, AppointmentStatus } from "@/Global/Types/types";
+import {
+  groupAppointments,
+  GroupedAppointment,
+} from "@/Global/Utils/groupingUtils";
 import { useTranslation } from "react-i18next";
 import { formatDateAndTime } from "@/Global/Utils/commonFn";
 import { CustomTooltip } from "../customUIComponents/CustomTooltip";
 import { LabeledInput } from "../customUIComponents/LabeledInput";
+import { getStatusProps, StatusChip } from "../customUIComponents/StatusChip";
 
 const cn = (...classes: (string | boolean | undefined | null)[]): string =>
   classes.filter(Boolean).join(" ");
@@ -44,6 +51,7 @@ const AppointmentCard: React.FC<AppointmentCardProps> = ({
   onClick,
 }) => {
   const { t } = useTranslation();
+    const statusProps = getStatusProps(appointment.status as AppointmentStatus);
   return (
     <div
       className="p-2 border border-gray-200 dark:border-gray-700 rounded-md shadow-sm mb-2 hover:shadow-md transition-shadow bg-white dark:bg-gray-800 cursor-pointer"
@@ -56,17 +64,9 @@ const AppointmentCard: React.FC<AppointmentCardProps> = ({
           <User className="h-3.5 w-3.5 text-gray-500 dark:text-gray-400" />
           <span className="truncate max-w-[150px]">{appointment.clientName}</span>
         </h3>
-        <span
-          className={cn(
-            "text-[10px] uppercase font-bold px-1.5 py-0.5 rounded-sm tracking-wider text-white",
-            getStatusColor(appointment.status)
-          )}
-        >
-          {t(
-            appointment.status.charAt(0).toUpperCase() +
-              appointment.status.slice(1)
-          )}
-        </span>
+        <div className="flex-shrink-0">
+          <div className={`${statusProps.className} rounded-full h-2 w-2 border`}></div>
+        </div>
       </div>
       
       <div className="flex items-center justify-between text-xs text-gray-600 dark:text-gray-300">
@@ -87,6 +87,88 @@ const AppointmentCard: React.FC<AppointmentCardProps> = ({
           <span className="truncate max-w-[120px]">{appointment.serviceName}</span>
         </div>
       </div>
+    </div>
+  );
+};
+
+interface GroupedAppointmentAccordionProps {
+  group: GroupedAppointment;
+  onSelectAppointment: (appointment: Appointment) => void;
+  openDetailsModal: () => void;
+}
+
+const GroupedAppointmentAccordion: React.FC<
+  GroupedAppointmentAccordionProps
+> = ({ group, onSelectAppointment, openDetailsModal }) => {
+  const [isExpanded, setIsExpanded] = React.useState(false);
+  const mainApt = group.mainAppointment;
+
+  return (
+    <div className="border border-gray-200 dark:border-gray-700 rounded-md shadow-sm mb-2 hover:shadow-md transition-shadow bg-white dark:bg-gray-800 overflow-hidden">
+      <div
+        className="p-3 flex items-center justify-between cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700/30 transition-colors"
+        onClick={() => setIsExpanded(!isExpanded)}
+      >
+        <div className="flex items-center space-x-3 truncate">
+          <div className="bg-primary/10 p-2 rounded-lg">
+            <Briefcase className="h-4 w-4 text-primary" />
+          </div>
+          <div className="truncate">
+            <h3 className="font-semibold text-sm truncate">
+              {mainApt.serviceName}
+            </h3>
+            <div className="flex items-center space-x-2 text-xs text-gray-500 dark:text-gray-400">
+              <span className="flex items-center space-x-1">
+                <Clock className="h-3 w-3" />
+                <span>
+                  {formatDateAndTime(mainApt.appointmentTime.start, "time")}
+                </span>
+              </span>
+              <span className="flex items-center space-x-1">
+                <Users className="h-3 w-3" />
+                <span>
+                  {group.count}
+                </span>
+              </span>
+            </div>
+          </div>
+        </div>
+        <div className="flex-shrink-0 ml-2">
+          {isExpanded ? (
+            <ChevronUp className="h-4 w-4 text-gray-400" />
+          ) : (
+            <ChevronDown className="h-4 w-4 text-gray-400" />
+          )}
+        </div>
+      </div>
+
+      {isExpanded && (
+        <div className="px-3 pb-3 space-y-2 border-t border-gray-100 dark:border-gray-700/50 pt-3 animate-in fade-in slide-in-from-top-1 duration-200">
+          {group.appointments.map((apt) => (
+            <div
+              key={apt._id}
+              className="flex items-center justify-between p-2 rounded bg-gray-50 dark:bg-gray-900/50 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors cursor-pointer border border-transparent hover:border-gray-200 dark:hover:border-gray-600"
+              onClick={() => {
+                onSelectAppointment(apt);
+                openDetailsModal();
+              }}
+            >
+              <div className="flex items-center space-x-2 overflow-hidden">
+                <User className="h-3.5 w-3.5 text-gray-400 shrink-0" />
+                <span className="text-sm truncate font-medium">{apt.clientName}</span>
+                {apt.paymentStatus === "captured" && (
+                  <CreditCard className="h-3 w-3 text-green-500 shrink-0" />
+                )}
+              </div>
+              <div
+                className={`${
+                  getStatusProps(apt.status as AppointmentStatus).className
+                } rounded-full h-2 w-2 border shrink-0 ml-2`}
+              ></div>
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 };
@@ -520,16 +602,30 @@ const MobileCalendar = ({
                   {dateKey}
                 </h2>
                 {filteredAppointments.length > 0 ? (
-                  filteredAppointments.map((appointment: Appointment) => (
-                    <AppointmentCard
-                      key={appointment._id}
-                      appointment={appointment}
-                      onClick={() => {
-                        onSelectAppointment(appointment);
-                        openDetailsModal();
-                      }}
-                    />
-                  ))
+                  groupAppointments(filteredAppointments).map((item, idx) => {
+                    if ("isGroup" in item && item.isGroup) {
+                      return (
+                        <GroupedAppointmentAccordion
+                          key={`${dateKey}-group-${idx}`}
+                          group={item as GroupedAppointment}
+                          onSelectAppointment={onSelectAppointment}
+                          openDetailsModal={openDetailsModal}
+                        />
+                      );
+                    } else {
+                      const appointment = item as Appointment;
+                      return (
+                        <AppointmentCard
+                          key={appointment._id}
+                          appointment={appointment}
+                          onClick={() => {
+                            onSelectAppointment(appointment);
+                            openDetailsModal();
+                          }}
+                        />
+                      );
+                    }
+                  })
                 ) : (
                   <p className="text-center text-gray-500 dark:text-gray-400 mt-4 p-4 rounded-lg bg-gray-100 dark:bg-gray-800 border border-dashed border-gray-300 dark:border-gray-700">
                     {t("No appointments.")}
