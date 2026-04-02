@@ -23,6 +23,8 @@ import { User } from "@/context/AuthContextTypes";
 import { useAuthContext } from "@/context/AuthContext";
 import callApi from "../Api/callApi";
 import { usePaletteTheme } from "@/components/ThemeProvider";
+import { usePushNotifications } from "@/hooks/usePushNotifications";
+import { Bell, BellOff } from "lucide-react";
 
 import { Skeleton } from "@/components/ui/skeleton";
 
@@ -41,7 +43,8 @@ export default function SettingsPage() {
     usePaletteTheme();
   const { t } = useTranslation();
   const { setPageTitle } = usePageTitle();
-  const { user } = useAuthContext();
+  const { user, token } = useAuthContext();
+  const { isSubscribed, subscribeToPush, unsubscribeFromPush } = usePushNotifications();
   const [isLoading, setIsLoading] = useState(true);
   const [isInitialLoad, setIsInitialLoad] = useState(true);
   const [mounted, setMounted] = useState(false); // Флаг за успешно монтиране на клиента
@@ -431,6 +434,62 @@ export default function SettingsPage() {
                     aria-label={`Select ${palette.name} theme`}
                   />
                 ))}
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Карта за Нотификации */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-primary text-2xl flex items-center gap-2">
+              <Bell className="h-6 w-6" />
+              {t("Notifications")}
+            </CardTitle>
+            <CardDescription>
+              {t("Get real-time updates about your appointments")}
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-6 pt-4 pb-4">
+            <div className="flex items-center justify-between">
+              <div className="space-y-0.5">
+                <label
+                  className="text-primary text-base font-medium"
+                >
+                  {t("Push Notifications")}
+                </label>
+                <p className="text-sm text-muted-foreground">
+                  {isSubscribed 
+                    ? t("You are currently receiving notifications on this device") 
+                    : t("Enable notifications to stay updated")}
+                </p>
+              </div>
+
+              <div className="flex items-center gap-2">
+                {isSubscribed ? (
+                  <Bell className="h-4 w-4 text-primary" />
+                ) : (
+                  <BellOff className="h-4 w-4 text-muted-foreground" />
+                )}
+                <Switch
+                  checked={isSubscribed}
+                  onCheckedChange={async (checked) => {
+                    if (checked) {
+                      const success = await subscribeToPush(token || "");
+                      if (success) {
+                        toast.success(t("Notifications enabled! 🔔"));
+                      } else {
+                        toast.error(t("Failed to enable notifications. Please check your browser settings."));
+                      }
+                    } else {
+                      const success = await unsubscribeFromPush();
+                      if (success) {
+                        toast.success(t("Notifications disabled."));
+                      }
+                    }
+                  }}
+                  disabled={!mounted}
+                />
               </div>
             </div>
           </CardContent>

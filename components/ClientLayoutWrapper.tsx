@@ -27,7 +27,23 @@ export default function ClientLayoutWrapper({
     }
   }, [user]);
 
-  // Apply persisted language once on mount (avoid overriding manual selections on navigation)
+  // Register Service Worker for PWA
+  useEffect(() => {
+    if ("serviceWorker" in navigator && window.location.protocol === "https:" || window.location.hostname === "localhost") {
+      window.addEventListener("load", () => {
+        navigator.serviceWorker
+          .register("/sw.js")
+          .then((registration) => {
+            console.log("SW registered:", registration);
+          })
+          .catch((error) => {
+            console.log("SW registration failed:", error);
+          });
+      });
+    }
+  }, []);
+
+  // Apply persisted language once on mount
   useEffect(() => {
     const stored =
       typeof window !== "undefined" ? localStorage.getItem("appLocale") : null;

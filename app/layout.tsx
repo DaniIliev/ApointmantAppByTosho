@@ -12,6 +12,13 @@ export const metadata: Metadata = {
   title: "AppointDI",
   description: "AppointDI - Smart Appointment Scheduling",
   generator: "Next.js",
+  manifest: "/manifest.json",
+  themeColor: "#000000",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "default",
+    title: "AppointDI",
+  },
 };
 
 import { LocationProvider } from "@/context/LocationContext";
