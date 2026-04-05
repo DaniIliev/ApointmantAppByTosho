@@ -51,7 +51,7 @@ const AppointmentCard: React.FC<AppointmentCardProps> = ({
   onClick,
 }) => {
   const { t } = useTranslation();
-    const statusProps = getStatusProps(appointment.status as AppointmentStatus);
+  const statusProps = getStatusProps(appointment.status as AppointmentStatus);
   return (
     <div
       className="p-2 border border-gray-200 dark:border-gray-700 rounded-md shadow-sm mb-2 hover:shadow-md transition-shadow bg-white dark:bg-gray-800 cursor-pointer"
@@ -62,13 +62,17 @@ const AppointmentCard: React.FC<AppointmentCardProps> = ({
       <div className="flex items-center justify-between space-x-2 mb-1.5 pb-1 border-b border-gray-100 dark:border-gray-700/50">
         <h3 className="font-semibold text-sm flex items-center space-x-1.5">
           <User className="h-3.5 w-3.5 text-gray-500 dark:text-gray-400" />
-          <span className="truncate max-w-[150px]">{appointment.clientName}</span>
+          <span className="truncate max-w-[150px]">
+            {appointment.clientName}
+          </span>
         </h3>
         <div className="flex-shrink-0">
-          <div className={`${statusProps.className} rounded-full h-2 w-2 border`}></div>
+          <div
+            className={`${statusProps.className} rounded-full h-2 w-2 border`}
+          ></div>
         </div>
       </div>
-      
+
       <div className="flex items-center justify-between text-xs text-gray-600 dark:text-gray-300">
         <div className="flex items-center space-x-1.5 font-medium text-gray-800 dark:text-gray-200">
           <Clock className="h-3 w-3 text-primary" />
@@ -84,7 +88,9 @@ const AppointmentCard: React.FC<AppointmentCardProps> = ({
         </div>
         <div className="flex items-center space-x-1 text-gray-500 dark:text-gray-400 truncate ml-2">
           <Briefcase className="h-3 w-3 text-primary/70 flex-shrink-0" />
-          <span className="truncate max-w-[120px]">{appointment.serviceName}</span>
+          <span className="truncate max-w-[120px]">
+            {appointment.serviceName}
+          </span>
         </div>
       </div>
     </div>
@@ -126,9 +132,7 @@ const GroupedAppointmentAccordion: React.FC<
               </span>
               <span className="flex items-center space-x-1">
                 <Users className="h-3 w-3" />
-                <span>
-                  {group.count}
-                </span>
+                <span>{group.count}</span>
               </span>
             </div>
           </div>
@@ -155,7 +159,9 @@ const GroupedAppointmentAccordion: React.FC<
             >
               <div className="flex items-center space-x-2 overflow-hidden">
                 <User className="h-3.5 w-3.5 text-gray-400 shrink-0" />
-                <span className="text-sm truncate font-medium">{apt.clientName}</span>
+                <span className="text-sm truncate font-medium">
+                  {apt.clientName}
+                </span>
                 {apt.paymentStatus === "captured" && (
                   <CreditCard className="h-3 w-3 text-green-500 shrink-0" />
                 )}
@@ -190,7 +196,7 @@ const WeeklyCalendar: React.FC<WeeklyCalendarProps> = ({
 }) => {
   const startOfTheWeek: Date = startOfWeek(selectedDate, { weekStartsOn: 1 });
   const weekDays: Date[] = [...Array(7)].map((_, i) =>
-    addDays(startOfTheWeek, i)
+    addDays(startOfTheWeek, i),
   );
 
   const monthYearTitle: string = format(selectedDate, "MMMM yyyy", {
@@ -229,8 +235,8 @@ const WeeklyCalendar: React.FC<WeeklyCalendarProps> = ({
               isSameDay(date, selectedDate)
                 ? "font-bold text-blue-600 dark:text-blue-400"
                 : uniqueDates[format(date, "yyyy-MM-dd")]
-                ? "font-bold text-blue-600 dark:text-blue-400"
-                : "text-gray-600 dark:text-gray-400"
+                  ? "font-bold text-blue-600 dark:text-blue-400"
+                  : "text-gray-600 dark:text-gray-400",
             )}
           >
             <span className="text-xs">
@@ -241,7 +247,7 @@ const WeeklyCalendar: React.FC<WeeklyCalendarProps> = ({
                 "text-lg font-semibold w-8 h-8 flex items-center justify-center rounded-full transition-colors",
                 isSameDay(date, selectedDate)
                   ? "ring-2 ring-blue-600 bg-blue-100 dark:bg-blue-900"
-                  : ""
+                  : "",
               )}
             >
               {format(date, "d")}
@@ -271,6 +277,7 @@ const MonthlyCalendar: React.FC<MonthlyCalendarProps> = ({
   const start: Date = startOfMonth(selectedDate);
   const end: Date = endOfMonth(selectedDate);
   const allDates: Date[] = eachDayOfInterval({ start, end });
+  const leadingEmptyDays: number = (start.getDay() + 6) % 7;
 
   const daysOfWeek: string[] = ["Пн", "Вт", "Ср", "Чт", "Пт", "Сб", "Нд"];
 
@@ -301,6 +308,9 @@ const MonthlyCalendar: React.FC<MonthlyCalendarProps> = ({
         ))}
       </div>
       <div className="grid grid-cols-7 gap-1">
+        {Array.from({ length: leadingEmptyDays }).map((_, index) => (
+          <div key={`empty-${index}`} className="h-12" aria-hidden="true" />
+        ))}
         {allDates.map((date: Date) => (
           <button
             key={date.toString()}
@@ -311,8 +321,8 @@ const MonthlyCalendar: React.FC<MonthlyCalendarProps> = ({
               isSameDay(date, selectedDate)
                 ? "font-bold text-blue-600 dark:text-blue-400"
                 : uniqueDates[format(date, "yyyy-MM-dd")]
-                ? "font-bold text-blue-600 dark:text-blue-400"
-                : "text-gray-600 dark:text-gray-400"
+                  ? "font-bold text-blue-600 dark:text-blue-400"
+                  : "text-gray-600 dark:text-gray-400",
             )}
           >
             <span
@@ -320,7 +330,7 @@ const MonthlyCalendar: React.FC<MonthlyCalendarProps> = ({
                 "text-sm font-semibold w-8 h-8 flex items-center justify-center rounded-full transition-colors",
                 isSameDay(date, selectedDate)
                   ? "ring-2 ring-blue-600 bg-blue-100 dark:bg-blue-900"
-                  : ""
+                  : "",
               )}
             >
               {format(date, "d")}
@@ -351,7 +361,7 @@ const MobileCalendar = ({
   // const appointments: Appointment[] = mockAppointments;
 
   const appointmentRefs = React.useRef<Record<string, HTMLDivElement | null>>(
-    {}
+    {},
   );
   const containerRef = React.useRef<HTMLDivElement>(null);
   const isUserScrolling = React.useRef<boolean>(false);
@@ -360,7 +370,7 @@ const MobileCalendar = ({
     return [...appointments].sort(
       (a, b) =>
         parseISO(a.appointmentTime.start).getTime() -
-        parseISO(b.appointmentTime.start).getTime()
+        parseISO(b.appointmentTime.start).getTime(),
     );
   }, [appointments]);
 
@@ -380,7 +390,7 @@ const MobileCalendar = ({
           "dd MMMM yyyy г.",
           {
             locale: bg,
-          }
+          },
         );
         if (!groups[dateKey]) {
           groups[dateKey] = [];
@@ -400,7 +410,7 @@ const MobileCalendar = ({
         }
         return acc;
       },
-      {}
+      {},
     );
   }, [appointments]);
 
@@ -476,7 +486,7 @@ const MobileCalendar = ({
         root: containerRef.current,
         rootMargin: "0px",
         threshold: 0,
-      }
+      },
     );
 
     Object.values(appointmentRefs.current).forEach((ref) => {
@@ -533,7 +543,7 @@ const MobileCalendar = ({
         <div
           className={cn(
             "overflow-hidden transition-all duration-300 ease-in-out w-full",
-            isMonthlyView ? "h-auto" : "h-28"
+            isMonthlyView ? "h-auto" : "h-28",
           )}
         >
           {isMonthlyView ? (
@@ -587,7 +597,7 @@ const MobileCalendar = ({
             const appointmentsForDate: Appointment[] =
               groupedAppointments[dateKey] || [];
             const filteredAppointments = appointmentsForDate.filter((apt) =>
-              apt.clientName.toLowerCase().includes(searchQuery.toLowerCase())
+              apt.clientName.toLowerCase().includes(searchQuery.toLowerCase()),
             );
 
             return (

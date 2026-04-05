@@ -105,7 +105,7 @@ export default function BusinessLandingPage() {
           </div>
 
           {/* Booking methods & client tools (non-uniform presentation) */}
-          <div className="mt-8 grid lg:grid-cols-2 gap-8 items-center">
+          <div className="mt-8 grid lg:grid-cols-2  gap-8 items-center justify-center">
             <div className="space-y-4">
               <div className="flex items-start gap-3">
                 <QrCode className="h-6 w-6 text-primary flex-shrink-0" />
@@ -142,9 +142,9 @@ export default function BusinessLandingPage() {
               </div>
             </div>
             {/* Interactive public page preview */}
-            <div className="mx-auto w-full max-w-2xl">
+            {/* <div className="mx-auto w-full max-w-2xl">
               <PublicPagePreview />
-            </div>
+            </div> */}
           </div>
 
           {/* Process & operations strip */}
