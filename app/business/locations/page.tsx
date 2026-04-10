@@ -1,7 +1,15 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Plus, MapPin, Phone, Clock, Pencil, Trash2, Upload } from "lucide-react";
+import {
+  Plus,
+  MapPin,
+  Phone,
+  Clock,
+  Pencil,
+  Trash2,
+  Upload,
+} from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { usePageTitle } from "@/context/PageTitleContext";
 import { useRightNav } from "@/context/RightNavContext";
@@ -41,7 +49,9 @@ function LocationsPageContent() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingLocation, setEditingLocation] = useState<Location | null>(null);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
-  const [locationToDelete, setLocationToDelete] = useState<Location | null>(null);
+  const [locationToDelete, setLocationToDelete] = useState<Location | null>(
+    null,
+  );
   const [isLoading, setIsLoading] = useState(false);
   const [isInitialLoading, setIsInitialLoading] = useState(true);
   const router = useRouter();
@@ -51,7 +61,7 @@ function LocationsPageContent() {
     address: string;
     city: string;
     phone: string;
-    email: string;  
+    email: string;
     imageUrl: File | string | null;
   }>({
     name: "",
@@ -66,7 +76,10 @@ function LocationsPageContent() {
     if (!user?.businessId) return;
     if (isInitial) setIsInitialLoading(true);
     try {
-      const data = await callApi(`/api/locations?businessId=${user.businessId}`, "GET");
+      const data = await callApi(
+        `/api/locations?businessId=${user.businessId}`,
+        "GET",
+      );
       setLocations(data);
     } catch (error) {
       console.error("Failed to fetch locations:", error);
@@ -118,13 +131,17 @@ function LocationsPageContent() {
     e.preventDefault();
     setIsLoading(true);
     const method = editingLocation ? "PUT" : "POST";
-    const endpoint = editingLocation ? `/api/locations/${editingLocation._id}` : "/api/locations";
+    const endpoint = editingLocation
+      ? `/api/locations/${editingLocation._id}`
+      : "/api/locations";
 
     try {
       const isFile = formData.imageUrl instanceof File;
       const payload = { ...formData, businessId: user?.businessId };
       await callApi(endpoint, method, payload, isFile);
-      toast.success(editingLocation ? t("Location updated") : t("Location created"));
+      toast.success(
+        editingLocation ? t("Location updated") : t("Location created"),
+      );
       fetchLocations();
       setIsModalOpen(false);
     } catch (error) {
@@ -157,7 +174,7 @@ function LocationsPageContent() {
 
   return (
     <div className="space-y-6">
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6">
         {isInitialLoading ? (
           [1, 2, 3].map((i) => (
             <Skeleton key={i} className="h-96 rounded-3xl w-full" />
@@ -176,23 +193,68 @@ function LocationsPageContent() {
         ) : (
           <div className="col-span-full text-center py-12 bg-white/50 dark:bg-gray-800/50 rounded-3xl border-2 border-dashed border-primary/20">
             <MapPin className="h-12 w-12 mx-auto text-muted-foreground mb-4 opacity-20" />
-            <p className="text-muted-foreground">{t("No locations found. Add your first location to get started!")}</p>
-            <Button onClick={() => openModal()} className="mt-4 rounded-full" iconType="add">
+            <p className="text-muted-foreground">
+              {t("No locations found. Add your first location to get started!")}
+            </p>
+            <Button
+              onClick={() => openModal()}
+              className="mt-4 rounded-full"
+              iconType="add"
+            >
               {t("Add Location")}
             </Button>
           </div>
         )}
       </div>
 
-      <Modal open={isModalOpen} onOpenChange={setIsModalOpen} label={editingLocation ? t("Edit Location") : t("Add New Location")}>
+      <Modal
+        open={isModalOpen}
+        onOpenChange={setIsModalOpen}
+        label={editingLocation ? t("Edit Location") : t("Add New Location")}
+      >
         <form onSubmit={handleSubmit} className="space-y-4 p-2">
-          <LabeledInput label={t("Location Name")} id="name" value={formData.name} onChange={(e) => setFormData({ ...formData, name: e.target.value })} required />
-          <LabeledInput label={t("Address")} id="address" value={formData.address} onChange={(e) => setFormData({ ...formData, address: e.target.value })} required />
-          <LabeledInput label={t("City")} id="city" value={formData.city} onChange={(e) => setFormData({ ...formData, city: e.target.value })} required />
-          <LabeledInput label={t("Phone")} id="phone" value={formData.phone} onChange={(e) => setFormData({ ...formData, phone: e.target.value })} required />
-          <LabeledInput label={t("Email")} id="email" value={formData.email} onChange={(e) => setFormData({ ...formData, email: e.target.value })} required />
+          <LabeledInput
+            label={t("Location Name")}
+            id="name"
+            value={formData.name}
+            onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+            required
+          />
+          <LabeledInput
+            label={t("Address")}
+            id="address"
+            value={formData.address}
+            onChange={(e) =>
+              setFormData({ ...formData, address: e.target.value })
+            }
+            required
+          />
+          <LabeledInput
+            label={t("City")}
+            id="city"
+            value={formData.city}
+            onChange={(e) => setFormData({ ...formData, city: e.target.value })}
+            required
+          />
+          <LabeledInput
+            label={t("Phone")}
+            id="phone"
+            value={formData.phone}
+            onChange={(e) =>
+              setFormData({ ...formData, phone: e.target.value })
+            }
+            required
+          />
+          <LabeledInput
+            label={t("Email")}
+            id="email"
+            value={formData.email}
+            onChange={(e) =>
+              setFormData({ ...formData, email: e.target.value })
+            }
+            required
+          />
 
-          
           <div className="space-y-2">
             <label
               htmlFor="image"
@@ -203,8 +265,8 @@ function LocationsPageContent() {
                 {formData.imageUrl instanceof File
                   ? `1 file selected: ${formData.imageUrl.name}`
                   : formData.imageUrl
-                  ? t("Image uploaded")
-                  : t("Click to upload or drag & drop")}
+                    ? t("Image uploaded")
+                    : t("Click to upload or drag & drop")}
               </span>
               <input
                 id="image"
@@ -220,9 +282,13 @@ function LocationsPageContent() {
               />
             </label>
           </div>
-          
+
           <div className="flex justify-end gap-2 pt-4">
-            <Button variant="outline" onClick={() => setIsModalOpen(false)} disabled={isLoading}>
+            <Button
+              variant="outline"
+              onClick={() => setIsModalOpen(false)}
+              disabled={isLoading}
+            >
               {t("Cancel")}
             </Button>
             <Button type="submit" disabled={isLoading}>
@@ -237,7 +303,9 @@ function LocationsPageContent() {
         onClose={() => setIsDeleteDialogOpen(false)}
         onConfirm={confirmDelete}
         title={t("Delete Location")}
-        message={t("Are you sure you want to delete this location? This may affect services and staff assigned to it.")}
+        message={t(
+          "Are you sure you want to delete this location? This may affect services and staff assigned to it.",
+        )}
       />
     </div>
   );

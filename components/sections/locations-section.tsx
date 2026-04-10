@@ -34,7 +34,7 @@ export function LocationsSection({
         </CardTitle>
       </CardHeader>
       <CardContent className="pt-6 pb-6">
-        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid sm:grid-cols-2 lg:grid-cols-2 gap-6">
           {locations.map((loc) => (
             <LocationCard
               key={loc._id}

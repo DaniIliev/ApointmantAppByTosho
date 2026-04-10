@@ -55,7 +55,7 @@ const SubMenu = ({
   const hasActiveChild = item.children?.some(
     (child) =>
       pathname === child.href ||
-      child.children?.some((nested) => pathname === nested.href)
+      child.children?.some((nested) => pathname === nested.href),
   );
   const [isSubmenuOpen, setIsSubmenuOpen] = useState(!!hasActiveChild);
   const isActive = item.href ? pathname === item.href : hasActiveChild;
@@ -213,8 +213,7 @@ export default function LeftNav({ isOpen, onClose }: LeftNavProps) {
     user?.role === "staff" ||
     user?.role === "admin"
       ? [
-          // { href: "/home", label: t("Home"), icon: House },
-          { href: "/for-business", label: t("Home"), icon: House },
+          { href: "/home", label: t("Home"), icon: House },
 
           { href: "/dashboard", label: t("Dashboard"), icon: LayoutDashboard },
           {

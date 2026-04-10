@@ -15,8 +15,7 @@ import { Modal } from "@/components/customUIComponents/Modal";
 import { MultiSelectCombobox } from "@/components/customUIComponents/MultiSelectCombobox";
 import callApi from "../Api/callApi";
 import { StaffMember } from "./types";
-import { StaffViewModal } from "./StaffViewModal";
-import { StaffEditModal } from "./StaffEditModal";
+import { StaffModal } from "./StaffModal";
 import { useAuthContext } from "@/context/AuthContext";
 
 import { Skeleton } from "@/components/ui/skeleton";
@@ -47,24 +46,16 @@ function StaffPageContent() {
   const { selectedLocation } = useLocationContext();
   const [staff, setStaff] = useState<StaffMember[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [isViewModalOpen, setIsViewModalOpen] = useState(false);
-  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [modalMode, setModalMode] = useState<"view" | "edit" | "create">(
+    "create",
+  );
   const [selectedStaff, setSelectedStaff] = useState<StaffMember | null>(null);
   const [locations, setLocations] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [newStaffMember, setNewStaffMember] = useState({
-    firstName: "",
-    lastName: "",
-    email: "",
-    phone: "",
-    locationIds: [] as string[],
-  });
 
   useEffect(() => {
     setPageTitle(t("Staff Management"));
-    setExtraRightNavMenu(
-      <AddStaffNav onOpenModal={() => setIsModalOpen(true)} />
-    );
+    setExtraRightNavMenu(<AddStaffNav onOpenModal={openCreateModal} />);
     setIsRightNavVisible(true);
     return () => {
       setPageTitle(null);
@@ -80,7 +71,7 @@ function StaffPageContent() {
       try {
         const [staffData, locationsData] = await Promise.all([
           callApi(`/api/staff/staff-list?businessId=${user.businessId}`, "GET"),
-          callApi(`/api/locations?businessId=${user.businessId}`, "GET")
+          callApi(`/api/locations?businessId=${user.businessId}`, "GET"),
         ]);
         setStaff(staffData);
         setLocations(locationsData);
@@ -94,22 +85,19 @@ function StaffPageContent() {
     loadData();
   }, [user?.businessId, t, selectedLocation?._id]);
 
-  // Open staff details modal
-  const openStaffDetailsModal = (staffId: string) => {
-    const staff = findStaffById(staffId);
-    if (staff) {
-      setSelectedStaff(staff);
-      setIsViewModalOpen(true);
+  const openStaffModal = (staffId: string, mode: "view" | "edit") => {
+    const foundStaff = findStaffById(staffId);
+    if (foundStaff) {
+      setSelectedStaff(foundStaff);
+      setModalMode(mode);
+      setIsModalOpen(true);
     }
   };
 
-  // Open staff edit modal
-  const openStaffEditModalModal = (staffId: string) => {
-    const staff = findStaffById(staffId);
-    if (staff) {
-      setSelectedStaff(staff);
-      setIsEditModalOpen(true);
-    }
+  const openCreateModal = () => {
+    setSelectedStaff(null);
+    setModalMode("create");
+    setIsModalOpen(true);
   };
 
   // Find staff by ID
@@ -117,11 +105,15 @@ function StaffPageContent() {
     return staff.find((s) => s._id === staffId);
   };
 
-  // Handle staff update
+  // Handle staff update/create
   const handleStaffUpdated = (updatedStaff: StaffMember) => {
     setStaff((prev) =>
-      prev.map((s) => (s._id === updatedStaff._id ? updatedStaff : s))
+      prev.map((s) => (s._id === updatedStaff._id ? updatedStaff : s)),
     );
+  };
+
+  const handleStaffCreated = (newStaff: StaffMember) => {
+    setStaff((prev) => [...prev, newStaff]);
   };
 
   const removeStaff = async (staffId: string) => {
@@ -131,35 +123,6 @@ function StaffPageContent() {
       toast.success(t("Staff member removed successfully") as string);
     } catch (error) {
       toast.error(t("Failed to remove staff member") as string);
-    }
-  };
-
-  const handleInviteStaff = async () => {
-    try {
-      const result = await callApi(
-        "/api/staff/invite",
-        "POST",
-        newStaffMember
-      );
-      setStaff((prev) => [...prev, result.staff]);
-
-      setIsModalOpen(false);
-      toast.success(
-        t(
-          "Staff member invited successfully! An email with a temporary password has been sent"
-        )
-      );
-
-      // Изчистване на формата
-      setNewStaffMember({
-        firstName: "",
-        lastName: "",
-        email: "",
-        phone: "",
-        locationIds: [],
-      });
-    } catch (error) {
-      toast.error(t("Failed to invite staff member"));
     }
   };
 
@@ -190,11 +153,13 @@ function StaffPageContent() {
       cell: ({ row }) => {
         const staffLocations = row.original.locationIds || [];
         const names = staffLocations
-          .map(id => locations.find(l => l._id === id)?.name)
+          .map((id) => locations.find((l) => l._id === id)?.name)
           .filter(Boolean)
           .join(", ");
-        return <span className="truncate max-w-[200px] block">{names || "-"}</span>;
-      }
+        return (
+          <span className="truncate max-w-[200px] block">{names || "-"}</span>
+        );
+      },
     },
     {
       accessorKey: "role",
@@ -207,12 +172,12 @@ function StaffPageContent() {
       cell: ({ row }) => (
         <div className="flex items-center gap-0.5 mobile-actions">
           <CustomTooltip
-            onClick={() => openStaffDetailsModal(row.original._id)}
+            onClick={() => openStaffModal(row.original._id, "view")}
             tooltipText={t("View Details")}
             icon={<Eye />}
           />
           <CustomTooltip
-            onClick={() => openStaffEditModalModal(row.original._id)}
+            onClick={() => openStaffModal(row.original._id, "edit")}
             tooltipText={t("Edit")}
             icon={<Pencil />}
           />
@@ -244,86 +209,13 @@ function StaffPageContent() {
     <>
       <GenericTable data={staff} columns={columns} editable={false} />
 
-      <Modal
-        label={t("Add New Staff Member")}
+      <StaffModal
         open={isModalOpen}
         onOpenChange={setIsModalOpen}
-      >
-        <div className="space-y-3 p-2">
-          <LabeledInput
-            type="text"
-            value={newStaffMember.firstName}
-            onChange={(e) =>
-              setNewStaffMember({
-                ...newStaffMember,
-                firstName: e.target.value,
-              })
-            }
-            label={t("First Name")}
-            id="firstName"
-          />
-          <LabeledInput
-            type="text"
-            value={newStaffMember.lastName}
-            onChange={(e) =>
-              setNewStaffMember({ ...newStaffMember, lastName: e.target.value })
-            }
-            label={t("Last Name")}
-            id="lastName"
-          />
-          <LabeledInput
-            type="email"
-            value={newStaffMember.email}
-            onChange={(e) =>
-              setNewStaffMember({ ...newStaffMember, email: e.target.value })
-            }
-            label={t("Email")}
-            id="email"
-          />
-          <LabeledInput
-            type="tel"
-            value={newStaffMember.phone}
-            onChange={(e) =>
-              setNewStaffMember({ ...newStaffMember, phone: e.target.value })
-            }
-            label={t("Phone")}
-            id="phone"
-          />
-
-          <div className="space-y-1">
-            <label className="text-sm font-medium">{t("Locations")}</label>
-            <MultiSelectCombobox
-              items={locations.map(l => ({ id: l._id, name: l.name }))}
-              selectedIds={newStaffMember.locationIds}
-              onSelectIdsChange={(newIds) => setNewStaffMember({ ...newStaffMember, locationIds: newIds })}
-              getLabel={(item) => item.name}
-              triggerPlaceholder={t("Select locations")}
-              searchPlaceholder={t("Search locations...")}
-              emptyMessage={t("No locations found.")}
-            />
-          </div>
-
-          <div className="flex justify-end gap-2 pt-4">
-            <Button variant="outline" onClick={() => setIsModalOpen(false)}>
-              {t("Cancel")}
-            </Button>
-            <Button onClick={handleInviteStaff}>{t("Invite Staff")}</Button>
-          </div>
-        </div>
-      </Modal>
-
-      <StaffViewModal
-        open={isViewModalOpen}
-        onOpenChange={setIsViewModalOpen}
-        staff={selectedStaff}
-        locations={locations}
-      />
-
-      <StaffEditModal
-        open={isEditModalOpen}
-        onOpenChange={setIsEditModalOpen}
+        mode={modalMode}
         staff={selectedStaff}
         onStaffUpdated={handleStaffUpdated}
+        onStaffCreated={handleStaffCreated}
         locations={locations}
       />
     </>
