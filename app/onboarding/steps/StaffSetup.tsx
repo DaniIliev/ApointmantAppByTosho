@@ -256,7 +256,11 @@ export default function StaffSetup({
                   options={[
                     { id: "manager", name: t("Manager") },
                     { id: "staff", name: t("Staff") },
-                    { id: "business", name: t("Business Owner") },
+                    {
+                      id: "business",
+                      name: t("Business Owner"),
+                      disabled: true,
+                    },
                   ]}
                   placeholder={t("Select role")}
                   // @ts-ignore
