@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { Suspense, useEffect, useRef } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useAuthContext } from "@/context/AuthContext";
 import { toast } from "sonner";
@@ -13,7 +13,7 @@ interface DecodedToken {
   role?: string;
 }
 
-export default function AuthCallbackPage() {
+function AuthCallbackPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { setUser } = useAuthContext();
@@ -69,4 +69,12 @@ export default function AuthCallbackPage() {
   }, [router, searchParams, setUser]);
 
   return null;
+}
+
+export default function AuthCallbackPage() {
+  return (
+    <Suspense fallback={null}>
+      <AuthCallbackPageContent />
+    </Suspense>
+  );
 }
