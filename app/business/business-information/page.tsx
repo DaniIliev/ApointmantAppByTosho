@@ -335,7 +335,7 @@ function BusinessInformationPageContent() {
 
 export default function BusinessInformationPage() {
   return (
-    <ProtectedRoute requiredRoles={["business"]}>
+    <ProtectedRoute requiredRoles={["business", "manager"]}>
       <BusinessInformationPageContent />
     </ProtectedRoute>
   );

@@ -26,7 +26,7 @@ interface Alert {
   _id: string;
   isRead: boolean;
   message: string;
-  createdAt: string;
+  createdAt?: string;
   updatedAt?: string;
   type: string;
   appointment?: AppointmentInfo;
@@ -111,11 +111,104 @@ export default function TopNav({
     setIsAlertsOpen(false);
   };
 
+  const normalizeAlert = (rawAlert: unknown): Alert | null => {
+    if (!rawAlert || typeof rawAlert !== "object") return null;
+
+    const source = rawAlert as Record<string, unknown>;
+    const appointmentCandidate =
+      source.appointment && typeof source.appointment === "object"
+        ? (source.appointment as Record<string, unknown>)
+        : undefined;
+
+    const normalizedAppointment = appointmentCandidate
+      ? {
+          _id:
+            typeof appointmentCandidate._id === "string"
+              ? appointmentCandidate._id
+              : "",
+          clientName:
+            typeof appointmentCandidate.clientName === "string"
+              ? appointmentCandidate.clientName
+              : "",
+          appointmentTime:
+            appointmentCandidate.appointmentTime &&
+            typeof appointmentCandidate.appointmentTime === "object"
+              ? {
+                  start: String(
+                    (
+                      appointmentCandidate.appointmentTime as Record<
+                        string,
+                        unknown
+                      >
+                    ).start ?? "",
+                  ),
+                  end: String(
+                    (
+                      appointmentCandidate.appointmentTime as Record<
+                        string,
+                        unknown
+                      >
+                    ).end ?? "",
+                  ),
+                }
+              : { start: "", end: "" },
+          service:
+            typeof appointmentCandidate.service === "string" ||
+            (appointmentCandidate.service &&
+              typeof appointmentCandidate.service === "object")
+              ? (appointmentCandidate.service as
+                  | { _id: string; name: string }
+                  | string)
+              : undefined,
+          clientPhone:
+            typeof appointmentCandidate.clientPhone === "string"
+              ? appointmentCandidate.clientPhone
+              : undefined,
+          email:
+            typeof appointmentCandidate.email === "string"
+              ? appointmentCandidate.email
+              : undefined,
+          status:
+            typeof appointmentCandidate.status === "string"
+              ? appointmentCandidate.status
+              : undefined,
+          staff:
+            typeof appointmentCandidate.staff === "string"
+              ? appointmentCandidate.staff
+              : undefined,
+        }
+      : undefined;
+
+    const normalizedType =
+      typeof source.type === "string"
+        ? source.type
+        : normalizedAppointment
+          ? "appointment"
+          : "notification";
+
+    return {
+      _id: typeof source._id === "string" ? source._id : crypto.randomUUID(),
+      isRead: typeof source.isRead === "boolean" ? source.isRead : false,
+      message:
+        typeof source.message === "string"
+          ? source.message
+          : "New notification",
+      createdAt:
+        typeof source.createdAt === "string"
+          ? source.createdAt
+          : new Date().toISOString(),
+      updatedAt:
+        typeof source.updatedAt === "string" ? source.updatedAt : undefined,
+      type: normalizedType,
+      appointment: normalizedAppointment,
+    };
+  };
+
   useEffect(() => {
     console.log("user", user);
     if (user && (user.role === "staff" || user.role === "business")) {
       const socket = io(
-        process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080"
+        process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080",
       );
 
       socket.on("connect", () => {
@@ -127,7 +220,9 @@ export default function TopNav({
 
       socket.on("newAppointment", (newAlert) => {
         console.log("Received new alert:", newAlert);
-        setAlerts((prevAlerts) => [newAlert, ...prevAlerts]);
+        const normalized = normalizeAlert(newAlert);
+        if (!normalized) return;
+        setAlerts((prevAlerts) => [normalized, ...prevAlerts]);
       });
 
       socket.on("disconnect", (reason) => {
@@ -138,8 +233,11 @@ export default function TopNav({
         console.log("Fetching alerts from API...");
         try {
           const fetchedAlerts = await callApi("/api/alerts", "GET");
-          if (fetchedAlerts) {
-            setAlerts(fetchedAlerts);
+          if (Array.isArray(fetchedAlerts)) {
+            const normalizedAlerts = fetchedAlerts
+              .map((alert) => normalizeAlert(alert))
+              .filter((alert): alert is Alert => alert !== null);
+            setAlerts(normalizedAlerts);
           }
         } catch (error) {
           console.error("Error fetching alerts:", error);

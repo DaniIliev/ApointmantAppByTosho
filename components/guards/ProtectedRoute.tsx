@@ -16,7 +16,7 @@ import { useTranslation } from "react-i18next";
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
-  requiredRoles?: ("personal" | "business" | "staff" | "admin")[];
+  requiredRoles?: ("personal" | "business" | "staff" | "admin" | "manager")[];
   requiredPlan?: PlanType[];
   featureName?: string;
 }
@@ -31,13 +31,7 @@ export default function ProtectedRoute({
   const { user } = useAuthContext();
   const router = useRouter();
   const pathname = usePathname();
-  const [isChecking, setIsChecking] = useState(true);
   const [shouldRedirect, setShouldRedirect] = useState<string | null>(null);
-
-  useEffect(() => {
-    const timer = setTimeout(() => setIsChecking(false), 100);
-    return () => clearTimeout(timer);
-  }, []);
 
   useEffect(() => {
     if (shouldRedirect) {
@@ -45,25 +39,11 @@ export default function ProtectedRoute({
     }
   }, [shouldRedirect, router]);
 
-  if (isChecking) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        {/* <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
-         */}
-        <Loader2 className="h-12 w-12 animate-spin text-primary" />
-      </div>
-    );
-  }
-
   if (!user) {
     if (!shouldRedirect) {
       setShouldRedirect(`/login?redirect=${encodeURIComponent(pathname)}`);
     }
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
-      </div>
-    );
+    return null;
   }
 
   if (requiredRoles && !requiredRoles.includes(user.role)) {
@@ -84,7 +64,7 @@ export default function ProtectedRoute({
                 {t(
                   `This page is only available to ${requiredRoles
                     .join(", ")
-                    .replace(/,([^,]*)$/, " and$1")} accounts.`
+                    .replace(/,([^,]*)$/, " and$1")} accounts.`,
                 )}
               </p>
               <p className="text-sm text-muted-foreground">
@@ -128,7 +108,7 @@ export default function ProtectedRoute({
               </h2>
               <p className="text-muted-foreground">
                 {t(
-                  "Business accounts need an active subscription to access this feature. Choose a plan to get started."
+                  "Business accounts need an active subscription to access this feature. Choose a plan to get started.",
                 )}
               </p>
               <p className="text-sm text-muted-foreground">
@@ -172,7 +152,7 @@ export default function ProtectedRoute({
                     featureName || "This feature"
                   } is available on ${requiredPlan
                     .join(", ")
-                    .replace(/,([^,]*)$/, " and$1")} plans.`
+                    .replace(/,([^,]*)$/, " and$1")} plans.`,
                 )}
               </p>
               <div className="bg-muted/50 rounded-lg space-y-2">
@@ -205,7 +185,7 @@ export default function ProtectedRoute({
     user.role,
     userPlanType,
     true,
-    user.subscriptionStatus
+    user.subscriptionStatus,
   );
 
   if (!access.allowed) {

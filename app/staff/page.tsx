@@ -224,7 +224,7 @@ function StaffPageContent() {
 
 export default function StaffPage() {
   return (
-    <ProtectedRoute requiredRoles={["business"]}>
+    <ProtectedRoute requiredRoles={["business", "manager"]}>
       <StaffPageContent />
     </ProtectedRoute>
   );

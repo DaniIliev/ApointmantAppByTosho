@@ -36,7 +36,7 @@ function QRCodePageContent() {
       try {
         const response = await callApi(
           `/api/business/${user.businessId}`,
-          "GET"
+          "GET",
         );
         setQrCodeUrl(response.qrCodeUrl || "");
         setBusinessName(response.businessName || "");
@@ -137,8 +137,10 @@ function QRCodePageContent() {
     if (navigator.share) {
       try {
         await navigator.share({
-          title: `${businessName} - Book an Appointment`,
-          text: `Scan the QR code or visit the link to book an appointment at ${businessName}`,
+          title: t(`${businessName} - Book an Appointment`),
+          text: t(
+            `Scan the QR code or visit the link to book an appointment at ${businessName}`,
+          ),
           url: shareUrl,
         });
         toast.success(t("Shared successfully"));
@@ -209,14 +211,14 @@ function QRCodePageContent() {
   }
 
   return (
-    <div >
+    <div>
       <div className=" mx-auto space-y-6">
         {/* Main QR Code Card */}
         <Card className="overflow-hidden">
           <CardHeader className="bg-gradient-to-r from-primary/10 to-primary/5">
             <p className="text-sm text-muted-foreground mt-2">
               {t(
-                "Share this QR code with your clients so they can easily book appointments"
+                "Share this QR code with your clients so they can easily book appointments",
               )}
             </p>
           </CardHeader>
@@ -291,7 +293,7 @@ function QRCodePageContent() {
 
 export default function QRCodePage() {
   return (
-    <ProtectedRoute requiredRoles={["business"]}>
+    <ProtectedRoute requiredRoles={["business", "staff", "manager"]}>
       <QRCodePageContent />
     </ProtectedRoute>
   );

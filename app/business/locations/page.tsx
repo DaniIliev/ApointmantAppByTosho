@@ -49,21 +49,76 @@ function LocationsPageContent() {
   const [isInitialLoading, setIsInitialLoading] = useState(true);
   const router = useRouter();
 
+  const phoneRegex = /^\+?[0-9\s()\-]{6,20}$/;
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+  const isValidWebsite = (value?: string) => {
+    if (!value?.trim()) return true;
+    try {
+      const normalized = /^https?:\/\//i.test(value)
+        ? value
+        : `https://${value}`;
+      const url = new URL(normalized);
+      return ["http:", "https:"].includes(url.protocol);
+    } catch {
+      return false;
+    }
+  };
+
   const [formData, setFormData] = useState<{
     name: string;
     address: string;
+    addressLine2: string;
+    postalCode: string;
     city: string;
+    country: string;
     phone: string;
     email: string;
+    website: string;
+    isDefault: boolean;
     imageUrl: File | string | null;
   }>({
     name: "",
     address: "",
+    addressLine2: "",
+    postalCode: "",
     city: "",
+    country: "България",
     phone: "",
     email: "",
+    website: "",
+    isDefault: false,
     imageUrl: null,
   });
+
+  const [formErrors, setFormErrors] = useState<Partial<Record<string, string>>>(
+    {},
+  );
+
+  const validateForm = () => {
+    const errors: Partial<Record<string, string>> = {};
+
+    if (!formData.name.trim()) errors.name = t("Location name is required");
+    if (!formData.address.trim()) errors.address = t("Address is required");
+    if (!formData.city.trim()) errors.city = t("City is required");
+
+    if (!formData.phone.trim()) {
+      errors.phone = t("Phone is required");
+    } else if (!phoneRegex.test(formData.phone.trim())) {
+      errors.phone = t("Invalid phone format");
+    }
+
+    if (formData.email && !emailRegex.test(formData.email.trim())) {
+      errors.email = t("Invalid email format");
+    }
+
+    if (formData.website && !isValidWebsite(formData.website)) {
+      errors.website = t("Invalid website URL");
+    }
+
+    setFormErrors(errors);
+    return Object.keys(errors).length === 0;
+  };
 
   const fetchLocations = async (isInitial = false) => {
     if (!user?.businessId) return;
@@ -101,27 +156,44 @@ function LocationsPageContent() {
       setFormData({
         name: location.name,
         address: location.address,
+        addressLine2: location.addressLine2 || "",
+        postalCode: location.postalCode || "",
         city: location.city,
+        country: location.country || "България",
         phone: location.phone,
         imageUrl: location.imageUrl || "",
         email: location.email || "",
+        website: location.website || "",
+        isDefault: !!location.isDefault,
       });
     } else {
       setEditingLocation(null);
       setFormData({
         name: "",
         address: "",
+        addressLine2: "",
+        postalCode: "",
         city: "",
         phone: "",
+        country: "България",
         imageUrl: null,
         email: "",
+        website: "",
+        isDefault: false,
       });
     }
+    setFormErrors({});
     setIsModalOpen(true);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    if (!validateForm()) {
+      toast.error(t("Please fix form errors"));
+      return;
+    }
+
     setIsLoading(true);
     const method = editingLocation ? "PUT" : "POST";
     const endpoint = editingLocation
@@ -212,6 +284,8 @@ function LocationsPageContent() {
             value={formData.name}
             onChange={(e) => setFormData({ ...formData, name: e.target.value })}
             required
+            showError={true}
+            errorText={formErrors.name || t("Required")}
           />
           <LabeledInput
             label={t("Address")}
@@ -221,6 +295,24 @@ function LocationsPageContent() {
               setFormData({ ...formData, address: e.target.value })
             }
             required
+            showError={true}
+            errorText={formErrors.address || t("Required")}
+          />
+          <LabeledInput
+            label={t("Address Line 2")}
+            id="addressLine2"
+            value={formData.addressLine2}
+            onChange={(e) =>
+              setFormData({ ...formData, addressLine2: e.target.value })
+            }
+          />
+          <LabeledInput
+            label={t("Postal Code")}
+            id="postalCode"
+            value={formData.postalCode}
+            onChange={(e) =>
+              setFormData({ ...formData, postalCode: e.target.value })
+            }
           />
           <LabeledInput
             label={t("City")}
@@ -228,6 +320,16 @@ function LocationsPageContent() {
             value={formData.city}
             onChange={(e) => setFormData({ ...formData, city: e.target.value })}
             required
+            showError={true}
+            errorText={formErrors.city || t("Required")}
+          />
+          <LabeledInput
+            label={t("Country")}
+            id="country"
+            value={formData.country}
+            onChange={(e) =>
+              setFormData({ ...formData, country: e.target.value })
+            }
           />
           <LabeledInput
             label={t("Phone")}
@@ -237,6 +339,8 @@ function LocationsPageContent() {
               setFormData({ ...formData, phone: e.target.value })
             }
             required
+            showError={true}
+            errorText={formErrors.phone || t("Required")}
           />
           <LabeledInput
             label={t("Email")}
@@ -245,8 +349,39 @@ function LocationsPageContent() {
             onChange={(e) =>
               setFormData({ ...formData, email: e.target.value })
             }
-            required
           />
+          {formErrors.email && (
+            <p className="text-xs text-red-500 -mt-2">{formErrors.email}</p>
+          )}
+          <LabeledInput
+            label={t("Website")}
+            id="website"
+            value={formData.website}
+            onChange={(e) =>
+              setFormData({ ...formData, website: e.target.value })
+            }
+          />
+          {formErrors.website && (
+            <p className="text-xs text-red-500 -mt-2">{formErrors.website}</p>
+          )}
+
+          <div className="flex items-center gap-3 px-1 py-1">
+            <input
+              id="isDefault"
+              type="checkbox"
+              checked={formData.isDefault}
+              onChange={(e) =>
+                setFormData({ ...formData, isDefault: e.target.checked })
+              }
+              className="h-4 w-4 rounded border-border accent-primary"
+            />
+            <label
+              htmlFor="isDefault"
+              className="text-sm text-muted-foreground"
+            >
+              {t("Set as default location")}
+            </label>
+          </div>
 
           <ImageUpload
             value={
@@ -299,7 +434,7 @@ function LocationsPageContent() {
 
 export default function LocationsPage() {
   return (
-    <ProtectedRoute requiredRoles={["business"]}>
+    <ProtectedRoute requiredRoles={["business", "manager"]}>
       <LocationsPageContent />
     </ProtectedRoute>
   );

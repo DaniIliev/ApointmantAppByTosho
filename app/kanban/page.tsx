@@ -65,17 +65,27 @@ function KanbanPageContent() {
 
   // Modal states for Cards & Columns
   const [cardModalOpen, setCardModalOpen] = useState(false);
-  const [cardModalMode, setCardModalMode] = useState<"create" | "edit">("create");
+  const [cardModalMode, setCardModalMode] = useState<"create" | "edit">(
+    "create",
+  );
   const [selectedCard, setSelectedCard] = useState<KanbanCard | null>(null);
-  const [selectedColumnId, setSelectedColumnId] = useState<string | undefined>(undefined);
+  const [selectedColumnId, setSelectedColumnId] = useState<string | undefined>(
+    undefined,
+  );
 
   const [columnModalOpen, setColumnModalOpen] = useState(false);
-  const [columnModalMode, setColumnModalMode] = useState<"create" | "edit">("create");
-  const [selectedColumn, setSelectedColumn] = useState<KanbanColumn | null>(null);
+  const [columnModalMode, setColumnModalMode] = useState<"create" | "edit">(
+    "create",
+  );
+  const [selectedColumn, setSelectedColumn] = useState<KanbanColumn | null>(
+    null,
+  );
 
   // Board Action Modal State
   const [boardModalOpen, setBoardModalOpen] = useState(false);
-  const [boardModalMode, setBoardModalMode] = useState<"create" | "edit">("create");
+  const [boardModalMode, setBoardModalMode] = useState<"create" | "edit">(
+    "create",
+  );
   const [boardTitle, setBoardTitle] = useState("");
 
   useEffect(() => {
@@ -95,13 +105,19 @@ function KanbanPageContent() {
 
     setLoading(true);
     try {
-      const boardsData: KanbanBoard[] = await callApi(`/api/kanban/boards?businessId=${user.businessId}`, "GET");
-      
+      const boardsData: KanbanBoard[] = await callApi(
+        `/api/kanban/boards?businessId=${user.businessId}`,
+        "GET",
+      );
+
       if (boardsData && boardsData.length > 0) {
         setBoards(boardsData);
         const firstBoard = boardsData[0];
         setSelectedBoardId(firstBoard._id);
-        const fullBoard = await callApi(`/api/kanban/boards/${firstBoard._id}`, "GET");
+        const fullBoard = await callApi(
+          `/api/kanban/boards/${firstBoard._id}`,
+          "GET",
+        );
         setColumns(fullBoard.columns || []);
       } else {
         setBoards([]);
@@ -109,7 +125,10 @@ function KanbanPageContent() {
         setColumns([]);
       }
 
-      const members: User[] = await callApi(`/api/kanban/business/${user.businessId}/members`, "GET");
+      const members: User[] = await callApi(
+        `/api/kanban/business/${user.businessId}/members`,
+        "GET",
+      );
       setAvailableUsers(members);
     } catch (error) {
       console.error("Failed to load kanban data:", error);
@@ -157,17 +176,35 @@ function KanbanPageContent() {
     };
 
     setExtraRightNavMenu([
-      <Button key="create" variant="ghost" onClick={handleCreateClick} className="w-full justify-start gap-3 px-3 py-2 h-9 font-medium hover:bg-accent rounded-lg">
+      <Button
+        key="create"
+        variant="ghost"
+        onClick={handleCreateClick}
+        className="w-full justify-start gap-3 px-3 py-2 h-9 font-medium hover:bg-accent rounded-lg"
+      >
         <Plus className="w-4 h-4 text-muted-foreground" /> {t("Create Board")}
       </Button>,
-      ...(selectedBoardId ? [
-        <Button key="edit" variant="ghost" onClick={handleEditClick} className="w-full justify-start gap-3 px-3 py-2 h-9 font-medium hover:bg-accent rounded-lg">
-          <Pencil className="w-4 h-4 text-muted-foreground" /> {t("Rename Board")}
-        </Button>,
-        <Button key="delete" variant="ghost" onClick={handleDeleteClick} className="w-full justify-start gap-3 px-3 py-2 h-9 font-medium text-destructive hover:text-destructive hover:bg-destructive/15 rounded-lg">
-          <Trash2 className="w-4 h-4" /> {t("Delete Board")}
-        </Button>
-      ] : [])
+      ...(selectedBoardId
+        ? [
+            <Button
+              key="edit"
+              variant="ghost"
+              onClick={handleEditClick}
+              className="w-full justify-start gap-3 px-3 py-2 h-9 font-medium hover:bg-accent rounded-lg"
+            >
+              <Pencil className="w-4 h-4 text-muted-foreground" />{" "}
+              {t("Rename Board")}
+            </Button>,
+            <Button
+              key="delete"
+              variant="ghost"
+              onClick={handleDeleteClick}
+              className="w-full justify-start gap-3 px-3 py-2 h-9 font-medium text-destructive hover:text-destructive hover:bg-destructive/15 rounded-lg"
+            >
+              <Trash2 className="w-4 h-4" /> {t("Delete Board")}
+            </Button>,
+          ]
+        : []),
     ]);
     setIsRightNavVisible(true);
 
@@ -190,9 +227,15 @@ function KanbanPageContent() {
         handleSelectBoard(newBoard._id);
         toast.success(t("Board created"));
       } else {
-        const upBoard = await callApi(`/api/kanban/boards/${selectedBoardId}`, "PUT", { title: boardTitle });
+        const upBoard = await callApi(
+          `/api/kanban/boards/${selectedBoardId}`,
+          "PUT",
+          { title: boardTitle },
+        );
         setBoards((prev) =>
-          prev.map((b) => (b._id === selectedBoardId ? { ...b, title: upBoard.title } : b))
+          prev.map((b) =>
+            b._id === selectedBoardId ? { ...b, title: upBoard.title } : b,
+          ),
         );
         toast.success(t("Board renamed"));
       }
@@ -230,7 +273,12 @@ function KanbanPageContent() {
           { value: "urgent", description: t("Urgent") },
         ],
         getIndicatorColor: (val: string) => {
-          const c: Record<string, string> = { low: "#6b7280", medium: "#3b82f6", high: "#f97316", urgent: "#ef4444" };
+          const c: Record<string, string> = {
+            low: "#6b7280",
+            medium: "#3b82f6",
+            high: "#f97316",
+            urgent: "#ef4444",
+          };
           return c[val] || "#000";
         },
       },
@@ -256,7 +304,7 @@ function KanbanPageContent() {
         })),
       },
     ],
-    [availableUsers, t]
+    [availableUsers, t],
   );
 
   const filteredColumns = useMemo(() => {
@@ -273,17 +321,25 @@ function KanbanPageContent() {
           }
           // Priority Filter
           if (filters.selectedPriorityFilters.length > 0) {
-            if (!filters.selectedPriorityFilters.includes(card.priority || "medium")) return false;
+            if (
+              !filters.selectedPriorityFilters.includes(
+                card.priority || "medium",
+              )
+            )
+              return false;
           }
           // Status Filter
           if (filters.selectedStatusFilters.length > 0) {
-            if (!filters.selectedStatusFilters.includes(card.status || "Planned")) return false;
+            if (
+              !filters.selectedStatusFilters.includes(card.status || "Planned")
+            )
+              return false;
           }
           // Assignees Filter
           if (filters.selectedAssignedUsersFilters.length > 0) {
             const cardAssignees = card.assignedUsers.map((u) => u._id);
-            const hasAssignee = filters.selectedAssignedUsersFilters.some((id) =>
-              cardAssignees.includes(id)
+            const hasAssignee = filters.selectedAssignedUsersFilters.some(
+              (id) => cardAssignees.includes(id),
             );
             if (!hasAssignee) return false;
           }
@@ -292,12 +348,16 @@ function KanbanPageContent() {
             if (!card.endDate) return false;
             const d = new Date(card.endDate);
             const today = new Date();
-            if (filters.dateFilter === "today" && d.toDateString() !== today.toDateString()) return false;
+            if (
+              filters.dateFilter === "today" &&
+              d.toDateString() !== today.toDateString()
+            )
+              return false;
             if (filters.dateFilter === "custom" && filters.customDateRange) {
               const start = new Date(filters.customDateRange.start);
               const end = new Date(filters.customDateRange.end);
-              start.setHours(0,0,0,0);
-              end.setHours(23,59,59,999);
+              start.setHours(0, 0, 0, 0);
+              end.setHours(23, 59, 59, 999);
               if (d < start || d > end) return false;
             }
           }
@@ -318,7 +378,10 @@ function KanbanPageContent() {
     setSelectedColumn(column);
     setColumnModalOpen(true);
   };
-  const handleSaveColumn = async (columnData: Partial<KanbanColumn>, mode: "create" | "edit") => {
+  const handleSaveColumn = async (
+    columnData: Partial<KanbanColumn>,
+    mode: "create" | "edit",
+  ) => {
     try {
       if (mode === "create") {
         if (!selectedBoardId) return;
@@ -331,12 +394,20 @@ function KanbanPageContent() {
         setColumns((prev) => [...prev, { ...newColumn, cards: [] }]);
         toast.success(t("Column created successfully"));
       } else {
-        const updatedColumn = await callApi(`/api/kanban/columns/${columnData._id}`, "PUT", {
-          title: columnData.title,
-          color: columnData.color,
-          limit: columnData.limit,
-        });
-        setColumns((prev) => prev.map((col) => (col._id === updatedColumn._id ? { ...col, ...updatedColumn } : col)));
+        const updatedColumn = await callApi(
+          `/api/kanban/columns/${columnData._id}`,
+          "PUT",
+          {
+            title: columnData.title,
+            color: columnData.color,
+            limit: columnData.limit,
+          },
+        );
+        setColumns((prev) =>
+          prev.map((col) =>
+            col._id === updatedColumn._id ? { ...col, ...updatedColumn } : col,
+          ),
+        );
         toast.success(t("Column updated successfully"));
       }
     } catch (error) {
@@ -366,7 +437,10 @@ function KanbanPageContent() {
     setSelectedColumnId(undefined);
     setCardModalOpen(true);
   };
-  const handleSaveCard = async (cardData: Partial<KanbanCard>, mode: "create" | "edit") => {
+  const handleSaveCard = async (
+    cardData: Partial<KanbanCard>,
+    mode: "create" | "edit",
+  ) => {
     try {
       if (mode === "create") {
         const newCard = await callApi("/api/kanban/cards", "POST", {
@@ -380,19 +454,29 @@ function KanbanPageContent() {
           assignedUsers: cardData.assignedUsers?.map((u) => u._id) || [],
         });
         setColumns((prev) =>
-          prev.map((col) => (col._id === newCard.columnId ? { ...col, cards: [...col.cards, newCard] } : col))
+          prev.map((col) =>
+            col._id === newCard.columnId
+              ? { ...col, cards: [...col.cards, newCard] }
+              : col,
+          ),
         );
         toast.success(t("Card created successfully"));
       } else {
-        const updatedCard = await callApi(`/api/kanban/cards/${cardData._id}`, "PUT", {
-          ...cardData,
-          assignedUsers: cardData.assignedUsers?.map((u) => u._id) || [],
-        });
+        const updatedCard = await callApi(
+          `/api/kanban/cards/${cardData._id}`,
+          "PUT",
+          {
+            ...cardData,
+            assignedUsers: cardData.assignedUsers?.map((u) => u._id) || [],
+          },
+        );
         setColumns((prev) =>
           prev.map((col) => ({
             ...col,
-            cards: col.cards.map((card) => (card._id === updatedCard._id ? updatedCard : card)),
-          }))
+            cards: col.cards.map((card) =>
+              card._id === updatedCard._id ? updatedCard : card,
+            ),
+          })),
         );
         toast.success(t("Card updated successfully"));
       }
@@ -403,7 +487,12 @@ function KanbanPageContent() {
   const handleDeleteCard = async (cardId: string) => {
     try {
       await callApi(`/api/kanban/cards/${cardId}`, "DELETE");
-      setColumns((prev) => prev.map((col) => ({ ...col, cards: col.cards.filter((card) => card._id !== cardId) })));
+      setColumns((prev) =>
+        prev.map((col) => ({
+          ...col,
+          cards: col.cards.filter((card) => card._id !== cardId),
+        })),
+      );
       toast.success(t("Card deleted successfully"));
     } catch (error) {
       toast.error(t("Failed to delete card"));
@@ -413,8 +502,13 @@ function KanbanPageContent() {
   const handleColumnsChange = (newColumns: KanbanColumn[]) => {
     // If we are showing filtered columns, replacing the whole array will DELETE hidden cards!
     // We only update if no filters are active to prevent data loss.
-    const isFiltered = filters.searchText || filters.dateFilter || filters.selectedPriorityFilters.length > 0 || filters.selectedStatusFilters.length > 0 || filters.selectedAssignedUsersFilters.length > 0;
-    
+    const isFiltered =
+      filters.searchText ||
+      filters.dateFilter ||
+      filters.selectedPriorityFilters.length > 0 ||
+      filters.selectedStatusFilters.length > 0 ||
+      filters.selectedAssignedUsersFilters.length > 0;
+
     if (isFiltered) {
       toast.info(t("Manual reordering is disabled while filters are active."));
       return;
@@ -427,17 +521,30 @@ function KanbanPageContent() {
       try {
         await Promise.all([
           callApi("/api/kanban/columns/reorder", "PUT", {
-            columns: newColumns.map((col, index) => ({ _id: col._id, order: index })),
+            columns: newColumns.map((col, index) => ({
+              _id: col._id,
+              order: index,
+            })),
           }),
           (async () => {
-            const allCards: Array<{ _id: string; order: number; columnId: string }> = [];
+            const allCards: Array<{
+              _id: string;
+              order: number;
+              columnId: string;
+            }> = [];
             newColumns.forEach((col) => {
               col.cards.forEach((card, cardIndex) => {
-                allCards.push({ _id: card._id, order: cardIndex, columnId: col._id });
+                allCards.push({
+                  _id: card._id,
+                  order: cardIndex,
+                  columnId: col._id,
+                });
               });
             });
             if (allCards.length > 0) {
-              return callApi("/api/kanban/cards/reorder", "PUT", { cards: allCards });
+              return callApi("/api/kanban/cards/reorder", "PUT", {
+                cards: allCards,
+              });
             }
           })(),
         ]);
@@ -467,13 +574,18 @@ function KanbanPageContent() {
           <div className="max-w-md w-full p-8 rounded-xl border border-border/40 bg-card shadow-sm text-center space-y-4">
             <h3 className="text-xl font-semibold">{t("No Boards Created")}</h3>
             <p className="text-muted-foreground">
-              {t("You don't have any Kanban boards yet. Create one to get started and manage your tasks efficiently.")}
+              {t(
+                "You don't have any Kanban boards yet. Create one to get started and manage your tasks efficiently.",
+              )}
             </p>
-            <Button onClick={() => {
-              setBoardModalMode("create");
-              setBoardTitle("");
-              setBoardModalOpen(true);
-            }} className="w-full sm:w-auto">
+            <Button
+              onClick={() => {
+                setBoardModalMode("create");
+                setBoardTitle("");
+                setBoardModalOpen(true);
+              }}
+              className="w-full sm:w-auto"
+            >
               <Plus className="w-4 h-4 mr-2" />
               {t("Create Board")}
             </Button>
@@ -487,7 +599,7 @@ function KanbanPageContent() {
                 id="board-selector"
                 label={t("Active Board")}
                 placeholder={t("Select a board")}
-                options={boards.map(b => ({ name: b.title, id: b._id }))}
+                options={boards.map((b) => ({ name: b.title, id: b._id }))}
                 value={selectedBoardId || ""}
                 onValueChange={handleSelectBoard}
               />
@@ -539,9 +651,13 @@ function KanbanPageContent() {
         onDelete={handleDeleteColumn}
       />
 
-      <Modal 
-        label={boardModalMode === "create" ? t("Create New Board") : t("Rename Board")}
-        open={boardModalOpen} 
+      <Modal
+        label={
+          boardModalMode === "create"
+            ? t("Create New Board")
+            : t("Rename Board")
+        }
+        open={boardModalOpen}
         onOpenChange={setBoardModalOpen}
       >
         <div className="p-2 md:p-6">
@@ -554,13 +670,21 @@ function KanbanPageContent() {
           />
         </div>
         <div className="flex justify-center gap-3">
-          <Button variant="outline" iconType="cancel" onClick={() => setBoardModalOpen(false)}>
+          <Button
+            variant="outline"
+            iconType="cancel"
+            onClick={() => setBoardModalOpen(false)}
+          >
             {t("Cancel")}
           </Button>
-          <Button iconType={'save'} onClick={handleSaveBoardModal} disabled={!boardTitle.trim()}>
+          <Button
+            iconType={"save"}
+            onClick={handleSaveBoardModal}
+            disabled={!boardTitle.trim()}
+          >
             {t("Save")}
-            </Button>
-          </div>
+          </Button>
+        </div>
       </Modal>
     </div>
   );
@@ -569,7 +693,7 @@ function KanbanPageContent() {
 export default function KanbanPage() {
   return (
     <ProtectedRoute
-      requiredRoles={["business", "staff"]}
+      requiredRoles={["business", "staff", "manager"]}
       requiredPlan={["starter", "professional", "enterprise"]}
     >
       <KanbanPageContent />

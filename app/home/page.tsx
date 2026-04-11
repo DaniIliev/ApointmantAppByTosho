@@ -49,7 +49,7 @@ type QuickAction = {
 };
 
 const staffAndBusinessRoles = ["business", "staff", "admin"] as const;
-const WEEKDAY_LABELS = ["Пн", "Вт", "Ср", "Чт", "Пт", "Сб", "Нд"];
+const WEEKDAY_LABELS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 const CHART_TRACK_HEIGHT = 138;
 
 function getWeekStart(date: Date) {
@@ -100,7 +100,7 @@ function HomePageContent() {
   );
 
   useEffect(() => {
-    setPageTitle("Home");
+    setPageTitle(t("Home"));
     setExtraRightNavMenu(null);
     setIsRightNavVisible(false);
 
@@ -152,20 +152,20 @@ function HomePageContent() {
     if (isTeamRole) {
       return [
         {
-          label: "Dashboard",
-          description: "Управлявай графика и срещите",
+          label: t("Dashboard"),
+          description: t("Manage your schedule and appointments"),
           href: "/dashboard",
           icon: <CalendarDays className="h-4 w-4" />,
         },
         {
-          label: "Services",
-          description: "Редактирай услуги и цени",
+          label: t("Services"),
+          description: t("Edit services and pricing"),
           href: "/appointment-types",
           icon: <Briefcase className="h-4 w-4" />,
         },
         {
-          label: "Team",
-          description: "Прегледай екип и роли",
+          label: t("Team"),
+          description: t("Review team and roles"),
           href: "/staff",
           icon: <UserRound className="h-4 w-4" />,
         },
@@ -174,20 +174,20 @@ function HomePageContent() {
 
     return [
       {
-        label: "Explore Businesses",
-        description: "Открий нови свободни часове",
+        label: t("Explore Businesses"),
+        description: t("Discover new available time slots"),
         href: "/for-business",
         icon: <Sparkles className="h-4 w-4" />,
       },
       {
-        label: "My Profile",
-        description: "Обнови профила си",
+        label: t("My Profile"),
+        description: t("Update your profile"),
         href: "/profile",
         icon: <UserRound className="h-4 w-4" />,
       },
       {
-        label: "Pricing",
-        description: "Виж плановете и екстрите",
+        label: t("Pricing"),
+        description: t("View plans and extras"),
         href: "/pricing",
         icon: <TrendingUp className="h-4 w-4" />,
       },
@@ -354,16 +354,17 @@ function HomePageContent() {
           <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
             <div className="space-y-2">
               <h1 className="text-2xl font-bold md:text-3xl">
-                Здравей, {displayName}
+                {t("Hello")}, {displayName}
               </h1>
               <p className="max-w-2xl text-sm text-white/90 md:text-base">
-                Тук виждаш най-важното за деня: бързи действия, предстоящи срещи
-                и текущия прогрес.
+                {t(
+                  "Here you see the most important information for the day: quick actions, upcoming appointments and current progress.",
+                )}
               </p>
             </div>
             <Link href="/dashboard">
               <Button className="bg-white text-primary hover:bg-white/90">
-                Отвори Dashboard <ArrowRight className="ml-2 h-4 w-4" />
+                {t("Open Dashboard")} <ArrowRight className="ml-2 h-4 w-4" />
               </Button>
             </Link>
           </div>
@@ -375,7 +376,9 @@ function HomePageContent() {
           <div className="flex items-start justify-between gap-3">
             <div>
               <CardTitle>Weekly pulse</CardTitle>
-              <CardDescription>Total vs completed по дни</CardDescription>
+              <CardDescription>
+                {t("Total vs completed by day")}
+              </CardDescription>
             </div>
           </div>
         </CardHeader>
@@ -426,7 +429,7 @@ function HomePageContent() {
 
           {stats.weekTotal === 0 && (
             <div className="rounded-xl border border-dashed p-4 text-center text-sm text-muted-foreground">
-              Все още нямаш срещи за тази седмица.
+              {t("You don't have any appointments for this week yet.")}
             </div>
           )}
         </CardContent>
@@ -553,9 +556,9 @@ function HomePageContent() {
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
         <Card className="h-full">
           <CardHeader>
-            <CardTitle>Quick actions</CardTitle>
+            <CardTitle>{t("Quick actions")}</CardTitle>
             <CardDescription>
-              Най-често ползвани секции за твоя акаунт
+              {t("Most frequently used sections for your account")}
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-3 pb-6">
@@ -584,11 +587,11 @@ function HomePageContent() {
 
         <Card className="h-full">
           <CardHeader>
-            <CardTitle>Upcoming appointments</CardTitle>
+            <CardTitle>{t("Upcoming appointments")}</CardTitle>
             <CardDescription>
               {stats.nextItem
-                ? `Следващ час: ${formatDateAndTime(stats.nextItem.appointmentTime.start, "dateTime")}`
-                : "Нямаш предстоящи срещи в момента"}
+                ? `${t("Next appointment")}: ${formatDateAndTime(stats.nextItem.appointmentTime.start, "dateTime")}`
+                : t("You don't have any upcoming appointments at the moment")}
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-3 pb-6">
@@ -627,12 +630,14 @@ function HomePageContent() {
               })
             ) : (
               <div className="rounded-xl border border-dashed p-6 text-center">
-                <p className="font-semibold">Графикът е чист ✨</p>
+                <p className="font-semibold">
+                  {t("Your schedule is clear")} ✨
+                </p>
                 <p className="text-sm text-muted-foreground">
-                  Добави нова среща от Dashboard, за да започнеш.
+                  {t("Add a new appointment from Dashboard to get started.")}
                 </p>
                 <Link href="/dashboard" className="mt-4 inline-block">
-                  <Button variant="outline">Към Dashboard</Button>
+                  <Button variant="outline">{t("Go to Dashboard")}</Button>
                 </Link>
               </div>
             )}

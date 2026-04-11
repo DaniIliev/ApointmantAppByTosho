@@ -5,6 +5,8 @@ export interface SelectOptionsAppointmentType {
   price?: number;
 }
 
+export type PaymentOption = "cash" | "card" | "cash_and_card";
+
 export type AppointmentStatus =
   | "pending"
   | "confirmed"
@@ -59,18 +61,15 @@ export interface AppointmentType {
   duration: number;
   price: number;
   color: string;
-  staffMembers: {     
-    
-        _id: string,
-        email: string,
-        firstName: string,
-        lastName: string,
-        role: string,
-        locationIds: string[]
-    
- 
-}[]; // Unified field name
-  paymentOption?: "cash" | "card" | "cash_and_card";
+  staffMembers: {
+    _id: string;
+    email: string;
+    firstName: string;
+    lastName: string;
+    role: string;
+    locationIds: string[];
+  }[]; // Unified field name
+  paymentOption?: PaymentOption;
   locationId: string;
   isGroup?: boolean;
   capacity?: number;
@@ -81,7 +80,7 @@ export interface Staff {
   firstName: string;
   lastName: string;
   email: string;
-  role: "staff" | "admin";
+  role: "staff" | "manager" | "business";
   locationIds: string[];
 }
 
@@ -143,15 +142,17 @@ export interface Location {
   isDefault?: boolean;
   createdAt?: string;
   updatedAt?: string;
-  schedule?: {
-    monday: string;
-    tuesday: string;
-    wednesday: string;
-    thursday: string;
-    friday: string;
-    saturday: string;
-    sunday: string;
-  } | string;
+  schedule?:
+    | {
+        monday: string;
+        tuesday: string;
+        wednesday: string;
+        thursday: string;
+        friday: string;
+        saturday: string;
+        sunday: string;
+      }
+    | string;
 }
 
 export interface Service {
@@ -164,7 +165,9 @@ export interface Service {
   price: number;
   category: string;
   imageUrl?: File | string | null;
-  paymentOption?: "cash" | "card" | "cash_and_card";
+  paymentOption?: PaymentOption;
+  isGroup?: boolean;
+  capacity?: number;
   locationId?: string;
   color?: string; // Kept for UI
   createdAt?: string;
@@ -244,7 +247,7 @@ export interface AvailableSlot {
   endTime: string;
 }
 export const getBusinessCategories = (
-  t: (key: string) => string
+  t: (key: string) => string,
 ): SelectOption[] => [
   { id: "BEAUTY & WELLNESS", name: t("BEAUTY & WELLNESS") },
   { id: "MEDICAL & HEALTH", name: t("MEDICAL & HEALTH") },
@@ -256,7 +259,7 @@ export const getBusinessCategories = (
 ];
 
 export const getCategoryOptions = (
-  t: (key: string) => string
+  t: (key: string) => string,
 ): SelectOption[] => [
   // BEAUTY & WELLNESS (КРАСОТА И УЕЛНЕС) - Най-популярни
   {

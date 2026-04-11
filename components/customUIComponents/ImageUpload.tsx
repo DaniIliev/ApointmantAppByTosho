@@ -41,13 +41,6 @@ export function ImageUpload({
     }
   }, [value]);
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      onChange(file);
-    }
-  };
-
   return (
     <div className={cn("space-y-2", className)}>
       {label && (
@@ -56,27 +49,19 @@ export function ImageUpload({
         </label>
       )}
       {preview ? (
-        <div className="space-y-2">
+        <div>
           <HoverImagePreview
             src={preview}
             alt={label || t("Image preview")}
             previewTitle={label || t("Image preview")}
             onDelete={onRemove}
-            className="w-full aspect-[16/10]"
+            onChangeImage={onChange}
+            className="w-full max-w-[220px] aspect-[4/3]"
+            imageClassName="object-contain bg-muted/20"
           />
-          <label className="inline-flex items-center gap-2 cursor-pointer text-sm text-primary hover:underline">
-            <Upload className="h-4 w-4" />
-            {t("Change image")}
-            <input
-              type="file"
-              className="hidden"
-              accept="image/*"
-              onChange={handleFileChange}
-            />
-          </label>
         </div>
       ) : (
-        <label className="flex flex-col items-center justify-center w-full aspect-[16/10] rounded-2xl cursor-pointer hover:bg-slate-50 dark:hover:bg-white/5 transition-all group border border-dashed border-border">
+        <label className="flex flex-col items-center justify-center w-full max-w-[220px] aspect-[4/3] rounded-2xl cursor-pointer hover:bg-slate-50 dark:hover:bg-white/5 transition-all group p-4">
           <div className="p-4 rounded-full bg-primary/10 mb-2 group-hover:scale-110 transition-transform">
             <Upload className="h-8 w-8 text-primary" />
           </div>
@@ -87,7 +72,12 @@ export function ImageUpload({
             type="file"
             className="hidden"
             accept="image/*"
-            onChange={handleFileChange}
+            onChange={(e) => {
+              const file = e.target.files?.[0];
+              if (file) {
+                onChange(file);
+              }
+            }}
           />
         </label>
       )}

@@ -6,7 +6,8 @@
     "dev": "next dev --turbopack",
     "build": "next build --turbopack",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "i18n:extract": "node scripts/extract-translations.mjs"
   },
   "dependencies": {
     "@dnd-kit/core": "^6.3.1",

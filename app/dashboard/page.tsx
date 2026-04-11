@@ -389,9 +389,9 @@ function DashboardPageContent() {
         label={t("What would you like to create?")}
         open={isCreateChoiceModalOpen}
         onOpenChange={setIsCreateChoiceModalOpen}
-        width="lg"
+        width="md"
       >
-        <div className="p-2 pb-4 space-y-3">
+        <div className="p-3 pb-4 space-y-3">
           <Button
             type="button"
             variant="outline"

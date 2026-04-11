@@ -4,7 +4,7 @@
  */
 
 export type PlanType = "none" | "starter" | "professional" | "enterprise";
-export type UserRole = "personal" | "business" | "staff" | "admin";
+export type UserRole = "personal" | "business" | "staff" | "admin" | "manager";
 
 export interface PlanLimits {
   maxStaff: number;
@@ -118,87 +118,87 @@ export const ROUTE_PERMISSIONS: RoutePermission[] = [
   // Public routes (no authentication required)
   {
     path: "/",
-    allowedRoles: ["personal", "business", "staff"],
+    allowedRoles: ["personal", "business", "staff", "manager"],
     requiresAuth: false,
   },
   {
     path: "/home",
-    allowedRoles: ["personal", "business", "staff"],
+    allowedRoles: ["personal", "business", "staff", "manager"],
     requiresAuth: false,
   },
   {
     path: "/about",
-    allowedRoles: ["personal", "business", "staff"],
+    allowedRoles: ["personal", "business", "staff", "manager"],
     requiresAuth: false,
   },
   {
     path: "/blog",
-    allowedRoles: ["personal", "business", "staff"],
+    allowedRoles: ["personal", "business", "staff", "manager"],
     requiresAuth: false,
   },
   {
     path: "/for-business",
-    allowedRoles: ["personal", "business", "staff"],
+    allowedRoles: ["personal", "business", "staff", "manager"],
     requiresAuth: false,
   },
   {
     path: "/pricing",
-    allowedRoles: ["personal", "business", "staff"],
+    allowedRoles: ["personal", "business", "staff", "manager"],
     requiresAuth: false,
   },
   {
     path: "/login",
-    allowedRoles: ["personal", "business", "staff"],
+    allowedRoles: ["personal", "business", "staff", "manager"],
     requiresAuth: false,
   },
   {
     path: "/register",
-    allowedRoles: ["personal", "business", "staff"],
+    allowedRoles: ["personal", "business", "staff", "manager"],
     requiresAuth: false,
   },
 
   // Business owner only routes
   {
     path: "/dashboard",
-    allowedRoles: ["business", "staff"],
+    allowedRoles: ["business", "staff", "manager"],
     requiresAuth: true,
   },
   {
     path: "/staff",
-    allowedRoles: ["business"],
+    allowedRoles: ["business", "manager"],
     requiresAuth: true,
   },
   {
     path: "/schedule",
-    allowedRoles: ["business", "staff"],
+    allowedRoles: ["business", "staff", "manager"],
     requiresAuth: true,
   },
   {
     path: "/appointment-types",
-    allowedRoles: ["business"],
+    allowedRoles: ["business", "manager"],
     requiresAuth: true,
   },
   {
     path: "/business",
-    allowedRoles: ["business"],
+    allowedRoles: ["business", "manager"],
     requiresAuth: true,
   },
   {
     path: "/performance",
-    allowedRoles: ["business", 'staff'],
+    allowedRoles: ["business", "staff", "manager"],
     requiresAuth: true,
     requiredFeature: "analytics",
   },
   {
     path: "/kanban",
-    allowedRoles: ["business", "staff"],
+    allowedRoles: ["business", "staff", "manager"],
     requiresAuth: true,
     requiredFeature: "kanban",
     requiredPlan: ["starter", "professional", "enterprise"],
   },
   {
     path: "/taskManager",
-    allowedRoles: ["business", "staff"],
+    allowedRoles: ["business", "staff", "manager"],
     requiresAuth: true,
     requiredFeature: "taskManager",
     requiredPlan: ["starter", "professional", "enterprise"],
@@ -207,7 +207,7 @@ export const ROUTE_PERMISSIONS: RoutePermission[] = [
   // Shared authenticated routes (all authenticated users)
   {
     path: "/profile",
-    allowedRoles: ["personal", "business", "staff"],
+    allowedRoles: ["personal", "business", "staff", "manager"],
     requiresAuth: true,
   },
   {
@@ -225,14 +225,14 @@ export function hasRouteAccess(
   userRole: UserRole | null,
   userPlan: PlanType | null,
   isAuthenticated: boolean,
-  subscriptionStatus?: string
+  subscriptionStatus?: string,
 ): { allowed: boolean; reason?: string } {
   // Find matching route permission
   if (userRole === "admin") {
     return { allowed: true };
   }
   const routePermission = ROUTE_PERMISSIONS.find((r) =>
-    path.startsWith(r.path)
+    path.startsWith(r.path),
   );
 
   if (!routePermission) {
@@ -284,7 +284,7 @@ export function hasRouteAccess(
  */
 export function canAddStaff(
   currentStaffCount: number,
-  userPlan: PlanType
+  userPlan: PlanType,
 ): boolean {
   const limit = PLAN_LIMITS[userPlan].maxStaff;
   return limit === -1 || currentStaffCount < limit;
@@ -295,7 +295,7 @@ export function canAddStaff(
  */
 export function hasFeatureAccess(
   feature: keyof PlanLimits["features"],
-  userPlan: PlanType
+  userPlan: PlanType,
 ): boolean {
   return PLAN_LIMITS[userPlan].features[feature];
 }

@@ -20,7 +20,6 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const [token, setToken] = useState<string | null>(null);
-  const [isLoading, setIsLoading] = useState<boolean>(true);
   const router = useRouter();
 
   const login = async (formData: {
@@ -55,8 +54,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
             setUser(fetchedUser);
             if (
               !fetchedUser.role ||
-              !["personal", "business", "staff", "admin"].includes(
-                fetchedUser.role
+              !["personal", "business", "staff", "admin", "manager"].includes(
+                fetchedUser.role,
               )
             ) {
               router.push("/onboarding");
@@ -98,7 +97,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   useEffect(() => {
     const fetchUser = async () => {
-      setIsLoading(true);
       const storedToken = localStorage.getItem("token");
       if (storedToken) {
         try {
@@ -118,7 +116,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
               !isPublicRoute &&
               (!fetchedUser.role ||
                 !["personal", "business", "staff", "admin"].includes(
-                  fetchedUser.role
+                  fetchedUser.role,
                 ))
             ) {
               if (window.location.pathname !== "/onboarding") {
@@ -128,20 +126,16 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           } else {
             console.warn("Invalid token or missing _id in token.");
             logout();
-            setIsLoading(false);
             router.push("/login");
           }
         } catch (error) {
           console.error("Error fetching user data:", error);
           logout();
-          setIsLoading(false);
           router.push("/login");
         }
       } else {
         setUser(null);
-        setIsLoading(false);
       }
-      setIsLoading(false);
     };
     fetchUser();
   }, []);
@@ -156,8 +150,10 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   //   });
   // };
   return (
-    <AuthContext.Provider value={{ user, setUser, token, login, logout, refreshToken }}>
-      {isLoading ? <LoadingBackdrop loading={true} /> : children}
+    <AuthContext.Provider
+      value={{ user, setUser, token, login, logout, refreshToken }}
+    >
+      {children}
     </AuthContext.Provider>
   );
 };

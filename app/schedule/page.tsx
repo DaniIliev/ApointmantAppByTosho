@@ -47,11 +47,13 @@ export type Schedule = {
   break2: TimeRange;
   break3: TimeRange;
   locationId?: string;
-  staff?: {
-    firstName: string;
-    lastName: string;
-    email: string;
-  } | string;
+  staff?:
+    | {
+        firstName: string;
+        lastName: string;
+        email: string;
+      }
+    | string;
 };
 
 import { useLocationContext } from "@/context/LocationContext";
@@ -77,7 +79,7 @@ function StaffSchedulePageContent() {
   const { setExtraRightNavMenu, setIsRightNavVisible } = useRightNav();
   const { selectedLocation } = useLocationContext();
   const [selectedScheduleId, setSelectedScheduleId] = useState<string | null>(
-    null
+    null,
   );
   const [schedules, setSchedules] = useState<Schedule[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -99,7 +101,7 @@ function StaffSchedulePageContent() {
     setPageTitle(t("Schedule"));
     // Променете onCreateNewSchedule на openScheduleModal
     setExtraRightNavMenu(
-      <CreateNewSchedule onOpenModal={() => openScheduleModal()} />
+      <CreateNewSchedule onOpenModal={() => openScheduleModal()} />,
     );
     setIsRightNavVisible(true);
     return () => {
@@ -112,7 +114,8 @@ function StaffSchedulePageContent() {
   useEffect(() => {
     const fetchSchedules = async () => {
       try {
-        const locId = selectedLocation?._id || localStorage.getItem("selectedLocationId");
+        const locId =
+          selectedLocation?._id || localStorage.getItem("selectedLocationId");
         const query = locId ? `?locationId=${locId}` : "";
         const data = await callApi(`/api/staff-schedules${query}`, "GET");
         setSchedules(data);
@@ -126,7 +129,10 @@ function StaffSchedulePageContent() {
       if (!storedToken) return;
       try {
         const decodedUser = jwtDecode<any>(storedToken);
-        const data = await callApi(`/api/locations?businessId=${decodedUser.businessId}`, "GET");
+        const data = await callApi(
+          `/api/locations?businessId=${decodedUser.businessId}`,
+          "GET",
+        );
         setLocations(data);
       } catch (error) {
         console.error("Failed to fetch locations", error);
@@ -152,15 +158,15 @@ function StaffSchedulePageContent() {
         schedules.some(
           (originalRow) =>
             originalRow._id === row._id &&
-            JSON.stringify(originalRow) !== JSON.stringify(row)
-        )
+            JSON.stringify(originalRow) !== JSON.stringify(row),
+        ),
       );
 
       for (const updatedRow of changes) {
         await callApi(
           `/api/staff-schedules/${updatedRow._id}`,
           "PUT",
-          updatedRow
+          updatedRow,
         );
       }
 
@@ -175,7 +181,7 @@ function StaffSchedulePageContent() {
     try {
       await callApi(`/api/staff-schedules/${scheduleId}`, "DELETE");
       setSchedules((prev) =>
-        prev.filter((schedule) => schedule._id !== scheduleId)
+        prev.filter((schedule) => schedule._id !== scheduleId),
       );
       toast.success(t("Schedule deleted successfully!"));
     } catch (error) {
@@ -189,29 +195,31 @@ function StaffSchedulePageContent() {
     // Валидация за препокриване на графици
     const newStart = new Date(scheduleData.startDate);
     const newEnd = new Date(scheduleData.endDate);
-    
-    const targetStaff = typeof scheduleData.staff === "object" 
-      ? (scheduleData.staff as any)?._id 
-      : scheduleData.staff;
-    
-    const hasOverlap = schedules.some(s => {
+
+    const targetStaff =
+      typeof scheduleData.staff === "object"
+        ? (scheduleData.staff as any)?._id
+        : scheduleData.staff;
+
+    const hasOverlap = schedules.some((s) => {
       if (isEditing && s._id === scheduleData._id) return false;
-      
-      const sTarget = typeof s.staff === "object" 
-        ? (s.staff as any)?._id 
-        : s.staff;
-      
+
+      const sTarget =
+        typeof s.staff === "object" ? (s.staff as any)?._id : s.staff;
+
       // Проверяваме дали са за същия човек (или и двата са за локацията)
       if (sTarget !== targetStaff) return false;
-      
+
       const sStart = new Date(s.startDate);
       const sEnd = new Date(s.endDate);
-      
-      return (newStart <= sEnd && newEnd >= sStart);
+
+      return newStart <= sEnd && newEnd >= sStart;
     });
 
     if (hasOverlap) {
-      toast.error(t("This schedule overlaps with an existing one for the same period."));
+      toast.error(
+        t("This schedule overlaps with an existing one for the same period."),
+      );
       return;
     }
 
@@ -222,17 +230,17 @@ function StaffSchedulePageContent() {
         result = await callApi(
           `/api/staff-schedules/${scheduleData._id}`,
           "PUT",
-          scheduleData
+          scheduleData,
         );
         setSchedules((prev) =>
-          prev.map((s) => (s._id === scheduleData._id ? result : s))
+          prev.map((s) => (s._id === scheduleData._id ? result : s)),
         );
         toast.success(t("Schedule updated successfully!"));
       } else {
         const payload = {
           ...scheduleData,
           locationId: selectedLocation?._id,
-        }
+        };
         result = await callApi("/api/staff-schedules", "POST", payload);
         setSchedules((prev) => [...prev, result]);
         toast.success(t("Schedule created successfully!"));
@@ -249,7 +257,7 @@ function StaffSchedulePageContent() {
           if (decodedUser.role === "business") {
             const data = await callApi(
               `/api/staff/staff-list?businessId=${decodedUser.businessId}`,
-              "GET"
+              "GET",
             );
             if (data.length > 1) {
               setIsApplyToAllModalOpen(true);
@@ -262,8 +270,8 @@ function StaffSchedulePageContent() {
         t(
           isEditing
             ? "Failed to update schedule."
-            : "Failed to create schedule."
-        )
+            : "Failed to create schedule.",
+        ),
       );
     } finally {
       setIsModalOpen(false);
@@ -293,7 +301,7 @@ function StaffSchedulePageContent() {
       defaultWidth: 190,
       cell: ({ row }) => (
         <span className="font-medium">
-          {row.original.staff 
+          {row.original.staff
             ? `${(row.original.staff as any).firstName} ${(row.original.staff as any).lastName}`
             : t("Location Default")}
         </span>
@@ -339,11 +347,23 @@ function StaffSchedulePageContent() {
       defaultWidth: 130,
       cell: ({ row }) => {
         const now = new Date();
-        const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+        const today = new Date(
+          now.getFullYear(),
+          now.getMonth(),
+          now.getDate(),
+        );
         const start = new Date(row.original.startDate);
-        const startPure = new Date(start.getFullYear(), start.getMonth(), start.getDate());
+        const startPure = new Date(
+          start.getFullYear(),
+          start.getMonth(),
+          start.getDate(),
+        );
         const end = new Date(row.original.endDate);
-        const endPure = new Date(end.getFullYear(), end.getMonth(), end.getDate());
+        const endPure = new Date(
+          end.getFullYear(),
+          end.getMonth(),
+          end.getDate(),
+        );
 
         let status = "active";
 
@@ -716,10 +736,10 @@ function StaffSchedulePageContent() {
           </h2>
           <p className="text-sm text-gray-600 mb-4">
             {t(
-              "Do you want to apply this schedule to all staff in the business?"
+              "Do you want to apply this schedule to all staff in the business?",
             )}
             {t(
-              "Staff members will be able to edit it individually afterwards."
+              "Staff members will be able to edit it individually afterwards.",
             )}
           </p>
           <div className="flex justify-center gap-4">
@@ -743,7 +763,7 @@ function StaffSchedulePageContent() {
 
 export default function StaffSchedulePage() {
   return (
-    <ProtectedRoute requiredRoles={["business", "staff"]}>
+    <ProtectedRoute requiredRoles={["business", "staff", "manager"]}>
       <StaffSchedulePageContent />
     </ProtectedRoute>
   );

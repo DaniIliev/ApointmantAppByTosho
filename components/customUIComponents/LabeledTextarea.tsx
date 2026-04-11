@@ -33,7 +33,7 @@ export function LabeledTextarea({
         rows={rows}
         className={cn(
           "min-h-[100px] border-2 border-border focus:border-primary focus-visible:border-primary focus-visible:ring-0 transition-all duration-300 bg-gray-100 dark:bg-input/80 backdrop-blur-sm rounded-xl resize-none",
-          className
+          className,
         )}
         placeholder={placeholder}
       />

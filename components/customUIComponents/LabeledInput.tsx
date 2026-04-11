@@ -1,4 +1,10 @@
-import React, { useState, forwardRef } from "react";
+import React, {
+  useState,
+  forwardRef,
+  useEffect,
+  useRef,
+  useCallback,
+} from "react";
 import { Eye, EyeOff } from "lucide-react";
 
 const cn = (...classes: (string | boolean | undefined | null)[]): string => {
@@ -10,11 +16,12 @@ interface LabeledInputProps {
   id: string;
   value: string;
   onChange: (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
   ) => void;
   placeholder?: string;
   className?: string;
   type?: React.HTMLInputTypeAttribute;
+  multiline?: boolean;
   rows?: number;
   onClear?: () => void;
   required?: boolean;
@@ -37,6 +44,7 @@ export const LabeledInput = forwardRef<
       placeholder,
       className,
       type = "text",
+      multiline = false,
       rows,
       onClear,
       required,
@@ -44,11 +52,13 @@ export const LabeledInput = forwardRef<
       showError,
       ...props
     },
-    ref
+    ref,
   ) => {
     const [isFocused, setIsFocused] = useState<boolean>(false);
+    const textareaRef = useRef<HTMLTextAreaElement | null>(null);
     const hasValue = value?.length > 0;
-    const isTextarea = rows !== undefined;
+    const isTextarea = multiline || rows !== undefined;
+    const textareaRows = rows ?? 1;
     const isErroredEmpty = Boolean(showError && required && !hasValue);
     // Normalize display for date values passed in dd.MM.yyyy
     const displayValue = React.useMemo(() => {
@@ -75,22 +85,37 @@ export const LabeledInput = forwardRef<
       "outline-none",
       isFocused ? "placeholder-gray-400" : "placeholder-transparent",
       isClearable ? "pr-8" : "pr-4",
-      className
+      className,
     );
 
     const elementClasses = isTextarea
-      ? cn(baseClasses, `min-h-12 resize-y`)
+      ? cn(baseClasses, "min-h-12 resize-none overflow-hidden")
       : cn(baseClasses, "h-12");
+
+    const resizeTextarea = useCallback(
+      (element?: HTMLTextAreaElement | null) => {
+        if (!element) return;
+        element.style.height = "auto";
+        element.style.height = `${element.scrollHeight}px`;
+      },
+      [],
+    );
+
+    useEffect(() => {
+      if (isTextarea) {
+        resizeTextarea(textareaRef.current);
+      }
+    }, [displayValue, isTextarea, resizeTextarea]);
 
     const finalLabelPosition = isErroredEmpty
       ? "text-red-500"
       : isFocused || hasValue
-      ? "-top-0.5 text-xs left-3"
-      : isErroredEmpty
-      ? "text-red-500"
-      : isTextarea
-      ? "top-3 text-sm left-4"
-      : "top-1/2 -translate-y-1/2 text-sm left-4";
+        ? "-top-0.5 text-xs left-3"
+        : isErroredEmpty
+          ? "text-red-500"
+          : isTextarea
+            ? "top-3 text-sm left-4"
+            : "top-1/2 -translate-y-1/2 text-sm left-4";
 
     const hideLabelForDate = type === "date" && !isFocused && !hasValue;
 
@@ -132,7 +157,7 @@ export const LabeledInput = forwardRef<
               isErroredEmpty ? "text-red-500" : "text-gray-500",
               "group-focus-within/labeled-input:text-primary",
               finalLabelPosition,
-              hideLabelForDate && "opacity-0"
+              hideLabelForDate && "opacity-0",
             )}
           >
             {label}
@@ -141,10 +166,25 @@ export const LabeledInput = forwardRef<
           {isTextarea ? (
             <textarea
               id={id}
-              ref={ref as React.Ref<HTMLTextAreaElement>}
-              rows={rows}
+              ref={(element) => {
+                textareaRef.current = element;
+                if (!ref) return;
+                if (typeof ref === "function") {
+                  ref(element);
+                } else {
+                  (
+                    ref as React.MutableRefObject<
+                      HTMLInputElement | HTMLTextAreaElement | null
+                    >
+                  ).current = element;
+                }
+              }}
+              rows={textareaRows}
               value={displayValue}
-              onChange={onChange}
+              onChange={(e) => {
+                resizeTextarea(e.currentTarget);
+                onChange(e);
+              }}
               onFocus={() => setIsFocused(true)}
               onBlur={() => setIsFocused(false)}
               className={elementClasses}
@@ -172,8 +212,8 @@ export const LabeledInput = forwardRef<
                   type === "datetime-local"
                     ? placeholder
                     : isFocused && !hasValue
-                    ? placeholder
-                    : ""
+                      ? placeholder
+                      : ""
                 }
                 required={required}
                 aria-invalid={isErroredEmpty}
@@ -201,7 +241,7 @@ export const LabeledInput = forwardRef<
               className={cn(
                 "absolute right-2 transition-opacity duration-200 cursor-pointer",
                 isTextarea ? "top-4" : "top-1/2 -translate-y-1/2",
-                "h-5 w-5 rounded-full text-muted-foreground hover:text-primary/80 flex items-center justify-center z-20"
+                "h-5 w-5 rounded-full text-muted-foreground hover:text-primary/80 flex items-center justify-center z-20",
               )}
             >
               <svg
@@ -223,7 +263,7 @@ export const LabeledInput = forwardRef<
           <div
             className={cn(
               "absolute bottom-0 left-0 h-[2px] bg-primary transition-all duration-300",
-              (isFocused || hasValue) && !isErroredEmpty ? "w-full" : "w-0"
+              (isFocused || hasValue) && !isErroredEmpty ? "w-full" : "w-0",
             )}
           />
           {isErroredEmpty && errorText && (
@@ -232,7 +272,7 @@ export const LabeledInput = forwardRef<
         </div>
       </>
     );
-  }
+  },
 );
 
 LabeledInput.displayName = "LabeledInput";

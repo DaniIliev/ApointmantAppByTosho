@@ -77,11 +77,11 @@ export function SignInForm({ onSuccess }: SignInFormProps) {
   };
 
   return (
-    <div className="w-full flex items-center justify-center p-4 animate-in fade-in duration-700">
+    <div className="w-full flex items-center justify-center animate-in fade-in duration-700">
       <div className="relative w-full max-w-md">
         {/* Animated Background Glow */}
         <div className="absolute -inset-1 bg-gradient-to-br from-cyan-500 via-primary to-pink-500 rounded-[2.5rem] opacity-70 blur-md dark:blur-2xl" />
-        
+
         <div className="w-full relative bg-white/90 dark:bg-gray-900/90 backdrop-blur-2xl rounded-[2.5rem] p-8 md:p-10 border border-primary/10 shadow-2xl overflow-hidden">
           {/* Top Logo */}
           <div className="flex flex-col items-center mb-8">
@@ -127,7 +127,9 @@ export function SignInForm({ onSuccess }: SignInFormProps) {
                     type={showPassword ? "text" : "password"}
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    placeholder={otpMode ? t("Enter 6-digit code") : t("••••••••")}
+                    placeholder={
+                      otpMode ? t("Enter 6-digit code") : t("••••••••")
+                    }
                     required
                   />
                 </div>
@@ -165,7 +167,13 @@ export function SignInForm({ onSuccess }: SignInFormProps) {
                   {t("Log in")}
                   <div className="w-5 h-5 bg-white/20 rounded-full flex items-center justify-center group-hover:translate-x-1 transition-transform">
                     <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
-                      <path d="M4 3L7 6L4 9" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                      <path
+                        d="M4 3L7 6L4 9"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      />
                     </svg>
                   </div>
                 </>
@@ -192,17 +200,19 @@ export function SignInForm({ onSuccess }: SignInFormProps) {
                 }}
               >
                 <div className="w-14 h-14 rounded-2xl bg-white dark:bg-gray-800 border border-primary/10 shadow-sm flex items-center justify-center group-hover:shadow-md group-hover:border-primary/20 transition-all group-hover:-translate-y-1">
-                   <Image
-                      src="/google.png"
-                      alt="Google"
-                      width={28}
-                      height={28}
-                      className="w-12 h-12 object-contain"
-                    />
+                  <Image
+                    src="/google.png"
+                    alt="Google"
+                    width={28}
+                    height={28}
+                    className="w-12 h-12 object-contain"
+                  />
                 </div>
-                <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-tight">{t("Google")}</span>
+                <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-tight">
+                  {t("Google")}
+                </span>
               </button>
-              
+
               <button
                 type="button"
                 className="group relative flex flex-col items-center gap-2"
@@ -211,15 +221,17 @@ export function SignInForm({ onSuccess }: SignInFormProps) {
                 }}
               >
                 <div className="w-14 h-14 rounded-2xl bg-white dark:bg-gray-800 border border-primary/10 shadow-sm flex items-center justify-center group-hover:shadow-md group-hover:border-primary/20 transition-all group-hover:-translate-y-1">
-                   <Image
-                      src="/Facebook.png"
-                      alt="Facebook"
-                      width={28}
-                      height={28}
-                      className="w-7 h-7 object-contain"
-                    />
+                  <Image
+                    src="/Facebook.png"
+                    alt="Facebook"
+                    width={28}
+                    height={28}
+                    className="w-7 h-7 object-contain"
+                  />
                 </div>
-                <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-tight">{t("Facebook")}</span>
+                <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-tight">
+                  {t("Facebook")}
+                </span>
               </button>
             </div>
 

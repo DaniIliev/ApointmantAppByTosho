@@ -185,12 +185,12 @@ function PerformancePageContent() {
   // Dashboard state management
   const [items, setItems] = useState<DashboardItem[]>([]);
   const [selectedChartType, setSelectedChartType] = useState<string | null>(
-    null
+    null,
   );
   const [showConfigForm, setShowConfigForm] = useState(false);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [editingChart, setEditingChart] = useState<ChartConfig | undefined>(
-    undefined
+    undefined,
   );
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -240,14 +240,14 @@ function PerformancePageContent() {
       }
       return isPieChart ? "by_service" : "time_series";
     },
-    []
+    [],
   );
 
   const transformAnalyticsData = useCallback(
     (
       source: string,
       dimension: string,
-      rows: Array<Record<string, unknown>>
+      rows: Array<Record<string, unknown>>,
     ) => {
       let data: Array<Record<string, string | number>> = [];
       let dataKeys: string[] = [];
@@ -321,7 +321,7 @@ function PerformancePageContent() {
           data = rows.map((r) => ({
             name: (r.name as string) || "",
             bookings: Number(
-              (r.value as number) ?? (r.bookings as number) ?? 0
+              (r.value as number) ?? (r.bookings as number) ?? 0,
             ),
           }));
           dataKeys = ["bookings"];
@@ -336,13 +336,13 @@ function PerformancePageContent() {
 
       return { data, dataKeys, xAxisKey };
     },
-    []
+    [],
   );
 
   // Helper to calculate percentage change
   const calculatePercentageChange = (
     current: number,
-    previous: number
+    previous: number,
   ): { value: number; type: "increase" | "decrease" | "neutral" } => {
     if (previous === 0) {
       return {
@@ -361,7 +361,7 @@ function PerformancePageContent() {
     async (
       kpiType: string,
       staffId?: string,
-      customLocationId?: string
+      customLocationId?: string,
     ): Promise<{ value: string | number; change?: ChangeMetric }> => {
       try {
         const activeLocationId = customLocationId || locationId;
@@ -402,14 +402,14 @@ function PerformancePageContent() {
           const currentTotals = currentRows.reduce(
             (
               acc: { total: number; completed: number; cancelled: number },
-              cur
+              cur,
             ) => {
               acc.total += Number(cur.total ?? 0);
               acc.completed += Number(cur.completed ?? 0);
               acc.cancelled += Number(cur.cancelled ?? 0);
               return acc;
             },
-            { total: 0, completed: 0, cancelled: 0 }
+            { total: 0, completed: 0, cancelled: 0 },
           );
 
           // Fetch previous period data
@@ -430,14 +430,14 @@ function PerformancePageContent() {
           const prevTotals = prevRows.reduce(
             (
               acc: { total: number; completed: number; cancelled: number },
-              cur
+              cur,
             ) => {
               acc.total += Number(cur.total ?? 0);
               acc.completed += Number(cur.completed ?? 0);
               acc.cancelled += Number(cur.cancelled ?? 0);
               return acc;
             },
-            { total: 0, completed: 0, cancelled: 0 }
+            { total: 0, completed: 0, cancelled: 0 },
           );
 
           let currentValue = 0;
@@ -477,7 +477,7 @@ function PerformancePageContent() {
           >;
           const currentRevenue = currentRows.reduce(
             (sum, cur) => sum + Number(cur.revenue ?? cur.value ?? 0),
-            0
+            0,
           );
 
           // Fetch previous period revenue
@@ -497,7 +497,7 @@ function PerformancePageContent() {
           >;
           const prevRevenue = prevRows.reduce(
             (sum, cur) => sum + Number(cur.revenue ?? cur.value ?? 0),
-            0
+            0,
           );
 
           const change = calculatePercentageChange(currentRevenue, prevRevenue);
@@ -535,7 +535,7 @@ function PerformancePageContent() {
 
       return { value: "N/A" };
     },
-    [startDate, endDate, groupBy]
+    [startDate, endDate, groupBy],
   );
 
   const fetchChartData = useCallback(
@@ -549,7 +549,7 @@ function PerformancePageContent() {
             item as DashboardItem & {
               configuration?: { locationId?: string };
             }
-          ).configuration?.locationId
+          ).configuration?.locationId,
         );
         return { ...item, value: result.value, change: result.change };
       }
@@ -588,7 +588,10 @@ function PerformancePageContent() {
         });
         if (config.staffId) currentParams.set("staffId", config.staffId);
         if (config.locationId || locationId)
-          currentParams.set("locationId", config.locationId || locationId || "");
+          currentParams.set(
+            "locationId",
+            config.locationId || locationId || "",
+          );
         const currentUrl = `/api/analytics?${currentParams.toString()}&t=${Date.now()}`;
         const currentRows = (await callApi(currentUrl, "GET")) as Array<
           Record<string, unknown>
@@ -697,7 +700,7 @@ function PerformancePageContent() {
       const { data, dataKeys, xAxisKey } = transformAnalyticsData(
         apiSource,
         apiDimension,
-        rows as Array<Record<string, unknown>>
+        rows as Array<Record<string, unknown>>,
       );
 
       return {
@@ -721,7 +724,7 @@ function PerformancePageContent() {
       startDate,
       endDate,
       transformAnalyticsData,
-    ]
+    ],
   );
 
   const { setRemovePadding } = usePaddingControl();
@@ -746,7 +749,7 @@ function PerformancePageContent() {
             console.error("Failed to hydrate item", item.id, err);
             return item;
           }
-        })
+        }),
       );
       setItems(hydrated);
     } catch (err) {
@@ -770,7 +773,7 @@ function PerformancePageContent() {
       if (!itemsRef.current.length) return;
       try {
         const updated = await Promise.all(
-          itemsRef.current.map((item) => fetchChartData(item))
+          itemsRef.current.map((item) => fetchChartData(item)),
         );
         setItems(updated);
       } catch (err) {
@@ -818,7 +821,7 @@ function PerformancePageContent() {
         setItems((prev) => {
           if (exists) {
             return prev.map((item) =>
-              item.id === payload.id ? hydrated : item
+              item.id === payload.id ? hydrated : item,
             );
           }
           return [...prev, hydrated];
@@ -832,7 +835,7 @@ function PerformancePageContent() {
       setSelectedChartType(null);
       setEditingChart(undefined);
     },
-    [fetchChartData, items]
+    [fetchChartData, items],
   );
 
   const handleRemoveItem = useCallback(async (itemId: string) => {
@@ -849,10 +852,10 @@ function PerformancePageContent() {
   const handleUpdateItem = useCallback(
     (itemId: string, config: DashboardItem) => {
       setItems((prev) =>
-        prev.map((item) => (item.id === itemId ? config : item))
+        prev.map((item) => (item.id === itemId ? config : item)),
       );
     },
-    []
+    [],
   );
 
   const handleLayoutChange = useCallback(
@@ -865,7 +868,7 @@ function PerformancePageContent() {
         h: number;
         i: string;
         static?: boolean;
-      }[]
+      }[],
     ) => {
       setItems((prev) =>
         prev.map((item) => {
@@ -884,7 +887,7 @@ function PerformancePageContent() {
             layout: layoutConfig,
             responsiveLayout,
           } as DashboardItem;
-        })
+        }),
       );
 
       if (layoutSaveTimer.current) {
@@ -900,7 +903,7 @@ function PerformancePageContent() {
         }
       }, 500);
     },
-    []
+    [],
   );
 
   const handleEditChart = useCallback((chart: ChartConfig) => {
@@ -912,7 +915,7 @@ function PerformancePageContent() {
   useEffect(() => {
     setPageTitle(t("Performance Tracking"));
     setExtraRightNavMenu(
-      <CreateNewDashboardMenu onOpenModal={() => setIsCreateModalOpen(true)} />
+      <CreateNewDashboardMenu onOpenModal={() => setIsCreateModalOpen(true)} />,
     );
     setIsRightNavVisible(true);
 
@@ -1019,7 +1022,7 @@ function PerformancePageContent() {
               <Skeleton className="h-[300px] w-full rounded-xl col-span-2" />
             </div>
           )}
-          {error && (
+          {error && items.length != 0 && (
             <div className="flex items-center justify-center py-2 text-red-400 text-sm">
               {error}
             </div>
@@ -1036,7 +1039,7 @@ function PerformancePageContent() {
                   </h3>
                   <p className="text-muted-foreground leading-relaxed">
                     {t(
-                      "Start monitoring your business performance by adding your first chart or KPI. Track appointments, revenue, and more in real-time."
+                      "Start monitoring your business performance by adding your first chart or KPI. Track appointments, revenue, and more in real-time.",
                     )}
                   </p>
                 </div>
@@ -1067,7 +1070,7 @@ function PerformancePageContent() {
 export default function PerformancePage() {
   return (
     <ProtectedRoute
-      requiredRoles={["business", "staff"]}
+      requiredRoles={["business", "staff", "manager"]}
       requiredPlan={["starter", "professional", "enterprise"]}
     >
       <DashboardDateProvider>

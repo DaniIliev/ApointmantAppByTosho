@@ -10,9 +10,9 @@ import { LabeledSelect } from "@/components/customUIComponents/LabeledSelect";
 
 import { Location } from "@/Global/Types/types";
 
-type StaffRole = "manager" | "staff" | "business";
+export type StaffRole = "manager" | "staff" | "business";
 
-interface Staff {
+export interface Staff {
   _id?: string;
   firstName: string;
   lastName: string;
@@ -256,15 +256,13 @@ export default function StaffSetup({
                   options={[
                     { id: "manager", name: t("Manager") },
                     { id: "staff", name: t("Staff") },
+                    { id: "business", name: t("Business Owner") },
                   ]}
                   placeholder={t("Select role")}
                   // @ts-ignore
                   selectProps={{ disabled: s.role === "business" }}
                 />
                 <div className="space-y-2">
-                  <label className="text-sm font-medium">
-                    {t("Locations")}
-                  </label>
                   <MultiSelectCombobox
                     items={locations.map((loc) => ({
                       id: loc._id!,

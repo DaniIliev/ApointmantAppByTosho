@@ -1,8 +1,9 @@
-import React, { useEffect, useState, useMemo } from "react";
+import React, { useEffect, useState } from "react";
 import { Modal } from "@/components/customUIComponents/Modal";
 import { LabeledInput } from "@/components/customUIComponents/LabeledInput";
 import { LabeledSelect } from "@/components/customUIComponents/LabeledSelect"; // Assuming LabeledSelect is saved here or a similar path
 import { ImageUpload } from "@/components/customUIComponents/ImageUpload";
+import { PaymentOptionSelector } from "@/components/customUIComponents/PaymentOptionSelector";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Check, ChevronsUpDown, Loader2, X } from "lucide-react";
@@ -24,17 +25,9 @@ import { Badge } from "@/components/ui/badge"; // Assuming you have Badge compon
 
 import { cn } from "@/lib/utils";
 import callApi from "../Api/callApi";
-import { getCategoryOptions } from "@/Global/Types/types";
+import { getCategoryOptions, PaymentOption } from "@/Global/Types/types";
 import { useTranslation } from "react-i18next";
 import { useAuthContext } from "@/context/AuthContext";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
 
 // --- Type Definitions ---
 
@@ -54,8 +47,6 @@ type StaffMember = {
   firstName: string;
   lastName: string;
 };
-
-type PaymentOption = "cash" | "card" | "cash_and_card";
 
 const StaffAvatarsDisplay = ({
   selectedStaff,
@@ -111,36 +102,7 @@ const CreateAppointmentModal = ({
   const { user } = useAuthContext();
   const [staffMembers, setStaffMembers] = useState<StaffMember[]>([]);
   const [open, setOpen] = useState(false); // State for Popover visibility
-  const [selectedCategory, setSelectedCategory] = useState<string>(
-    formData?.category || "",
-  );
-  const [checkingStripe, setCheckingStripe] = useState(false);
-  const [stripeMessage, setStripeMessage] = useState<string | null>(null);
-  const [showStripePrompt, setShowStripePrompt] = useState(false);
-  const [pendingPaymentOption, setPendingPaymentOption] =
-    useState<PaymentOption | null>(null);
   const [locations, setLocations] = useState<any[]>([]);
-
-  const paymentOptions = useMemo(
-    () => [
-      {
-        value: "cash" as PaymentOption,
-        title: t("Cash only"),
-        description: t("Customer pays in person."),
-      },
-      {
-        value: "card" as PaymentOption,
-        title: t("Card only"),
-        description: t("Require online payment during booking."),
-      },
-      {
-        value: "cash_and_card" as PaymentOption,
-        title: t("Cash or card"),
-        description: t("Allow customer to choose at checkout."),
-      },
-    ],
-    [t],
-  );
 
   const categoryOptions = getCategoryOptions(t);
   useEffect(() => {
@@ -179,7 +141,6 @@ const CreateAppointmentModal = ({
 
   // Handle category change and reset subcategory if needed
   const handleCategoryChange = (newCategory: string) => {
-    setSelectedCategory(newCategory);
     setFormData((prev: any) => ({
       ...prev,
       category: newCategory,
@@ -192,49 +153,6 @@ const CreateAppointmentModal = ({
       ...prev,
       staffMembers: prev.staffMembers.filter((s: any) => s._id !== staffId),
     }));
-  };
-
-  const currentPaymentOption: PaymentOption =
-    (formData.paymentOption as PaymentOption) || "cash";
-
-  const ensureStripeReady = async (option: PaymentOption) => {
-    setStripeMessage(null);
-
-    if (option === "cash") {
-      setFormData((prev: any) => ({ ...prev, paymentOption: option }));
-      return;
-    }
-
-    setCheckingStripe(true);
-    try {
-      const status = await callApi("/api/stripe/connect/status", "GET");
-      const ready = Boolean(
-        status?.ready ?? status?.details_submitted ?? status?.charges_enabled,
-      );
-
-      if (!ready) {
-        setPendingPaymentOption(option);
-        setShowStripePrompt(true);
-        return;
-      }
-
-      setFormData((prev: any) => ({ ...prev, paymentOption: option }));
-      setStripeMessage(t("Stripe account ready for card payments."));
-    } catch (error: any) {
-      console.error("Stripe connect check failed", error);
-      setStripeMessage(
-        error?.message || t("Connect Stripe to enable card payments."),
-      );
-      setFormData((prev: any) => ({ ...prev, paymentOption: "cash" }));
-      setPendingPaymentOption(null);
-      setShowStripePrompt(false);
-    } finally {
-      setCheckingStripe(false);
-    }
-  };
-
-  const handlePaymentSelect = (option: PaymentOption) => {
-    ensureStripeReady(option);
   };
 
   return (
@@ -372,48 +290,13 @@ const CreateAppointmentModal = ({
           )}
         </div>
 
-        <div className="space-y-3">
-          <Label className="text-sm font-medium">Payment options</Label>
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-            {paymentOptions.map((option) => {
-              const selected = currentPaymentOption === option.value;
-              return (
-                <button
-                  key={option.value}
-                  type="button"
-                  onClick={() => handlePaymentSelect(option.value)}
-                  disabled={checkingStripe || isLoading}
-                  className={cn(
-                    "w-full text-left border rounded-lg p-3 transition focus:outline-none",
-                    "hover:border-primary/60 hover:shadow-sm",
-                    selected
-                      ? "border-primary bg-primary/10 shadow-sm"
-                      : "border-border bg-card/60",
-                  )}
-                >
-                  <div className="flex items-center justify-between">
-                    <span className="font-semibold text-sm">
-                      {option.title}
-                    </span>
-                    {selected && <Check className="h-4 w-4 text-primary" />}
-                  </div>
-                  <p className="text-xs text-muted-foreground mt-1">
-                    {option.description}
-                  </p>
-                </button>
-              );
-            })}
-          </div>
-          {checkingStripe && (
-            <div className="flex items-center gap-2 text-sm text-muted-foreground">
-              <Loader2 className="h-4 w-4 animate-spin" />
-              {t("Checking Stripe status...")}
-            </div>
-          )}
-          {stripeMessage && (
-            <p className="text-sm text-muted-foreground">{stripeMessage}</p>
-          )}
-        </div>
+        <PaymentOptionSelector
+          value={(formData.paymentOption as PaymentOption) || "cash"}
+          onChange={(option) =>
+            setFormData((prev: any) => ({ ...prev, paymentOption: option }))
+          }
+          disabled={isLoading}
+        />
 
         {/* Staff Selection with Avatar Display */}
         <div className="space-y-2">
@@ -527,82 +410,6 @@ const CreateAppointmentModal = ({
           </Button>
         </div>
       </form>
-
-      <Dialog open={showStripePrompt} onOpenChange={setShowStripePrompt}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>
-              {t("Connect Stripe to take card payments")}
-            </DialogTitle>
-            <DialogDescription>
-              {t(
-                "You'll be redirected to Stripe to complete onboarding. It takes about 2 minutes.",
-              )}
-            </DialogDescription>
-          </DialogHeader>
-          <DialogFooter>
-            <Button
-              variant="outline"
-              onClick={() => {
-                setShowStripePrompt(false);
-                setPendingPaymentOption(null);
-                setFormData((prev: any) => ({
-                  ...prev,
-                  paymentOption: "cash",
-                }));
-              }}
-            >
-              {t("Later")}
-            </Button>
-            <Button
-              disabled={checkingStripe}
-              onClick={async () => {
-                if (!pendingPaymentOption) {
-                  setShowStripePrompt(false);
-                  return;
-                }
-                setCheckingStripe(true);
-                try {
-                  const returnUrl =
-                    typeof window !== "undefined"
-                      ? window.location.href
-                      : undefined;
-                  const link = await callApi(
-                    "/api/stripe/connect/link",
-                    "POST",
-                    {
-                      returnUrl,
-                      refreshUrl: returnUrl,
-                    },
-                  );
-                  const onboardingUrl = link?.url || link?.onboardingUrl;
-                  if (onboardingUrl && typeof window !== "undefined") {
-                    window.location.href = onboardingUrl;
-                    return;
-                  }
-                  throw new Error("Stripe onboarding link not available");
-                } catch (error: any) {
-                  console.error("Stripe onboarding launch failed", error);
-                  setStripeMessage(
-                    error?.message ||
-                      t("Connect Stripe to enable card payments."),
-                  );
-                  setShowStripePrompt(false);
-                  setPendingPaymentOption(null);
-                  setFormData((prev: any) => ({
-                    ...prev,
-                    paymentOption: "cash",
-                  }));
-                } finally {
-                  setCheckingStripe(false);
-                }
-              }}
-            >
-              {checkingStripe ? t("Opening...") : t("Connect now")}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
     </Modal>
   );
 };

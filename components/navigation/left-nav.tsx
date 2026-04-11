@@ -210,6 +210,7 @@ export default function LeftNav({ isOpen, onClose }: LeftNavProps) {
 
   const navItems: NavItem[] =
     user?.role === "business" ||
+    user?.role === "manager" ||
     user?.role === "staff" ||
     user?.role === "admin"
       ? [

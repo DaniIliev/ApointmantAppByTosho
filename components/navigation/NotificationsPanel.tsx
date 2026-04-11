@@ -6,6 +6,7 @@ import callApi from "@/app/Api/callApi";
 import { toast } from "sonner";
 import { Button } from "../ui/button";
 import { CustomTooltip } from "../customUIComponents/CustomTooltip";
+import { formatDateAndTime } from "@/Global/Utils/commonFn";
 
 // Interfaces
 interface AppointmentInfo {
@@ -23,7 +24,7 @@ interface Alert {
   _id: string;
   isRead: boolean;
   message: string;
-  createdAt: string;
+  createdAt?: string;
   updatedAt?: string;
   type: string;
   appointment?: AppointmentInfo;
@@ -43,12 +44,24 @@ export default function NotificationsPanel({
   const { t } = useTranslation();
   const [isConfirmingAll, setIsConfirmingAll] = useState(false);
 
+  const formatTime = (value?: string) => {
+    if (!value) return "N/A";
+    const formatted = formatDateAndTime(value, "time");
+    return formatted === value ? "N/A" : formatted;
+  };
+
+  const formatDateTime = (value?: string) => {
+    if (!value) return t("Unknown date");
+    const formatted = formatDateAndTime(value, "dateTime");
+    return formatted === value ? t("Unknown date") : formatted;
+  };
+
   const handleAlertClick = async (alert: Alert) => {
     if (!alert.isRead) {
       try {
         await callApi(`/api/alerts/${alert._id}/read`, "PUT", {});
         onAlertsChange(
-          alerts.map((a) => (a._id === alert._id ? { ...a, isRead: true } : a))
+          alerts.map((a) => (a._id === alert._id ? { ...a, isRead: true } : a)),
         );
       } catch (error) {
         console.error("Failed to mark alert as read:", error);
@@ -69,7 +82,7 @@ export default function NotificationsPanel({
       const confirmedAppointment = await callApi(
         `/api/appointment/${appointmentId}/status`,
         "PUT",
-        { status: "confirmed" }
+        { status: "confirmed" },
       );
 
       if (confirmedAppointment) {
@@ -96,7 +109,7 @@ export default function NotificationsPanel({
       const cancelledAppointment = await callApi(
         `/api/appointment/${appointmentId}/status`,
         "PUT",
-        { status: "cancelled" }
+        { status: "cancelled" },
       );
 
       if (cancelledAppointment) {
@@ -122,9 +135,7 @@ export default function NotificationsPanel({
   };
 
   const handleConfirmAllAppointments = async () => {
-    const appointmentAlerts = alerts.filter(
-      (alert) => alert.type === "appointment" && alert.appointment?._id
-    );
+    const appointmentAlerts = alerts.filter((alert) => alert.appointment?._id);
 
     if (appointmentAlerts.length === 0) {
       toast.info(t("No appointments to confirm."));
@@ -145,7 +156,7 @@ export default function NotificationsPanel({
             const confirmedAppointment = await callApi(
               `/api/appointment/${appointmentId}/status`,
               "PUT",
-              { status: "confirmed" }
+              { status: "confirmed" },
             );
 
             if (confirmedAppointment) {
@@ -166,17 +177,17 @@ export default function NotificationsPanel({
             !(
               alert.type === "appointment" &&
               appointmentAlerts.some((a) => a._id === alert._id)
-            )
-        )
+            ),
+        ),
       );
 
       if (successCount > 0 && errorCount === 0) {
         toast.success(
-          t(`${successCount} appointment(s) confirmed successfully!`)
+          t(`${successCount} appointment(s) confirmed successfully!`),
         );
       } else if (successCount > 0 && errorCount > 0) {
         toast.warning(
-          t(`${successCount} appointment(s) confirmed, ${errorCount} failed.`)
+          t(`${successCount} appointment(s) confirmed, ${errorCount} failed.`),
         );
       } else {
         toast.error(t("Failed to confirm all appointments."));
@@ -192,8 +203,7 @@ export default function NotificationsPanel({
     <div className="absolute right-0 mt-2 w-72 md:w-80 bg-slate-900/90 backdrop-blur-xl border border-white/20 rounded-xl shadow-2xl p-3 max-h-96 overflow-y-auto">
       <div className="flex items-center justify-between mb-2">
         <h3 className="text-white font-bold">{t("Notifications")}</h3>
-        {alerts.filter((a) => a.type === "appointment" && a.appointment?._id)
-          .length > 0 && (
+        {alerts.filter((a) => a.appointment?._id).length > 0 && (
           <Button
             onClick={handleConfirmAllAppointments}
             disabled={isConfirmingAll}
@@ -210,7 +220,7 @@ export default function NotificationsPanel({
       {alerts.length > 0 ? (
         alerts.map((alert) => {
           const appt = alert.appointment;
-          const hasAppt = alert.type === "appointment" && !!appt;
+          const hasAppt = !!appt && !!appt._id;
 
           return (
             <div
@@ -231,26 +241,8 @@ export default function NotificationsPanel({
                     {t("Appointment from")}: {appt?.clientName ?? t("Unknown")}
                   </p>
                   <p className="text-xs text-white/60">
-                    {t("Time")}:{" "}
-                    {appt?.appointmentTime?.start
-                      ? new Date(appt.appointmentTime.start).toLocaleTimeString(
-                          "bg-BG",
-                          {
-                            hour: "2-digit",
-                            minute: "2-digit",
-                          }
-                        )
-                      : "N/A"}
-                    -
-                    {appt?.appointmentTime?.end
-                      ? new Date(appt.appointmentTime.end).toLocaleTimeString(
-                          "bg-BG",
-                          {
-                            hour: "2-digit",
-                            minute: "2-digit",
-                          }
-                        )
-                      : "N/A"}
+                    {t("Time")}: {formatTime(appt?.appointmentTime?.start)}-
+                    {formatTime(appt?.appointmentTime?.end)}
                   </p>
                   <div className="flex gap-2 justify-end mt-3">
                     <Button
@@ -281,7 +273,7 @@ export default function NotificationsPanel({
               ) : (
                 <>
                   <p className="text-xs text-white/60 mt-1">
-                    {new Date(alert.createdAt).toLocaleString("bg-BG")}
+                    {formatDateTime(alert.createdAt)}
                   </p>
                   <div className="flex justify-end mt-2">
                     <CustomTooltip

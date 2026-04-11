@@ -24,12 +24,17 @@ export default function ClientLayoutWrapper({
   useEffect(() => {
     if (user && user.mustChangePassword) {
       setShowChangePassword(true);
+    } else {
+      setShowChangePassword(false);
     }
   }, [user]);
 
   // Register Service Worker for PWA
   useEffect(() => {
-    if ("serviceWorker" in navigator && window.location.protocol === "https:" || window.location.hostname === "localhost") {
+    if (
+      ("serviceWorker" in navigator && window.location.protocol === "https:") ||
+      window.location.hostname === "localhost"
+    ) {
       window.addEventListener("load", () => {
         navigator.serviceWorker
           .register("/sw.js")
@@ -54,7 +59,11 @@ export default function ClientLayoutWrapper({
 
   const pathname = usePathname();
   const isOnboarding = pathname === "/onboarding";
-  const hasNoRole = !user?.role || !["personal", "business", "staff", "admin"].includes(user.role as any);
+  const hasNoRole =
+    !user?.role ||
+    !["personal", "business", "staff", "admin", "manager"].includes(
+      user.role as any,
+    );
   const hideLeftNav = isOnboarding || hasNoRole;
 
   return (
@@ -69,7 +78,7 @@ export default function ClientLayoutWrapper({
                 {children}
                 <ChangePasswordModal
                   open={showChangePassword}
-                  onClose={() => {}}
+                  onClose={() => setShowChangePassword(false)}
                 />
               </ClientLayout>
             ) : (

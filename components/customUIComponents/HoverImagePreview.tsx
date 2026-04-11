@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useMemo, useState } from "react";
-import { Eye, Trash2, Image as ImageIcon } from "lucide-react";
+import { Eye, Trash2, Image as ImageIcon, Upload } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { Modal } from "./Modal";
@@ -16,6 +16,7 @@ interface HoverImagePreviewProps {
   showPreviewIcon?: boolean;
   onDelete?: () => void;
   previewTitle?: string;
+  onChangeImage?: (file: File) => void;
 }
 
 export function HoverImagePreview({
@@ -27,6 +28,7 @@ export function HoverImagePreview({
   showPreviewIcon = true,
   onDelete,
   previewTitle,
+  onChangeImage,
 }: HoverImagePreviewProps) {
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
   const { t } = useTranslation();
@@ -42,7 +44,7 @@ export function HoverImagePreview({
     <>
       <div
         className={cn(
-          "group relative rounded-xl overflow-hidden border border-border bg-muted/30",
+          "group relative rounded-xl overflow-hidden bg-muted/30",
           className,
         )}
       >
@@ -111,6 +113,26 @@ export function HoverImagePreview({
                 </Button>
               )}
             </div>
+
+            {onChangeImage && (
+              <div className="absolute bottom-0 left-0 right-0 z-10 hidden md:flex items-center justify-center p-2 bg-gradient-to-t from-black/40 via-black/20 to-transparent opacity-0 transition-opacity group-hover:opacity-100">
+                <label className="flex items-center gap-2 cursor-pointer text-sm text-white hover:text-primary transition-colors">
+                  <Upload className="h-4 w-4" />
+                  {t("Change image")}
+                  <input
+                    type="file"
+                    className="hidden"
+                    accept="image/*"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (file) {
+                        onChangeImage(file);
+                      }
+                    }}
+                  />
+                </label>
+              </div>
+            )}
           </>
         )}
       </div>

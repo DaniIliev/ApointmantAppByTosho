@@ -40,7 +40,7 @@ function AppointmentTypesPageContent() {
   const { user } = useAuthContext();
   const { selectedLocation } = useLocationContext();
   const [appointmentTypes, setAppointmentTypes] = useState<AppointmentType[]>(
-    []
+    [],
   );
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingType, setEditingType] = useState<AppointmentType | null>(null);
@@ -74,12 +74,12 @@ function AppointmentTypesPageContent() {
 
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [typeToDelete, setTypeToDelete] = useState<AppointmentType | null>(
-    null
+    null,
   );
   const [isLoading, setIsLoading] = useState(false);
   const [isPageLoading, setIsPageLoading] = useState(true);
   const [selectedType, setSelectedType] = useState<AppointmentType | null>(
-    null
+    null,
   );
 
   const { setPageTitle } = usePageTitle();
@@ -89,7 +89,7 @@ function AppointmentTypesPageContent() {
     try {
       const services = await callApi(
         `/api/service?businessId=${user?.businessId}`,
-        "GET"
+        "GET",
       );
       setAppointmentTypes(services);
     } catch (error) {
@@ -103,7 +103,7 @@ function AppointmentTypesPageContent() {
     setPageTitle(t("Appointment Types"));
     setExtraRightNavMenu(<CreateNewTypeMenu onOpenModal={() => openModal()} />);
     setIsRightNavVisible(true);
-    
+
     return () => {
       setPageTitle(null);
       setExtraRightNavMenu(null);
@@ -140,8 +140,7 @@ function AppointmentTypesPageContent() {
         staffMembers:
           type.staffMembers?.map((s: any) => ({
             _id: s._id,
-            name:
-              s.name || `${s.firstName || ""} ${s.lastName || ""}`.trim(),
+            name: s.name || `${s.firstName || ""} ${s.lastName || ""}`.trim(),
           })) || [],
         paymentOption: (type as any).paymentOption || "cash",
         locationId: type.locationId || "",
@@ -222,7 +221,7 @@ function AppointmentTypesPageContent() {
 
   const formatDuration = (minutes: number) => {
     if (minutes < 60) {
-      return `${minutes}m`;
+      return `${minutes} minutes`;
     }
     const hours = Math.floor(minutes / 60);
     const remainingMinutes = minutes % 60;
@@ -243,7 +242,7 @@ function AppointmentTypesPageContent() {
   return (
     <div>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {appointmentTypes.length > 0 &&(
+        {appointmentTypes.length > 0 &&
           appointmentTypes.map((type) => (
             <AppointmentCard
               key={type._id}
@@ -253,8 +252,7 @@ function AppointmentTypesPageContent() {
               formatDuration={formatDuration}
               setSelectedType={setSelectedType}
             />
-          ))
-        ) }
+          ))}
       </div>
       {appointmentTypes.length === 0 && (
         <EmptyState onOpenModal={() => openModal()} />
@@ -283,7 +281,7 @@ function AppointmentTypesPageContent() {
         title={t("Delete Appointment Type")}
         message={t(
           'Are you sure you want to delete "{{name}}"? This action cannot be undone.',
-          { name: typeToDelete?.name || "" }
+          { name: typeToDelete?.name || "" },
         )}
       />
     </div>
@@ -292,7 +290,7 @@ function AppointmentTypesPageContent() {
 
 export default function AppointmentTypesPage() {
   return (
-    <ProtectedRoute requiredRoles={["business"]}>
+    <ProtectedRoute requiredRoles={["business", "manager"]}>
       <AppointmentTypesPageContent />
     </ProtectedRoute>
   );
