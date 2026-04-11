@@ -19,6 +19,12 @@ export const getStatusProps = (status: AppointmentStatus) => {
         className:
           "bg-card/50 border-2 border-green-500 text-green-600 dark:text-green-400",
       };
+    case "blocked":
+      return {
+        icon: <Clock size={16} />,
+        className:
+          "bg-card/50 border-2 border-slate-500 text-slate-600 dark:text-slate-400",
+      };
     case "cancelled":
     case "expired":
       return {

@@ -10,6 +10,7 @@ export type AppointmentStatus =
   | "confirmed"
   | "cancelled"
   | "completed"
+  | "blocked"
   | string;
 
 export interface Appointment {
@@ -28,6 +29,8 @@ export interface Appointment {
   servicePrice?: number;
   serviceDuration?: number;
   status: AppointmentStatus;
+  kind?: "appointment" | "work_block";
+  title?: string;
   notes?: string;
   staff: {
     _id: string;

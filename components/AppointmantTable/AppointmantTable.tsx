@@ -1,7 +1,12 @@
 "use client";
 
 import { Appointment, AppointmentStatus } from "@/Global/Types/types";
-import { CellProps, Column, GenericTable, Column as GenericColumn } from "../GenericTable/GenericTable";
+import {
+  CellProps,
+  Column,
+  GenericTable,
+  Column as GenericColumn,
+} from "../GenericTable/GenericTable";
 import { useTranslation } from "react-i18next";
 import {
   Clock,
@@ -13,7 +18,10 @@ import {
   Users,
 } from "lucide-react";
 import { formatDateAndTime } from "@/Global/Utils/commonFn";
-import { groupAppointments, GroupedAppointment } from "@/Global/Utils/groupingUtils";
+import {
+  groupAppointments,
+  GroupedAppointment,
+} from "@/Global/Utils/groupingUtils";
 import { CustomTooltip } from "../customUIComponents/CustomTooltip";
 import { StatusChip } from "../customUIComponents/StatusChip";
 import { useAuthContext } from "@/context/AuthContext";
@@ -58,9 +66,7 @@ export default function AppointmentsTable({
         }
         return (
           <div className="flex items-center gap-2">
-            <h3 className="font-semibold text-foreground">
-              {item.clientName}
-            </h3>
+            <h3 className="font-semibold text-foreground">{item.clientName}</h3>
             {(item.paymentStatus === "captured" ||
               item.paymentStatus === "authorized" ||
               item.serviceName === "card") && (
@@ -74,7 +80,8 @@ export default function AppointmentsTable({
       accessorKey: "status",
       header: t("Status"),
       cell: ({ row }: CellProps<any>) => {
-        if (row.original.isGroup) return <span className="text-muted-foreground">-</span>;
+        if (row.original.isGroup)
+          return <span className="text-muted-foreground">-</span>;
         return (
           <div className="flex items-center gap-2">
             <StatusChip status={row.original.status as AppointmentStatus} />
@@ -86,7 +93,10 @@ export default function AppointmentsTable({
       accessorKey: "paymentStatus",
       header: t("Payment"),
       cell: ({ row }: CellProps<any>) => {
-        if (row.original.isGroup) return <span className="text-muted-foreground">-</span>;
+        if (row.original.isGroup)
+          return <span className="text-muted-foreground">-</span>;
+        if (row.original.kind === "work_block")
+          return <span className="text-muted-foreground">-</span>;
         const paymentStatus = row.original.paymentStatus;
         const serviceName = row.original.serviceName;
 
@@ -133,13 +143,13 @@ export default function AppointmentsTable({
       accessorKey: "date",
       header: t("Date"),
       cell: ({ row }: CellProps<any>) => {
-        const apt = row.original.isGroup ? row.original.mainAppointment : row.original;
+        const apt = row.original.isGroup
+          ? row.original.mainAppointment
+          : row.original;
         return (
           <div className="flex items-center gap-1 text-sm text-muted-foreground">
             <CalendarIcon className="h-3 w-3" />
-            <span>
-              {formatDateAndTime(apt.appointmentTime.start, "date")}
-            </span>
+            <span>{formatDateAndTime(apt.appointmentTime.start, "date")}</span>
           </div>
         );
       },
@@ -148,7 +158,9 @@ export default function AppointmentsTable({
       accessorKey: "time",
       header: t("Time"),
       cell: ({ row }: CellProps<any>) => {
-        const apt = row.original.isGroup ? row.original.mainAppointment : row.original;
+        const apt = row.original.isGroup
+          ? row.original.mainAppointment
+          : row.original;
         return (
           <div className="flex items-center gap-1 text-sm text-muted-foreground">
             <Clock className="h-3 w-3" />
@@ -165,7 +177,9 @@ export default function AppointmentsTable({
       accessorKey: "service",
       header: t("Service"),
       cell: ({ row }: CellProps<any>) => {
-        const apt = row.original.isGroup ? row.original.mainAppointment : row.original;
+        const apt = row.original.isGroup
+          ? row.original.mainAppointment
+          : row.original;
         return <span>{apt.serviceName}</span>;
       },
     },
@@ -174,6 +188,24 @@ export default function AppointmentsTable({
       header: t("Actions"),
       cell: ({ row }: CellProps<any>) => {
         if (row.original.isGroup) return null;
+        if (row.original.kind === "work_block") {
+          return (
+            <div className="flex items-center gap-0.5 mobile-actions">
+              <CustomTooltip
+                onClick={() => handleOpenViewModal(row.original)}
+                tooltipText={t("View Details")}
+                icon={<Eye />}
+              />
+              {user && (user.role === "business" || user.role == "staff") && (
+                <CustomTooltip
+                  onClick={() => onDeleteAppointment(row.original._id)}
+                  tooltipText={t("Delete")}
+                  icon={<Trash2 className=" text-red-500" />}
+                />
+              )}
+            </div>
+          );
+        }
         return (
           <div className="flex items-center gap-0.5 mobile-actions">
             <CustomTooltip
@@ -215,19 +247,21 @@ export default function AppointmentsTable({
     item: any,
     allColumns: Column<any>[],
     columnVisibility: Record<string, boolean>,
-    columnWidths: Record<string, number>
+    columnWidths: Record<string, number>,
   ) => {
     if (!item.isGroup) return null;
-    
-    const visibleColumns = allColumns.filter(c => columnVisibility[c.accessorKey as string]);
+
+    const visibleColumns = allColumns.filter(
+      (c) => columnVisibility[c.accessorKey as string],
+    );
 
     return (
       <div className="bg-primary/[0.02] border-b border-gray-100 dark:border-gray-800">
         <table className="w-full table-fixed">
           <tbody>
             {item.appointments.map((participant: Appointment) => (
-              <tr 
-                key={participant._id} 
+              <tr
+                key={participant._id}
                 className="hover:bg-primary/[0.05] transition-colors border-l-4 border-primary/20"
               >
                 {visibleColumns.map((col, idx) => {
@@ -237,13 +271,17 @@ export default function AppointmentsTable({
                   if (col.accessorKey === "clientName") {
                     content = (
                       <div className="pl-6 py-3">
-                        <span className="font-semibold text-sm">{participant.clientName}</span>
+                        <span className="font-semibold text-sm">
+                          {participant.clientName}
+                        </span>
                       </div>
                     );
                   } else if (col.accessorKey === "status") {
                     content = (
                       <div className="flex items-center gap-2">
-                        <StatusChip status={participant.status as AppointmentStatus} />
+                        <StatusChip
+                          status={participant.status as AppointmentStatus}
+                        />
                       </div>
                     );
                   } else if (col.accessorKey === "paymentStatus") {
@@ -262,13 +300,19 @@ export default function AppointmentsTable({
                           tooltipText={t("Edit")}
                           icon={<Pencil size={14} />}
                         />
-                        {user && (user.role === "business" || user.role == "staff") && (
-                          <CustomTooltip
-                            onClick={() => onDeleteAppointment(participant._id)}
-                            tooltipText={t("Delete")}
-                            icon={<Trash2 size={14} className="text-red-500" />}
-                          />
-                        )}
+                        {user &&
+                          (user.role === "business" ||
+                            user.role == "staff") && (
+                            <CustomTooltip
+                              onClick={() =>
+                                onDeleteAppointment(participant._id)
+                              }
+                              tooltipText={t("Delete")}
+                              icon={
+                                <Trash2 size={14} className="text-red-500" />
+                              }
+                            />
+                          )}
                       </div>
                     );
                   } else {
@@ -277,8 +321,8 @@ export default function AppointmentsTable({
                   }
 
                   return (
-                    <td 
-                      key={idx} 
+                    <td
+                      key={idx}
                       className="px-4 py-2 whitespace-nowrap overflow-hidden text-ellipsis"
                       style={{ width }}
                     >
@@ -290,7 +334,7 @@ export default function AppointmentsTable({
             ))}
           </tbody>
         </table>
-        
+
         {/* Mobile View Accordion Content */}
         <div className="md:hidden space-y-3">
           {item.appointments.map((participant: Appointment) => (
@@ -303,7 +347,9 @@ export default function AppointmentsTable({
                   {t("Status")}
                 </span>
                 <div className="flex justify-end text-right text-gray-900 dark:text-gray-100">
-                  <StatusChip status={participant.status as AppointmentStatus} />
+                  <StatusChip
+                    status={participant.status as AppointmentStatus}
+                  />
                 </div>
               </div>
 
@@ -313,7 +359,9 @@ export default function AppointmentsTable({
                 </span>
                 <div className="flex flex-col items-end text-right text-gray-900 dark:text-gray-100">
                   <span className="font-bold">{participant.clientName}</span>
-                  <span className="text-[10px] text-muted-foreground">{participant.email}</span>
+                  <span className="text-[10px] text-muted-foreground">
+                    {participant.email}
+                  </span>
                 </div>
               </div>
 
@@ -332,13 +380,14 @@ export default function AppointmentsTable({
                     tooltipText={t("Edit")}
                     icon={<Pencil size={16} />}
                   />
-                  {user && (user.role === "business" || user.role == "staff") && (
-                    <CustomTooltip
-                      onClick={() => onDeleteAppointment(participant._id)}
-                      tooltipText={t("Delete")}
-                      icon={<Trash2 size={16} className="text-red-500" />}
-                    />
-                  )}
+                  {user &&
+                    (user.role === "business" || user.role == "staff") && (
+                      <CustomTooltip
+                        onClick={() => onDeleteAppointment(participant._id)}
+                        tooltipText={t("Delete")}
+                        icon={<Trash2 size={16} className="text-red-500" />}
+                      />
+                    )}
                 </div>
               </div>
             </div>
@@ -372,7 +421,9 @@ export default function AppointmentsTable({
             <span>{formatDateAndTime(apt.appointmentTime.start, "time")}</span>
           </div>
           <div className="flex items-center gap-1 col-span-2">
-            <span className="font-medium text-foreground">{apt.serviceName}</span>
+            <span className="font-medium text-foreground">
+              {apt.serviceName}
+            </span>
           </div>
         </div>
       </div>

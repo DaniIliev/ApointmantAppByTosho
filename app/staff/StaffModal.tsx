@@ -4,6 +4,7 @@ import React, { useState, useEffect } from "react";
 import { Modal } from "@/components/customUIComponents/Modal";
 import { Button } from "@/components/ui/button";
 import { LabeledInput } from "@/components/customUIComponents/LabeledInput";
+import { LabeledSelect } from "@/components/customUIComponents/LabeledSelect";
 import { StaffMember } from "./types";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
@@ -279,14 +280,18 @@ export const StaffModal: React.FC<StaffModalProps> = ({
                 id="phone"
               />
 
-              <LabeledInput
-                type="text"
-                value={formData.role}
-                onChange={(e) =>
-                  setFormData({ ...formData, role: e.target.value })
-                }
-                label={t("Role") as string}
+              <LabeledSelect
                 id="role"
+                label={t("Role") as string}
+                value={formData.role}
+                onValueChange={(val) => setFormData({ ...formData, role: val })}
+                options={[
+                  { id: "manager", name: t("Manager") },
+                  { id: "staff", name: t("Staff") },
+                  { id: "business", name: t("Business"), disabled: true },
+                ]}
+                placeholder={t("Select role") as string}
+                selectProps={{ disabled: formData.role === "business" }}
               />
 
               <MultiSelectCombobox

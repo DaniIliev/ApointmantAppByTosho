@@ -1,5 +1,6 @@
 "use client";
 import callApi from "@/app/Api/callApi";
+import { HoverImagePreview } from "@/components/customUIComponents/HoverImagePreview";
 import { LabeledInput } from "@/components/customUIComponents/LabeledInput";
 import { LabeledSelect } from "@/components/customUIComponents/LabeledSelect";
 import { Button } from "@/components/ui/button";
@@ -9,7 +10,7 @@ import { useAuthContext } from "@/context/AuthContext";
 import { usePageTitle } from "@/context/PageTitleContext";
 import { getBusinessCategories } from "@/Global/Types/types";
 
-import { Upload, X, Info, Contact, MapPin } from "lucide-react";
+import { Upload, Info, Contact, MapPin } from "lucide-react";
 import React, { useEffect, useState, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
@@ -52,10 +53,14 @@ const SectionHeader = ({
 );
 
 function BusinessInformationPageContent() {
-  const [imagePreview, setImagePreview] = useState<string | ArrayBuffer | null>(null);
+  const [imagePreview, setImagePreview] = useState<string | ArrayBuffer | null>(
+    null,
+  );
   const [imageFile, setImageFile] = useState<File | null>(null);
-  const [initialFormData, setInitialFormData] = useState<BusinessInformation>(getInitialState);
-  const [formData, setFormData] = useState<BusinessInformation>(getInitialState);
+  const [initialFormData, setInitialFormData] =
+    useState<BusinessInformation>(getInitialState);
+  const [formData, setFormData] =
+    useState<BusinessInformation>(getInitialState);
 
   const { t } = useTranslation();
   const { setPageTitle } = usePageTitle();
@@ -64,13 +69,14 @@ function BusinessInformationPageContent() {
   const [isSaving, setIsSaving] = useState(false);
 
   const BUSINESS_CATEGORIES = getBusinessCategories(t);
-  
+
   const hasChanges = useMemo(() => {
     const formChanged = Object.keys(formData).some((key) => {
       const k = key as keyof BusinessInformation;
       return formData[k] !== initialFormData[k];
     });
-    const imageChanged = !!imageFile || (formData.businessImageUrl && imagePreview === null);
+    const imageChanged =
+      !!imageFile || (formData.businessImageUrl && imagePreview === null);
     return formChanged || imageChanged;
   }, [formData, initialFormData, imageFile, imagePreview]);
 
@@ -86,7 +92,10 @@ function BusinessInformationPageContent() {
         return;
       }
       try {
-        const data: BusinessInformation = await callApi(`/api/business/${user.businessId}`, "GET");
+        const data: BusinessInformation = await callApi(
+          `/api/business/${user.businessId}`,
+          "GET",
+        );
         const normalizedData = { ...getInitialState(), ...data };
         setFormData(normalizedData);
         setInitialFormData(normalizedData);
@@ -117,8 +126,16 @@ function BusinessInformationPageContent() {
     setFormData((prev) => ({ ...prev, businessImageUrl: "" }));
   };
 
-  const handleInputChange = (field: keyof BusinessInformation, valueOrEvent: string | React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    const value = typeof valueOrEvent === "string" ? valueOrEvent : valueOrEvent.target.value;
+  const handleInputChange = (
+    field: keyof BusinessInformation,
+    valueOrEvent:
+      | string
+      | React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
+  ) => {
+    const value =
+      typeof valueOrEvent === "string"
+        ? valueOrEvent
+        : valueOrEvent.target.value;
     setFormData((prev) => ({ ...prev, [field]: value }));
   };
 
@@ -130,16 +147,27 @@ function BusinessInformationPageContent() {
     if (imageFile) payload.businessImageUrl = imageFile;
 
     try {
-      const updatedData: BusinessInformation = await callApi(`/api/business/${user?.businessId}`, "PUT", payload, true);
-      const newNormalizedData = { ...formData, businessImageUrl: updatedData.businessImageUrl || "" };
+      const updatedData: BusinessInformation = await callApi(
+        `/api/business/${user?.businessId}`,
+        "PUT",
+        payload,
+        true,
+      );
+      const newNormalizedData = {
+        ...formData,
+        businessImageUrl: updatedData.businessImageUrl || "",
+      };
       setFormData(newNormalizedData);
       setInitialFormData(newNormalizedData);
       setImageFile(null);
-      if (updatedData.businessImageUrl) setImagePreview(updatedData.businessImageUrl);
+      if (updatedData.businessImageUrl)
+        setImagePreview(updatedData.businessImageUrl);
       toast.success(t("Business information saved successfully!"));
     } catch (error: any) {
       console.error("Error saving business info:", error);
-      toast.error(t(`Error: ${error.message || "Could not save information."}`));
+      toast.error(
+        t(`Error: ${error.message || "Could not save information."}`),
+      );
     } finally {
       setIsSaving(false);
     }
@@ -150,42 +178,67 @@ function BusinessInformationPageContent() {
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-50 via-blue-50/30 to-gray-50 dark:from-[#0f1419] dark:via-[#1a1f2e] dark:to-[#0f1419]">
         <div className="text-center">
           <div className="w-12 h-12 border-4 border-blue-500/30 border-t-blue-500 rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-gray-600 dark:text-gray-300 font-medium">{t("Loading business information...")}</p>
+          <p className="text-gray-600 dark:text-gray-300 font-medium">
+            {t("Loading business information...")}
+          </p>
         </div>
       </div>
     );
   }
 
-  const currentImageSource = (imagePreview as string) || formData.businessImageUrl;
+  const currentImageSource =
+    (imagePreview as string) || formData.businessImageUrl;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50/30 to-gray-50 dark:from-[#0f1419] dark:via-[#1a1f2e] dark:to-[#0f1419] py-8 px-4 md:px-6 lg:px-8">
-      <div className="max-w-7xl mx-auto">
-        <div className="grid lg:grid-cols-[1fr,1.5fr] gap-6 lg:gap-8">
-          <div className="space-y-4">
-            <SectionHeader icon={Upload} title={t("Business Photo")} />
-            <Card className="bg-white dark:bg-gradient-to-br dark:from-[#1f2533] dark:to-[#2a3142] border border-gray-200 dark:border-white/10 overflow-hidden shadow-lg">
+    <div>
+      <div className="mx-auto">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8 items-stretch">
+          <div className="lg:h-full">
+            <Card className="bg-white dark:bg-gradient-to-br dark:from-[#1f2533] dark:to-[#2a3142] border border-gray-200 dark:border-white/10 overflow-hidden shadow-lg hover:shadow-xl transition-shadow duration-300 h-full">
               {currentImageSource ? (
-                <div className="relative w-full aspect-[16/10] group">
-                  <img src={currentImageSource} alt={t("Business preview")} className="w-full h-full object-cover" />
-                  <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                    <Button onClick={removeImage} size="icon" variant="destructive" className="rounded-full"><X className="h-5 w-5" /></Button>
-                  </div>
+                <div className="p-4 space-y-3">
+                  <HoverImagePreview
+                    src={currentImageSource as string}
+                    alt={t("Business preview")}
+                    previewTitle={formData.businessName || t("Business image")}
+                    onDelete={removeImage}
+                    className="w-full h-[260px]"
+                  />
+                  <label className="inline-flex items-center gap-2 cursor-pointer text-sm text-blue-600 dark:text-blue-400 hover:underline">
+                    <Upload className="h-4 w-4" />
+                    {t("Change image")}
+                    <input
+                      type="file"
+                      className="hidden"
+                      accept="image/*"
+                      onChange={handleImageUpload}
+                    />
+                  </label>
                 </div>
               ) : (
-                <label className="flex flex-col items-center justify-center w-full aspect-[16/10] cursor-pointer hover:bg-gray-50 dark:hover:bg-white/5 transition-all group">
+                <label className="flex flex-col items-center justify-center w-full h-full min-h-[320px] cursor-pointer hover:bg-gray-50 dark:hover:bg-white/5 transition-all group">
                   <div className="p-6 rounded-full bg-blue-50 dark:bg-blue-500/10 mb-4 group-hover:scale-110 transition-transform">
                     <Upload className="h-10 w-10 text-blue-500 dark:text-blue-400" />
                   </div>
-                  <span className="text-gray-700 dark:text-white/80 font-semibold">{t("Click to upload a photo")}</span>
-                  <input type="file" className="hidden" accept="image/*" onChange={handleImageUpload} />
+                  <span className="text-gray-700 dark:text-white/80 font-semibold">
+                    {t("Click to upload a photo")}
+                  </span>
+                  <span className="text-sm text-gray-500 dark:text-gray-400 mt-2">
+                    {t("16:10 aspect ratio recommended")}
+                  </span>
+                  <input
+                    type="file"
+                    className="hidden"
+                    accept="image/*"
+                    onChange={handleImageUpload}
+                  />
                 </label>
               )}
             </Card>
           </div>
 
-          <div className="space-y-6">
-            <Card className="bg-white dark:bg-gradient-to-br dark:from-[#1f2533] dark:to-[#2a3142] border border-gray-200 dark:border-white/10 p-6 shadow-lg">
+          <div className="lg:h-full">
+            <Card className="bg-white dark:bg-gradient-to-br dark:from-[#1f2533] dark:to-[#2a3142] border border-gray-200 dark:border-white/10 p-6 shadow-lg h-full">
               <SectionHeader icon={Info} title={t("General Information")} />
               <div className="mt-5 space-y-4">
                 <div className="grid md:grid-cols-2 gap-4">
@@ -201,9 +254,12 @@ function BusinessInformationPageContent() {
                     id="businessName"
                     label={t("Business Name")}
                     value={formData.businessName}
-                    onChange={(e) => handleInputChange("businessName", e.target.value)}
+                    onChange={(e) =>
+                      handleInputChange("businessName", e.target.value)
+                    }
                   />
                 </div>
+
                 <LabeledInput
                   label={t("About us")}
                   id="aboutUs"
@@ -214,55 +270,63 @@ function BusinessInformationPageContent() {
                 />
               </div>
             </Card>
-
-            <Card className="bg-white dark:bg-gradient-to-br dark:from-[#1f2533] dark:to-[#2a3142] border border-gray-200 dark:border-white/10 p-6 shadow-lg">
-              <SectionHeader icon={Contact} title={t("Contact Info")} />
-              <div className="mt-5 space-y-4">
-                <div className="grid md:grid-cols-2 gap-4">
-                  <LabeledInput
-                    id="email"
-                    type="email"
-                    label={t("Email")}
-                    value={formData.email}
-                    onChange={(e) => handleInputChange("email", e.target.value)}
-                  />
-                  <LabeledInput
-                    id="website"
-                    type="url"
-                    label={t("Website")}
-                    value={formData.website}
-                    onChange={(e) => handleInputChange("website", e.target.value)}
-                  />
-                </div>
-              </div>
-            </Card>
-
-            <Card className="bg-white dark:bg-gradient-to-br dark:from-[#1f2533] dark:to-[#2a3142] border border-gray-200 dark:border-white/10 p-6 shadow-lg">
-              <SectionHeader icon={MapPin} title={t("Locations")} />
-              <div className="mt-5 space-y-4">
-                <p className="text-sm text-muted-foreground">
-                  {t("Manage your business branches and locations. Each location has its own address, phone, and opening hours.")}
-                </p>
-                <Button onClick={() => window.location.href = "/business/locations"} className="w-full sm:w-auto rounded-full" iconType="add">
-                  {t("Manage Locations")}
-                </Button>
-              </div>
-            </Card>
-
-            {hasChanges && (
-              <div className="sticky bottom-4 z-10 flex justify-center pt-2">
-                <Button
-                  className="bg-blue-600 hover:bg-blue-700 text-white shadow-lg min-w-[200px]"
-                  size="lg"
-                  iconType="save"
-                  onClick={handleSubmit}
-                  disabled={isSaving}
-                >
-                  {isSaving ? t("Saving...") : t("Save Changes")}
-                </Button>
-              </div>
-            )}
           </div>
+        </div>
+
+        <div className="space-y-6 mt-6">
+          <Card className="bg-white dark:bg-gradient-to-br dark:from-[#1f2533] dark:to-[#2a3142] border border-gray-200 dark:border-white/10 p-6 shadow-lg">
+            <SectionHeader icon={Contact} title={t("Contact Info")} />
+            <div className="mt-5 space-y-4">
+              <div className="grid md:grid-cols-2 gap-4">
+                <LabeledInput
+                  id="email"
+                  type="email"
+                  label={t("Email")}
+                  value={formData.email}
+                  onChange={(e) => handleInputChange("email", e.target.value)}
+                />
+                <LabeledInput
+                  id="website"
+                  type="url"
+                  label={t("Website")}
+                  value={formData.website}
+                  onChange={(e) => handleInputChange("website", e.target.value)}
+                />
+              </div>
+            </div>
+          </Card>
+
+          <Card className="bg-white dark:bg-gradient-to-br dark:from-[#1f2533] dark:to-[#2a3142] border border-gray-200 dark:border-white/10 p-6 shadow-lg">
+            <SectionHeader icon={MapPin} title={t("Locations")} />
+            <div className="mt-5 space-y-4">
+              <p className="text-sm text-muted-foreground">
+                {t(
+                  "Manage your business branches and locations. Each location has its own address, phone, and opening hours.",
+                )}
+              </p>
+              <Button
+                onClick={() => (window.location.href = "/business/locations")}
+                className="w-full sm:w-auto rounded-full"
+                iconType="add"
+              >
+                {t("Manage Locations")}
+              </Button>
+            </div>
+          </Card>
+
+          {hasChanges && (
+            <div className="sticky bottom-4 z-10 flex justify-center pt-2">
+              <Button
+                className="bg-blue-600 hover:bg-blue-700 text-white shadow-lg min-w-[200px]"
+                size="lg"
+                iconType="save"
+                onClick={handleSubmit}
+                disabled={isSaving}
+              >
+                {isSaving ? t("Saving...") : t("Save Changes")}
+              </Button>
+            </div>
+          )}
         </div>
       </div>
     </div>

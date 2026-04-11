@@ -114,7 +114,7 @@ export function MultiSelectCombobox<T extends SelectOption>({
       </PopoverTrigger>
       {/* Класът за ширина w-[var(--radix-popover-trigger-width)] е специфичен за shadcn/ui, 
           тук го симулираме с w-full в нашия псевдо-PopoverContent */}
-      <PopoverContent className="w-full p-0">
+      <PopoverContent className="w-full">
         <Command>
           <CommandInput placeholder={searchPlaceholder} />
           <CommandEmpty>{emptyMessage}</CommandEmpty>

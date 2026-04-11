@@ -1,6 +1,11 @@
 "use client";
 import { useEffect, useState, useCallback } from "react";
-import { Plus } from "lucide-react";
+import {
+  ArrowRight,
+  BriefcaseBusiness,
+  CalendarPlus,
+  Plus,
+} from "lucide-react";
 import { usePageTitle } from "@/context/PageTitleContext";
 import ProtectedRoute from "@/components/guards/ProtectedRoute";
 import { useRightNav } from "@/context/RightNavContext";
@@ -12,10 +17,12 @@ import {
 import { getStatusColor } from "@/Global/Utils/statusIndicator";
 import Calendar from "@/components/calendar/Calendar";
 import ViewDetails from "./Forms/ViewDetails";
+import WorkBlockDetails from "./Forms/WorkBlockDetails";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useTranslation } from "react-i18next";
 import { CustomTooltip } from "@/components/customUIComponents/CustomTooltip";
 import { Modal } from "@/components/customUIComponents/Modal";
+import { Button } from "@/components/ui/button";
 import AppointmentsTable from "@/components/AppointmantTable/AppointmantTable";
 import callApi from "../Api/callApi";
 import { useAuthContext } from "@/context/AuthContext";
@@ -25,6 +32,7 @@ import AppointmentForm, {
   AppointmentFormData,
 } from "./Forms/CreateAppointmant";
 import { AppointmentEditModal } from "./Forms/AppointmentEditModal";
+import CreateWorkBlock from "./Forms/CreateWorkBlock";
 
 import { Skeleton } from "@/components/ui/skeleton";
 
@@ -79,6 +87,8 @@ function DashboardPageContent() {
     },
   });
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [isWorkBlockModalOpen, setIsWorkBlockModalOpen] = useState(false);
+  const [isCreateChoiceModalOpen, setIsCreateChoiceModalOpen] = useState(false);
   const { setPageTitle } = usePageTitle();
   const { setExtraRightNavMenu, setIsRightNavVisible } = useRightNav();
   const [activeTab, setActiveTab] = useState("calendar");
@@ -87,14 +97,14 @@ function DashboardPageContent() {
     try {
       const services: AppointmentType[] = await callApi(
         `/api/service?businessId=${user?.businessId}`,
-        "GET"
+        "GET",
       );
       setAppointmentTypes(services);
       const transformedOptions: SelectOptionsAppointmentType[] = services.map(
         (type) => ({
           id: type._id,
           name: type.name,
-        })
+        }),
       );
       setAppointmentTypesOptions(transformedOptions);
     } catch (error) {
@@ -126,7 +136,11 @@ function DashboardPageContent() {
   useEffect(() => {
     setPageTitle(t("Dashboard"));
     setExtraRightNavMenu(
-      <CreateNewDashboardMenu onOpenModal={() => setIsCreateModalOpen(true)} />
+      <div className="flex items-center gap-2">
+        <CreateNewDashboardMenu
+          onOpenModal={() => setIsCreateChoiceModalOpen(true)}
+        />
+      </div>,
     );
     setIsRightNavVisible(true);
     return () => {
@@ -154,14 +168,14 @@ function DashboardPageContent() {
     // If the appointment was cancelled, remove it from the list
     if (updatedAppointment.status === "cancelled") {
       setAppointments((prev) =>
-        prev.filter((apt) => apt._id !== updatedAppointment._id)
+        prev.filter((apt) => apt._id !== updatedAppointment._id),
       );
     } else {
       // Otherwise, update it in the list
       setAppointments((prev) =>
         prev.map((apt) =>
-          apt._id === updatedAppointment._id ? updatedAppointment : apt
-        )
+          apt._id === updatedAppointment._id ? updatedAppointment : apt,
+        ),
       );
     }
     setSelectedAppointment(null);
@@ -170,20 +184,27 @@ function DashboardPageContent() {
   };
 
   const handleDeleteAppointment = () => {
-    if (selectedAppointment) {
-      setAppointments((prev) =>
-        prev.filter((apt) => apt._id !== selectedAppointment._id)
-      );
-      setIsViewModalOpen(false);
-      setSelectedAppointment(null);
-    }
+    if (!selectedAppointment) return;
+
+    void (async () => {
+      try {
+        await callApi(`/api/appointment/${selectedAppointment._id}`, "DELETE");
+        setIsViewModalOpen(false);
+        setSelectedAppointment(null);
+        await getDashboardData();
+        toast.success(t("Appointment deleted successfully!"));
+      } catch (error) {
+        console.error("Failed to delete appointment:", error);
+        toast.error(t("Failed to delete appointment. Please try again."));
+      }
+    })();
   };
 
   const handleCreateAppointment = async (
-    appointmentData: AppointmentFormData
+    appointmentData: AppointmentFormData,
   ) => {
     const service = appointmentTypes?.find(
-      (s) => s._id === appointmentData.appointmentTypeId
+      (s) => s._id === appointmentData.appointmentTypeId,
     );
     if (!service) {
       toast.error(t("Invalid service selected."));
@@ -191,7 +212,7 @@ function DashboardPageContent() {
     }
 
     const startDateTime = moment(
-      `${appointmentData.date}T${appointmentData.time}`
+      `${appointmentData.date}T${appointmentData.time}`,
     ).toISOString();
 
     const payload = {
@@ -206,13 +227,8 @@ function DashboardPageContent() {
       locationId: selectedLocation?._id,
     };
     try {
-      const appointment: Appointment = await callApi(
-        "/api/appointment",
-        "POST",
-        payload
-      );
+      await callApi("/api/appointment", "POST", payload);
       setIsCreateModalOpen(false);
-      setAppointments((prev) => [...prev, appointment]);
       setNewAppointment({
         clientName: "",
         email: "",
@@ -223,6 +239,7 @@ function DashboardPageContent() {
         notes: "",
         staff: { _id: "", name: "" },
       });
+      await getDashboardData();
       toast.success(t("Appointment created successfully!"));
     } catch (error) {
       console.error("Failed to create appointment:", error);
@@ -252,10 +269,12 @@ function DashboardPageContent() {
   }
 
   return (
-    <div className={`relative ${activeTab === "calendar" ? "h-[calc(100dvh-9.5rem)]" : ""} md:h-full md:pb-0 flex flex-col`}>
-      <Tabs 
-        value={activeTab} 
-        onValueChange={setActiveTab} 
+    <div
+      className={`relative ${activeTab === "calendar" ? "h-[calc(100dvh-9.5rem)]" : ""} md:h-full md:pb-0 flex flex-col`}
+    >
+      <Tabs
+        value={activeTab}
+        onValueChange={setActiveTab}
         className="w-full h-full flex flex-col pb-0 md:pb-0"
       >
         {/* Desktop Tabs - Top */}
@@ -317,7 +336,7 @@ function DashboardPageContent() {
               } catch (error) {
                 console.error("Failed to delete appointment:", error);
                 toast.error(
-                  t("Failed to delete appointment. Please try again.")
+                  t("Failed to delete appointment. Please try again."),
                 );
               }
             }}
@@ -327,7 +346,11 @@ function DashboardPageContent() {
 
       {/* Модал за Преглед */}
       <Modal
-        label={t("Appointment Details")}
+        label={
+          selectedAppointment?.kind === "work_block"
+            ? t("Work Block Details")
+            : t("Appointment Details")
+        }
         open={isViewModalOpen}
         onOpenChange={(open) => {
           setIsViewModalOpen(open);
@@ -336,11 +359,17 @@ function DashboardPageContent() {
           }
         }}
       >
-        {selectedAppointment && (
+        {selectedAppointment && selectedAppointment.kind !== "work_block" && (
           <ViewDetails
             handleEditAppointment={handleEditAppointment}
             handleDeleteAppointment={handleDeleteAppointment}
             selectedAppointment={selectedAppointment}
+          />
+        )}
+        {selectedAppointment?.kind === "work_block" && (
+          <WorkBlockDetails
+            selectedAppointment={selectedAppointment}
+            handleDeleteAppointment={handleDeleteAppointment}
           />
         )}
       </Modal>
@@ -357,21 +386,90 @@ function DashboardPageContent() {
 
       {/* Модал за Създаване */}
       <Modal
+        label={t("What would you like to create?")}
+        open={isCreateChoiceModalOpen}
+        onOpenChange={setIsCreateChoiceModalOpen}
+        width="lg"
+      >
+        <div className="p-2 pb-4 space-y-3">
+          <Button
+            type="button"
+            variant="outline"
+            className="group h-auto w-full rounded-2xl border-primary/30 bg-card/80 px-4 py-4 hover:bg-primary/5"
+            onClick={() => {
+              setIsCreateChoiceModalOpen(false);
+              setIsCreateModalOpen(true);
+            }}
+          >
+            <div className="flex w-full items-center gap-3 text-left">
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
+                <CalendarPlus className="h-5 w-5" />
+              </div>
+              <div className="min-w-0 flex-1">
+                <p className="text-base font-semibold text-foreground leading-tight break-words">
+                  {t("Create New Appointment")}
+                </p>
+                <p className="text-sm text-muted-foreground leading-tight">
+                  {t("Book a client meeting")}
+                </p>
+              </div>
+              <ArrowRight className="h-4 w-4 shrink-0 text-muted-foreground transition-transform group-hover:translate-x-0.5" />
+            </div>
+          </Button>
+
+          <Button
+            type="button"
+            variant="outline"
+            className="group h-auto w-full rounded-2xl border-primary/30 bg-card/80 px-4 py-4 hover:bg-primary/5"
+            onClick={() => {
+              setIsCreateChoiceModalOpen(false);
+              setIsWorkBlockModalOpen(true);
+            }}
+          >
+            <div className="flex w-full items-center gap-3 text-left">
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-amber-500/10 text-amber-600 dark:text-amber-400">
+                <BriefcaseBusiness className="h-5 w-5" />
+              </div>
+              <div className="min-w-0 flex-1">
+                <p className="text-base font-semibold text-foreground leading-tight break-words">
+                  {t("Add Work Block")}
+                </p>
+                <p className="text-sm text-muted-foreground leading-tight">
+                  {t("Block time in calendar")}
+                </p>
+              </div>
+              <ArrowRight className="h-4 w-4 shrink-0 text-muted-foreground transition-transform group-hover:translate-x-0.5" />
+            </div>
+          </Button>
+        </div>
+      </Modal>
+
+      <Modal
         label={t("Create New Appointment")}
         open={isCreateModalOpen}
         onOpenChange={setIsCreateModalOpen}
       >
-        <AppointmentForm  
-          mode="create" 
-          handleSubmit={handleCreateAppointment} 
+        <AppointmentForm
+          mode="create"
+          handleSubmit={handleCreateAppointment}
           appointmentData={newAppointment}
           setAppointmentData={setNewAppointment}
-          onClose={() => setIsCreateModalOpen(false)} 
+          onClose={() => setIsCreateModalOpen(false)}
           appoitmentTypesOptions={appoitmentTypesOptions}
           appointmentTypes={appointmentTypes}
           locationId={selectedLocation?._id}
         />
       </Modal>
+
+      <CreateWorkBlock
+        open={isWorkBlockModalOpen}
+        onOpenChange={setIsWorkBlockModalOpen}
+        businessId={user?.businessId}
+        locationId={selectedLocation?._id}
+        onCreated={async () => {
+          await getDashboardData();
+        }}
+      />
     </div>
   );
 }

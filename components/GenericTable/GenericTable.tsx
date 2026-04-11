@@ -26,7 +26,7 @@ interface GenericTableProps<T> {
     item: T,
     columns: Column<T>[],
     columnVisibility: Record<string, boolean>,
-    columnWidths: Record<string, number>
+    columnWidths: Record<string, number>,
   ) => React.ReactNode;
   isAccordionRow?: (item: T) => boolean;
   renderAccordionHeader?: (item: T) => React.ReactNode;
@@ -46,10 +46,13 @@ export const GenericTable = <T extends Record<string, any>>({
   const [isMobile, setIsMobile] = useState(false);
   const [globalFilter, setGlobalFilter] = useState<string>("");
   const [dateFilter, setDateFilter] = useState<string>("all");
-  const [sorting, setSorting] = useState<SortingState>({ id: null, direction: null });
-  const [columnVisibility, setColumnVisibility] = useState<Record<string, boolean>>(
-    columns.reduce((acc, col) => ({ ...acc, [col.accessorKey]: true }), {})
-  );
+  const [sorting, setSorting] = useState<SortingState>({
+    id: null,
+    direction: null,
+  });
+  const [columnVisibility, setColumnVisibility] = useState<
+    Record<string, boolean>
+  >(columns.reduce((acc, col) => ({ ...acc, [col.accessorKey]: true }), {}));
   const [pagination, setPagination] = useState<PaginationState>({
     pageIndex: 0,
     pageSize: 10,
@@ -66,8 +69,8 @@ export const GenericTable = <T extends Record<string, any>>({
         ...acc,
         [col.accessorKey as string]: col.defaultWidth || 150,
       }),
-      {}
-    )
+      {},
+    ),
   );
 
   const tableRef = useRef<HTMLTableElement>(null);
@@ -93,9 +96,11 @@ export const GenericTable = <T extends Record<string, any>>({
   }, []);
 
   useEffect(() => {
-    const handleFullScreenChange = () => setIsFullScreen(!!document.fullscreenElement);
+    const handleFullScreenChange = () =>
+      setIsFullScreen(!!document.fullscreenElement);
     document.addEventListener("fullscreenchange", handleFullScreenChange);
-    return () => document.removeEventListener("fullscreenchange", handleFullScreenChange);
+    return () =>
+      document.removeEventListener("fullscreenchange", handleFullScreenChange);
   }, []);
 
   useEffect(() => {
@@ -106,7 +111,9 @@ export const GenericTable = <T extends Record<string, any>>({
   const toggleFullScreen = () => {
     if (!isFullScreen) {
       document.documentElement.requestFullscreen().catch((err) => {
-        console.error(`Error attempting to enable fullscreen mode: ${err.message}`);
+        console.error(
+          `Error attempting to enable fullscreen mode: ${err.message}`,
+        );
       });
     } else {
       document.exitFullscreen();
@@ -136,18 +143,48 @@ export const GenericTable = <T extends Record<string, any>>({
         const nextWeekStart = new Date(thisWeekStart);
         nextWeekStart.setDate(thisWeekStart.getDate() + 7);
 
-        const thisMonthStart = new Date(today.getFullYear(), today.getMonth(), 1);
-        const nextMonthStart = new Date(today.getFullYear(), today.getMonth() + 1, 1);
+        const thisMonthStart = new Date(
+          today.getFullYear(),
+          today.getMonth(),
+          1,
+        );
+        const nextMonthStart = new Date(
+          today.getFullYear(),
+          today.getMonth() + 1,
+          1,
+        );
 
         switch (dateFilter) {
-          case "today": return itemDate.getTime() === today.getTime();
-          case "tomorrow": return itemDate.getTime() === tomorrow.getTime();
-          case "this_week": return itemDate >= thisWeekStart && itemDate < nextWeekStart;
-          case "next_week": return itemDate >= nextWeekStart && itemDate < new Date(nextWeekStart.getFullYear(), nextWeekStart.getMonth(), nextWeekStart.getDate() + 7);
-          case "this_month": return itemDate.getMonth() === thisMonthStart.getMonth() && itemDate.getFullYear() === thisMonthStart.getFullYear();
-          case "next_month": return itemDate.getMonth() === nextMonthStart.getMonth() && itemDate.getFullYear() === nextMonthStart.getFullYear();
-          case "future": return itemDate.getTime() >= nextMonthStart.getTime();
-          default: return true;
+          case "today":
+            return itemDate.getTime() === today.getTime();
+          case "tomorrow":
+            return itemDate.getTime() === tomorrow.getTime();
+          case "this_week":
+            return itemDate >= thisWeekStart && itemDate < nextWeekStart;
+          case "next_week":
+            return (
+              itemDate >= nextWeekStart &&
+              itemDate <
+                new Date(
+                  nextWeekStart.getFullYear(),
+                  nextWeekStart.getMonth(),
+                  nextWeekStart.getDate() + 7,
+                )
+            );
+          case "this_month":
+            return (
+              itemDate.getMonth() === thisMonthStart.getMonth() &&
+              itemDate.getFullYear() === thisMonthStart.getFullYear()
+            );
+          case "next_month":
+            return (
+              itemDate.getMonth() === nextMonthStart.getMonth() &&
+              itemDate.getFullYear() === nextMonthStart.getFullYear()
+            );
+          case "future":
+            return itemDate.getTime() >= nextMonthStart.getTime();
+          default:
+            return true;
         }
       });
     }
@@ -155,8 +192,8 @@ export const GenericTable = <T extends Record<string, any>>({
     if (globalFilter) {
       tempFilteredData = tempFilteredData.filter((item) =>
         Object.values(item).some((value) =>
-          String(value).toLowerCase().includes(globalFilter.toLowerCase())
-        )
+          String(value).toLowerCase().includes(globalFilter.toLowerCase()),
+        ),
       );
     }
     return tempFilteredData;
@@ -178,27 +215,35 @@ export const GenericTable = <T extends Record<string, any>>({
 
   const paginatedData = sortedData.slice(
     pagination.pageIndex * pagination.pageSize,
-    (pagination.pageIndex + 1) * pagination.pageSize
+    (pagination.pageIndex + 1) * pagination.pageSize,
   );
 
   const getRowClass = (): string => {
     switch (rowDensity) {
-      case "compact": return "h-11";
-      case "spacious": return "h-20";
-      default: return "h-14";
+      case "compact":
+        return "h-11";
+      case "spacious":
+        return "h-20";
+      default:
+        return "h-14";
     }
   };
 
   const getCellClass = (): string => {
     switch (rowDensity) {
-      case "compact": return "py-2.5";
-      case "spacious": return "py-6";
-      default: return "py-4";
+      case "compact":
+        return "py-2.5";
+      case "spacious":
+        return "py-6";
+      default:
+        return "py-4";
     }
   };
 
   const handleExport = (): void => {
-    const headers = columns.map((col) => col.header).filter((h) => h !== "Actions");
+    const headers = columns
+      .map((col) => col.header)
+      .filter((h) => h !== "Actions");
     exportToCsv(sortedData, headers, "appointments");
   };
 
@@ -207,16 +252,23 @@ export const GenericTable = <T extends Record<string, any>>({
   const handleSort = (columnId: string): void => {
     setSorting((prev) => {
       if (prev.id === columnId) {
-        if (prev.direction === "asc") return { id: columnId, direction: "desc" };
+        if (prev.direction === "asc")
+          return { id: columnId, direction: "desc" };
         if (prev.direction === "desc") return { id: null, direction: null };
       }
       return { id: columnId, direction: "asc" };
     });
   };
 
-  const handleUpdate = (rowIndex: number, accessorKey: keyof T | string, value: any) => {
+  const handleUpdate = (
+    rowIndex: number,
+    accessorKey: keyof T | string,
+    value: any,
+  ) => {
     setTempData((prev) =>
-      prev.map((row, index) => (index === rowIndex ? { ...row, [accessorKey]: value } : row))
+      prev.map((row, index) =>
+        index === rowIndex ? { ...row, [accessorKey]: value } : row,
+      ),
     );
   };
 
@@ -243,15 +295,24 @@ export const GenericTable = <T extends Record<string, any>>({
   useEffect(() => {
     const handleMouseMove = (e: MouseEvent) => {
       if (!resizeState.isResizing || !resizeState.columnId) return;
-      const newWidth = resizeState.startWidth + (e.clientX - resizeState.startX);
+      const newWidth =
+        resizeState.startWidth + (e.clientX - resizeState.startX);
       if (newWidth > 50) {
-        setColumnWidths((prev) => ({ ...prev, [resizeState.columnId!]: newWidth }));
+        setColumnWidths((prev) => ({
+          ...prev,
+          [resizeState.columnId!]: newWidth,
+        }));
       }
     };
 
     const handleMouseUp = () => {
       if (resizeState.isResizing) {
-        setResizeState({ isResizing: false, startX: 0, startWidth: 0, columnId: null });
+        setResizeState({
+          isResizing: false,
+          startX: 0,
+          startWidth: 0,
+          columnId: null,
+        });
       }
     };
 
@@ -289,14 +350,17 @@ export const GenericTable = <T extends Record<string, any>>({
     );
   }
 
-
   return (
-    <div className={`p-0 transition-all duration-500 ${isFullScreen ? "fixed inset-0 z-[100] bg-white dark:bg-gray-950 overflow-auto" : ""}`}>
+    <div
+      className={`p-0 transition-all duration-500 ${isFullScreen ? "fixed inset-0 z-[100] bg-white dark:bg-gray-950 overflow-auto" : ""}`}
+    >
       <div className="rounded-2xl border border-gray-100 dark:border-gray-800 shadow-xl bg-white dark:bg-card/30 backdrop-blur-xl flex flex-col h-full">
         <Toolbar
           globalFilter={globalFilter}
           setGlobalFilter={setGlobalFilter}
-          setPageIndex={(index) => setPagination(p => ({ ...p, pageIndex: index }))}
+          setPageIndex={(index) =>
+            setPagination((p) => ({ ...p, pageIndex: index }))
+          }
           editable={editable}
           isEditing={isEditing}
           setIsEditing={setIsEditing}
@@ -313,8 +377,14 @@ export const GenericTable = <T extends Record<string, any>>({
           handleExport={handleExport}
         />
 
-        <div className="flex-1 overflow-x-auto custom-scrollbar" ref={tableContainerRef}>
-          <table className="w-full text-left table-fixed border-collapse" ref={tableRef}>
+        <div
+          className="flex-1 overflow-x-auto custom-scrollbar"
+          ref={tableContainerRef}
+        >
+          <table
+            className="w-full text-left table-fixed border-collapse"
+            ref={tableRef}
+          >
             <TableHeader
               columns={columns}
               columnVisibility={columnVisibility}
@@ -328,32 +398,64 @@ export const GenericTable = <T extends Record<string, any>>({
             <tbody className="divide-y divide-gray-50 dark:divide-gray-800/50">
               {paginatedData.length ? (
                 paginatedData.map((row, rowIndex) => {
-                  const sortedRow = sortedData[pagination.pageIndex * pagination.pageSize + rowIndex];
-                  const originalIndex = tempData.findIndex((item) => item === sortedRow);
+                  const sortedRow =
+                    sortedData[
+                      pagination.pageIndex * pagination.pageSize + rowIndex
+                    ];
+                  const originalIndex = tempData.findIndex(
+                    (item) => item === sortedRow,
+                  );
+                  const canExpandRow =
+                    !!renderRowDetails &&
+                    (isAccordionRow ? isAccordionRow(row) : true);
 
                   return (
                     <React.Fragment key={rowIndex}>
-                      <tr className={`group border-b border-gray-100 dark:border-gray-800/50 hover:bg-blue-50/30 dark:hover:bg-blue-900/5 transition-all duration-200 ${getRowClass()} ${expandedRows[rowIndex] ? "bg-blue-50/20 dark:bg-blue-900/10" : ""}`}>
+                      <tr
+                        className={`group border-b border-gray-100 dark:border-gray-800/50 hover:bg-blue-50/30 dark:hover:bg-blue-900/5 transition-all duration-200 ${getRowClass()} ${canExpandRow && expandedRows[rowIndex] ? "bg-blue-50/20 dark:bg-blue-900/10" : ""}`}
+                      >
                         {columns
-                          .filter((c) => columnVisibility[c.accessorKey as string])
+                          .filter(
+                            (c) => columnVisibility[c.accessorKey as string],
+                          )
                           .map((column, colIndex) => (
                             <td
                               key={colIndex}
                               className={`px-4 ${getCellClass()} text-sm text-gray-600 dark:text-gray-300 relative`}
-                              style={{ width: columnWidths[column.accessorKey as string] }}
-                              onClick={() => renderRowDetails && setExpandedRows(prev => ({...prev, [rowIndex]: !prev[rowIndex]}))}
+                              style={{
+                                width:
+                                  columnWidths[column.accessorKey as string],
+                              }}
+                              onClick={() =>
+                                canExpandRow &&
+                                setExpandedRows((prev) => ({
+                                  ...prev,
+                                  [rowIndex]: !prev[rowIndex],
+                                }))
+                              }
                             >
                               <div className="flex items-center gap-3">
-                                {colIndex === 0 && renderRowDetails && (
+                                {colIndex === 0 && canExpandRow && (
                                   <div className="cursor-pointer text-blue-500 hover:scale-110 transition-transform">
-                                    {expandedRows[rowIndex] ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
+                                    {expandedRows[rowIndex] ? (
+                                      <ChevronDown size={14} />
+                                    ) : (
+                                      <ChevronRight size={14} />
+                                    )}
                                   </div>
                                 )}
                                 <div className="truncate flex-1">
                                   {isEditing && column.editableCell
                                     ? column.editableCell(
                                         { row: { original: row } },
-                                        (accessorKey, value) => handleUpdate(originalIndex !== -1 ? originalIndex : rowIndex, accessorKey, value)
+                                        (accessorKey, value) =>
+                                          handleUpdate(
+                                            originalIndex !== -1
+                                              ? originalIndex
+                                              : rowIndex,
+                                            accessorKey,
+                                            value,
+                                          ),
                                       )
                                     : column.cell({ row: { original: row } })}
                                 </div>
@@ -361,12 +463,23 @@ export const GenericTable = <T extends Record<string, any>>({
                             </td>
                           ))}
                       </tr>
-                      {renderRowDetails && expandedRows[rowIndex] && (
+                      {canExpandRow && expandedRows[rowIndex] && (
                         <tr className="bg-gray-50/50 dark:bg-gray-900/30 animate-in fade-in slide-in-from-top-1 duration-300 border-b border-gray-100 dark:border-gray-800">
-                          <td colSpan={columns.filter(c => columnVisibility[c.accessorKey as string]).length} className="p-0">
-                           
-                              {renderRowDetails(row, columns, columnVisibility, columnWidths)}
-                            
+                          <td
+                            colSpan={
+                              columns.filter(
+                                (c) =>
+                                  columnVisibility[c.accessorKey as string],
+                              ).length
+                            }
+                            className="p-0"
+                          >
+                            {renderRowDetails(
+                              row,
+                              columns,
+                              columnVisibility,
+                              columnWidths,
+                            )}
                           </td>
                         </tr>
                       )}
@@ -375,12 +488,25 @@ export const GenericTable = <T extends Record<string, any>>({
                 })
               ) : (
                 <tr>
-                  <td colSpan={columns.length} className="h-40 text-center text-gray-400 dark:text-gray-500 italic">
+                  <td
+                    colSpan={columns.length}
+                    className="h-40 text-center text-gray-400 dark:text-gray-500 italic"
+                  >
                     <div className="flex flex-col items-center gap-2">
-                       <svg className="w-10 h-10 mb-2 opacity-20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                       </svg>
-                       {t("No results.")}
+                      <svg
+                        className="w-10 h-10 mb-2 opacity-20"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={1}
+                          d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                        />
+                      </svg>
+                      {t("No results.")}
                     </div>
                   </td>
                 </tr>

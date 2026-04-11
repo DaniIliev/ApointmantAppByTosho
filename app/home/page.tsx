@@ -347,73 +347,6 @@ function HomePageContent() {
   const fullName = `${user?.firstName || ""} ${user?.lastName || ""}`.trim();
   const displayName = fullName || user?.email || "there";
 
-  // const weeklyStatusLineOption = useMemo(() => {
-  //   const labels = stats.chartData.map((item) => item.label);
-
-  //   return {
-  //     tooltip: {
-  //       trigger: "axis",
-  //     },
-  //     legend: {
-  //       top: 0,
-  //       data: ["All", "Completed", "Pending", "Cancelled"],
-  //     },
-  //     grid: {
-  //       left: "3%",
-  //       right: "4%",
-  //       bottom: "3%",
-  //       top: "14%",
-  //       containLabel: true,
-  //     },
-  //     xAxis: {
-  //       type: "category",
-  //       data: labels,
-  //     },
-  //     yAxis: {
-  //       type: "value",
-  //       minInterval: 1,
-  //     },
-  //     series: [
-  //       {
-  //         name: "All",
-  //         type: "line",
-  //         smooth: true,
-  //         data: stats.chartData.map((item) => item.all),
-  //         lineStyle: { width: 3, color: "#64748b" },
-  //         itemStyle: { color: "#64748b" },
-  //         areaStyle: { color: "rgba(100,116,139,0.12)" },
-  //       },
-  //       {
-  //         name: "Completed",
-  //         type: "line",
-  //         smooth: true,
-  //         data: stats.chartData.map((item) => item.completed),
-  //         lineStyle: { width: 3, color: "#10b981" },
-  //         itemStyle: { color: "#10b981" },
-  //         areaStyle: { color: "rgba(16,185,129,0.12)" },
-  //       },
-  //       {
-  //         name: "Pending",
-  //         type: "line",
-  //         smooth: true,
-  //         data: stats.chartData.map((item) => item.pending),
-  //         lineStyle: { width: 3, color: "#f59e0b" },
-  //         itemStyle: { color: "#f59e0b" },
-  //         areaStyle: { color: "rgba(245,158,11,0.1)" },
-  //       },
-  //       {
-  //         name: "Cancelled",
-  //         type: "line",
-  //         smooth: true,
-  //         data: stats.chartData.map((item) => item.cancelled),
-  //         lineStyle: { width: 3, color: "#f43f5e" },
-  //         itemStyle: { color: "#f43f5e" },
-  //         areaStyle: { color: "rgba(244,63,94,0.08)" },
-  //       },
-  //     ],
-  //   };
-  // }, [stats.chartData]);
-
   return (
     <div className="space-y-5">
       <Card className="border-0 bg-gradient-to-br from-primary via-primary to-primary/75 text-white shadow-xl">
@@ -498,25 +431,6 @@ function HomePageContent() {
           )}
         </CardContent>
       </Card>
-
-      {/* <Card>
-        <CardHeader>
-          <CardTitle>Weekly status trend</CardTitle>
-          <CardDescription>
-            Monday to Sunday line chart: All, Completed, Pending, Cancelled
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="h-[360px] md:h-[420px]">
-          <ReactECharts
-            option={weeklyStatusLineOption}
-            style={{ width: "100%", height: "100%" }}
-            opts={{ renderer: "canvas" }}
-            notMerge
-            lazyUpdate
-          />
-        </CardContent>
-      </Card> */}
-
       <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
         <Card>
           <CardHeader className="pb-3">
@@ -589,9 +503,6 @@ function HomePageContent() {
                 </CardDescription>
               </div>
               <div className="flex justify-center gap-1">
-                <div className="rounded-lg bg-background/80 p-2">
-                  <Wallet className="h-4 w-4 text-emerald-600" />
-                </div>
                 <div
                   className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-semibold ${stats.revenueDeltaPercent >= 0 ? "bg-emerald-500/15 text-emerald-600" : "bg-rose-500/15 text-rose-600"}`}
                 >
@@ -602,6 +513,9 @@ function HomePageContent() {
                   )}
                   {stats.revenueDeltaPercent >= 0 ? "+" : ""}
                   {stats.revenueDeltaPercent}%
+                </div>
+                <div className="rounded-lg bg-background/80 p-2">
+                  <Wallet className="h-4 w-4 text-primary" />
                 </div>
               </div>
             </div>
@@ -615,7 +529,7 @@ function HomePageContent() {
                 </div>
                 <div className="h-2 rounded-full bg-accent/40">
                   <div
-                    className="h-2 rounded-full bg-emerald-500 shadow-[0_0_12px_rgba(16,185,129,0.4)]"
+                    className="h-2 rounded-full bg-primary shadow-[0_0_12px_rgba(16,185,129,0.4)]"
                     style={{ width: `${stats.thisWeekRevenueWidth}%` }}
                   />
                 </div>

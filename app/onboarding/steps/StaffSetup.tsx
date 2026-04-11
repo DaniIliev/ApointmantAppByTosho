@@ -8,7 +8,18 @@ import { ArrowLeft, ArrowRight, UserPlus, Trash2, Shield } from "lucide-react";
 import callApi from "@/app/Api/callApi";
 import { LabeledSelect } from "@/components/customUIComponents/LabeledSelect";
 
-import { Location, Staff } from "@/Global/Types/types";
+import { Location } from "@/Global/Types/types";
+
+type StaffRole = "manager" | "staff" | "business";
+
+interface Staff {
+  _id?: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+  role: StaffRole;
+  locationIds: string[];
+}
 import { MultiSelectCombobox } from "@/components/customUIComponents/MultiSelectCombobox";
 
 interface StaffSetupProps {
@@ -18,13 +29,26 @@ interface StaffSetupProps {
   initialData?: Staff[];
 }
 
-export default function StaffSetup({ locations, onNext, onBack, initialData }: StaffSetupProps) {
+export default function StaffSetup({
+  locations,
+  onNext,
+  onBack,
+  initialData,
+}: StaffSetupProps) {
   const { t } = useTranslation();
   const [loading, setLoading] = useState(false);
   const [staff, setStaff] = useState<Staff[]>(
     initialData && initialData.length > 0
       ? initialData
-      : [{ firstName: "", lastName: "", email: "", role: "staff", locationIds: [locations[0]?._id || ""] }]
+      : [
+          {
+            firstName: "",
+            lastName: "",
+            email: "",
+            role: "staff",
+            locationIds: [locations[0]?._id || ""],
+          },
+        ],
   );
 
   useEffect(() => {
@@ -34,7 +58,16 @@ export default function StaffSetup({ locations, onNext, onBack, initialData }: S
   }, [initialData]);
 
   const addStaffMember = () => {
-    setStaff([...staff, { firstName: "", lastName: "", email: "", role: "staff", locationIds: [locations[0]?._id || ""] }]);
+    setStaff([
+      ...staff,
+      {
+        firstName: "",
+        lastName: "",
+        email: "",
+        role: "staff",
+        locationIds: [locations[0]?._id || ""],
+      },
+    ]);
   };
 
   const removeStaffMember = (index: number) => {
@@ -55,21 +88,21 @@ export default function StaffSetup({ locations, onNext, onBack, initialData }: S
     try {
       // Group staff by normalized email to avoid duplicate parallel requests for the same person
       const staffMap = new Map<string, Staff>();
-      
-      staff.forEach(s => {
+
+      staff.forEach((s) => {
         if (!s.email) return;
         const normalizedEmail = s.email.trim().toLowerCase();
         if (staffMap.has(normalizedEmail)) {
           const existing = staffMap.get(normalizedEmail)!;
-          s.locationIds.forEach(locId => {
+          s.locationIds.forEach((locId) => {
             if (locId && !existing.locationIds.includes(locId)) {
               existing.locationIds.push(locId);
             }
           });
         } else {
-          staffMap.set(normalizedEmail, { 
-            ...s, 
-            locationIds: [...s.locationIds] 
+          staffMap.set(normalizedEmail, {
+            ...s,
+            locationIds: [...s.locationIds],
           });
         }
       });
@@ -79,38 +112,57 @@ export default function StaffSetup({ locations, onNext, onBack, initialData }: S
 
       for (const s of Array.from(staffMap.values())) {
         let lastResStaff = null;
-        
+
         // Find existing locationIds for this staff if from initialData
-        const originalStaff = (initialData || []).find(o => o.email.toLowerCase() === s.email.toLowerCase());
-        const originalLocIds = (originalStaff?.locationIds || []).map(id => id.toString());
-        
+        const originalStaff = (initialData || []).find(
+          (o) => o.email.toLowerCase() === s.email.toLowerCase(),
+        );
+        const originalLocIds = (originalStaff?.locationIds || []).map((id) =>
+          id.toString(),
+        );
+
         // Identify new locations that need an invite/assignment call
-        const newLocIds = s.locationIds.filter(locId => !originalLocIds.includes(locId.toString()));
+        const newLocIds = s.locationIds.filter(
+          (locId) => !originalLocIds.includes(locId.toString()),
+        );
 
         for (const locId of newLocIds) {
           try {
-            const res = await callApi("/api/staff/invite", "POST", { ...s, locationId: locId });
+            const res = await callApi("/api/staff/invite", "POST", {
+              ...s,
+              locationId: locId,
+            });
             if (res.staff) {
               lastResStaff = res.staff;
             }
           } catch (err) {
-            console.error(`Failed to invite ${s.email} to location ${locId}:`, err);
+            console.error(
+              `Failed to invite ${s.email} to location ${locId}:`,
+              err,
+            );
           }
         }
-        
+
         if (lastResStaff) {
           invitedStaffMap.set(lastResStaff.email.toLowerCase(), lastResStaff);
         } else if (originalStaff) {
           // If no new locations were added, keep the original staff data with updated local state
-          invitedStaffMap.set(s.email.toLowerCase(), { ...originalStaff, ...s });
+          invitedStaffMap.set(s.email.toLowerCase(), {
+            ...originalStaff,
+            ...s,
+          });
         }
       }
 
       // Update the original staff array with IDs
-      const finalStaff = staff.map(s => {
+      const finalStaff = staff.map((s) => {
         const invited = invitedStaffMap.get(s.email.toLowerCase());
         if (invited) {
-          return { ...s, _id: invited._id, locationIds: invited.locationIds || s.locationIds };
+          return {
+            ...s,
+            _id: invited._id,
+            locationIds: invited.locationIds || s.locationIds,
+          };
         }
         return s;
       });
@@ -125,23 +177,30 @@ export default function StaffSetup({ locations, onNext, onBack, initialData }: S
   };
 
   return (
-    <div >
+    <div>
       <div className="flex items-center gap-4 mb-8">
         <div className="p-3 rounded-2xl bg-primary/10 text-primary">
           <UserPlus className="h-8 w-8" />
         </div>
         <div>
           <h2 className="text-2xl font-bold">{t("Invite your team")}</h2>
-          <p className="text-muted-foreground">{t("Add staff members and assign them to your locations.")}</p>
+          <p className="text-muted-foreground">
+            {t("Add staff members and assign them to your locations.")}
+          </p>
         </div>
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-8">
         <div className="space-y-6">
           {staff.map((s, index) => (
-            <div key={index} className="p-6 rounded-2xl border border-border bg-slate-50/50 dark:bg-slate-900/50">
+            <div
+              key={index}
+              className="p-6 rounded-2xl border border-border bg-slate-50/50 dark:bg-slate-900/50"
+            >
               <div className="flex justify-between items-center mb-4">
-                <h3 className="font-bold text-lg">{t("Team Member")} #{index + 1}</h3>
+                <h3 className="font-bold text-lg">
+                  {t("Team Member")} #{index + 1}
+                </h3>
                 {staff.length > 1 && (
                   <Button
                     type="button"
@@ -160,7 +219,9 @@ export default function StaffSetup({ locations, onNext, onBack, initialData }: S
                   id={`firstName-${index}`}
                   label={t("First Name")}
                   value={s.firstName}
-                  onChange={(e) => updateStaff(index, "firstName", e.target.value)}
+                  onChange={(e) =>
+                    updateStaff(index, "firstName", e.target.value)
+                  }
                   placeholder={t("First name")}
                   required
                 />
@@ -168,7 +229,9 @@ export default function StaffSetup({ locations, onNext, onBack, initialData }: S
                   id={`lastName-${index}`}
                   label={t("Last Name")}
                   value={s.lastName}
-                  onChange={(e) => updateStaff(index, "lastName", e.target.value)}
+                  onChange={(e) =>
+                    updateStaff(index, "lastName", e.target.value)
+                  }
                   placeholder={t("Last name")}
                   required
                 />
@@ -178,7 +241,9 @@ export default function StaffSetup({ locations, onNext, onBack, initialData }: S
                     label={t("Email Address")}
                     type="email"
                     value={s.email}
-                    onChange={(e) => updateStaff(index, "email", e.target.value)}
+                    onChange={(e) =>
+                      updateStaff(index, "email", e.target.value)
+                    }
                     placeholder={t("staff@example.com")}
                     required
                   />
@@ -186,20 +251,29 @@ export default function StaffSetup({ locations, onNext, onBack, initialData }: S
                 <LabeledSelect
                   id={`role-${index}`}
                   label={t("Role")}
-                  value={s.role}
+                  value={s.role === "business" ? "business" : s.role}
                   onValueChange={(val) => updateStaff(index, "role", val)}
                   options={[
+                    { id: "manager", name: t("Manager") },
                     { id: "staff", name: t("Staff") },
-                    { id: "admin", name: t("Admin") }
                   ]}
                   placeholder={t("Select role")}
+                  // @ts-ignore
+                  selectProps={{ disabled: s.role === "business" }}
                 />
                 <div className="space-y-2">
-                  <label className="text-sm font-medium">{t("Locations")}</label>
+                  <label className="text-sm font-medium">
+                    {t("Locations")}
+                  </label>
                   <MultiSelectCombobox
-                    items={locations.map(loc => ({ id: loc._id!, name: loc.name }))}
+                    items={locations.map((loc) => ({
+                      id: loc._id!,
+                      name: loc.name,
+                    }))}
                     selectedIds={s.locationIds}
-                    onSelectIdsChange={(newIds) => updateStaff(index, "locationIds", newIds)}
+                    onSelectIdsChange={(newIds) =>
+                      updateStaff(index, "locationIds", newIds)
+                    }
                     getLabel={(item) => item.name}
                     triggerPlaceholder={t("Select locations")}
                     searchPlaceholder={t("Search locations...")}
@@ -229,11 +303,7 @@ export default function StaffSetup({ locations, onNext, onBack, initialData }: S
           >
             {t("Back")}
           </Button>
-          <Button
-            type="submit"
-            disabled={loading}
-            iconType="next"
-          >
+          <Button type="submit" disabled={loading} iconType="next">
             {loading ? t("Sending...") : t("Next Step")}
           </Button>
         </div>

@@ -28,24 +28,32 @@ const ViewDetails = ({
 }: ViewDetailsProps) => {
   const { t } = useTranslation();
   const { user } = useAuthContext();
+  const isWorkBlock = selectedAppointment.kind === "work_block";
+  const displayTitle = isWorkBlock
+    ? selectedAppointment.title || selectedAppointment.clientName
+    : selectedAppointment.clientName;
   return (
     <>
       <div className="flex items-center justify-between mb-3">
-        <h3 className="text-xl font-bold">{selectedAppointment.clientName}</h3>
+        <h3 className="text-xl font-bold">{displayTitle}</h3>
         <StatusChip status={selectedAppointment.status} />
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div className="space-y-4">
-          <div className="flex items-center gap-3">
-            <Mail className="h-5 w-5 text-primary" />
-            <span>{selectedAppointment.email}</span>
-          </div>
+          {!isWorkBlock && (
+            <>
+              <div className="flex items-center gap-3">
+                <Mail className="h-5 w-5 text-primary" />
+                <span>{selectedAppointment.email}</span>
+              </div>
 
-          <div className="flex items-center gap-3">
-            <Phone className="h-5 w-5 text-primary" />
-            <span>{selectedAppointment.clientPhone}</span>
-          </div>
+              <div className="flex items-center gap-3">
+                <Phone className="h-5 w-5 text-primary" />
+                <span>{selectedAppointment.clientPhone}</span>
+              </div>
+            </>
+          )}
         </div>
 
         <div className="space-y-4">
@@ -53,7 +61,7 @@ const ViewDetails = ({
             <CalendarIcon className="h-5 w-5 text-primary" />
             <span>
               {new Date(
-                selectedAppointment.appointmentTime.start
+                selectedAppointment.appointmentTime.start,
               ).toLocaleDateString()}
             </span>
           </div>
@@ -63,12 +71,12 @@ const ViewDetails = ({
             <span>
               {formatDateAndTime(
                 selectedAppointment.appointmentTime.start,
-                "time"
+                "time",
               )}{" "}
               -{" "}
               {formatDateAndTime(
                 selectedAppointment.appointmentTime.end,
-                "time"
+                "time",
               )}
             </span>
           </div>
@@ -97,9 +105,10 @@ const ViewDetails = ({
             </div>
           )}
           {/* Payment indicator */}
-          {(selectedAppointment.paymentStatus &&
+          {!isWorkBlock &&
+          ((selectedAppointment.paymentStatus &&
             selectedAppointment.paymentStatus !== "not_required") ||
-          selectedAppointment.serviceName === "card" ? (
+            selectedAppointment.serviceName === "card") ? (
             <div className="flex items-center gap-2 text-sm">
               <CreditCard
                 className={`h-4 w-4 ${
@@ -108,10 +117,10 @@ const ViewDetails = ({
                   selectedAppointment.serviceName === "card"
                     ? "text-green-500"
                     : selectedAppointment.paymentStatus === "pending"
-                    ? "text-yellow-600"
-                    : selectedAppointment.paymentStatus === "refunded"
-                    ? "text-blue-600"
-                    : "text-red-600"
+                      ? "text-yellow-600"
+                      : selectedAppointment.paymentStatus === "refunded"
+                        ? "text-blue-600"
+                        : "text-red-600"
                 }`}
               />
               <span>
@@ -120,10 +129,10 @@ const ViewDetails = ({
                 selectedAppointment.serviceName === "card"
                   ? t("Paid Online")
                   : selectedAppointment.paymentStatus === "pending"
-                  ? t("Payment Pending")
-                  : selectedAppointment.paymentStatus === "refunded"
-                  ? t("Refunded")
-                  : t("Payment Issue")}
+                    ? t("Payment Pending")
+                    : selectedAppointment.paymentStatus === "refunded"
+                      ? t("Refunded")
+                      : t("Payment Issue")}
               </span>
             </div>
           ) : null}
@@ -138,7 +147,7 @@ const ViewDetails = ({
           </p>
         </div>
       )}
-      {handleEditAppointment && handleDeleteAppointment && (
+      {handleEditAppointment && handleDeleteAppointment && !isWorkBlock && (
         <div className="flex justify-center gap-3 pt-4 mt-4">
           {user && (user.role === "business" || user.role == "staff") && (
             <Button

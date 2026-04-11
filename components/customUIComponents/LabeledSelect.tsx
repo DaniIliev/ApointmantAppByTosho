@@ -16,7 +16,9 @@ interface LabeledSelectProps<T extends string> {
     name: string;
     duration?: number;
     price?: number;
+    disabled?: boolean;
   }[];
+  selectProps?: React.SelectHTMLAttributes<HTMLSelectElement>;
 }
 
 export function LabeledSelect<T extends string>({
@@ -26,6 +28,7 @@ export function LabeledSelect<T extends string>({
   onValueChange,
   placeholder,
   options,
+  selectProps,
 }: LabeledSelectProps<T>) {
   const [isFocused, setIsFocused] = useState<boolean>(false);
   const hasValue = !!value;
@@ -39,7 +42,7 @@ export function LabeledSelect<T extends string>({
           "group-focus-within/labeled-input:text-primary",
           isFocused || hasValue
             ? "-top-0.5 text-xs left-3"
-            : "top-1/2 -translate-y-1/2 text-sm left-4"
+            : "top-1/2 -translate-y-1/2 text-sm left-4",
         )}
       >
         {label}
@@ -56,15 +59,20 @@ export function LabeledSelect<T extends string>({
             "border-b-2 border-card",
             "outline-none",
             "appearance-none", // Премахва стрелката
-            "cursor-pointer"
+            "cursor-pointer",
           )}
+          {...selectProps}
         >
           <option value="" disabled>
             {isFocused && placeholder}
           </option>
 
           {options.map((option) => (
-            <option key={option.id} value={option.id}>
+            <option
+              key={option.id}
+              value={option.id}
+              disabled={option.disabled}
+            >
               {option.name}
             </option>
           ))}
@@ -72,7 +80,7 @@ export function LabeledSelect<T extends string>({
         <div
           className={cn(
             "absolute bottom-0 left-0 h-[2px] bg-primary transition-all duration-300",
-            isFocused || hasValue ? "w-full" : "w-0"
+            isFocused || hasValue ? "w-full" : "w-0",
           )}
         />
       </div>

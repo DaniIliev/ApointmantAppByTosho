@@ -1,15 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import {
-  Plus,
-  MapPin,
-  Phone,
-  Clock,
-  Pencil,
-  Trash2,
-  Upload,
-} from "lucide-react";
+import { Plus, MapPin, Phone, Clock, Pencil, Trash2 } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { usePageTitle } from "@/context/PageTitleContext";
 import { useRightNav } from "@/context/RightNavContext";
@@ -19,6 +11,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Modal } from "@/components/customUIComponents/Modal";
 import { LabeledInput } from "@/components/customUIComponents/LabeledInput";
+import { ImageUpload } from "@/components/customUIComponents/ImageUpload";
 import { toast } from "sonner";
 import ProtectedRoute from "@/components/guards/ProtectedRoute";
 import DeleteConfirmationDialog from "@/components/DeleteConfirmationDialog/DeleteConfirmationDialog";
@@ -255,33 +248,26 @@ function LocationsPageContent() {
             required
           />
 
-          <div className="space-y-2">
-            <label
-              htmlFor="image"
-              className="flex flex-col items-center justify-center h-24 border-2 border-dashed border-input rounded-xl cursor-pointer bg-input/20 hover:bg-input/40 transition-colors duration-300"
-            >
-              <Upload className="h-6 w-6 text-gray-500 mb-1" />
-              <span className="text-sm text-gray-600">
-                {formData.imageUrl instanceof File
-                  ? `1 file selected: ${formData.imageUrl.name}`
-                  : formData.imageUrl
-                    ? t("Image uploaded")
-                    : t("Click to upload or drag & drop")}
-              </span>
-              <input
-                id="image"
-                type="file"
-                onChange={(e) =>
-                  setFormData({
-                    ...formData,
-                    imageUrl: e.target.files?.[0] || null,
-                  })
-                }
-                className="sr-only"
-                accept="image/*"
-              />
-            </label>
-          </div>
+          <ImageUpload
+            value={
+              typeof formData.imageUrl === "string"
+                ? formData.imageUrl
+                : formData.imageUrl || null
+            }
+            onChange={(file) =>
+              setFormData({
+                ...formData,
+                imageUrl: file,
+              })
+            }
+            onRemove={() =>
+              setFormData({
+                ...formData,
+                imageUrl: null,
+              })
+            }
+            label={t("Location image")}
+          />
 
           <div className="flex justify-end gap-2 pt-4">
             <Button

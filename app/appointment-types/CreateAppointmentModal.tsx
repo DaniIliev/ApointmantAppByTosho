@@ -2,10 +2,10 @@ import React, { useEffect, useState, useMemo } from "react";
 import { Modal } from "@/components/customUIComponents/Modal";
 import { LabeledInput } from "@/components/customUIComponents/LabeledInput";
 import { LabeledSelect } from "@/components/customUIComponents/LabeledSelect"; // Assuming LabeledSelect is saved here or a similar path
+import { ImageUpload } from "@/components/customUIComponents/ImageUpload";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
-import { Input } from "@/components/ui/input";
-import { Check, ChevronsUpDown, Loader2, Upload, X } from "lucide-react";
+import { Check, ChevronsUpDown, Loader2, X } from "lucide-react";
 
 import {
   Popover,
@@ -112,7 +112,7 @@ const CreateAppointmentModal = ({
   const [staffMembers, setStaffMembers] = useState<StaffMember[]>([]);
   const [open, setOpen] = useState(false); // State for Popover visibility
   const [selectedCategory, setSelectedCategory] = useState<string>(
-    formData?.category || ""
+    formData?.category || "",
   );
   const [checkingStripe, setCheckingStripe] = useState(false);
   const [stripeMessage, setStripeMessage] = useState<string | null>(null);
@@ -139,7 +139,7 @@ const CreateAppointmentModal = ({
         description: t("Allow customer to choose at checkout."),
       },
     ],
-    [t]
+    [t],
   );
 
   const categoryOptions = getCategoryOptions(t);
@@ -149,7 +149,7 @@ const CreateAppointmentModal = ({
         try {
           const staffList = await callApi(
             `/api/staff/staff-list?businessId=${user?.businessId}`,
-            "GET"
+            "GET",
           );
           setStaffMembers(staffList);
         } catch (error) {
@@ -160,7 +160,7 @@ const CreateAppointmentModal = ({
         try {
           const locs = await callApi(
             `/api/locations?businessId=${user?.businessId}`,
-            "GET"
+            "GET",
           );
           setLocations(locs.map((l: any) => ({ id: l._id, name: l.name })));
         } catch (error) {
@@ -209,7 +209,7 @@ const CreateAppointmentModal = ({
     try {
       const status = await callApi("/api/stripe/connect/status", "GET");
       const ready = Boolean(
-        status?.ready ?? status?.details_submitted ?? status?.charges_enabled
+        status?.ready ?? status?.details_submitted ?? status?.charges_enabled,
       );
 
       if (!ready) {
@@ -223,7 +223,7 @@ const CreateAppointmentModal = ({
     } catch (error: any) {
       console.error("Stripe connect check failed", error);
       setStripeMessage(
-        error?.message || t("Connect Stripe to enable card payments.")
+        error?.message || t("Connect Stripe to enable card payments."),
       );
       setFormData((prev: any) => ({ ...prev, paymentOption: "cash" }));
       setPendingPaymentOption(null);
@@ -260,7 +260,9 @@ const CreateAppointmentModal = ({
           id="locationId"
           label={t("Location")}
           value={formData.locationId}
-          onValueChange={(val) => setFormData((prev: any) => ({ ...prev, locationId: val }))}
+          onValueChange={(val) =>
+            setFormData((prev: any) => ({ ...prev, locationId: val }))
+          }
           placeholder={t("Select a location")}
           options={locations}
         />
@@ -321,7 +323,9 @@ const CreateAppointmentModal = ({
         <div className="p-4 rounded-xl border border-primary/10 bg-primary/5 space-y-4">
           <div className="flex items-center justify-between">
             <div className="space-y-0.5">
-              <Label className="text-base font-semibold">{t("Group Appointment")}</Label>
+              <Label className="text-base font-semibold">
+                {t("Group Appointment")}
+              </Label>
               <p className="text-xs text-muted-foreground">
                 {t("Allow multiple clients to book the same time slot.")}
               </p>
@@ -336,13 +340,13 @@ const CreateAppointmentModal = ({
               }
               className={cn(
                 "relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none",
-                formData.isGroup ? "bg-primary" : "bg-gray-300"
+                formData.isGroup ? "bg-primary" : "bg-gray-300",
               )}
             >
               <span
                 className={cn(
                   "inline-block h-4 w-4 transform rounded-full bg-white transition-transform",
-                  formData.isGroup ? "translate-x-6" : "translate-x-1"
+                  formData.isGroup ? "translate-x-6" : "translate-x-1",
                 )}
               />
             </button>
@@ -384,7 +388,7 @@ const CreateAppointmentModal = ({
                     "hover:border-primary/60 hover:shadow-sm",
                     selected
                       ? "border-primary bg-primary/10 shadow-sm"
-                      : "border-border bg-card/60"
+                      : "border-border bg-card/60",
                   )}
                 >
                   <div className="flex items-center justify-between">
@@ -434,7 +438,7 @@ const CreateAppointmentModal = ({
                 <CommandGroup>
                   {staffMembers.map((staff) => {
                     const isSelected = formData.staffMembers.some(
-                      (s: { _id: string }) => s._id === staff._id
+                      (s: { _id: string }) => s._id === staff._id,
                     );
                     return (
                       <CommandItem
@@ -445,7 +449,7 @@ const CreateAppointmentModal = ({
                           if (isSelected) {
                             // ПРЕМАХВАНЕ: Филтрираме обекта по _id
                             newSelected = newSelected.filter(
-                              (s) => s._id !== staff._id
+                              (s) => s._id !== staff._id,
                             );
                           } else {
                             // ДОБАВЯНЕ: Добавяме обекта с _id и name
@@ -463,7 +467,7 @@ const CreateAppointmentModal = ({
                         <Check
                           className={cn(
                             "mr-2 h-4 w-4",
-                            isSelected ? "opacity-100" : "opacity-0"
+                            isSelected ? "opacity-100" : "opacity-0",
                           )}
                         />
                         {`${staff.firstName} ${staff.lastName}`}
@@ -480,32 +484,22 @@ const CreateAppointmentModal = ({
           />
         </div>
         <div className="space-y-2">
-          {/* <Label htmlFor="image" className="text-sm font-medium">
-            Image
-          </Label> */}
-          <label
-            htmlFor="image"
-            className="flex flex-col items-center justify-center h-24 border-2 border-dashed border-input rounded-xl cursor-pointer bg-input/20 hover:bg-input/40 transition-colors duration-300"
-          >
-            <Upload className="h-6 w-6 text-gray-500 mb-1" />
-            <span className="text-sm text-gray-600">
-              {formData.imageUrl
-                ? `1 file selected: ${formData.imageUrl.name || "Image"}`
-                : "Click to upload or drag & drop"}
-            </span>
-            <Input
-              id="image"
-              type="file"
-              onChange={(e) =>
-                setFormData({
-                  ...formData,
-                  imageUrl: e.target.files?.[0] || null,
-                })
-              }
-              className="sr-only"
-              accept="image/*"
-            />
-          </label>
+          <ImageUpload
+            value={formData.imageUrl}
+            onChange={(file) =>
+              setFormData({
+                ...formData,
+                imageUrl: file,
+              })
+            }
+            onRemove={() =>
+              setFormData({
+                ...formData,
+                imageUrl: null,
+              })
+            }
+            label={t("Image")}
+          />
         </div>
 
         {/* Action Buttons */}
@@ -542,7 +536,7 @@ const CreateAppointmentModal = ({
             </DialogTitle>
             <DialogDescription>
               {t(
-                "You'll be redirected to Stripe to complete onboarding. It takes about 2 minutes."
+                "You'll be redirected to Stripe to complete onboarding. It takes about 2 minutes.",
               )}
             </DialogDescription>
           </DialogHeader>
@@ -579,7 +573,7 @@ const CreateAppointmentModal = ({
                     {
                       returnUrl,
                       refreshUrl: returnUrl,
-                    }
+                    },
                   );
                   const onboardingUrl = link?.url || link?.onboardingUrl;
                   if (onboardingUrl && typeof window !== "undefined") {
@@ -591,7 +585,7 @@ const CreateAppointmentModal = ({
                   console.error("Stripe onboarding launch failed", error);
                   setStripeMessage(
                     error?.message ||
-                      t("Connect Stripe to enable card payments.")
+                      t("Connect Stripe to enable card payments."),
                   );
                   setShowStripePrompt(false);
                   setPendingPaymentOption(null);

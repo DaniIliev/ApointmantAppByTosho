@@ -25,6 +25,8 @@ export const getStatusColor = (status: AppointmentStatus) => {
       return "bg-card/50 border-2 border-blue-500 text-blue-600";
     case "completed":
       return "bg-card/50 border-2 border-green-500 text-green-600";
+    case "blocked":
+      return "bg-card/50 border-2 border-slate-500 text-slate-600";
     case "cancelled":
     case "missed":
       return "bg-card/50 border-2 border-red-500 text-red-600";
