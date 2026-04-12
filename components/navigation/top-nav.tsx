@@ -252,10 +252,16 @@ export default function TopNav({
     }
   }, [user]);
 
+  const titleOffsetClass = hideLeftNav
+    ? "lg:translate-x-0"
+    : isLeftNavOpen
+      ? "lg:translate-x-32"
+      : "lg:translate-x-10";
+
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 bg-primary-foreground backdrop-blur-xl">
-      <div className="flex items-center justify-between px-6 py-2">
-        <div className="flex items-center space-x-4">
+      <div className="relative flex items-center px-3 py-2 md:grid md:grid-cols-[auto_1fr_auto] md:items-center md:px-6 md:gap-2">
+        <div className="flex items-center space-x-3 min-w-0">
           {!hideLeftNav && (
             <button
               onClick={onToggleLeftNav}
@@ -268,7 +274,7 @@ export default function TopNav({
               )}
             </button>
           )}
-          <h1 className="flex align-end text-l font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
+          <h1 className="flex items-end gap-1 text-l font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
             <Image
               src="/AppointmantPro.png"
               alt="logo"
@@ -276,11 +282,21 @@ export default function TopNav({
               height={32}
               className="w-8 h-auto"
             />
-            <span className="">{t("AppointDI ")}</span>
+            <span className="hidden sm:inline">{t("AppointDI ")}</span>
           </h1>
         </div>
 
-        <div className="hidden md:flex flex-grow justify-center">
+        {pageTitle && (
+          <div className="pointer-events-none absolute left-1/2 -translate-x-1/2 md:hidden max-w-[44vw]">
+            <h2 className="truncate text-sm font-semibold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent tracking-tight text-center">
+              {t(pageTitle)}
+            </h2>
+          </div>
+        )}
+
+        <div
+          className={`hidden md:flex justify-center min-w-0 transition-transform duration-300 ${titleOffsetClass}`}
+        >
           {pageTitle && (
             <h2 className="text-xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent tracking-tight">
               {t(pageTitle)}
@@ -290,7 +306,7 @@ export default function TopNav({
 
         {user ? (
           // MODIFIED: Adjusted for vertical buttons with labels
-          <div className="flex items-center space-x-4">
+          <div className="ml-auto flex shrink-0 items-center gap-2 md:space-x-4 md:justify-self-end">
             {/* Alerts/Notifications Button with Text */}
             <div className="relative" ref={alertsRef}>
               <button
@@ -429,7 +445,7 @@ export default function TopNav({
             </div>
           </div>
         ) : (
-          <div className="flex items-center space-x-4">
+          <div className="ml-auto flex shrink-0 items-center gap-2 md:space-x-4 md:justify-self-end">
             <div className="relative" ref={languagesRef}>
               <button
                 onClick={toggleLanguages}

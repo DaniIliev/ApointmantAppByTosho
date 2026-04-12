@@ -299,13 +299,17 @@ function DashboardPageContent() {
             value="calendar"
             className="data-[state=active]:bg-primary data-[state=active]:text-white data-[state=inactive]:text-muted-foreground flex flex-col items-center justify-center gap-1 rounded-lg transition-all py-2 px-3"
           >
-            <span className="text-xs font-medium">{t("Calendar")}</span>
+            <span className="text-xs text-foreground font-medium">
+              {t("Calendar")}
+            </span>
           </TabsTrigger>
           <TabsTrigger
             value="table"
             className="data-[state=active]:bg-primary data-[state=active]:text-white data-[state=inactive]:text-muted-foreground flex flex-col items-center justify-center gap-1 rounded-lg transition-all py-2 px-3"
           >
-            <span className="text-xs font-medium">{t("Table")}</span>
+            <span className="text-xs font-medium text-foreground">
+              {t("Table")}
+            </span>
           </TabsTrigger>
         </TabsList>
 
@@ -476,7 +480,7 @@ function DashboardPageContent() {
 
 export default function DashboardPage() {
   return (
-    <ProtectedRoute requiredRoles={["business", "staff"]}>
+    <ProtectedRoute requiredRoles={["business", "staff", "manager"]}>
       <DashboardPageContent />
     </ProtectedRoute>
   );

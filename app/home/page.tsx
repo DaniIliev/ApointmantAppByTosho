@@ -312,7 +312,7 @@ function HomePageContent() {
         thisWeek.length > 0
           ? Math.round((completed / thisWeek.length) * 100)
           : 0,
-      nextItems: upcoming.slice(0, 4),
+      nextItems: upcoming.slice(0, 3),
       nextItem: upcoming[0] ?? null,
       chartData,
       maxDayTotal: Math.max(
@@ -375,7 +375,9 @@ function HomePageContent() {
         <CardHeader>
           <div className="flex items-start justify-between gap-3">
             <div>
-              <CardTitle>Weekly pulse</CardTitle>
+              <CardTitle className="text-foreground">
+                {t("Weekly pulse")}
+              </CardTitle>
               <CardDescription>
                 {t("Total vs completed by day")}
               </CardDescription>
@@ -404,7 +406,7 @@ function HomePageContent() {
                   key={item.label}
                   className="flex flex-col items-center gap-2 md:gap-3"
                 >
-                  <span className="text-base md:text-xl">{item.all}</span>
+                  <span className="text-foreground md:text-xl">{item.all}</span>
                   <div
                     className="relative flex w-7 items-end overflow-hidden rounded-[999px] bg-accent/30 md:w-12"
                     style={{ height: `${CHART_TRACK_HEIGHT}px` }}
@@ -439,16 +441,16 @@ function HomePageContent() {
           <CardHeader className="pb-3">
             <div className="flex items-start justify-between gap-3">
               <div>
-                <CardTitle className="text-sm font-semibold">
-                  Appointments Momentum
+                <CardTitle className="text-foreground text-sm font-semibold">
+                  {t("Appointments Momentum")}
                 </CardTitle>
                 <CardDescription className="text-xs">
-                  This week vs last week
+                  {t("This week vs last week")}
                 </CardDescription>
               </div>
               <div className="flex justify-center gap-1">
                 <div
-                  className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-semibold ${stats.appointmentsDeltaPercent >= 0 ? "bg-emerald-500/15 text-emerald-600" : "bg-rose-500/15 text-rose-600"}`}
+                  className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-semibold ${stats.appointmentsDeltaPercent >= 0 ? "bg-emerald-500/5 text-emerald-600" : "bg-rose-500/15 text-rose-600"}`}
                 >
                   {stats.appointmentsDeltaPercent >= 0 ? (
                     <ArrowUpRight className="h-3.5 w-3.5" />
@@ -464,11 +466,11 @@ function HomePageContent() {
               </div>
             </div>
           </CardHeader>
-          <CardContent className="pt-0">
+          <CardContent className="pt-0 pb-6">
             <div className="space-y-2">
               <div>
                 <div className="mb-1 flex items-center justify-between text-xs text-muted-foreground">
-                  <span>This week</span>
+                  <span>{t("This week")}</span>
                   <span>{stats.thisWeekAppointments}</span>
                 </div>
                 <div className="h-2 rounded-full bg-accent/40">
@@ -480,7 +482,7 @@ function HomePageContent() {
               </div>
               <div>
                 <div className="mb-1 flex items-center justify-between text-xs text-muted-foreground">
-                  <span>Last week</span>
+                  <span>{t("Last week")}</span>
                   <span>{stats.previousWeekAppointments}</span>
                 </div>
                 <div className="h-2 rounded-full bg-accent/40">
@@ -498,16 +500,16 @@ function HomePageContent() {
           <CardHeader className="pb-3">
             <div className="flex items-start justify-between gap-3">
               <div>
-                <CardTitle className="text-sm font-semibold">
-                  Revenue Momentum
+                <CardTitle className="text-foreground text-sm font-semibold">
+                  {t("Revenue Momentum")}
                 </CardTitle>
                 <CardDescription className="text-xs">
-                  Completed appointments only
+                  {t("Completed appointments only")}
                 </CardDescription>
               </div>
               <div className="flex justify-center gap-1">
                 <div
-                  className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-semibold ${stats.revenueDeltaPercent >= 0 ? "bg-emerald-500/15 text-emerald-600" : "bg-rose-500/15 text-rose-600"}`}
+                  className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-semibold ${stats.revenueDeltaPercent >= 0 ? "bg-emerald-500/5 text-emerald-600" : "bg-rose-500/15 text-rose-600"}`}
                 >
                   {stats.revenueDeltaPercent >= 0 ? (
                     <ArrowUpRight className="h-3.5 w-3.5" />
@@ -527,7 +529,7 @@ function HomePageContent() {
             <div className="space-y-2">
               <div>
                 <div className="mb-1 flex items-center justify-between text-xs text-muted-foreground">
-                  <span>This week</span>
+                  <span>{t("This week")}</span>
                   <span>{formatCurrency(stats.thisWeekRevenue)}</span>
                 </div>
                 <div className="h-2 rounded-full bg-accent/40">
@@ -539,7 +541,7 @@ function HomePageContent() {
               </div>
               <div>
                 <div className="mb-1 flex items-center justify-between text-xs text-muted-foreground">
-                  <span>Last week</span>
+                  <span>{t("Last week")}</span>
                   <span>{formatCurrency(stats.previousWeekRevenue)}</span>
                 </div>
                 <div className="h-2 rounded-full bg-accent/40">
@@ -556,7 +558,9 @@ function HomePageContent() {
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
         <Card className="h-full">
           <CardHeader>
-            <CardTitle>{t("Quick actions")}</CardTitle>
+            <CardTitle className="text-foreground">
+              {t("Quick actions")}
+            </CardTitle>
             <CardDescription>
               {t("Most frequently used sections for your account")}
             </CardDescription>
@@ -573,7 +577,9 @@ function HomePageContent() {
                     {item.icon}
                   </div>
                   <div>
-                    <p className="font-semibold">{item.label}</p>
+                    <p className="font-semibold text-foreground">
+                      {item.label}
+                    </p>
                     <p className="text-sm text-muted-foreground">
                       {item.description}
                     </p>
@@ -587,7 +593,9 @@ function HomePageContent() {
 
         <Card className="h-full">
           <CardHeader>
-            <CardTitle>{t("Upcoming appointments")}</CardTitle>
+            <CardTitle className="text-foreground">
+              {t("Upcoming appointments")}
+            </CardTitle>
             <CardDescription>
               {stats.nextItem
                 ? `${t("Next appointment")}: ${formatDateAndTime(stats.nextItem.appointmentTime.start, "dateTime")}`
@@ -613,7 +621,12 @@ function HomePageContent() {
                     className="flex flex-col gap-3 rounded-xl border p-4 md:flex-row md:items-center md:justify-between"
                   >
                     <div>
-                      <p className="font-semibold">{appointment.clientName}</p>
+                      <p className="flex item-center gap-1 font-semibold text-foreground">
+                        {appointment.clientName}{" "}
+                        <Badge className={`w-fit capitalize ${badgeClass}`}>
+                          {status}
+                        </Badge>
+                      </p>
                       <p className="text-sm text-muted-foreground">
                         {appointment.serviceName || "Appointment"} ·{" "}
                         {formatDateAndTime(
@@ -622,9 +635,6 @@ function HomePageContent() {
                         )}
                       </p>
                     </div>
-                    <Badge className={`w-fit capitalize ${badgeClass}`}>
-                      {status}
-                    </Badge>
                   </div>
                 );
               })

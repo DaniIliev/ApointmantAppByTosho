@@ -414,7 +414,7 @@ const MobileCalendar = ({
     );
   }, [appointments]);
 
-  const handleSelectDate = (date: Date): void => {
+  const handleSelectDate = (date: Date, smoothScroll = true): void => {
     isUserScrolling.current = true;
     setSelectedDate(date);
 
@@ -422,7 +422,7 @@ const MobileCalendar = ({
     const element: HTMLDivElement | null = appointmentRefs.current[dateKey];
     if (element) {
       element.scrollIntoView({
-        behavior: "smooth",
+        behavior: smoothScroll ? "smooth" : "auto",
         block: "nearest",
         inline: "nearest",
       });
@@ -506,7 +506,7 @@ const MobileCalendar = ({
 
   React.useEffect(() => {
     setTimeout(() => {
-      handleSelectDate(new Date());
+      handleSelectDate(new Date(), false);
     }, 100);
   }, []);
 

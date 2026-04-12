@@ -6,6 +6,8 @@ export type StaffMember = {
   phone: string;
   role: string;
   profilePictureUrl?: string;
+  rating?: number;
+  ratingCount?: number;
   locationIds: string[];
 };
 

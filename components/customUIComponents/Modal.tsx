@@ -159,24 +159,26 @@ export const Modal = ({
     };
   }, [open, autoDetectDirty]);
 
-  const contentClasses = `${widthClass} md:max-h-[90vh] h-full md:h-auto max-h-screen flex flex-col ${
+  const desktopContentClasses = `${widthClass} md:max-h-[90vh] md:h-auto min-h-0 flex flex-col overflow-hidden ${
     centerContentOnMobile ? "items-stretch md:items-stretch" : ""
   } bg-card/95 backdrop-blur-lg border-2 border-primary/20 [&>button]:hidden md:rounded-lg rounded-none p-0 md:p-6`;
+
+  const mobileContentClasses = `w-full h-auto max-h-[90dvh] min-h-0 flex flex-col overflow-hidden bg-card/95 backdrop-blur-lg [&>button]:hidden rounded-none p-0`;
 
   const titleClasses = `text-xl md:text-2xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent ${
     centerContentOnMobile ? "w-full" : ""
   }`;
 
   const bodyClasses = scrollableContent
-    ? "flex-1 overflow-y-auto overflow-x-hidden px-4 md:px-0 md:pr-2 pb-4 md:pb-0 overscroll-contain"
-    : "flex-1 overflow-visible px-4 md:px-0 md:pr-2 pb-4 md:pb-0";
+    ? "flex-1 min-h-0 overflow-y-auto overflow-x-hidden px-4 md:px-0 md:pr-2 pb-4 md:pb-0 overscroll-contain"
+    : "flex-1 min-h-0 overflow-visible px-4 md:px-0 md:pr-2 pb-4 md:pb-0";
 
   return (
     <>
       {isMobile ? (
         <Drawer open={open} onOpenChange={handleOpenChange}>
-          <DrawerContent className="max-h-[95vh]">
-            <div className={contentClasses}>
+          <DrawerContent className="h-auto max-h-[90dvh] overflow-hidden pb-[env(safe-area-inset-bottom)]">
+            <div className={mobileContentClasses}>
               <DrawerHeader
                 className={`flex-shrink-0 p-4 md:p-0 border-b md:border-b-0 border-border/50 ${
                   centerContentOnMobile ? "text-center md:text-left" : ""
@@ -200,7 +202,7 @@ export const Modal = ({
         </Drawer>
       ) : (
         <Dialog open={open} onOpenChange={handleOpenChange}>
-          <DialogContent className={contentClasses}>
+          <DialogContent className={desktopContentClasses}>
             <DialogHeader
               className={`flex-shrink-0 p-4 md:p-0 border-b md:border-b-0 border-border/50 ${
                 centerContentOnMobile ? "text-center md:text-left" : ""

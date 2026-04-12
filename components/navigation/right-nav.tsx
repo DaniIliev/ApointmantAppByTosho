@@ -16,7 +16,7 @@ function RightNavBubbles({ content }: { content: React.ReactNode }) {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const hiddenHostRef = useRef<HTMLDivElement | null>(null);
   const [top, setTop] = useState<number>(
-    typeof window !== "undefined" ? window.innerHeight * 0.12 : 300
+    typeof window !== "undefined" ? window.innerHeight * 0.12 : 300,
   );
   const [isDragging, setIsDragging] = useState(false);
   const [open, setOpen] = useState(false);
@@ -64,8 +64,10 @@ function RightNavBubbles({ content }: { content: React.ReactNode }) {
 
   const onPointerUp = (e: React.PointerEvent) => {
     setIsDragging(false);
-    try { (e.target as Element).releasePointerCapture?.(e.pointerId); } catch(e){}
-    
+    try {
+      (e.target as Element).releasePointerCapture?.(e.pointerId);
+    } catch (e) {}
+
     if (!movedRef.current) {
       if (!isMultiple && childArray.length > 0) {
         triggerPrimaryAction();
@@ -87,7 +89,7 @@ function RightNavBubbles({ content }: { content: React.ReactNode }) {
         className={cn(
           "fixed z-50 select-none touch-none", // ensure layout over everything
           "transition-shadow",
-          isDragging ? "cursor-grabbing" : "cursor-grab"
+          isDragging ? "cursor-grabbing" : "cursor-grab",
         )}
         onPointerDown={onPointerDown}
         onPointerMove={onPointerMove}
@@ -99,10 +101,10 @@ function RightNavBubbles({ content }: { content: React.ReactNode }) {
           aria-label="Open quick actions"
           tabIndex={0}
           className={cn(
-            "h-[42px] w-[42px] rounded-full shadow-lg border border-border/20 overflow-hidden",
+            "h-[42px] w-[42px] rounded-full shadow-lg overflow-hidden",
             "bg-primary text-primary-foreground flex items-center justify-center",
-            "active:scale-95 transition-all duration-200 focus:outline-none focus-visible:outline-none focus:ring-2 focus:ring-primary ring-offset-2",
-            open && "ring-2 ring-primary ring-offset-2"
+            "active:scale-95 transition-all duration-200 focus:outline-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary",
+            open && "ring-2 ring-primary",
           )}
           onKeyDown={(e) => {
             if (e.key === "Enter" || e.key === " ") {
@@ -113,7 +115,7 @@ function RightNavBubbles({ content }: { content: React.ReactNode }) {
           }}
         >
           {!isMultiple && childArray.length > 0 ? (
-            <div className="pointer-events-none flex items-center justify-center h-full w-full scale-90">
+            <div className="pointer-events-none flex items-center justify-center h-full w-full scale-90 [&_button]:!border-0 [&_button]:!bg-transparent [&_button]:!shadow-none [&_button]:!ring-0 [&_button]:!outline-none [&_button]:!p-0 [&_button]:rounded-none">
               {content}
             </div>
           ) : open ? (
@@ -135,7 +137,7 @@ function RightNavBubbles({ content }: { content: React.ReactNode }) {
           className={cn(
             "fixed z-50 -translate-y-1/2",
             "bg-popover border border-border/40 rounded-xl shadow-2xl",
-            "p-1.5 min-w-[200px] origin-right animate-in fade-in zoom-in-95 duration-150"
+            "p-1.5 min-w-[200px] origin-right animate-in fade-in zoom-in-95 duration-150",
           )}
           style={{ top: top + 21, right: 60 }}
           onClick={(e) => {
@@ -154,9 +156,9 @@ function RightNavBubbles({ content }: { content: React.ReactNode }) {
 
       {/* Backdrop to dismiss popover */}
       {open && isMultiple && (
-        <div 
-          className="fixed inset-0 z-40 bg-transparent/5" 
-          onClick={() => setOpen(false)} 
+        <div
+          className="fixed inset-0 z-40 bg-transparent/5"
+          onClick={() => setOpen(false)}
         />
       )}
     </>
