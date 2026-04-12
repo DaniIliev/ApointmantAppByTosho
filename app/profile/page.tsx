@@ -45,7 +45,8 @@ export default function SettingsPage() {
   const { t } = useTranslation();
   const { setPageTitle } = usePageTitle();
   const { user, token } = useAuthContext();
-  const { isSubscribed, subscribeToPush, unsubscribeFromPush } = usePushNotifications();
+  const { isSubscribed, subscribeToPush, unsubscribeFromPush } =
+    usePushNotifications();
   const [isLoading, setIsLoading] = useState(true);
   const [isInitialLoad, setIsInitialLoad] = useState(true);
   const [mounted, setMounted] = useState(false); // Флаг за успешно монтиране на клиента
@@ -139,7 +140,7 @@ export default function SettingsPage() {
       const updatedData: User = await callApi(
         `/api/auth/user/${user._id}`,
         "PUT",
-        dataToSave
+        dataToSave,
       );
 
       setUserData((prev) => ({
@@ -158,7 +159,7 @@ export default function SettingsPage() {
       setIsDirty(false);
 
       toast.success(
-        t("Your profile settings have been updated successfully. 💾")
+        t("Your profile settings have been updated successfully. 💾"),
       );
     } catch (error) {
       toast.error(
@@ -167,7 +168,7 @@ export default function SettingsPage() {
             error instanceof Error
               ? error.message
               : t("An unknown error occurred"),
-        })
+        }),
       );
     }
   };
@@ -226,7 +227,7 @@ export default function SettingsPage() {
         `/api/auth/user/${user._id}/picture`,
         "PUT",
         payload,
-        true
+        true,
       );
 
       setUserData({
@@ -241,7 +242,7 @@ export default function SettingsPage() {
             error instanceof Error
               ? error.message
               : t("An unknown error occurred"),
-        })
+        }),
       );
     }
   };
@@ -454,14 +455,14 @@ export default function SettingsPage() {
           <CardContent className="space-y-6 pt-4 pb-4">
             <div className="flex items-center justify-between">
               <div className="space-y-0.5">
-                <label
-                  className="text-primary text-base font-medium"
-                >
+                <label className="text-primary text-base font-medium">
                   {t("Push Notifications")}
                 </label>
                 <p className="text-sm text-muted-foreground">
-                  {isSubscribed 
-                    ? t("You are currently receiving notifications on this device") 
+                  {isSubscribed
+                    ? t(
+                        "You are currently receiving notifications on this device",
+                      )
                     : t("Enable notifications to stay updated")}
                 </p>
               </div>
@@ -480,7 +481,11 @@ export default function SettingsPage() {
                       if (success) {
                         toast.success(t("Notifications enabled! 🔔"));
                       } else {
-                        toast.error(t("Failed to enable notifications. Please check your browser settings."));
+                        toast.error(
+                          t(
+                            "Failed to enable notifications. Please check your browser settings.",
+                          ),
+                        );
                       }
                     } else {
                       const success = await unsubscribeFromPush();
