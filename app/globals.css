@@ -70,6 +70,13 @@
   --secondary: #b71c1c; /* Deep Crimson */
   --accent: #e57373;
 }
+
+.theme-pink {
+  --primary: #ec4899;
+  --primary-dark: #be185d;
+  --secondary: #db2777;
+  --accent: #f472b6;
+}
 @theme inline {
   --color-text-primary: var(--text-primary);
   --color-background: var(--background);

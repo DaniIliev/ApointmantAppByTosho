@@ -34,6 +34,7 @@ const AVAILABLE_PALETTES = [
   { name: "Green", value: "theme-green", displayColor: "#4caf50" },
   { name: "Purple", value: "theme-purple", displayColor: "#8a2be2" },
   { name: "Red", value: "theme-red", displayColor: "#DC2626" },
+  { name: "Pink", value: "theme-pink", displayColor: "#ec4899" },
 ];
 
 export default function SettingsPage() {
