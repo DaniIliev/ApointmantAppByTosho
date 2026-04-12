@@ -15,7 +15,6 @@ import callApi from "@/app/Api/callApi";
 import AppointmentCard from "./AppointmentCard";
 import EmptyState from "./EmptyState";
 import CreateAppointmentModal from "./CreateAppointmentModal";
-import AppointmentDetailsModal from "./AppointmentDetailsModal";
 import { useAuthContext } from "@/context/AuthContext";
 import { Skeleton } from "@/components/ui/skeleton";
 
@@ -78,9 +77,6 @@ function AppointmentTypesPageContent() {
   );
   const [isLoading, setIsLoading] = useState(false);
   const [isPageLoading, setIsPageLoading] = useState(true);
-  const [selectedType, setSelectedType] = useState<AppointmentType | null>(
-    null,
-  );
 
   const { setPageTitle } = usePageTitle();
   const { setExtraRightNavMenu, setIsRightNavVisible } = useRightNav();
@@ -241,7 +237,7 @@ function AppointmentTypesPageContent() {
 
   return (
     <div>
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-4">
         {appointmentTypes.length > 0 &&
           appointmentTypes.map((type) => (
             <AppointmentCard
@@ -250,7 +246,6 @@ function AppointmentTypesPageContent() {
               openModal={openModal}
               handleDelete={handleDelete}
               formatDuration={formatDuration}
-              setSelectedType={setSelectedType}
             />
           ))}
       </div>
@@ -266,12 +261,6 @@ function AppointmentTypesPageContent() {
         handleSubmit={handleSubmit}
         isLoading={isLoading}
         colorOptions={colorOptions}
-      />
-
-      <AppointmentDetailsModal
-        selectedType={selectedType}
-        setSelectedType={setSelectedType}
-        formatDuration={formatDuration}
       />
 
       <DeleteConfirmationDialog

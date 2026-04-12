@@ -28,7 +28,7 @@ export default function ProtectedRoute({
   featureName,
 }: ProtectedRouteProps) {
   const { t } = useTranslation();
-  const { user } = useAuthContext();
+  const { user, isAuthLoading } = useAuthContext();
   const router = useRouter();
   const pathname = usePathname();
   const [shouldRedirect, setShouldRedirect] = useState<string | null>(null);
@@ -39,10 +39,21 @@ export default function ProtectedRoute({
     }
   }, [shouldRedirect, router]);
 
-  if (!user) {
-    if (!shouldRedirect) {
+  useEffect(() => {
+    if (!isAuthLoading && !user) {
       setShouldRedirect(`/login?redirect=${encodeURIComponent(pathname)}`);
     }
+  }, [isAuthLoading, user, pathname]);
+
+  if (isAuthLoading) {
+    return (
+      <div className="flex h-full items-center justify-center">
+        <Loader2 className="h-10 w-10 animate-spin text-primary" />
+      </div>
+    );
+  }
+
+  if (!user) {
     return null;
   }
 

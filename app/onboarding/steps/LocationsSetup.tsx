@@ -319,6 +319,7 @@ export default function LocationsSetup({
                     value={loc.imageUrl}
                     onChange={(file) => updateLocation(index, "imageUrl", file)}
                     onRemove={() => updateLocation(index, "imageUrl", "")}
+                    fullWidth
                   />
                 </div>
               </div>

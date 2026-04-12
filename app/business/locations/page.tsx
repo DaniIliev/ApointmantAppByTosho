@@ -278,109 +278,82 @@ function LocationsPageContent() {
         label={editingLocation ? t("Edit Location") : t("Add New Location")}
       >
         <form onSubmit={handleSubmit} className="space-y-4 p-2">
-          <LabeledInput
-            label={t("Location Name")}
-            id="name"
-            value={formData.name}
-            onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-            required
-            showError={true}
-            errorText={formErrors.name || t("Required")}
-          />
-          <LabeledInput
-            label={t("Address")}
-            id="address"
-            value={formData.address}
-            onChange={(e) =>
-              setFormData({ ...formData, address: e.target.value })
-            }
-            required
-            showError={true}
-            errorText={formErrors.address || t("Required")}
-          />
-          <LabeledInput
-            label={t("Address Line 2")}
-            id="addressLine2"
-            value={formData.addressLine2}
-            onChange={(e) =>
-              setFormData({ ...formData, addressLine2: e.target.value })
-            }
-          />
-          <LabeledInput
-            label={t("Postal Code")}
-            id="postalCode"
-            value={formData.postalCode}
-            onChange={(e) =>
-              setFormData({ ...formData, postalCode: e.target.value })
-            }
-          />
-          <LabeledInput
-            label={t("City")}
-            id="city"
-            value={formData.city}
-            onChange={(e) => setFormData({ ...formData, city: e.target.value })}
-            required
-            showError={true}
-            errorText={formErrors.city || t("Required")}
-          />
-          <LabeledInput
-            label={t("Country")}
-            id="country"
-            value={formData.country}
-            onChange={(e) =>
-              setFormData({ ...formData, country: e.target.value })
-            }
-          />
-          <LabeledInput
-            label={t("Phone")}
-            id="phone"
-            value={formData.phone}
-            onChange={(e) =>
-              setFormData({ ...formData, phone: e.target.value })
-            }
-            required
-            showError={true}
-            errorText={formErrors.phone || t("Required")}
-          />
-          <LabeledInput
-            label={t("Email")}
-            id="email"
-            value={formData.email}
-            onChange={(e) =>
-              setFormData({ ...formData, email: e.target.value })
-            }
-          />
-          {formErrors.email && (
-            <p className="text-xs text-red-500 -mt-2">{formErrors.email}</p>
-          )}
-          <LabeledInput
-            label={t("Website")}
-            id="website"
-            value={formData.website}
-            onChange={(e) =>
-              setFormData({ ...formData, website: e.target.value })
-            }
-          />
-          {formErrors.website && (
-            <p className="text-xs text-red-500 -mt-2">{formErrors.website}</p>
-          )}
-
-          <div className="flex items-center gap-3 px-1 py-1">
-            <input
-              id="isDefault"
-              type="checkbox"
-              checked={formData.isDefault}
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+            <LabeledInput
+              label={t("Location Name")}
+              id="name"
+              value={formData.name}
               onChange={(e) =>
-                setFormData({ ...formData, isDefault: e.target.checked })
+                setFormData({ ...formData, name: e.target.value })
               }
-              className="h-4 w-4 rounded border-border accent-primary"
+              required
+              showError={true}
+              errorText={formErrors.name || t("Required")}
             />
-            <label
-              htmlFor="isDefault"
-              className="text-sm text-muted-foreground"
-            >
-              {t("Set as default location")}
-            </label>
+            <LabeledInput
+              label={t("Phone")}
+              id="phone"
+              value={formData.phone}
+              onChange={(e) =>
+                setFormData({ ...formData, phone: e.target.value })
+              }
+              required
+              showError={true}
+              errorText={formErrors.phone || t("Required")}
+            />
+            <div>
+              <LabeledInput
+                label={t("Email")}
+                id="email"
+                value={formData.email}
+                onChange={(e) =>
+                  setFormData({ ...formData, email: e.target.value })
+                }
+              />
+              {formErrors.email && (
+                <p className="-mt-2 text-xs text-red-500">{formErrors.email}</p>
+              )}
+            </div>
+            <LabeledInput
+              label={t("Country")}
+              id="country"
+              value={formData.country}
+              onChange={(e) =>
+                setFormData({ ...formData, country: e.target.value })
+              }
+            />
+            <LabeledInput
+              label={t("City")}
+              id="city"
+              value={formData.city}
+              onChange={(e) =>
+                setFormData({ ...formData, city: e.target.value })
+              }
+              required
+              showError={true}
+              errorText={formErrors.city || t("Required")}
+            />
+            <LabeledInput
+              label={t("Postal Code")}
+              id="postalCode"
+              value={formData.postalCode}
+              onChange={(e) =>
+                setFormData({ ...formData, postalCode: e.target.value })
+              }
+            />
+            <div className="md:col-span-2">
+              <LabeledInput
+                label={t("Address")}
+                id="address"
+                value={formData.address}
+                onChange={(e) =>
+                  setFormData({ ...formData, address: e.target.value })
+                }
+                required
+                showError={true}
+                errorText={formErrors.address || t("Required")}
+              />
+            </div>
           </div>
 
           <ImageUpload
@@ -389,6 +362,7 @@ function LocationsPageContent() {
                 ? formData.imageUrl
                 : formData.imageUrl || null
             }
+            fullWidth
             onChange={(file) =>
               setFormData({
                 ...formData,
@@ -401,18 +375,18 @@ function LocationsPageContent() {
                 imageUrl: null,
               })
             }
-            label={t("Location image")}
           />
 
-          <div className="flex justify-end gap-2 pt-4">
+          <div className="flex justify-center gap-2 pt-4">
             <Button
               variant="outline"
               onClick={() => setIsModalOpen(false)}
               disabled={isLoading}
+              iconType="cancel"
             >
               {t("Cancel")}
             </Button>
-            <Button type="submit" disabled={isLoading}>
+            <Button type="submit" disabled={isLoading} iconType="save">
               {isLoading ? t("Saving...") : t("Save")}
             </Button>
           </div>

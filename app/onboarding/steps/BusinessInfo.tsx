@@ -184,7 +184,7 @@ export default function BusinessInfoStep({
             />
           </div>
 
-          <div className="space-y-6 m-auto">
+          <div className="space-y-6 m-auto md:justify-self-center md:pl-6">
             <ImageUpload
               label={t("")}
               value={formData.businessImageUrl}
@@ -194,6 +194,7 @@ export default function BusinessInfoStep({
               onRemove={() =>
                 setFormData((prev) => ({ ...prev, businessImageUrl: "" }))
               }
+              fullWidth
             />
           </div>
         </div>

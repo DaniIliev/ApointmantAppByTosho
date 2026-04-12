@@ -12,6 +12,7 @@ interface ImageUploadProps {
   onRemove: () => void;
   label?: string;
   className?: string;
+  fullWidth?: boolean;
 }
 
 export function ImageUpload({
@@ -20,6 +21,7 @@ export function ImageUpload({
   onRemove,
   label,
   className,
+  fullWidth = false,
 }: ImageUploadProps) {
   const { t } = useTranslation();
   const [preview, setPreview] = useState<string | null>(null);
@@ -56,12 +58,20 @@ export function ImageUpload({
             previewTitle={label || t("Image preview")}
             onDelete={onRemove}
             onChangeImage={onChange}
-            className="w-full max-w-[220px] aspect-[4/3]"
+            className={cn(
+              "w-full aspect-[4/3]",
+              fullWidth ? "max-w-none" : "max-w-[220px]",
+            )}
             imageClassName="object-contain bg-muted/20"
           />
         </div>
       ) : (
-        <label className="flex flex-col items-center justify-center w-full max-w-[220px] aspect-[4/3] rounded-2xl cursor-pointer hover:bg-slate-50 dark:hover:bg-white/5 transition-all group p-4">
+        <label
+          className={cn(
+            "flex w-full flex-col items-center justify-center aspect-[4/3] rounded-2xl cursor-pointer hover:bg-slate-50 dark:hover:bg-white/5 transition-all group p-4",
+            fullWidth ? "max-w-none" : "max-w-[220px]",
+          )}
+        >
           <div className="p-4 rounded-full bg-primary/10 mb-2 group-hover:scale-110 transition-transform">
             <Upload className="h-8 w-8 text-primary" />
           </div>

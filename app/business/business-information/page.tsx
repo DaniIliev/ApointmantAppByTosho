@@ -204,16 +204,6 @@ function BusinessInformationPageContent() {
                     onDelete={removeImage}
                     className="w-full h-[260px]"
                   />
-                  <label className="inline-flex items-center gap-2 cursor-pointer text-sm text-blue-600 dark:text-blue-400 hover:underline">
-                    <Upload className="h-4 w-4" />
-                    {t("Change image")}
-                    <input
-                      type="file"
-                      className="hidden"
-                      accept="image/*"
-                      onChange={handleImageUpload}
-                    />
-                  </label>
                 </div>
               ) : (
                 <label className="flex flex-col items-center justify-center w-full h-full min-h-[320px] cursor-pointer hover:bg-gray-50 dark:hover:bg-white/5 transition-all group">

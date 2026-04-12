@@ -3,23 +3,11 @@ import { Modal } from "@/components/customUIComponents/Modal";
 import { LabeledInput } from "@/components/customUIComponents/LabeledInput";
 import { LabeledSelect } from "@/components/customUIComponents/LabeledSelect"; // Assuming LabeledSelect is saved here or a similar path
 import { ImageUpload } from "@/components/customUIComponents/ImageUpload";
+import { MultiSelectCombobox } from "@/components/customUIComponents/MultiSelectCombobox";
 import { PaymentOptionSelector } from "@/components/customUIComponents/PaymentOptionSelector";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
-import { Check, ChevronsUpDown, Loader2, X } from "lucide-react";
-
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
-import {
-  Command,
-  CommandEmpty,
-  CommandGroup,
-  CommandInput,
-  CommandItem,
-} from "@/components/ui/command";
+import { Loader2, X } from "lucide-react";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"; // Assuming you have Avatar component from shadcn/ui
 import { Badge } from "@/components/ui/badge"; // Assuming you have Badge component from shadcn/ui
 
@@ -101,7 +89,6 @@ const CreateAppointmentModal = ({
   const { t } = useTranslation();
   const { user } = useAuthContext();
   const [staffMembers, setStaffMembers] = useState<StaffMember[]>([]);
-  const [open, setOpen] = useState(false); // State for Popover visibility
   const [locations, setLocations] = useState<any[]>([]);
 
   const categoryOptions = getCategoryOptions(t);
@@ -155,6 +142,28 @@ const CreateAppointmentModal = ({
     }));
   };
 
+  const selectedStaffIds: string[] = (formData.staffMembers || []).map(
+    (staff: { _id: string }) => staff._id,
+  );
+
+  const handleStaffIdsChange = (newIds: string[]) => {
+    const selectedStaff = newIds
+      .map((id) => {
+        const staff = staffMembers.find((member) => member._id === id);
+        if (!staff) return null;
+        return {
+          _id: staff._id,
+          name: `${staff.firstName} ${staff.lastName}`,
+        };
+      })
+      .filter(Boolean);
+
+    setFormData((prev: any) => ({
+      ...prev,
+      staffMembers: selectedStaff,
+    }));
+  };
+
   return (
     <Modal
       open={isModalOpen}
@@ -162,29 +171,14 @@ const CreateAppointmentModal = ({
       label={editingType ? "Edit Appointment Type" : "New Appointment Type"}
     >
       <form onSubmit={handleSubmit} className="space-y-6">
-        {/* Category and Subcategory Dropdowns */}
-        <div className="grid grid-cols-2 gap-4">
-          <LabeledSelect<string>
-            id="category"
-            label="Category"
-            value={formData?.category || ""}
-            onValueChange={handleCategoryChange}
-            placeholder="Select a category"
-            options={categoryOptions}
-          />
-        </div>
-
         <LabeledSelect<string>
-          id="locationId"
-          label={t("Location")}
-          value={formData.locationId}
-          onValueChange={(val) =>
-            setFormData((prev: any) => ({ ...prev, locationId: val }))
-          }
-          placeholder={t("Select a location")}
-          options={locations}
+          id="category"
+          label="Category"
+          value={formData?.category || ""}
+          onValueChange={handleCategoryChange}
+          placeholder="Select a category"
+          options={categoryOptions}
         />
-
         <LabeledInput
           id="name"
           label="Name"
@@ -194,23 +188,6 @@ const CreateAppointmentModal = ({
           }
           placeholder="e.g., Business Consultation"
         />
-
-        <div className="space-y-2">
-          <LabeledInput
-            label={t("Description (Optional)")}
-            id="description"
-            value={formData.description}
-            onChange={(e) =>
-              setFormData((prev: any) => ({
-                ...prev,
-                description: e.target.value,
-              }))
-            }
-            placeholder={t("Brief description of the service")}
-            rows={2}
-          />
-        </div>
-
         <div className="grid grid-cols-2 gap-4">
           <LabeledInput
             id="duration"
@@ -234,6 +211,44 @@ const CreateAppointmentModal = ({
             }
             placeholder="150.00"
             type="number"
+          />
+        </div>
+        <div className="grid grid-cols-2 gap-4">
+          <LabeledSelect<string>
+            id="locationId"
+            label={t("Location")}
+            value={formData.locationId}
+            onValueChange={(val) =>
+              setFormData((prev: any) => ({ ...prev, locationId: val }))
+            }
+            placeholder={t("Select a location")}
+            options={locations}
+          />
+          <MultiSelectCombobox
+            label={t("Staff members")}
+            items={staffMembers.map((staff) => ({
+              id: staff._id,
+              name: `${staff.firstName} ${staff.lastName}`,
+            }))}
+            selectedIds={selectedStaffIds}
+            onSelectIdsChange={handleStaffIdsChange}
+            getLabel={(item) => item.name}
+            searchPlaceholder={t("Search staff...")}
+            emptyMessage={t("No staff found.")}
+          />
+        </div>
+        <div className="space-y-2">
+          <LabeledInput
+            label={t("Description (Optional)")}
+            id="description"
+            value={formData.description}
+            onChange={(e) =>
+              setFormData((prev: any) => ({
+                ...prev,
+                description: e.target.value,
+              }))
+            }
+            placeholder={t("Brief description of the service")}
           />
         </div>
 
@@ -297,75 +312,6 @@ const CreateAppointmentModal = ({
           }
           disabled={isLoading}
         />
-
-        {/* Staff Selection with Avatar Display */}
-        <div className="space-y-2">
-          <Popover open={open} onOpenChange={setOpen}>
-            <PopoverTrigger asChild>
-              <Button
-                variant="outline"
-                role="combobox"
-                aria-expanded={open}
-                className="w-full justify-between"
-              >
-                {formData.staffMembers.length > 0
-                  ? `${formData.staffMembers.length} staff selected`
-                  : "Select staff members..."}
-                <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-              </Button>
-            </PopoverTrigger>
-            <PopoverContent className="w-[var(--radix-popover-trigger-width)] p-0">
-              <Command>
-                <CommandInput placeholder="Search staff..." />
-                <CommandEmpty>No staff found.</CommandEmpty>
-                <CommandGroup>
-                  {staffMembers.map((staff) => {
-                    const isSelected = formData.staffMembers.some(
-                      (s: { _id: string }) => s._id === staff._id,
-                    );
-                    return (
-                      <CommandItem
-                        key={staff._id}
-                        value={`${staff.firstName} ${staff.lastName}`} // Add value for search
-                        onSelect={() => {
-                          let newSelected = [...formData.staffMembers];
-                          if (isSelected) {
-                            // ПРЕМАХВАНЕ: Филтрираме обекта по _id
-                            newSelected = newSelected.filter(
-                              (s) => s._id !== staff._id,
-                            );
-                          } else {
-                            // ДОБАВЯНЕ: Добавяме обекта с _id и name
-                            newSelected.push({
-                              _id: staff._id,
-                              name: `${staff.firstName} ${staff.lastName}`,
-                            });
-                          }
-                          setFormData((prev: any) => ({
-                            ...prev,
-                            staffMembers: newSelected,
-                          }));
-                        }}
-                      >
-                        <Check
-                          className={cn(
-                            "mr-2 h-4 w-4",
-                            isSelected ? "opacity-100" : "opacity-0",
-                          )}
-                        />
-                        {`${staff.firstName} ${staff.lastName}`}
-                      </CommandItem>
-                    );
-                  })}
-                </CommandGroup>
-              </Command>
-            </PopoverContent>
-          </Popover>
-          <StaffAvatarsDisplay
-            selectedStaff={formData.staffMembers}
-            onRemove={handleRemoveStaff}
-          />
-        </div>
         <div className="space-y-2">
           <ImageUpload
             value={formData.imageUrl}
@@ -375,13 +321,13 @@ const CreateAppointmentModal = ({
                 imageUrl: file,
               })
             }
+            fullWidth
             onRemove={() =>
               setFormData({
                 ...formData,
                 imageUrl: null,
               })
             }
-            label={t("Image")}
           />
         </div>
 

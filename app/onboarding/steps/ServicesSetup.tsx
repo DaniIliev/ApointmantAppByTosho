@@ -336,6 +336,7 @@ export default function ServicesSetup({
                   value={ser.imageUrl}
                   onChange={(file) => updateService(index, "imageUrl", file)}
                   onRemove={() => updateService(index, "imageUrl", "")}
+                  fullWidth
                 />
                 {/* </div> */}
               </div>

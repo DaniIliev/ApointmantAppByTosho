@@ -43,6 +43,7 @@ export type User = {
 export type AuthContextType = {
   user: User | null;
   token: string | null;
+  isAuthLoading: boolean;
   login: (formData: {
     email: string;
     password?: string;

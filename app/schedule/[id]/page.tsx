@@ -28,7 +28,6 @@ type WorkHours = {
   breaks: TimeRange[]; // Променено на TimeRange[]
 };
 export default function StaffDailySchedulePage() {
-  const router = useRouter();
   const params = useParams();
   const { t } = useTranslation();
 
@@ -130,14 +129,7 @@ export default function StaffDailySchedulePage() {
   }, [setPageTitle, scheduleId]);
 
   return (
-    <div className="space-y-4">
-      <div className="absolute top-2 right-4  hidden md:block">
-        <CustomTooltip
-          onClick={() => router.back()}
-          tooltipText={t("Go Back")}
-          icon={<ArrowLeft />}
-        />
-      </div>
+    <div>
       <ScheduleCalendarView dailyData={dailyData} onEditDay={handleEditDay} />
       {dayToEdit && (
         <DailyScheduleEditModal
