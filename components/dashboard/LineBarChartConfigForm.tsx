@@ -14,6 +14,7 @@ import { LabeledSelect } from "@/components/customUIComponents/LabeledSelect";
 import { Modal } from "../customUIComponents/Modal";
 import { useTranslation } from "react-i18next";
 import { useLocationOptions } from "./useLocationOptions";
+import { getThemeChartColorTokens } from "@/lib/themeColors";
 
 interface LineBarChartConfigFormProps {
   open: boolean;
@@ -92,7 +93,7 @@ export function LineBarChartConfigForm({
             (result.seriesConfig as Record<string, unknown>) || {
               barSeries: [],
               lineSeries: [],
-            }
+            },
           );
         } else {
           // Non-comparison mode: show bars only for returned keys
@@ -152,14 +153,14 @@ export function LineBarChartConfigForm({
       ? previewSeries && Object.keys(previewSeries).length
         ? previewSeries
         : config.dataSource === "appointments"
-        ? {
-            barSeries: ["count", "completed"],
-            lineSeries: ["prevCount", "prevCompleted"],
-          }
-        : { barSeries: ["revenue"], lineSeries: ["prevRevenue"] }
+          ? {
+              barSeries: ["count", "completed"],
+              lineSeries: ["prevCount", "prevCompleted"],
+            }
+          : { barSeries: ["revenue"], lineSeries: ["prevRevenue"] }
       : config.dataSource === "appointments"
-      ? { barSeries: ["count", "completed"], lineSeries: [] }
-      : { barSeries: ["revenue"], lineSeries: [] };
+        ? { barSeries: ["count", "completed"], lineSeries: [] }
+        : { barSeries: ["revenue"], lineSeries: [] };
 
     const chartConfig: ChartConfig = {
       id: editingChart?.id || `chart-${Date.now()}`,
@@ -168,7 +169,7 @@ export function LineBarChartConfigForm({
       dataKey: config.dataSource,
       dataKeys: previewDataKeys.length ? previewDataKeys : getDataKeys(),
       xAxisKey: "name",
-      colors: ["#3b61c0", "#00bfff", "#f59e0b", "#dc2626", "#1f2937"],
+      colors: getThemeChartColorTokens(),
       data: previewData,
       seriesConfig,
       layout: editingChart?.layout || {
@@ -298,13 +299,7 @@ export function LineBarChartConfigForm({
                     previewDataKeys.length ? previewDataKeys : getDataKeys()
                   }
                   xAxisKey="name"
-                  colors={[
-                    "#3b61c0",
-                    "#00bfff",
-                    "#f59e0b",
-                    "#dc2626",
-                    "#1f2937",
-                  ]}
+                  colors={getThemeChartColorTokens()}
                   seriesConfig={previewSeries}
                 />
               </div>

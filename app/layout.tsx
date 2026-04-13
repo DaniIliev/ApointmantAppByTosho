@@ -48,10 +48,9 @@ html {
     else d.classList.remove('dark');
 
     var p = localStorage.getItem('selectedPalette');
-    var allowed = ['theme-blue','theme-green','theme-purple','theme-red'];
-    if (p && allowed.indexOf(p) !== -1) {
-      d.classList.add(p);
-    }
+    var allowed = ['theme-blue','theme-green','theme-purple','theme-red','theme-pink'];
+    for (var i = 0; i < allowed.length; i++) d.classList.remove(allowed[i]);
+    if (p && allowed.indexOf(p) !== -1) d.classList.add(p);
   } catch (e) { }
 })();`,
           }}

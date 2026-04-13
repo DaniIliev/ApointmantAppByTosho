@@ -13,6 +13,7 @@ import { LabeledSelect } from "@/components/customUIComponents/LabeledSelect";
 import { Modal } from "../customUIComponents/Modal";
 import { useTranslation } from "react-i18next";
 import { useLocationOptions } from "./useLocationOptions";
+import { getThemeChartColorTokens } from "@/lib/themeColors";
 
 interface HorizontalBarChartConfigFormProps {
   open: boolean;
@@ -24,15 +25,6 @@ interface HorizontalBarChartConfigFormProps {
 const barOptions = [
   { id: "by_service", label: "By Service" },
   { id: "by_staff", label: "By Staff" },
-];
-
-const colors = [
-  "#3b82f6",
-  "#ef4444",
-  "#10b981",
-  "#f59e0b",
-  "#8b5cf6",
-  "#ec4899",
 ];
 
 export function HorizontalBarChartConfigForm({
@@ -54,7 +46,7 @@ export function HorizontalBarChartConfigForm({
       dataKey: "count",
       dataKeys: ["count"],
       xAxisKey: "name",
-      colors: [colors[0]],
+      colors: [getThemeChartColorTokens()[0]],
       configuration: {
         dataSource: "appointments",
         metric: "by_service",

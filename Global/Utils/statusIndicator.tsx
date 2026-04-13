@@ -20,18 +20,18 @@ type CardStatusIndicator = {
 export const getStatusColor = (status: AppointmentStatus) => {
   switch (status) {
     case "pending":
-      return "bg-card/50 border-2 border-yellow-500 text-yellow-600";
+      return "status-theme-base status-theme-pending";
     case "confirmed":
-      return "bg-card/50 border-2 border-blue-500 text-blue-600";
+      return "status-theme-base status-theme-confirmed";
     case "completed":
-      return "bg-card/50 border-2 border-green-500 text-green-600";
+      return "status-theme-base status-theme-completed";
     case "blocked":
-      return "bg-card/50 border-2 border-slate-500 text-slate-600";
+      return "status-theme-base status-theme-blocked";
     case "cancelled":
     case "missed":
-      return "bg-card/50 border-2 border-red-500 text-red-600";
+      return "status-theme-base status-theme-cancelled";
     default:
-      return "bg-card/50 border-2 border-muted text-muted-foreground";
+      return "status-theme-base border-border text-muted-foreground";
   }
 };
 
@@ -87,7 +87,7 @@ type CardPriorityIndicator = {
 };
 
 export const getPriorityIndicator = (
-  priority: string
+  priority: string,
 ): CardPriorityIndicator => {
   switch (priority) {
     case "Low":
@@ -118,7 +118,7 @@ type CardDueDateIndicator = {
 };
 
 export const getDueDateIndicator = (
-  dueDateFilter: string
+  dueDateFilter: string,
 ): CardDueDateIndicator => {
   switch (dueDateFilter) {
     case "Late":

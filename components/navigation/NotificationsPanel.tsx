@@ -228,9 +228,9 @@ export default function NotificationsPanel({
               onClick={() => handleAlertClick(alert)}
               className={`mb-2 p-3 rounded-lg cursor-pointer transition-all duration-200 ${
                 !alert.isRead
-                  ? "bg-blue-600/20 border-l-4 border-blue-400"
-                  : "bg-white/5"
-              } hover:bg-white/10`}
+                  ? "bg-primary/30 border-l-4 border-primary-light"
+                  : "bg-primary/10"
+              } hover:bg-primary/15`}
             >
               <p className="text-sm font-semibold text-white/90">
                 {alert.message}
@@ -262,8 +262,8 @@ export default function NotificationsPanel({
                         handleCancelAppointment(alert);
                       }}
                       size="sm"
-                      //   variant="outline"
-                      className="h-7 px-2 text-xs font-semibold text-white bg-red-600/90 rounded-md border border-white/10 hover:bg-red-600 transition-colors flex items-center gap-1"
+                      variant="outline"
+                      className="h-7 px-2 text-xs font-semibold  rounded-md border flex items-center gap-1"
                     >
                       <X className="w-3 h-3" />
                       {t("Cancel")}

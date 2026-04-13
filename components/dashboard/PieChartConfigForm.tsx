@@ -13,6 +13,7 @@ import { LabeledSelect } from "@/components/customUIComponents/LabeledSelect";
 import { Modal } from "../customUIComponents/Modal";
 import { useTranslation } from "react-i18next";
 import { useLocationOptions } from "./useLocationOptions";
+import { getThemeChartColorTokens } from "@/lib/themeColors";
 
 interface PieChartConfigFormProps {
   open: boolean;
@@ -166,7 +167,7 @@ export function PieChartConfigForm({
       type: "pie",
       dataKey: previewDataKeys[0] || getDataKey(),
       xAxisKey: nameKey || getNameKey(),
-      colors: ["#3b61c0", "#00bfff", "#f59e0b", "#dc2626", "#1f2937"],
+      colors: getThemeChartColorTokens(),
       data: previewData,
       layout: editingChart?.layout || {
         x: 0,
@@ -305,13 +306,7 @@ export function PieChartConfigForm({
                     previewDataKeys.length ? previewDataKeys : [getDataKey()]
                   }
                   xAxisKey={nameKey || getNameKey()}
-                  colors={[
-                    "#3b61c0",
-                    "#00bfff",
-                    "#f59e0b",
-                    "#dc2626",
-                    "#1f2937",
-                  ]}
+                  colors={getThemeChartColorTokens()}
                 />
               </div>
             ) : (

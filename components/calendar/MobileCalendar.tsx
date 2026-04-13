@@ -233,9 +233,9 @@ const WeeklyCalendar: React.FC<WeeklyCalendarProps> = ({
               "flex flex-col items-center p-2 rounded-full transition-colors w-1/7",
               "hover:bg-gray-200 dark:hover:bg-gray-800",
               isSameDay(date, selectedDate)
-                ? "font-bold text-blue-600 dark:text-blue-400"
+                ? "font-bold text-primary dark:primary-light"
                 : uniqueDates[format(date, "yyyy-MM-dd")]
-                  ? "font-bold text-blue-600 dark:text-blue-400"
+                  ? "font-bold text-primary dark:primary-light"
                   : "text-gray-600 dark:text-gray-400",
             )}
           >
@@ -246,7 +246,7 @@ const WeeklyCalendar: React.FC<WeeklyCalendarProps> = ({
               className={cn(
                 "text-lg font-semibold w-8 h-8 flex items-center justify-center rounded-full transition-colors",
                 isSameDay(date, selectedDate)
-                  ? "ring-2 ring-blue-600 bg-blue-100 dark:bg-blue-900"
+                  ? "ring-2 ring-primary bg-primary/50 dark:bg-primary-dark"
                   : "",
               )}
             >
@@ -319,9 +319,9 @@ const MonthlyCalendar: React.FC<MonthlyCalendarProps> = ({
               "flex flex-col items-center p-2 rounded-lg transition-colors",
               "hover:bg-gray-200 dark:hover:bg-gray-800",
               isSameDay(date, selectedDate)
-                ? "font-bold text-blue-600 dark:text-blue-400"
+                ? "font-bold text-primary dark:primary-light"
                 : uniqueDates[format(date, "yyyy-MM-dd")]
-                  ? "font-bold text-blue-600 dark:text-blue-400"
+                  ? "font-bold text-primary dark:primary-light"
                   : "text-gray-600 dark:text-gray-400",
             )}
           >
@@ -329,7 +329,7 @@ const MonthlyCalendar: React.FC<MonthlyCalendarProps> = ({
               className={cn(
                 "text-sm font-semibold w-8 h-8 flex items-center justify-center rounded-full transition-colors",
                 isSameDay(date, selectedDate)
-                  ? "ring-2 ring-blue-600 bg-blue-100 dark:bg-blue-900"
+                  ? "ring-2 ring-primary bg-primary/20 dark:bg-primary-dark"
                   : "",
               )}
             >
@@ -566,7 +566,7 @@ const MobileCalendar = ({
         </div>
 
         <button
-          className="w-full text-center p-2 mt-2 text-sm font-semibold text-blue-600 dark:text-blue-400 hover:underline"
+          className="w-full text-center p-2 mt-2 text-sm font-semibold text-primary dark:text-primary hover:underline"
           onClick={() => setIsMonthlyView(!isMonthlyView)}
         >
           {isMonthlyView ? "Свий" : "Разшири"}

@@ -19,7 +19,6 @@ import {
 } from "lucide-react";
 
 import ProtectedRoute from "@/components/guards/ProtectedRoute";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -29,13 +28,14 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Appointment } from "@/Global/Types/types";
+import { Appointment, AppointmentStatus } from "@/Global/Types/types";
 import callApi from "@/app/Api/callApi";
 import { useAuthContext } from "@/context/AuthContext";
 import { usePageTitle } from "@/context/PageTitleContext";
 import { useRightNav } from "@/context/RightNavContext";
 import { formatDateAndTime } from "@/Global/Utils/commonFn";
 import { useTranslation } from "react-i18next";
+import { StatusChip } from "@/components/customUIComponents/StatusChip";
 
 const ReactECharts = dynamic(() => import("echarts-for-react"), {
   ssr: false,
@@ -79,13 +79,6 @@ function formatCurrency(value: number) {
     maximumFractionDigits: 0,
   }).format(value);
 }
-
-const statusBadgeClassMap: Record<string, string> = {
-  confirmed: "bg-emerald-500/20 text-emerald-600",
-  pending: "bg-amber-500/20 text-amber-600",
-  completed: "bg-blue-500/20 text-blue-600",
-  cancelled: "bg-rose-500/20 text-rose-600",
-};
 
 function HomePageContent() {
   const { user } = useAuthContext();
@@ -362,11 +355,6 @@ function HomePageContent() {
                 )}
               </p>
             </div>
-            <Link href="/dashboard">
-              <Button className="bg-white text-primary hover:bg-white/90">
-                {t("Open Dashboard")} <ArrowRight className="ml-2 h-4 w-4" />
-              </Button>
-            </Link>
           </div>
         </CardContent>
       </Card>
@@ -375,16 +363,12 @@ function HomePageContent() {
         <CardHeader>
           <div className="flex items-start justify-between gap-3">
             <div>
-              <CardTitle className="text-foreground">
-                {t("Weekly pulse")}
-              </CardTitle>
-              <CardDescription>
-                {t("Total vs completed by day")}
-              </CardDescription>
+              <CardTitle className="text-foreground">{t("Weekly pulse")}</CardTitle>
+              <CardDescription>{t("Total vs completed by day")}</CardDescription>
             </div>
           </div>
         </CardHeader>
-        <CardContent className="space-y-4 pb-6">
+        <CardContent className="space-y-3 pb-6">
           {stats.weekTotal > 0 && (
             <div
               className="h-full rounded-full bg-primary transition-all"
@@ -436,6 +420,7 @@ function HomePageContent() {
           )}
         </CardContent>
       </Card>
+
       <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
         <Card>
           <CardHeader className="pb-3">
@@ -611,9 +596,7 @@ function HomePageContent() {
               </div>
             ) : stats.nextItems.length > 0 ? (
               stats.nextItems.map((appointment) => {
-                const status = appointment.status || "pending";
-                const badgeClass =
-                  statusBadgeClassMap[status] || "bg-zinc-500/20 text-zinc-600";
+                const status = (appointment.status || "pending") as AppointmentStatus;
 
                 return (
                   <div
@@ -621,11 +604,9 @@ function HomePageContent() {
                     className="flex flex-col gap-3 rounded-xl border p-4 md:flex-row md:items-center md:justify-between"
                   >
                     <div>
-                      <p className="flex item-center gap-1 font-semibold text-foreground">
-                        {appointment.clientName}{" "}
-                        <Badge className={`w-fit capitalize ${badgeClass}`}>
-                          {status}
-                        </Badge>
+                      <p className="flex items-center gap-2 font-semibold text-foreground">
+                        {appointment.clientName}
+                        <StatusChip status={status} />
                       </p>
                       <p className="text-sm text-muted-foreground">
                         {appointment.serviceName || "Appointment"} ·{" "}

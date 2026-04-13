@@ -275,13 +275,8 @@ export default function TopNav({
             </button>
           )}
           <h1 className="flex items-end gap-1 text-l font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
-            <Image
-              src="/AppointmantPro.png"
-              alt="logo"
-              width={32}
-              height={32}
-              className="w-8 h-auto"
-            />
+            <span className="theme-logo-mask" aria-hidden="true" />
+            <span className="sr-only">{t("AppointDI")}</span>
             <span className="hidden sm:inline">{t("AppointDI ")}</span>
           </h1>
         </div>

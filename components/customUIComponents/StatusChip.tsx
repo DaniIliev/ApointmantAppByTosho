@@ -16,44 +16,37 @@ export const getStatusProps = (status: AppointmentStatus) => {
     case "active":
       return {
         icon: <Check size={16} />,
-        className:
-          "bg-card/50 border-2 border-green-500 text-green-600 dark:text-green-400",
+        className: "status-theme-base status-theme-completed",
       };
     case "blocked":
       return {
         icon: <Clock size={16} />,
-        className:
-          "bg-card/50 border-2 border-slate-500 text-slate-600 dark:text-slate-400",
+        className: "status-theme-base status-theme-blocked",
       };
     case "cancelled":
     case "expired":
       return {
         icon: <X size={16} />,
-        className:
-          "bg-card/50 border-2 border-red-500 text-red-600 dark:text-red-400",
+        className: "status-theme-base status-theme-cancelled",
       };
     case "pending":
       return {
         icon: <Clock size={16} />,
-        className:
-          "bg-card/50 border-2 border-yellow-500 text-yellow-600 dark:text-yellow-400",
+        className: "status-theme-base status-theme-pending",
       };
     case "confirmed":
     case "upcoming":
       return {
         icon: <Clock size={16} />,
-        className:
-          "bg-card/50 border-2 border-blue-500 text-blue-600 dark:text-blue-400",
+        className: "status-theme-base status-theme-confirmed",
       };
     default:
       return {
         icon: null,
-        className:
-          "bg-card/50 border-2 border-gray-400 text-gray-600 dark:text-gray-400",
+        className: "status-theme-base border-border text-muted-foreground",
       };
   }
 };
-
 
 export const StatusChip = ({ status }: StatusChipProps) => {
   const { t } = useTranslation();
@@ -62,7 +55,7 @@ export const StatusChip = ({ status }: StatusChipProps) => {
   return (
     <div
       className={cn(
-        `flex items-center gap-1 rounded-full px-3 py-1 text-sm font-semibold whitespace-nowrap ${statusProps.className}`
+        `flex items-center gap-1 rounded-full px-3 py-1 text-sm font-semibold whitespace-nowrap ${statusProps.className}`,
       )}
     >
       {statusProps.icon}

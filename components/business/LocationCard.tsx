@@ -46,7 +46,7 @@ export function LocationCard({
   return (
     <Card
       className={cn(
-        "group relative h-[350px] overflow-hidden rounded-3xl border-2 border-primary/80 bg-background shadow-xl transition-all duration-300 hover:shadow-2xl cursor-pointer",
+        "group relative h-[350px] overflow-hidden rounded-3xl border-2 border-primary/40 bg-background shadow-xl transition-all duration-300 hover:shadow-2xl cursor-pointer",
         isSelected && "ring-2 ring-primary/40",
         className,
       )}

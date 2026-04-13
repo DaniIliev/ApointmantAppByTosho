@@ -42,9 +42,9 @@ const SectionHeader = ({
   icon: React.ElementType;
   title: string;
 }) => (
-  <div className="flex items-center gap-3 mb-1">
-    <div className="p-2 rounded-lg bg-blue-50 dark:bg-blue-500/10">
-      <Icon className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+  <div className="flex items-center gap-2 mb-1">
+    <div className=" rounded-lg ">
+      <Icon className="h-6 w-6 text-primary dark:text-primary" />
     </div>
     <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
       {title}
@@ -207,8 +207,8 @@ function BusinessInformationPageContent() {
                 </div>
               ) : (
                 <label className="flex flex-col items-center justify-center w-full h-full min-h-[320px] cursor-pointer hover:bg-gray-50 dark:hover:bg-white/5 transition-all group">
-                  <div className="p-6 rounded-full bg-blue-50 dark:bg-blue-500/10 mb-4 group-hover:scale-110 transition-transform">
-                    <Upload className="h-10 w-10 text-blue-500 dark:text-blue-400" />
+                  <div className="p-6 rounded-full bg-primary dark:bg-primary-dark mb-4 group-hover:scale-110 transition-transform">
+                    <Upload className="h-10 w-10 " />
                   </div>
                   <span className="text-gray-700 dark:text-white/80 font-semibold">
                     {t("Click to upload a photo")}

@@ -13,6 +13,7 @@ import { fetchPreviewData } from "./analyticsPreview";
 import { Modal } from "../customUIComponents/Modal";
 import { useTranslation } from "react-i18next";
 import { useLocationOptions } from "./useLocationOptions";
+import { getThemeChartColorTokens } from "@/lib/themeColors";
 
 interface LineChartConfigFormProps {
   open: boolean;
@@ -137,7 +138,7 @@ export function LineChartConfigForm({
         if (isCancelled) return;
         setPreviewData(result.data);
         setPreviewDataKeys(
-          result.dataKeys?.length ? result.dataKeys : getDataKeys()
+          result.dataKeys?.length ? result.dataKeys : getDataKeys(),
         );
         setPreviewXAxisKey(result.xAxisKey || getXAxisKey());
       } catch (err) {
@@ -173,7 +174,7 @@ export function LineChartConfigForm({
       dataKey: config.dataSource,
       dataKeys,
       xAxisKey: previewXAxisKey || getXAxisKey(),
-      colors: ["#3b61c0", "#00bfff", "#f59e0b", "#dc2626", "#1f2937"],
+      colors: getThemeChartColorTokens(),
       data: previewData,
       layout: editingChart?.layout || {
         x: 0,
@@ -311,13 +312,7 @@ export function LineChartConfigForm({
                     previewDataKeys.length ? previewDataKeys : getDataKeys()
                   }
                   xAxisKey={previewXAxisKey || getXAxisKey()}
-                  colors={[
-                    "#3b61c0",
-                    "#00bfff",
-                    "#f59e0b",
-                    "#dc2626",
-                    "#1f2937",
-                  ]}
+                  colors={getThemeChartColorTokens()}
                 />
               </div>
             ) : (
