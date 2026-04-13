@@ -18,7 +18,10 @@ import {
 } from "@/Global/Utils/commonFn";
 import { Badge } from "@/components/ui/badge";
 import { Modal } from "@/components/customUIComponents/Modal";
-import { getStatusProps, StatusChip } from "@/components/customUIComponents/StatusChip";
+import {
+  getStatusProps,
+  StatusChip,
+} from "@/components/customUIComponents/StatusChip";
 
 interface AppointmentPreview {
   id: string;
@@ -232,9 +235,9 @@ export function CalendarPreview() {
                     <button
                       key={apt.id}
                       onClick={() => setSelectedAppointment(apt)}
-                      className={`w-full rounded-sm px-1 py-0.5 text-[10px] truncate border cursor-pointer hover:shadow-md transition ${getStatusMeta(
-                        apt.status,
-                      ).className}`}
+                      className={`w-full rounded-sm px-1 py-0.5 text-[10px] truncate border cursor-pointer hover:shadow-md transition ${
+                        getStatusMeta(apt.status).className
+                      }`}
                     >
                       <span className="flex items-center gap-1">
                         <span className="shrink-0 [&>svg]:h-3 [&>svg]:w-3">
@@ -293,9 +296,9 @@ export function CalendarPreview() {
                       <button
                         key={apt.id}
                         onClick={() => setSelectedAppointment(apt)}
-                        className={`w-full rounded px-0.5 py-0.5 truncate border cursor-pointer hover:shadow-md transition text-left ${getStatusMeta(
-                          apt.status,
-                        ).className}`}
+                        className={`w-full rounded px-0.5 py-0.5 truncate border cursor-pointer hover:shadow-md transition text-left ${
+                          getStatusMeta(apt.status).className
+                        }`}
                       >
                         <span className="flex items-center gap-1">
                           <span className="shrink-0 [&>svg]:h-3 [&>svg]:w-3">
