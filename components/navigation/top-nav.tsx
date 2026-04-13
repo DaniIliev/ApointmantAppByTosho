@@ -277,17 +277,17 @@ export default function TopNav({
           <h1 className="flex items-end gap-1 text-l font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
             <span className="theme-logo-mask" aria-hidden="true" />
             <span className="sr-only">{t("AppointDI")}</span>
-            <span className="hidden sm:inline">{t("AppointDI ")}</span>
+            <span className=" sm:inline">{t("AppointDI ")}</span>
           </h1>
         </div>
 
-        {pageTitle && (
+        {/* {pageTitle && (
           <div className="pointer-events-none absolute left-1/2 -translate-x-1/2 md:hidden max-w-[44vw]">
             <h2 className="truncate text-sm font-semibold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent tracking-tight text-center">
               {t(pageTitle)}
             </h2>
           </div>
-        )}
+        )} */}
 
         <div
           className={`hidden md:flex justify-center min-w-0 transition-transform duration-300 ${titleOffsetClass}`}
