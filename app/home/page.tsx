@@ -363,8 +363,12 @@ function HomePageContent() {
         <CardHeader>
           <div className="flex items-start justify-between gap-3">
             <div>
-              <CardTitle className="text-foreground">{t("Weekly pulse")}</CardTitle>
-              <CardDescription>{t("Total vs completed by day")}</CardDescription>
+              <CardTitle className="text-foreground">
+                {t("Weekly pulse")}
+              </CardTitle>
+              <CardDescription>
+                {t("Total vs completed by day")}
+              </CardDescription>
             </div>
           </div>
         </CardHeader>
@@ -596,7 +600,8 @@ function HomePageContent() {
               </div>
             ) : stats.nextItems.length > 0 ? (
               stats.nextItems.map((appointment) => {
-                const status = (appointment.status || "pending") as AppointmentStatus;
+                const status = (appointment.status ||
+                  "pending") as AppointmentStatus;
 
                 return (
                   <div
