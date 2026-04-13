@@ -1,13 +1,13 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { Suspense, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import PricingSection from "@/components/Pricing/PricingSection";
 import BusinessSetupModal from "@/components/BusinessSetup/BusinessSetupModal";
 import { useSearchParams } from "next/navigation";
 import { useAuthContext } from "@/context/AuthContext";
 
-export default function PricingPage() {
+function PricingPageContent() {
   const { t } = useTranslation();
   const params = useSearchParams();
   const onboarding = params.get("onboarding") === "1";
@@ -27,5 +27,13 @@ export default function PricingPage() {
         businessId={user?.businessId}
       />
     </div>
+  );
+}
+
+export default function PricingPage() {
+  return (
+    <Suspense fallback={null}>
+      <PricingPageContent />
+    </Suspense>
   );
 }

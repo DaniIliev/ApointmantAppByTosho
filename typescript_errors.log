@@ -1,0 +1,21 @@
+app/dashboard/Forms/AppointmentEditModal.tsx(101,48): error TS2339: Property 'staffs' does not exist on type 'AppointmentType'.
+app/dashboard/Forms/AppointmentEditModal.tsx(103,39): error TS2339: Property 'staffs' does not exist on type 'AppointmentType'.
+app/onboarding/steps/ServicesSetup.tsx(31,97): error TS2345: Argument of type 'Service[] | { name: string; duration: number; price: number; category: string; locationId: string; staffs: never[]; }[]' is not assignable to parameter of type 'Service[] | (() => Service[])'.
+  Type '{ name: string; duration: number; price: number; category: string; locationId: string; staffs: never[]; }[]' is not assignable to type 'Service[] | (() => Service[])'.
+    Type '{ name: string; duration: number; price: number; category: string; locationId: string; staffs: never[]; }[]' is not assignable to type 'Service[]'.
+      Object literal may only specify known properties, and 'staffs' does not exist in type 'Service'.
+app/onboarding/steps/ServicesSetup.tsx(35,118): error TS2322: Type 'Service | { name: string; duration: number; price: number; category: string; locationId: string; staffs: never[]; }' is not assignable to type 'Service'.
+  Object literal may only specify known properties, and 'staffs' does not exist in type 'Service'.
+app/onboarding/steps/ServicesSetup.tsx(35,118): error TS2353: Object literal may only specify known properties, and 'staffs' does not exist in type 'Service'.
+app/onboarding/steps/ServicesSetup.tsx(54,36): error TS2339: Property 'staffs' does not exist on type 'Service'.
+app/onboarding/steps/ServicesSetup.tsx(55,43): error TS7006: Parameter 's' implicitly has an 'any' type.
+app/onboarding/steps/ServicesSetup.tsx(59,40): error TS7006: Parameter 's' implicitly has an 'any' type.
+app/onboarding/steps/ServicesSetup.tsx(64,33): error TS2345: Argument of type '"staffs"' is not assignable to parameter of type 'keyof Service'.
+app/onboarding/steps/ServicesSetup.tsx(136,43): error TS2339: Property 'staffs' does not exist on type 'Service'.
+app/onboarding/steps/ServicesSetup.tsx(136,62): error TS7006: Parameter 'assigned' implicitly has an 'any' type.
+components/sections/services-section.tsx(162,36): error TS2339: Property 'staffs' does not exist on type 'AppointmentType'.
+components/sections/services-section.tsx(162,54): error TS2339: Property 'staffs' does not exist on type 'AppointmentType'.
+components/sections/services-section.tsx(170,42): error TS2339: Property 'staffs' does not exist on type 'AppointmentType'.
+components/sections/services-section.tsx(170,54): error TS7006: Parameter 'staff' implicitly has an 'any' type.
+components/sections/services-section.tsx(188,44): error TS2339: Property 'staffs' does not exist on type 'AppointmentType'.
+components/sections/services-section.tsx(188,56): error TS7006: Parameter 'staff' implicitly has an 'any' type.

@@ -12,6 +12,8 @@ import { LabeledInput } from "@/components/customUIComponents/LabeledInput";
 import { LabeledSelect } from "@/components/customUIComponents/LabeledSelect";
 import { Modal } from "../customUIComponents/Modal";
 import { useTranslation } from "react-i18next";
+import { useLocationOptions } from "./useLocationOptions";
+import { getThemeChartColorTokens } from "@/lib/themeColors";
 
 interface HorizontalBarChartConfigFormProps {
   open: boolean;
@@ -23,15 +25,6 @@ interface HorizontalBarChartConfigFormProps {
 const barOptions = [
   { id: "by_service", label: "By Service" },
   { id: "by_staff", label: "By Staff" },
-];
-
-const colors = [
-  "#3b82f6",
-  "#ef4444",
-  "#10b981",
-  "#f59e0b",
-  "#8b5cf6",
-  "#ec4899",
 ];
 
 export function HorizontalBarChartConfigForm({
@@ -53,7 +46,7 @@ export function HorizontalBarChartConfigForm({
       dataKey: "count",
       dataKeys: ["count"],
       xAxisKey: "name",
-      colors: [colors[0]],
+      colors: [getThemeChartColorTokens()[0]],
       configuration: {
         dataSource: "appointments",
         metric: "by_service",
@@ -68,6 +61,7 @@ export function HorizontalBarChartConfigForm({
   const [loadingPreview, setLoadingPreview] = useState(true);
   const { startDate, endDate, groupBy } = useDashboardDate();
   const { staffOptions, loadingStaff } = useStaffOptions();
+  const { locationOptions, loadingLocations } = useLocationOptions();
 
   useEffect(() => {
     let isCancelled = false;
@@ -108,6 +102,7 @@ export function HorizontalBarChartConfigForm({
     groupBy,
     startDate,
     endDate,
+    config.configuration?.locationId,
   ]);
 
   const handleSave = () => {
@@ -209,6 +204,29 @@ export function HorizontalBarChartConfigForm({
                 id: s._id as string,
                 name:
                   `${s.firstName} ${s.lastName}`.trim() || (s._id as string),
+              })),
+            ]}
+          />
+
+          <LabeledSelect<string>
+            id="location-id"
+            label="Location (optional)"
+            placeholder={loadingLocations ? "Loading..." : "All locations"}
+            value={(config.configuration as any)?.locationId || "all"}
+            onValueChange={(value) =>
+              setConfig({
+                ...config,
+                configuration: {
+                  ...config.configuration,
+                  locationId: value === "all" ? "" : value,
+                } as ChartConfig["configuration"],
+              })
+            }
+            options={[
+              { id: "all", name: "All locations" },
+              ...locationOptions.map((l: any) => ({
+                id: l._id,
+                name: l.name,
               })),
             ]}
           />

@@ -5,11 +5,14 @@ export interface SelectOptionsAppointmentType {
   price?: number;
 }
 
+export type PaymentOption = "cash" | "card" | "cash_and_card";
+
 export type AppointmentStatus =
   | "pending"
   | "confirmed"
   | "cancelled"
   | "completed"
+  | "blocked"
   | string;
 
 export interface Appointment {
@@ -28,6 +31,8 @@ export interface Appointment {
   servicePrice?: number;
   serviceDuration?: number;
   status: AppointmentStatus;
+  kind?: "appointment" | "work_block";
+  title?: string;
   notes?: string;
   staff: {
     _id: string;
@@ -44,6 +49,7 @@ export interface Appointment {
   stripePaymentIntentId?: string;
   stripePaymentMethodId?: string;
   stripePaymentAmount?: number;
+  locationId?: string | any;
 }
 
 export interface AppointmentType {
@@ -55,9 +61,19 @@ export interface AppointmentType {
   duration: number;
   price: number;
   color: string;
-  staffs: { _id: string; name: string }[]; // Променено на staffIds
-  paymentOption?: "cash" | "card" | "cash_and_card";
+  staffMembers: {
+    _id: string;
+    email: string;
+    firstName: string;
+    lastName: string;
+    profilePictureUrl?: string;
+    role: string;
+    locationIds: string[];
+  }[]; // Unified field name
+  paymentOption?: PaymentOption;
   locationId: string;
+  isGroup?: boolean;
+  capacity?: number;
 }
 
 export interface Staff {
@@ -65,8 +81,8 @@ export interface Staff {
   firstName: string;
   lastName: string;
   email: string;
-  role: "staff" | "admin";
-  locationId: string;
+  role: "staff" | "manager" | "business";
+  locationIds: string[];
 }
 
 export interface Business {
@@ -113,7 +129,7 @@ export interface Business {
 
 export interface Location {
   _id?: string;
-  imageUrl?: string;
+  imageUrl?: string | File | null;
   businessId?: string;
   name: string;
   address: string;
@@ -127,28 +143,32 @@ export interface Location {
   isDefault?: boolean;
   createdAt?: string;
   updatedAt?: string;
-  schedule?: {
-    monday: string;
-    tuesday: string;
-    wednesday: string;
-    thursday: string;
-    friday: string;
-    saturday: string;
-    sunday: string;
-  } | string;
+  schedule?:
+    | {
+        monday: string;
+        tuesday: string;
+        wednesday: string;
+        thursday: string;
+        friday: string;
+        saturday: string;
+        sunday: string;
+      }
+    | string;
 }
 
 export interface Service {
   _id?: string;
   business?: string;
-  staffs?: { _id: string; name: string }[];
+  staffMembers?: { _id: string; name: string }[];
   name: string;
   description?: string;
   duration: number;
   price: number;
   category: string;
   imageUrl?: File | string | null;
-  paymentOption?: "cash" | "card" | "cash_and_card";
+  paymentOption?: PaymentOption;
+  isGroup?: boolean;
+  capacity?: number;
   locationId?: string;
   color?: string; // Kept for UI
   createdAt?: string;
@@ -228,7 +248,7 @@ export interface AvailableSlot {
   endTime: string;
 }
 export const getBusinessCategories = (
-  t: (key: string) => string
+  t: (key: string) => string,
 ): SelectOption[] => [
   { id: "BEAUTY & WELLNESS", name: t("BEAUTY & WELLNESS") },
   { id: "MEDICAL & HEALTH", name: t("MEDICAL & HEALTH") },
@@ -240,7 +260,7 @@ export const getBusinessCategories = (
 ];
 
 export const getCategoryOptions = (
-  t: (key: string) => string
+  t: (key: string) => string,
 ): SelectOption[] => [
   // BEAUTY & WELLNESS (КРАСОТА И УЕЛНЕС) - Най-популярни
   {

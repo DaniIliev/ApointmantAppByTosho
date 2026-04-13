@@ -8,6 +8,7 @@ export type PreviewRequest = {
   groupBy?: string;
   staffId?: string;
   serviceId?: string;
+  locationId?: string;
   status?: string;
   startDate: string;
   endDate: string;
@@ -33,6 +34,7 @@ export function inferDimensionPreview(
       return "by_staff";
     if (metric === "by_status") return "by_status";
     if (metric === "by_category") return "by_category";
+    if (metric === "by_location") return "by_location";
     if (metric === "count") return isPieChart ? "by_status" : "time_series";
     return isPieChart ? "by_service" : "time_series";
   }
@@ -44,6 +46,7 @@ export function inferDimensionPreview(
   if (source === "revenue") {
     if (metric === "by_service") return "by_service";
     if (metric === "by_staff") return "by_staff";
+    if (metric === "by_location") return "by_location";
     if (metric === "count") return isPieChart ? "by_service" : "time_series";
     return isPieChart ? "by_service" : "time_series";
   }
@@ -96,6 +99,12 @@ export function transformPreviewData(
         cancelled: Number((r.cancelled as number) ?? 0),
       }));
       dataKeys = ["count", "completed", "cancelled"];
+    } else if (dimension === "by_location") {
+      data = rows.map((r) => ({
+        name: (r.name as string) || (r._id as string) || "Default / Unassigned",
+        count: Number((r.value as number) ?? (r.count as number) ?? 0),
+      }));
+      dataKeys = ["count"];
     }
   } else if (source === "staff") {
     if (dimension === "by_staff" || dimension === "time_series") {
@@ -118,6 +127,12 @@ export function transformPreviewData(
       data = rows.map((r) => ({
         name: (r.name as string) || "",
         revenue: Number((r.value as number) ?? 0),
+      }));
+      dataKeys = ["revenue"];
+    } else if (dimension === "by_location") {
+      data = rows.map((r) => ({
+        name: (r.name as string) || (r._id as string) || "Default / Unassigned",
+        revenue: Number((r.value as number) ?? (r.revenue as number) ?? 0),
       }));
       dataKeys = ["revenue"];
     }
@@ -158,6 +173,7 @@ export async function fetchPreviewData(
     groupBy,
     staffId,
     serviceId,
+    locationId,
     status,
     startDate,
     endDate,
@@ -197,6 +213,7 @@ export async function fetchPreviewData(
       to: prevEnd.toISOString().split("T")[0],
     });
     if (staffId) prevParams.set("staffId", staffId);
+    if (locationId) prevParams.set("locationId", locationId);
 
     const currentRows = (await callApi(
       `/api/analytics?${currentParams.toString()}&t=${Date.now()}`,
@@ -259,6 +276,7 @@ export async function fetchPreviewData(
   if (staffId) params.set("staffId", staffId);
   if (serviceId) params.set("serviceId", serviceId);
   if (status) params.set("status", status);
+  if (locationId) params.set("locationId", locationId);
 
   const rows = (await callApi(
     `/api/analytics?${params.toString()}&t=${Date.now()}`,

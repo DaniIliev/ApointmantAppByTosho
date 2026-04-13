@@ -77,176 +77,173 @@ export function SignInForm({ onSuccess }: SignInFormProps) {
   };
 
   return (
-    <div className=" w-full flex items-center justify-center animate-in fade-in duration-500">
-      <div className="relative w-full max-w-lg">
-        <div className="absolute -inset-0.5 bg-gradient-to-br from-cyan-500 via-primary to-pink-500 rounded-3xl opacity-75 blur-sm dark:blur-xl" />
-        <div className="w-full relative bg-white dark:bg-gray-900 backdrop-blur-xl rounded-3xl p-6 border border-primary/20 shadow-6xl">
-          <div className="flex justify-center mb-4">
-            <Image
-              src="/AppointmantPro.png"
-              alt="logo"
-              width={40}
-              height={40}
-              className="w-10 h-auto"
-            />
-          </div>
+    <div className="w-full flex items-center justify-center animate-in fade-in duration-700">
+      <div className="relative w-full max-w-md">
+        {/* Animated Background Glow */}
+        <div className="absolute -inset-1 bg-gradient-to-br from-cyan-500 via-primary to-pink-500 rounded-[2.5rem] opacity-70 blur-md dark:blur-2xl" />
 
-          <div className="flex justify-center mb-4">
-            <div className="flex items-baseline gap-1">
-              <span className="text-xl font-bold theme-text-gradient">
+        <div className="w-full relative bg-white/90 dark:bg-gray-900/90 backdrop-blur-2xl rounded-[2.5rem] p-8 md:p-10 border border-primary/10 shadow-2xl overflow-hidden">
+          {/* Top Logo */}
+          <div className="flex flex-col items-center mb-8">
+            <div className="p-3 bg-primary/5 rounded-2xl mb-4 border border-primary/10">
+              <Image
+                src="/AppointmantPro.png"
+                alt="logo"
+                width={44}
+                height={44}
+                className="w-11 h-auto"
+              />
+            </div>
+            <div className="text-center">
+              <h1 className="text-3xl font-extrabold tracking-tight theme-text-gradient mb-1">
                 {t("AppointDI®")}
-              </span>
+              </h1>
+              <p className="text-sm text-muted-foreground font-medium">
+                {t("Sign in to your account")}
+              </p>
             </div>
           </div>
 
-          {/* Welcome text */}
-          <div className="text-center mb-4">
-            <h2 className="text-3xl font-bold mb-2">{t("Welcome!")}</h2>
-            <p className="text-sm text-muted-foreground">
-              {t("Please enter your details")}
-            </p>
-          </div>
-
-          {/* Form */}
           <form onSubmit={handleSubmit} className="space-y-6">
-            <div>
-              <LabeledInput
-                id="email"
-                label={t("Email")}
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder={t("Email") || "Email"}
-                onClear={() => setEmail("")}
-                className="!bg-transparent"
-                required
-              />
-            </div>
+            <div className="space-y-5">
+              <div className="space-y-1.5">
+                <LabeledInput
+                  id="email"
+                  label={t("Email")}
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder={t("Enter your email")}
+                  onClear={() => setEmail("")}
+                  required
+                />
+              </div>
 
-            <div className="relative">
-              <LabeledInput
-                id="password"
-                label={otpMode ? t("One-time Password") : t("Password")}
-                type={showPassword ? "text" : "password"}
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder={
-                  otpMode
-                    ? t("Enter one-time password") || "One-time Password"
-                    : t("Password") || "Password"
-                }
-                className="!bg-transparent"
-                required
-              />
-              <button
-                type="button"
-                onClick={() => setShowPassword((p) => !p)}
-                className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
-                aria-label={
-                  showPassword ? t("Hide password") : t("Show password")
-                }
-              >
-                {showPassword ? (
-                  <EyeOff className="h-5 w-5" />
-                ) : (
-                  <Eye className="h-5 w-5" />
-                )}
-              </button>
+              <div className="space-y-1.5 relative">
+                <div className="relative group">
+                  <LabeledInput
+                    id="password"
+                    label={otpMode ? t("One-time Password") : t("Password")}
+                    type={showPassword ? "text" : "password"}
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    placeholder={
+                      otpMode ? t("Enter 6-digit code") : t("••••••••")
+                    }
+                    required
+                  />
+                </div>
+                <div className="flex justify-end pt-1">
+                  <button
+                    type="button"
+                    className="text-xs font-bold text-primary hover:text-accent transition-colors hover:underline underline-offset-4"
+                    onClick={() => {
+                      setForgotOpen(true);
+                      setForgotSent(false);
+                      setForgotError(null);
+                    }}
+                  >
+                    {t("Forgot password?")}
+                  </button>
+                </div>
+              </div>
             </div>
 
             {error && (
-              <div className="text-xs text-red-500 font-medium -mt-2">
+              <div className="bg-red-50 dark:bg-red-500/10 border border-red-200 dark:border-red-500/20 rounded-xl p-3 text-xs text-red-600 dark:text-red-400 font-medium animate-in fade-in slide-in-from-top-1">
                 {error}
               </div>
             )}
 
-            <div className="w-full flex justify-center">
-              <Button
-                type="submit"
-                disabled={loading}
-                iconType="send"
-                className="rounded-full w-30 py-5 flex justify-center items-center"
-              >
-                {loading ? t("Logging in...") : t("Log in")}
-              </Button>
-            </div>
+            <Button
+              type="submit"
+              disabled={loading}
+              className="w-full rounded-2xl py-6 text-lg font-bold shadow-lg shadow-primary/20 hover:shadow-xl hover:shadow-primary/30 transition-all flex justify-center items-center gap-2 group"
+            >
+              {loading ? (
+                t("Logging in...")
+              ) : (
+                <>
+                  {t("Log in")}
+                  <div className="w-5 h-5 bg-white/20 rounded-full flex items-center justify-center group-hover:translate-x-1 transition-transform">
+                    <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+                      <path
+                        d="M4 3L7 6L4 9"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      />
+                    </svg>
+                  </div>
+                </>
+              )}
+            </Button>
 
-            <div className="text-center">
-              <button
-                type="button"
-                className="text-sm text-foreground hover:text-primary transition-colors underline"
-                onClick={() => {
-                  setForgotOpen(true);
-                  setForgotSent(false);
-                  setForgotError(null);
-                }}
-              >
-                {t("Forgot password?")}
-              </button>
-            </div>
-            <div className="mt-4 text-center text-sm text-muted-foreground">
-              <span>{t("Don't have an account?")} </span>
-              <a
-                href="/register"
-                className="text-primary hover:text-accent font-semibold hover:underline transition-colors"
-              >
-                {t("Create one here")}
-              </a>
-            </div>
-
-            <div className="relative my-6">
-              <div className="absolute inset-0 flex items-center">
+            <div className="relative my-8">
+              <div className="absolute inset-0 flex items-center px-2">
                 <span className="w-full border-t border-muted/50"></span>
               </div>
-              <div className="relative flex justify-center text-xs uppercase">
-                <span className="bg-white dark:bg-gray-900 px-2 text-muted-foreground">
-                  {t("Or continue with")}
+              <div className="relative flex justify-center text-xs uppercase tracking-widest font-bold">
+                <span className="bg-white dark:bg-gray-900 px-4 text-muted-foreground/60">
+                  {t("Or connect with")}
                 </span>
               </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
-              <Button
+            <div className="flex justify-center gap-6">
+              <button
                 type="button"
-                variant="outline"
-                className="w-full flex items-center justify-center gap-2 py-5 rounded-2xl border-primary/20 hover:bg-primary/5"
+                className="group relative flex flex-col items-center gap-2"
                 onClick={() => {
-                  window.location.href = `${
-                    process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080"
-                  }/api/auth/google`;
+                  window.location.href = `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080"}/api/auth/google`;
                 }}
               >
-                <Image
-                  src="/google.svg"
-                  alt="Google"
-                  width={20}
-                  height={20}
-                  className="w-5 h-5"
-                />
-                <span className="font-semibold text-xs md:text-sm">Google</span>
-              </Button>
-              <Button
-                type="button"
-                variant="outline"
-                className="w-full flex items-center justify-center gap-2 py-5 rounded-2xl border-primary/20 hover:bg-primary/5"
-                onClick={() => {
-                  window.location.href = `${
-                    process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080"
-                  }/api/auth/facebook`;
-                }}
-              >
-                <Image
-                  src="/facebook.svg"
-                  alt="Facebook"
-                  width={20}
-                  height={20}
-                  className="w-5 h-5"
-                />
-                <span className="font-semibold text-xs md:text-sm">
-                  Facebook
+                <div className="w-14 h-14 rounded-2xl bg-white dark:bg-gray-800 border border-primary/10 shadow-sm flex items-center justify-center group-hover:shadow-md group-hover:border-primary/20 transition-all group-hover:-translate-y-1">
+                  <Image
+                    src="/google.png"
+                    alt="Google"
+                    width={28}
+                    height={28}
+                    className="w-12 h-12 object-contain"
+                  />
+                </div>
+                <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-tight">
+                  {t("Google")}
                 </span>
-              </Button>
+              </button>
+
+              <button
+                type="button"
+                className="group relative flex flex-col items-center gap-2"
+                onClick={() => {
+                  window.location.href = `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080"}/api/auth/facebook`;
+                }}
+              >
+                <div className="w-14 h-14 rounded-2xl bg-white dark:bg-gray-800 border border-primary/10 shadow-sm flex items-center justify-center group-hover:shadow-md group-hover:border-primary/20 transition-all group-hover:-translate-y-1">
+                  <Image
+                    src="/Facebook.png"
+                    alt="Facebook"
+                    width={28}
+                    height={28}
+                    className="w-7 h-7 object-contain"
+                  />
+                </div>
+                <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-tight">
+                  {t("Facebook")}
+                </span>
+              </button>
             </div>
+
+            <p className="mt-8 text-center text-sm text-muted-foreground">
+              {t("Don't have an account?")}{" "}
+              <a
+                href="/register"
+                className="text-primary hover:text-accent font-bold transition-colors hover:underline underline-offset-4"
+              >
+                {t("Join now")}
+              </a>
+            </p>
           </form>
         </div>
       </div>

@@ -44,9 +44,9 @@ export const TimeRangePicker: React.FC<TimeRangePickerProps> = ({
   const [tempEnd, setTempEnd] = useState(parseTime24(value.endTime));
 
   React.useEffect(() => {
+    setTempStart(parseTime24(value.startTime));
+    setTempEnd(parseTime24(value.endTime));
     if (!open) {
-      setTempStart(parseTime24(value.startTime));
-      setTempEnd(parseTime24(value.endTime));
       setSelecting("start");
     }
   }, [open, value.startTime, value.endTime]);

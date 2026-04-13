@@ -15,6 +15,7 @@ import {
 } from "@dnd-kit/core";
 import { arrayMove } from "@dnd-kit/sortable";
 import { useState } from "react";
+import { cn } from "@/lib/utils";
 
 interface KanbanBoardProps {
   columns: KanbanColumnType[];
@@ -161,7 +162,7 @@ export function KanbanBoard({
       onDragOver={handleDragOver}
       onDragEnd={handleDragEnd}
     >
-      <div className="flex gap-4 overflow-x-auto pb-4 h-full">
+      <div className="flex gap-4 overflow-x-auto overflow-y-hidden pb-4 pt-2 px-2 h-full scrollbar-thin scrollbar-thumb-border/40 scrollbar-track-transparent">
         {columns.map((column) => (
           <KanbanColumn
             key={column._id}
@@ -177,19 +178,25 @@ export function KanbanBoard({
         {/* Add Column Button */}
         <button
           onClick={onAddColumn}
-          className="flex-shrink-0 w-80 h-17 border-2 border-dashed border-muted-foreground/30 hover:border-primary hover:bg-primary rounded-lg flex flex-row items-center justify-center gap-2 transition-colors text-muted-foreground hover:text-foreground"
+          className="flex-shrink-0 w-[320px] h-[100px] border-2 border-dashed border-border/50 hover:border-primary/60 hover:bg-primary/5 rounded-2xl flex items-center justify-center gap-3 transition-all duration-300 text-muted-foreground hover:text-primary shadow-sm group"
         >
-          <Plus className="w-6 h-6" />
-          <span className="text-sm font-medium">Add Column</span>
+          <Plus className="w-5 h-5 transition-transform group-hover:scale-110" />
+          <span className="text-sm font-semibold tracking-wide">Add Column</span>
         </button>
       </div>
 
       {/* Drag Overlay */}
-      <DragOverlay>
+      <DragOverlay dropAnimation={{
+        duration: 250,
+        easing: "cubic-bezier(0.18, 0.67, 0.6, 1.22)"
+      }}>
         {activeCard ? (
-          <div className="w-80 opacity-80 rotate-3 transform scale-105">
-            <div className="bg-card border-2 border-primary rounded-lg p-4 shadow-2xl">
-              <h3 className="font-semibold text-sm">{activeCard.title}</h3>
+          <div className="w-[300px] opacity-90 rotate-3 transform scale-105 pointer-events-none z-[9999]">
+            <div className="bg-card/95 border border-primary/40 rounded-xl p-3 shadow-2xl ring-2 ring-primary ring-offset-1 ring-offset-background flex flex-col gap-2">
+              <h3 className="font-semibold text-[13px] text-foreground leading-tight">
+                {activeCard.title}
+              </h3>
+              <div className="h-2 w-16 bg-primary/20 rounded-full mt-1" />
             </div>
           </div>
         ) : null}

@@ -20,6 +20,30 @@
   --border: #d1d5db;
   --input: rgba(255, 255, 255, 0.8);
   --radius: 0.5rem;
+
+  --status-pending: #d39b2f;
+  --status-pending: color-mix(in srgb, var(--primary) 35%, #f59e0b 65%);
+  --status-confirmed: #3b61c0;
+  --status-confirmed: color-mix(in srgb, var(--primary) 90%, var(--accent) 10%);
+  --status-completed: #2da47f;
+  --status-completed: color-mix(in srgb, var(--primary) 25%, #10b981 75%);
+  --status-blocked: #64748b;
+  --status-blocked: color-mix(in srgb, var(--primary) 20%, #64748b 80%);
+  --status-cancelled: #d2556c;
+  --status-cancelled: color-mix(in srgb, var(--primary) 20%, #ef4444 80%);
+
+  --chart-1: #3b61c0;
+  --chart-1: var(--primary);
+  --chart-2: #0ea5e9;
+  --chart-2: color-mix(in srgb, var(--primary) 10%, var(--accent) 90%);
+  --chart-3: #8b5cf6;
+  --chart-3: color-mix(in srgb, var(--primary) 10%, #8b5cf6 90%);
+  --chart-4: #22c55e;
+  --chart-4: color-mix(in srgb, var(--primary) 10%, #22c55e 90%);
+  --chart-5: #f97316;
+  --chart-5: color-mix(in srgb, var(--primary) 10%, #f97316 90%);
+  --chart-6: #e11d48;
+  --chart-6: color-mix(in srgb, var(--primary) 10%, #e11d48 90%);
 }
 
 .dark {
@@ -69,6 +93,13 @@
   /* Replace with your desired red secondary/accent color */
   --secondary: #b71c1c; /* Deep Crimson */
   --accent: #e57373;
+}
+
+.theme-pink {
+  --primary: #ec4899;
+  --primary-dark: #be185d;
+  --secondary: #db2777;
+  --accent: #f472b6;
 }
 @theme inline {
   --color-text-primary: var(--text-primary);
@@ -145,6 +176,37 @@
 }
 
 @layer utilities {
+  .status-theme-base {
+    background: color-mix(in srgb, var(--card) 60%, transparent);
+    border-width: 2px;
+    border-style: solid;
+  }
+
+  .status-theme-pending {
+    border-color: var(--status-pending);
+    color: var(--status-pending);
+  }
+
+  .status-theme-confirmed {
+    border-color: var(--status-confirmed);
+    color: var(--status-confirmed);
+  }
+
+  .status-theme-completed {
+    border-color: var(--status-completed);
+    color: var(--status-completed);
+  }
+
+  .status-theme-blocked {
+    border-color: var(--status-blocked);
+    color: var(--status-blocked);
+  }
+
+  .status-theme-cancelled {
+    border-color: var(--status-cancelled);
+    color: var(--status-cancelled);
+  }
+
   .theme-gradient-primary {
     background: linear-gradient(to right, var(--primary), var(--accent));
   }
@@ -187,6 +249,35 @@
 .no-outline,
 .no-outline * {
   outline: none !important;
+}
+
+.theme-logo-mask {
+  width: 2rem;
+  height: 2rem;
+  display: inline-block;
+  background-image: url("/AppointmantPro.png");
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: contain;
+}
+
+@supports ((-webkit-mask-image: url("")) or (mask-image: url(""))) {
+  .theme-logo-mask {
+    background: linear-gradient(to bottom right, var(--primary), var(--accent));
+    background-image: linear-gradient(
+      to bottom right,
+      var(--primary),
+      var(--accent)
+    );
+    -webkit-mask-image: url("/AppointmantPro.png");
+    mask-image: url("/AppointmantPro.png");
+    -webkit-mask-repeat: no-repeat;
+    mask-repeat: no-repeat;
+    -webkit-mask-position: center;
+    mask-position: center;
+    -webkit-mask-size: contain;
+    mask-size: contain;
+  }
 }
 
 @keyframes float {

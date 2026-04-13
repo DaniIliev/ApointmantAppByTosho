@@ -33,6 +33,7 @@ export interface KPIConfig {
   icon?: React.ReactNode;
   configuration?: {
     staffId?: string;
+    locationId?: string;
   };
   layout?: GridLayoutConfig;
   responsiveLayout?: ResponsiveLayout;
@@ -61,6 +62,7 @@ export interface ChartConfig {
     status?: string;
     from?: string;
     to?: string;
+    locationId?: string;
     // LineBar specific: compare current vs previous week
     compareWeeks?: boolean;
   };

@@ -92,6 +92,7 @@ export const formatPriceEUR = (value: number, locale: string = "bg-BG") =>
   }).format(value);
 
 export const getInitials = (name: string) => {
+  if (!name) return "";
   const parts = name.split(" ");
   if (parts.length === 1) return parts[0][0]?.toUpperCase() || "";
   return (

@@ -16,6 +16,7 @@ import {
 import { formatPriceEUR } from "@/Global/Utils/commonFn";
 import type { KPIConfig } from "./types";
 import { useStaffOptions } from "./useStaffOptions";
+import { useLocationOptions } from "./useLocationOptions";
 import { Modal } from "../customUIComponents/Modal";
 import { useTranslation } from "react-i18next";
 import { useDashboardDate } from "@/context/DashboardDateContext";
@@ -77,7 +78,9 @@ export function KPIConfigForm({
   const { startDate, endDate, groupBy } = useDashboardDate();
   const [selectedKPI, setSelectedKPI] = useState<string>("totalAppointments");
   const [staffId, setStaffId] = useState<string>("");
+  const [locationIdFilter, setLocationIdFilter] = useState<string>("");
   const { staffOptions, loadingStaff } = useStaffOptions();
+  const { locationOptions, loadingLocations } = useLocationOptions();
   const [previewValue, setPreviewValue] = useState<string | number>(
     "Loading..."
   );
@@ -141,6 +144,7 @@ export function KPIConfigForm({
             to: endDate,
           });
           if (staffId) currentParams.set("staffId", staffId);
+          if (locationIdFilter) currentParams.set("locationId", locationIdFilter);
           const currentUrl = `/api/analytics?${currentParams.toString()}&t=${Date.now()}`;
           const currentRows = (await callApi(currentUrl, "GET")) as Array<
             Record<string, unknown>
@@ -167,6 +171,7 @@ export function KPIConfigForm({
             to: prevEndStr,
           });
           if (staffId) prevParams.set("staffId", staffId);
+          if (locationIdFilter) prevParams.set("locationId", locationIdFilter);
           const prevUrl = `/api/analytics?${prevParams.toString()}&t=${Date.now()}`;
           const prevRows = (await callApi(prevUrl, "GET")) as Array<
             Record<string, unknown>
@@ -216,6 +221,7 @@ export function KPIConfigForm({
             to: endDate,
           });
           if (staffId) currentParams.set("staffId", staffId);
+          if (locationIdFilter) currentParams.set("locationId", locationIdFilter);
           const currentUrl = `/api/analytics?${currentParams.toString()}&t=${Date.now()}`;
           const currentRows = (await callApi(currentUrl, "GET")) as Array<
             Record<string, unknown>
@@ -234,6 +240,7 @@ export function KPIConfigForm({
             to: prevEndStr,
           });
           if (staffId) prevParams.set("staffId", staffId);
+          if (locationIdFilter) prevParams.set("locationId", locationIdFilter);
           const prevUrl = `/api/analytics?${prevParams.toString()}&t=${Date.now()}`;
           const prevRows = (await callApi(prevUrl, "GET")) as Array<
             Record<string, unknown>
@@ -257,6 +264,7 @@ export function KPIConfigForm({
             dimension: "metrics",
           });
           const url = `/api/analytics?${params.toString()}&t=${Date.now()}`;
+          if (locationIdFilter) params.set("locationId", locationIdFilter);
           const rows = await callApi(url, "GET");
           const list = rows as Array<Record<string, unknown>>;
           if (!isCancelled) {
@@ -293,7 +301,7 @@ export function KPIConfigForm({
     return () => {
       isCancelled = true;
     };
-  }, [selectedKPI, staffId, startDate, endDate, groupBy]);
+  }, [selectedKPI, staffId, locationIdFilter, startDate, endDate, groupBy]);
 
   const handleSave = () => {
     const kpiOption = kpiOptions.find((opt) => opt.id === selectedKPI);
@@ -306,7 +314,10 @@ export function KPIConfigForm({
       title: kpiOption.label,
       value: previewValue,
       change: previewChange,
-      configuration: staffId ? { staffId } : undefined,
+      configuration: {
+        ...(staffId ? { staffId } : {}),
+        ...(locationIdFilter ? { locationId: locationIdFilter } : {}),
+      },
       layout: {
         x: 0,
         y: 0,
@@ -353,6 +364,23 @@ export function KPIConfigForm({
                 id: s._id as string,
                 name:
                   `${s.firstName} ${s.lastName}`.trim() || (s._id as string),
+              })),
+            ]}
+          />
+
+          <LabeledSelect<string>
+            id="location-id"
+            label={t("Location (optional)")}
+            placeholder={loadingLocations ? "Loading..." : "All locations"}
+            value={locationIdFilter || "all"}
+            onValueChange={(value) =>
+              setLocationIdFilter(value === "all" ? "" : value)
+            }
+            options={[
+              { id: "all", name: "All locations" },
+              ...locationOptions.map((l) => ({
+                id: l._id as string,
+                name: l.name,
               })),
             ]}
           />

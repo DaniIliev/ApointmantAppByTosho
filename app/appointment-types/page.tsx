@@ -15,7 +15,6 @@ import callApi from "@/app/Api/callApi";
 import AppointmentCard from "./AppointmentCard";
 import EmptyState from "./EmptyState";
 import CreateAppointmentModal from "./CreateAppointmentModal";
-import AppointmentDetailsModal from "./AppointmentDetailsModal";
 import { useAuthContext } from "@/context/AuthContext";
 import { Skeleton } from "@/components/ui/skeleton";
 
@@ -33,11 +32,14 @@ const CreateNewTypeMenu = ({ onOpenModal }: CreateNewDashboardMenuProps) => {
   );
 };
 
+import { useLocationContext } from "@/context/LocationContext";
+
 function AppointmentTypesPageContent() {
   const { t } = useTranslation();
   const { user } = useAuthContext();
+  const { selectedLocation } = useLocationContext();
   const [appointmentTypes, setAppointmentTypes] = useState<AppointmentType[]>(
-    []
+    [],
   );
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingType, setEditingType] = useState<AppointmentType | null>(null);
@@ -52,6 +54,8 @@ function AppointmentTypesPageContent() {
     locationId: string;
     staffMembers: { _id: string; name: string }[];
     paymentOption: "cash" | "card" | "cash_and_card";
+    isGroup: boolean;
+    capacity: string;
   }>({
     name: "",
     category: "",
@@ -63,17 +67,16 @@ function AppointmentTypesPageContent() {
     imageUrl: null,
     staffMembers: [],
     paymentOption: "cash",
+    isGroup: false,
+    capacity: "1",
   });
 
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [typeToDelete, setTypeToDelete] = useState<AppointmentType | null>(
-    null
+    null,
   );
   const [isLoading, setIsLoading] = useState(false);
   const [isPageLoading, setIsPageLoading] = useState(true);
-  const [selectedType, setSelectedType] = useState<AppointmentType | null>(
-    null
-  );
 
   const { setPageTitle } = usePageTitle();
   const { setExtraRightNavMenu, setIsRightNavVisible } = useRightNav();
@@ -82,7 +85,7 @@ function AppointmentTypesPageContent() {
     try {
       const services = await callApi(
         `/api/service?businessId=${user?.businessId}`,
-        "GET"
+        "GET",
       );
       setAppointmentTypes(services);
     } catch (error) {
@@ -96,14 +99,17 @@ function AppointmentTypesPageContent() {
     setPageTitle(t("Appointment Types"));
     setExtraRightNavMenu(<CreateNewTypeMenu onOpenModal={() => openModal()} />);
     setIsRightNavVisible(true);
-    fetchServices();
 
     return () => {
       setPageTitle(null);
       setExtraRightNavMenu(null);
       setIsRightNavVisible(false);
     };
-  }, [setPageTitle, setExtraRightNavMenu, setIsRightNavVisible]);
+  }, [setPageTitle, setExtraRightNavMenu, setIsRightNavVisible, t]);
+
+  useEffect(() => {
+    fetchServices();
+  }, [user?.businessId, selectedLocation?._id]);
 
   const colorOptions = [
     "from-blue-500 to-cyan-500",
@@ -127,9 +133,15 @@ function AppointmentTypesPageContent() {
         price: type.price.toString(),
         color: type.color || "from-blue-500 to-cyan-500",
         imageUrl: type.imageUrl || null,
-        staffMembers: type.staffs || [],
+        staffMembers:
+          type.staffMembers?.map((s: any) => ({
+            _id: s._id,
+            name: s.name || `${s.firstName || ""} ${s.lastName || ""}`.trim(),
+          })) || [],
         paymentOption: (type as any).paymentOption || "cash",
         locationId: type.locationId || "",
+        isGroup: type.isGroup || false,
+        capacity: (type.capacity || 1).toString(),
       });
     } else {
       setEditingType(null);
@@ -144,6 +156,8 @@ function AppointmentTypesPageContent() {
         staffMembers: [],
         paymentOption: "cash",
         locationId: "",
+        isGroup: false,
+        capacity: "1",
       });
     }
     setIsModalOpen(true);
@@ -165,10 +179,12 @@ function AppointmentTypesPageContent() {
         color: formData.color,
         imageUrl: formData.imageUrl,
         category: formData.category,
-        staffs: JSON.stringify(formData.staffMembers),
+        staffMembers: JSON.stringify(formData.staffMembers),
         paymentOption: formData.paymentOption,
         locationId: formData.locationId,
         businessId: user?.businessId,
+        isGroup: formData.isGroup,
+        capacity: Number(formData.capacity),
       };
       console.log("payload", dataToSend);
       await callApi(endpoint, method, dataToSend, isFile);
@@ -201,7 +217,7 @@ function AppointmentTypesPageContent() {
 
   const formatDuration = (minutes: number) => {
     if (minutes < 60) {
-      return `${minutes}m`;
+      return `${minutes} minutes`;
     }
     const hours = Math.floor(minutes / 60);
     const remainingMinutes = minutes % 60;
@@ -221,8 +237,8 @@ function AppointmentTypesPageContent() {
 
   return (
     <div>
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {appointmentTypes.length > 0 ? (
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-4">
+        {appointmentTypes.length > 0 &&
           appointmentTypes.map((type) => (
             <AppointmentCard
               key={type._id}
@@ -230,14 +246,12 @@ function AppointmentTypesPageContent() {
               openModal={openModal}
               handleDelete={handleDelete}
               formatDuration={formatDuration}
-              setSelectedType={setSelectedType}
             />
-          ))
-        ) : (
-          <EmptyState onOpenModal={() => openModal()} />
-        )}
+          ))}
       </div>
-
+      {appointmentTypes.length === 0 && (
+        <EmptyState onOpenModal={() => openModal()} />
+      )}
       <CreateAppointmentModal
         isModalOpen={isModalOpen}
         setIsModalOpen={setIsModalOpen}
@@ -249,12 +263,6 @@ function AppointmentTypesPageContent() {
         colorOptions={colorOptions}
       />
 
-      <AppointmentDetailsModal
-        selectedType={selectedType}
-        setSelectedType={setSelectedType}
-        formatDuration={formatDuration}
-      />
-
       <DeleteConfirmationDialog
         isOpen={isDeleteDialogOpen}
         onClose={() => setIsDeleteDialogOpen(false)}
@@ -262,7 +270,7 @@ function AppointmentTypesPageContent() {
         title={t("Delete Appointment Type")}
         message={t(
           'Are you sure you want to delete "{{name}}"? This action cannot be undone.',
-          { name: typeToDelete?.name || "" }
+          { name: typeToDelete?.name || "" },
         )}
       />
     </div>
@@ -271,7 +279,7 @@ function AppointmentTypesPageContent() {
 
 export default function AppointmentTypesPage() {
   return (
-    <ProtectedRoute requiredRoles={["business"]}>
+    <ProtectedRoute requiredRoles={["business", "manager"]}>
       <AppointmentTypesPageContent />
     </ProtectedRoute>
   );

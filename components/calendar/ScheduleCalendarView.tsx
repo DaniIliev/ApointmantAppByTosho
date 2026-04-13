@@ -119,12 +119,12 @@ export default function ScheduleCalendarView({
   // Сортираме всички данни и намираме границите (първи и последен ден)
   const sortedAllData = useMemo(
     () => [...dailyData].sort((a, b) => a.date.getTime() - b.date.getTime()),
-    [dailyData]
+    [dailyData],
   );
 
   const firstAvailableMonth = startOfMonth(sortedAllData[0].date);
   const lastAvailableMonth = startOfMonth(
-    sortedAllData[sortedAllData.length - 1].date
+    sortedAllData[sortedAllData.length - 1].date,
   );
   const currentMonth = startOfMonth(new Date());
 
@@ -147,7 +147,7 @@ export default function ScheduleCalendarView({
   // Групираме дните само за текущия месец
   const weeks = useMemo(
     () => groupIntoWeeksForMonth(dailyData, currentDate),
-    [dailyData, currentDate]
+    [dailyData, currentDate],
   );
 
   // --- Навигационна Логика ---
@@ -193,7 +193,7 @@ export default function ScheduleCalendarView({
       </div>
 
       {/* Desktop View */}
-      <div className="hidden md:block space-y-1 p-2">
+      <div className="hidden md:block">
         {/* Header: Име на месеца и Навигация */}
         <div className="flex justify-between items-center p-2 mb-2 border-b">
           {/* Лява Стрелка */}

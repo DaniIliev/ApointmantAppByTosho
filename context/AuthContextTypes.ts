@@ -1,5 +1,13 @@
 import { UserRole } from "@/lib/permissions";
 
+export type Location = {
+  _id: string;
+  name: string;
+  address: string;
+  city: string;
+  businessId: string;
+};
+
 export type User = {
   _id: string;
   email: string;
@@ -29,11 +37,13 @@ export type User = {
   // Computed fields for easier access
   plan?: string; // Kept for backward compatibility
   planType?: "free" | "starter" | "professional" | "enterprise"; // Normalized plan type
+  locations?: Location[];
 };
 
 export type AuthContextType = {
   user: User | null;
   token: string | null;
+  isAuthLoading: boolean;
   login: (formData: {
     email: string;
     password?: string;

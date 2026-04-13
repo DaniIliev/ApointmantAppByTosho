@@ -23,12 +23,20 @@ import {
   ChevronRight,
   CalendarDays,
   CreditCard,
+  Users,
+  ChevronDown,
+  ChevronUp,
 } from "lucide-react";
-import { Appointment } from "@/Global/Types/types";
-import { getStatusColor } from "@/Global/Utils/statusIndicator";
+import { Appointment, AppointmentStatus } from "@/Global/Types/types";
+import {
+  groupAppointments,
+  GroupedAppointment,
+} from "@/Global/Utils/groupingUtils";
 import { useTranslation } from "react-i18next";
 import { formatDateAndTime } from "@/Global/Utils/commonFn";
 import { CustomTooltip } from "../customUIComponents/CustomTooltip";
+import { LabeledInput } from "../customUIComponents/LabeledInput";
+import { getStatusProps, StatusChip } from "../customUIComponents/StatusChip";
 
 const cn = (...classes: (string | boolean | undefined | null)[]): string =>
   classes.filter(Boolean).join(" ");
@@ -43,52 +51,130 @@ const AppointmentCard: React.FC<AppointmentCardProps> = ({
   onClick,
 }) => {
   const { t } = useTranslation();
+  const statusProps = getStatusProps(appointment.status as AppointmentStatus);
   return (
     <div
-      className="p-3 border border-gray-200 dark:border-gray-700 rounded-lg shadow-sm mb-2 hover:shadow-lg transition-shadow duration-200 bg-white dark:bg-gray-800"
+      className="p-2 border border-gray-200 dark:border-gray-700 rounded-md shadow-sm mb-2 hover:shadow-md transition-shadow bg-white dark:bg-gray-800 cursor-pointer"
       onClick={onClick}
       role={onClick ? "button" : undefined}
       tabIndex={onClick ? 0 : undefined}
     >
-      <div className="flex items-center justify-between space-x-2 mb-1 pb-1 border-b border-gray-200 dark:border-gray-700">
-        <h3 className="font-semibold text-lg flex items-center space-x-1">
-          <User className="h-4 w-4 text-gray-700 dark:text-gray-300" />
-          <span>{appointment.clientName}</span>
+      <div className="flex items-center justify-between space-x-2 mb-1.5 pb-1 border-b border-gray-100 dark:border-gray-700/50">
+        <h3 className="font-semibold text-sm flex items-center space-x-1.5">
+          <User className="h-3.5 w-3.5 text-gray-500 dark:text-gray-400" />
+          <span className="truncate max-w-[150px]">
+            {appointment.clientName}
+          </span>
         </h3>
-        <span
-          className={cn(
-            "text-xs font-medium px-2 py-1 rounded-full text-white",
-            getStatusColor(appointment.status)
-          )}
-        >
-          {t(
-            appointment.status.charAt(0).toUpperCase() +
-              appointment.status.slice(1)
-          )}
-        </span>
-      </div>
-      <div className="space-y-1 text-sm text-gray-600 dark:text-gray-300">
-        <div className="flex items-center space-x-2">
-          <CalendarDays className="h-4 w-4 text-primary" />
-          <p>{formatDateAndTime(appointment.appointmentTime.start, "date")}</p>
+        <div className="flex-shrink-0">
+          <div
+            className={`${statusProps.className} rounded-full h-2 w-2 border`}
+          ></div>
         </div>
-        <div className="flex items-center space-x-2">
-          <Clock className="h-4 w-4 text-primary" />
+      </div>
+
+      <div className="flex items-center justify-between text-xs text-gray-600 dark:text-gray-300">
+        <div className="flex items-center space-x-1.5 font-medium text-gray-800 dark:text-gray-200">
+          <Clock className="h-3 w-3 text-primary" />
           <p className="flex items-center gap-1">
             {(appointment.paymentStatus === "captured" ||
               appointment.paymentStatus === "authorized" ||
               appointment.serviceName === "card") && (
-              <CreditCard className="w-4 h-4 text-green-500 flex-shrink-0" />
+              <CreditCard className="w-3 h-3 text-green-500 flex-shrink-0" />
             )}
             {formatDateAndTime(appointment.appointmentTime.start, "time")} -{" "}
             {formatDateAndTime(appointment.appointmentTime.end, "time")}
           </p>
         </div>
-        <div className="flex items-center space-x-2">
-          <Briefcase className="h-4 w-4 text-primary" />
-          <p>{appointment.serviceName}</p>
+        <div className="flex items-center space-x-1 text-gray-500 dark:text-gray-400 truncate ml-2">
+          <Briefcase className="h-3 w-3 text-primary/70 flex-shrink-0" />
+          <span className="truncate max-w-[120px]">
+            {appointment.serviceName}
+          </span>
         </div>
       </div>
+    </div>
+  );
+};
+
+interface GroupedAppointmentAccordionProps {
+  group: GroupedAppointment;
+  onSelectAppointment: (appointment: Appointment) => void;
+  openDetailsModal: () => void;
+}
+
+const GroupedAppointmentAccordion: React.FC<
+  GroupedAppointmentAccordionProps
+> = ({ group, onSelectAppointment, openDetailsModal }) => {
+  const [isExpanded, setIsExpanded] = React.useState(false);
+  const mainApt = group.mainAppointment;
+
+  return (
+    <div className="border border-gray-200 dark:border-gray-700 rounded-md shadow-sm mb-2 hover:shadow-md transition-shadow bg-white dark:bg-gray-800 overflow-hidden">
+      <div
+        className="p-3 flex items-center justify-between cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700/30 transition-colors"
+        onClick={() => setIsExpanded(!isExpanded)}
+      >
+        <div className="flex items-center space-x-3 truncate">
+          <div className="bg-primary/10 p-2 rounded-lg">
+            <Briefcase className="h-4 w-4 text-primary" />
+          </div>
+          <div className="truncate">
+            <h3 className="font-semibold text-sm truncate">
+              {mainApt.serviceName}
+            </h3>
+            <div className="flex items-center space-x-2 text-xs text-gray-500 dark:text-gray-400">
+              <span className="flex items-center space-x-1">
+                <Clock className="h-3 w-3" />
+                <span>
+                  {formatDateAndTime(mainApt.appointmentTime.start, "time")}
+                </span>
+              </span>
+              <span className="flex items-center space-x-1">
+                <Users className="h-3 w-3" />
+                <span>{group.count}</span>
+              </span>
+            </div>
+          </div>
+        </div>
+        <div className="flex-shrink-0 ml-2">
+          {isExpanded ? (
+            <ChevronUp className="h-4 w-4 text-gray-400" />
+          ) : (
+            <ChevronDown className="h-4 w-4 text-gray-400" />
+          )}
+        </div>
+      </div>
+
+      {isExpanded && (
+        <div className="px-3 pb-3 space-y-2 border-t border-gray-100 dark:border-gray-700/50 pt-3 animate-in fade-in slide-in-from-top-1 duration-200">
+          {group.appointments.map((apt) => (
+            <div
+              key={apt._id}
+              className="flex items-center justify-between p-2 rounded bg-gray-50 dark:bg-gray-900/50 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors cursor-pointer border border-transparent hover:border-gray-200 dark:hover:border-gray-600"
+              onClick={() => {
+                onSelectAppointment(apt);
+                openDetailsModal();
+              }}
+            >
+              <div className="flex items-center space-x-2 overflow-hidden">
+                <User className="h-3.5 w-3.5 text-gray-400 shrink-0" />
+                <span className="text-sm truncate font-medium">
+                  {apt.clientName}
+                </span>
+                {apt.paymentStatus === "captured" && (
+                  <CreditCard className="h-3 w-3 text-green-500 shrink-0" />
+                )}
+              </div>
+              <div
+                className={`${
+                  getStatusProps(apt.status as AppointmentStatus).className
+                } rounded-full h-2 w-2 border shrink-0 ml-2`}
+              ></div>
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 };
@@ -110,7 +196,7 @@ const WeeklyCalendar: React.FC<WeeklyCalendarProps> = ({
 }) => {
   const startOfTheWeek: Date = startOfWeek(selectedDate, { weekStartsOn: 1 });
   const weekDays: Date[] = [...Array(7)].map((_, i) =>
-    addDays(startOfTheWeek, i)
+    addDays(startOfTheWeek, i),
   );
 
   const monthYearTitle: string = format(selectedDate, "MMMM yyyy", {
@@ -147,10 +233,10 @@ const WeeklyCalendar: React.FC<WeeklyCalendarProps> = ({
               "flex flex-col items-center p-2 rounded-full transition-colors w-1/7",
               "hover:bg-gray-200 dark:hover:bg-gray-800",
               isSameDay(date, selectedDate)
-                ? "font-bold text-blue-600 dark:text-blue-400"
+                ? "font-bold text-primary dark:primary-light"
                 : uniqueDates[format(date, "yyyy-MM-dd")]
-                ? "font-bold text-blue-600 dark:text-blue-400"
-                : "text-gray-600 dark:text-gray-400"
+                  ? "font-bold text-primary dark:primary-light"
+                  : "text-gray-600 dark:text-gray-400",
             )}
           >
             <span className="text-xs">
@@ -160,8 +246,8 @@ const WeeklyCalendar: React.FC<WeeklyCalendarProps> = ({
               className={cn(
                 "text-lg font-semibold w-8 h-8 flex items-center justify-center rounded-full transition-colors",
                 isSameDay(date, selectedDate)
-                  ? "ring-2 ring-blue-600 bg-blue-100 dark:bg-blue-900"
-                  : ""
+                  ? "ring-2 ring-primary bg-primary/50 dark:bg-primary-dark"
+                  : "",
               )}
             >
               {format(date, "d")}
@@ -191,6 +277,7 @@ const MonthlyCalendar: React.FC<MonthlyCalendarProps> = ({
   const start: Date = startOfMonth(selectedDate);
   const end: Date = endOfMonth(selectedDate);
   const allDates: Date[] = eachDayOfInterval({ start, end });
+  const leadingEmptyDays: number = (start.getDay() + 6) % 7;
 
   const daysOfWeek: string[] = ["Пн", "Вт", "Ср", "Чт", "Пт", "Сб", "Нд"];
 
@@ -221,6 +308,9 @@ const MonthlyCalendar: React.FC<MonthlyCalendarProps> = ({
         ))}
       </div>
       <div className="grid grid-cols-7 gap-1">
+        {Array.from({ length: leadingEmptyDays }).map((_, index) => (
+          <div key={`empty-${index}`} className="h-12" aria-hidden="true" />
+        ))}
         {allDates.map((date: Date) => (
           <button
             key={date.toString()}
@@ -229,18 +319,18 @@ const MonthlyCalendar: React.FC<MonthlyCalendarProps> = ({
               "flex flex-col items-center p-2 rounded-lg transition-colors",
               "hover:bg-gray-200 dark:hover:bg-gray-800",
               isSameDay(date, selectedDate)
-                ? "font-bold text-blue-600 dark:text-blue-400"
+                ? "font-bold text-primary dark:primary-light"
                 : uniqueDates[format(date, "yyyy-MM-dd")]
-                ? "font-bold text-blue-600 dark:text-blue-400"
-                : "text-gray-600 dark:text-gray-400"
+                  ? "font-bold text-primary dark:primary-light"
+                  : "text-gray-600 dark:text-gray-400",
             )}
           >
             <span
               className={cn(
                 "text-sm font-semibold w-8 h-8 flex items-center justify-center rounded-full transition-colors",
                 isSameDay(date, selectedDate)
-                  ? "ring-2 ring-blue-600 bg-blue-100 dark:bg-blue-900"
-                  : ""
+                  ? "ring-2 ring-primary bg-primary/20 dark:bg-primary-dark"
+                  : "",
               )}
             >
               {format(date, "d")}
@@ -271,7 +361,7 @@ const MobileCalendar = ({
   // const appointments: Appointment[] = mockAppointments;
 
   const appointmentRefs = React.useRef<Record<string, HTMLDivElement | null>>(
-    {}
+    {},
   );
   const containerRef = React.useRef<HTMLDivElement>(null);
   const isUserScrolling = React.useRef<boolean>(false);
@@ -280,7 +370,7 @@ const MobileCalendar = ({
     return [...appointments].sort(
       (a, b) =>
         parseISO(a.appointmentTime.start).getTime() -
-        parseISO(b.appointmentTime.start).getTime()
+        parseISO(b.appointmentTime.start).getTime(),
     );
   }, [appointments]);
 
@@ -300,7 +390,7 @@ const MobileCalendar = ({
           "dd MMMM yyyy г.",
           {
             locale: bg,
-          }
+          },
         );
         if (!groups[dateKey]) {
           groups[dateKey] = [];
@@ -320,11 +410,11 @@ const MobileCalendar = ({
         }
         return acc;
       },
-      {}
+      {},
     );
   }, [appointments]);
 
-  const handleSelectDate = (date: Date): void => {
+  const handleSelectDate = (date: Date, smoothScroll = true): void => {
     isUserScrolling.current = true;
     setSelectedDate(date);
 
@@ -332,7 +422,7 @@ const MobileCalendar = ({
     const element: HTMLDivElement | null = appointmentRefs.current[dateKey];
     if (element) {
       element.scrollIntoView({
-        behavior: "smooth",
+        behavior: smoothScroll ? "smooth" : "auto",
         block: "nearest",
         inline: "nearest",
       });
@@ -396,7 +486,7 @@ const MobileCalendar = ({
         root: containerRef.current,
         rootMargin: "0px",
         threshold: 0,
-      }
+      },
     );
 
     Object.values(appointmentRefs.current).forEach((ref) => {
@@ -416,12 +506,12 @@ const MobileCalendar = ({
 
   React.useEffect(() => {
     setTimeout(() => {
-      handleSelectDate(new Date());
+      handleSelectDate(new Date(), false);
     }, 100);
   }, []);
 
   return (
-    <div className="flex flex-col h-screen max-w-lg mx-auto bg-white dark:bg-black text-gray-900 dark:text-gray-100 font-sans">
+    <div className="flex flex-col h-full max-w-lg mx-auto bg-white dark:bg-black text-gray-900 dark:text-gray-100 font-sans">
       <style>
         {`
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
@@ -453,7 +543,7 @@ const MobileCalendar = ({
         <div
           className={cn(
             "overflow-hidden transition-all duration-300 ease-in-out w-full",
-            isMonthlyView ? "h-auto" : "h-28"
+            isMonthlyView ? "h-auto" : "h-28",
           )}
         >
           {isMonthlyView ? (
@@ -476,7 +566,7 @@ const MobileCalendar = ({
         </div>
 
         <button
-          className="w-full text-center p-2 mt-2 text-sm font-semibold text-blue-600 dark:text-blue-400 hover:underline"
+          className="w-full text-center p-2 mt-2 text-sm font-semibold text-primary dark:text-primary hover:underline"
           onClick={() => setIsMonthlyView(!isMonthlyView)}
         >
           {isMonthlyView ? "Свий" : "Разшири"}
@@ -485,18 +575,15 @@ const MobileCalendar = ({
 
       {/* Search Bar */}
       <div className="relative mb-0 px-4">
-        <Search className="absolute left-7 top-1/2 -translate-y-1/2 text-gray-400" />
-        <input
-          type="text"
-          placeholder="Търсене по име..."
-          className="w-full pl-10 pr-4 py-2 rounded-md bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+        <Search className="h-4 w-4 absolute right-7 top-1/2 -translate-y-1/2 text-gray-500 z-10" />
+        <LabeledInput
           value={searchQuery}
-          onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-            setSearchQuery(e.target.value)
-          }
+          onChange={(e) => setSearchQuery(e.target.value)}
+          label={t("Search appointments...")}
+          id={"search-appointments"}
+          className="w-5"
         />
       </div>
-
       {/* Appointments List */}
       <div
         className="flex-1 overflow-y-auto space-y-4 px-4 pb-4 scrolling-container"
@@ -510,7 +597,7 @@ const MobileCalendar = ({
             const appointmentsForDate: Appointment[] =
               groupedAppointments[dateKey] || [];
             const filteredAppointments = appointmentsForDate.filter((apt) =>
-              apt.clientName.toLowerCase().includes(searchQuery.toLowerCase())
+              apt.clientName.toLowerCase().includes(searchQuery.toLowerCase()),
             );
 
             return (
@@ -525,16 +612,30 @@ const MobileCalendar = ({
                   {dateKey}
                 </h2>
                 {filteredAppointments.length > 0 ? (
-                  filteredAppointments.map((appointment: Appointment) => (
-                    <AppointmentCard
-                      key={appointment._id}
-                      appointment={appointment}
-                      onClick={() => {
-                        onSelectAppointment(appointment);
-                        openDetailsModal();
-                      }}
-                    />
-                  ))
+                  groupAppointments(filteredAppointments).map((item, idx) => {
+                    if ("isGroup" in item && item.isGroup) {
+                      return (
+                        <GroupedAppointmentAccordion
+                          key={`${dateKey}-group-${idx}`}
+                          group={item as GroupedAppointment}
+                          onSelectAppointment={onSelectAppointment}
+                          openDetailsModal={openDetailsModal}
+                        />
+                      );
+                    } else {
+                      const appointment = item as Appointment;
+                      return (
+                        <AppointmentCard
+                          key={appointment._id}
+                          appointment={appointment}
+                          onClick={() => {
+                            onSelectAppointment(appointment);
+                            openDetailsModal();
+                          }}
+                        />
+                      );
+                    }
+                  })
                 ) : (
                   <p className="text-center text-gray-500 dark:text-gray-400 mt-4 p-4 rounded-lg bg-gray-100 dark:bg-gray-800 border border-dashed border-gray-300 dark:border-gray-700">
                     {t("No appointments.")}

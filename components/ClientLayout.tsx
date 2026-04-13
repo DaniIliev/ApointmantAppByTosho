@@ -5,8 +5,6 @@ import { useState } from "react";
 import TopNav from "@/components/navigation/top-nav";
 import LeftNav from "@/components/navigation/left-nav";
 import RightNavigation from "./navigation/right-nav";
-import { useRightNav } from "@/context/RightNavContext";
-import Footer from "./Footer/Footer";
 import { usePaddingControl } from "@/context/PaddingContext";
 
 export const LEFT_NAV_OPEN_WIDTH_CLASS = "ml-0 lg:ml-64";
@@ -32,7 +30,18 @@ export default function ClientLayout({
         <TopNav onToggleLeftNav={toggleLeftNav} isLeftNavOpen={isLeftNavOpen} hideLeftNav={hideLeftNav} />
       </div>
       <div className="flex flex-1 pt-12.5 transition-all duration-300">
-        {!hideLeftNav && <LeftNav isOpen={isLeftNavOpen} />}
+        {!hideLeftNav && (
+          <LeftNav isOpen={isLeftNavOpen} onClose={() => setIsLeftNavOpen(false)} />
+        )}
+
+        {/* Mobile Backdrop */}
+        {isLeftNavOpen && !hideLeftNav && (
+          <div
+            className="fixed inset-0 bg-black/40 backdrop-blur-sm z-30 md:hidden transition-opacity duration-300"
+            onClick={() => setIsLeftNavOpen(false)}
+            aria-hidden="true"
+          />
+        )}
 
         <main
           className={`

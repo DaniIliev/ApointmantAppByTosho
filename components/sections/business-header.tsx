@@ -36,7 +36,7 @@ export function BusinessHeader({ business }: BusinessHeaderProps) {
           </div>
           <div className="md:col-span-7 flex flex-col justify-center">
             <Badge className="w-fit mb-3 text-sm font-medium bg-primary/10 text-primary border border-primary/20 hover:bg-primary/20 transition-colors">
-              {business.category}
+              {business?.category}
             </Badge>
 
             <h1 className="text-3xl lg:text-5xl font-extrabold mb-4 text-foreground tracking-tight">

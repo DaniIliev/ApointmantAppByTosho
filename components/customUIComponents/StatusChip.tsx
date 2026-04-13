@@ -10,50 +10,52 @@ interface StatusChipProps {
   status: AppointmentStatus;
 }
 
-const getStatusProps = (status: AppointmentStatus) => {
+export const getStatusProps = (status: AppointmentStatus) => {
   switch (status) {
     case "completed":
+    case "active":
       return {
         icon: <Check size={16} />,
-        className:
-          "bg-card/50 border-2 border-green-500 text-green-600 dark:text-green-400",
+        className: "status-theme-base status-theme-completed",
+      };
+    case "blocked":
+      return {
+        icon: <Clock size={16} />,
+        className: "status-theme-base status-theme-blocked",
       };
     case "cancelled":
+    case "expired":
       return {
         icon: <X size={16} />,
-        className:
-          "bg-card/50 border-2 border-red-500 text-red-600 dark:text-red-400",
+        className: "status-theme-base status-theme-cancelled",
       };
     case "pending":
       return {
         icon: <Clock size={16} />,
-        className:
-          "bg-card/50 border-2 border-yellow-500 text-yellow-600 dark:text-yellow-400",
+        className: "status-theme-base status-theme-pending",
       };
     case "confirmed":
+    case "upcoming":
       return {
         icon: <Clock size={16} />,
-        className:
-          "bg-card/50 border-2 border-blue-500 text-blue-600 dark:text-blue-400",
+        className: "status-theme-base status-theme-confirmed",
       };
     default:
       return {
         icon: null,
-        className:
-          "bg-card/50 border-2 border-gray-400 text-gray-600 dark:text-gray-400",
+        className: "status-theme-base border-border text-muted-foreground",
       };
   }
 };
 
 export const StatusChip = ({ status }: StatusChipProps) => {
-  console.log("status", status);
   const { t } = useTranslation();
   const statusProps = getStatusProps(status);
 
   return (
     <div
       className={cn(
-        `flex items-center gap-1 rounded-full px-3 py-1 text-sm font-semibold whitespace-nowrap ${statusProps.className}`
+        `flex items-center gap-1 rounded-full px-3 py-1 text-sm font-semibold whitespace-nowrap ${statusProps.className}`,
       )}
     >
       {statusProps.icon}

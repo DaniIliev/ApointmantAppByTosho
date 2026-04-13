@@ -12,6 +12,8 @@ import { LabeledInput } from "@/components/customUIComponents/LabeledInput";
 import { LabeledSelect } from "@/components/customUIComponents/LabeledSelect";
 import { Modal } from "../customUIComponents/Modal";
 import { useTranslation } from "react-i18next";
+import { useLocationOptions } from "./useLocationOptions";
+import { getThemeChartColorTokens } from "@/lib/themeColors";
 
 interface PieChartConfigFormProps {
   open: boolean;
@@ -26,12 +28,13 @@ type PieMetric =
   | "by_source"
   | "popularity"
   | "client_distribution"
-  | "count";
+  | "count"
+  | "by_location";
 
 const dataSourceMetrics: Record<PieDataSource, PieMetric[]> = {
-  appointments: ["by_service", "count"],
+  appointments: ["by_service", "count", "by_location"],
   clients: ["by_source"],
-  revenue: ["by_service"],
+  revenue: ["by_service", "by_location"],
   services: ["popularity"],
 };
 
@@ -41,6 +44,7 @@ interface PieConfig {
   metric: PieMetric;
   showLegend: boolean;
   staffId?: string;
+  locationId?: string;
 }
 
 export function PieChartConfigForm({
@@ -56,6 +60,7 @@ export function PieChartConfigForm({
     metric: "by_service",
     showLegend: true,
     staffId: "",
+    locationId: "",
   });
 
   const [previewData, setPreviewData] = useState<Record<string, unknown>[]>([]);
@@ -64,6 +69,7 @@ export function PieChartConfigForm({
   const [loadingPreview, setLoadingPreview] = useState(true);
   const { startDate, endDate, groupBy } = useDashboardDate();
   const { staffOptions, loadingStaff } = useStaffOptions();
+  const { locationOptions, loadingLocations } = useLocationOptions();
 
   const availableMetrics = dataSourceMetrics[config.dataSource] || [
     "by_service",
@@ -79,6 +85,7 @@ export function PieChartConfigForm({
           dataSource: config.dataSource,
           metric: config.metric,
           staffId: config.staffId || undefined,
+          locationId: config.locationId || undefined,
           groupBy,
           startDate,
           endDate,
@@ -106,7 +113,9 @@ export function PieChartConfigForm({
     config.staffId,
     groupBy,
     startDate,
+    startDate,
     endDate,
+    config.locationId,
   ]);
 
   const getDataKey = () => {
@@ -124,6 +133,9 @@ export function PieChartConfigForm({
     }
     if (config.dataSource === "services" && config.metric === "popularity") {
       return "bookings";
+    }
+    if (config.metric === "by_location") {
+      return config.dataSource === "revenue" ? "revenue" : "count";
     }
     return "value";
   };
@@ -144,6 +156,7 @@ export function PieChartConfigForm({
     if (config.dataSource === "services" && config.metric === "popularity") {
       return "service";
     }
+    if (config.metric === "by_location") return "name";
     return "name";
   };
 
@@ -154,7 +167,7 @@ export function PieChartConfigForm({
       type: "pie",
       dataKey: previewDataKeys[0] || getDataKey(),
       xAxisKey: nameKey || getNameKey(),
-      colors: ["#3b61c0", "#00bfff", "#f59e0b", "#dc2626", "#1f2937"],
+      colors: getThemeChartColorTokens(),
       data: previewData,
       layout: editingChart?.layout || {
         x: 0,
@@ -166,6 +179,7 @@ export function PieChartConfigForm({
         dataSource: config.dataSource,
         metric: config.metric,
         staffId: config.staffId?.trim() || undefined,
+        locationId: config.locationId?.trim() || undefined,
       },
     };
 
@@ -248,6 +262,26 @@ export function PieChartConfigForm({
               })),
             ]}
           />
+
+          <LabeledSelect<string>
+            id="location-id"
+            label="Location (optional)"
+            placeholder={loadingLocations ? "Loading..." : "All locations"}
+            value={config.locationId || "all"}
+            onValueChange={(value) =>
+              setConfig({
+                ...config,
+                locationId: value === "all" ? "" : value,
+              })
+            }
+            options={[
+              { id: "all", name: "All locations" },
+              ...locationOptions.map((l) => ({
+                id: l._id as string,
+                name: l.name,
+              })),
+            ]}
+          />
         </div>
 
         {/* Preview Panel */}
@@ -272,13 +306,7 @@ export function PieChartConfigForm({
                     previewDataKeys.length ? previewDataKeys : [getDataKey()]
                   }
                   xAxisKey={nameKey || getNameKey()}
-                  colors={[
-                    "#3b61c0",
-                    "#00bfff",
-                    "#f59e0b",
-                    "#dc2626",
-                    "#1f2937",
-                  ]}
+                  colors={getThemeChartColorTokens()}
                 />
               </div>
             ) : (

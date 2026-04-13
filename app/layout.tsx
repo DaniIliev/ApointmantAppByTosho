@@ -12,7 +12,16 @@ export const metadata: Metadata = {
   title: "AppointDI",
   description: "AppointDI - Smart Appointment Scheduling",
   generator: "Next.js",
+  manifest: "/manifest.json",
+  themeColor: "#000000",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "default",
+    title: "AppointDI",
+  },
 };
+
+import { LocationProvider } from "@/context/LocationContext";
 
 export default function RootLayout({
   children,
@@ -39,10 +48,9 @@ html {
     else d.classList.remove('dark');
 
     var p = localStorage.getItem('selectedPalette');
-    var allowed = ['theme-blue','theme-green','theme-purple','theme-red'];
-    if (p && allowed.indexOf(p) !== -1) {
-      d.classList.add(p);
-    }
+    var allowed = ['theme-blue','theme-green','theme-purple','theme-red','theme-pink'];
+    for (var i = 0; i < allowed.length; i++) d.classList.remove(allowed[i]);
+    if (p && allowed.indexOf(p) !== -1) d.classList.add(p);
   } catch (e) { }
 })();`,
           }}
@@ -50,15 +58,17 @@ html {
       </head>
       <body>
         <AuthProvider>
-          <NextThemesProvider
-            attribute="class"
-            defaultTheme="dark"
-            enableSystem={false}
-          >
-            <ThemeProvider>
-              <ClientLayoutWrapper>{children}</ClientLayoutWrapper>
-            </ThemeProvider>
-          </NextThemesProvider>
+          <LocationProvider>
+            <NextThemesProvider
+              attribute="class"
+              defaultTheme="light"
+              enableSystem={false}
+            >
+              <ThemeProvider>
+                <ClientLayoutWrapper>{children}</ClientLayoutWrapper>
+              </ThemeProvider>
+            </NextThemesProvider>
+          </LocationProvider>
         </AuthProvider>
       </body>
     </html>

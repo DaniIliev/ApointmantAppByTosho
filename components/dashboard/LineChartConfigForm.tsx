@@ -12,6 +12,8 @@ import { useStaffOptions } from "./useStaffOptions";
 import { fetchPreviewData } from "./analyticsPreview";
 import { Modal } from "../customUIComponents/Modal";
 import { useTranslation } from "react-i18next";
+import { useLocationOptions } from "./useLocationOptions";
+import { getThemeChartColorTokens } from "@/lib/themeColors";
 
 interface LineChartConfigFormProps {
   open: boolean;
@@ -27,9 +29,9 @@ type LineDataSource =
   | "staff"
   | "services";
 const dataSourceMetrics: Record<LineDataSource, string[]> = {
-  appointments: ["count", "by_service", "by_status", "by_staff"],
+  appointments: ["count", "by_service", "by_status", "by_staff", "by_location"],
   clients: ["by_source"],
-  revenue: ["by_service", "by_staff"],
+  revenue: ["by_service", "by_staff", "by_location"],
   services: ["popularity"],
   staff: ["appointments_count"],
 };
@@ -39,6 +41,7 @@ interface LineConfig {
   dataSource: LineDataSource;
   metric: string;
   staffId?: string;
+  locationId?: string;
 }
 
 export function LineChartConfigForm({
@@ -57,6 +60,7 @@ export function LineChartConfigForm({
           "appointments",
         metric: editingChart.configuration?.metric || "count",
         staffId: editingChart.configuration?.staffId || "",
+        locationId: editingChart.configuration?.locationId || "",
       };
     }
     return {
@@ -64,6 +68,7 @@ export function LineChartConfigForm({
       dataSource: "appointments",
       metric: "count",
       staffId: "",
+      locationId: "",
     };
   });
 
@@ -74,6 +79,7 @@ export function LineChartConfigForm({
   const { startDate, endDate, groupBy } = useDashboardDate();
   const availableMetrics = dataSourceMetrics[config.dataSource] || ["count"];
   const { staffOptions, loadingStaff } = useStaffOptions();
+  const { locationOptions, loadingLocations } = useLocationOptions();
 
   const getDataKeys = () => {
     if (config.dataSource === "appointments" && config.metric === "count") {
@@ -91,17 +97,11 @@ export function LineChartConfigForm({
     if (config.dataSource === "clients" && config.metric === "by_source") {
       return ["count"];
     }
+    if (config.metric === "by_location") {
+      return config.dataSource === "revenue" ? ["revenue"] : ["count"];
+    }
     if (config.dataSource === "revenue") {
       return ["revenue"];
-    }
-    if (config.dataSource === "services" && config.metric === "popularity") {
-      return ["bookings"];
-    }
-    if (
-      config.dataSource === "staff" &&
-      config.metric === "appointments_count"
-    ) {
-      return ["count", "completed", "cancelled"];
     }
     return ["count"];
   };
@@ -116,6 +116,7 @@ export function LineChartConfigForm({
     ) {
       return "name";
     }
+    if (config.metric === "by_location") return "name";
     return "name";
   };
 
@@ -129,6 +130,7 @@ export function LineChartConfigForm({
           dataSource: config.dataSource,
           metric: config.metric,
           staffId: config.staffId || undefined,
+          locationId: config.locationId || undefined,
           groupBy,
           startDate,
           endDate,
@@ -136,7 +138,7 @@ export function LineChartConfigForm({
         if (isCancelled) return;
         setPreviewData(result.data);
         setPreviewDataKeys(
-          result.dataKeys?.length ? result.dataKeys : getDataKeys()
+          result.dataKeys?.length ? result.dataKeys : getDataKeys(),
         );
         setPreviewXAxisKey(result.xAxisKey || getXAxisKey());
       } catch (err) {
@@ -158,7 +160,9 @@ export function LineChartConfigForm({
     config.staffId,
     groupBy,
     startDate,
+    startDate,
     endDate,
+    config.locationId,
   ]);
 
   const handleSave = () => {
@@ -170,7 +174,7 @@ export function LineChartConfigForm({
       dataKey: config.dataSource,
       dataKeys,
       xAxisKey: previewXAxisKey || getXAxisKey(),
-      colors: ["#3b61c0", "#00bfff", "#f59e0b", "#dc2626", "#1f2937"],
+      colors: getThemeChartColorTokens(),
       data: previewData,
       layout: editingChart?.layout || {
         x: 0,
@@ -182,6 +186,7 @@ export function LineChartConfigForm({
         dataSource: config.dataSource,
         metric: config.metric,
         staffId: config.staffId?.trim() || undefined,
+        locationId: config.locationId?.trim() || undefined,
       },
     };
 
@@ -263,6 +268,26 @@ export function LineChartConfigForm({
               })),
             ]}
           />
+
+          <LabeledSelect<string>
+            id="location-id"
+            label="Location (optional)"
+            placeholder={loadingLocations ? "Loading..." : "All locations"}
+            value={config.locationId || "all"}
+            onValueChange={(value) =>
+              setConfig({
+                ...config,
+                locationId: value === "all" ? "" : value,
+              })
+            }
+            options={[
+              { id: "all", name: "All locations" },
+              ...locationOptions.map((l) => ({
+                id: l._id as string,
+                name: l.name,
+              })),
+            ]}
+          />
         </div>
 
         {/* Preview Panel */}
@@ -287,13 +312,7 @@ export function LineChartConfigForm({
                     previewDataKeys.length ? previewDataKeys : getDataKeys()
                   }
                   xAxisKey={previewXAxisKey || getXAxisKey()}
-                  colors={[
-                    "#3b61c0",
-                    "#00bfff",
-                    "#f59e0b",
-                    "#dc2626",
-                    "#1f2937",
-                  ]}
+                  colors={getThemeChartColorTokens()}
                 />
               </div>
             ) : (

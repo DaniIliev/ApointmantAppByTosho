@@ -98,9 +98,9 @@ export const AppointmentEditModal: React.FC<AppointmentEditModalProps> = ({
         const selectedService = appointmentTypes?.find(
           (type) => type._id === formData.appointmentTypeId
         );
-        if (selectedService && selectedService.staffs) {
+        if (selectedService && selectedService.staffMembers) {
           const staffDetails = await callApi(`/api/staff/by-ids`, "POST", {
-            staffIds: selectedService.staffs,
+            staffIds: selectedService.staffMembers.map((s: any) => s._id),
           });
           setAvailableStaff(staffDetails);
         }
@@ -114,9 +114,9 @@ export const AppointmentEditModal: React.FC<AppointmentEditModalProps> = ({
   // Fetch available slots when staff and date change
   useEffect(() => {
     const fetchSlots = async () => {
-      if (formData.staffId && formData.date && formData.appointmentTypeId) {
+      if (formData.staffId && formData.date && formData.appointmentTypeId && appointment) {
         const slots = await callApi(
-          `/api/appointment/availability?staffId=${formData.staffId}&date=${formData.date}&serviceId=${formData.appointmentTypeId}`,
+          `/api/appointment/availability?staffId=${formData.staffId}&date=${formData.date}&serviceId=${formData.appointmentTypeId}&locationId=${appointment.locationId?._id || appointment.locationId}`,
           "GET"
         );
 

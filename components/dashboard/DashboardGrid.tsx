@@ -237,7 +237,7 @@ export function DashboardGrid({
         preventCollision={false}
         useCSSTransforms={true}
         isDraggable={true}
-        isResizable={!isMobile}
+        isResizable={true}
         containerPadding={[containerPadding, containerPadding]}
         margin={[marginSize, marginSize]}
         draggableHandle=".draggable-handle"
@@ -329,7 +329,7 @@ export function DashboardGrid({
                 </div>
 
                 {/* Chart */}
-                <div className="flex-1 w-full pt-8">
+                <div className="flex-1 w-full pt-6">
                   <PerformanceChart
                     title=""
                     data={

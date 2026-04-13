@@ -18,6 +18,7 @@ import {
 } from "@/Global/Utils/commonFn";
 import { Badge } from "@/components/ui/badge";
 import { Modal } from "@/components/customUIComponents/Modal";
+import { getStatusProps, StatusChip } from "@/components/customUIComponents/StatusChip";
 
 interface AppointmentPreview {
   id: string;
@@ -115,31 +116,8 @@ export function CalendarPreview() {
   const weekDates = useMemo(() => getWeekDates(currentDate), [currentDate]);
   const monthDates = useMemo(() => getMonthDates(currentDate), [currentDate]);
 
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case "confirmed":
-        return "bg-green-500/10 text-green-700 dark:text-green-400 border-green-200 dark:border-green-800";
-      case "pending":
-        return "bg-yellow-500/10 text-yellow-700 dark:text-yellow-400 border-yellow-200 dark:border-yellow-800";
-      case "completed":
-        return "bg-blue-500/10 text-blue-700 dark:text-blue-400 border-blue-200 dark:border-blue-800";
-      default:
-        return "bg-gray-500/10 text-gray-700 dark:text-gray-400";
-    }
-  };
-
-  const getStatusBadgeColor = (status: string) => {
-    switch (status) {
-      case "confirmed":
-        return "bg-green-500/20 text-green-700 dark:text-green-400 border-green-200 dark:border-green-800";
-      case "pending":
-        return "bg-yellow-500/20 text-yellow-700 dark:text-yellow-400 border-yellow-200 dark:border-yellow-800";
-      case "completed":
-        return "bg-blue-500/20 text-blue-700 dark:text-blue-400 border-blue-200 dark:border-blue-800";
-      default:
-        return "bg-gray-500/20 text-gray-700 dark:text-gray-400";
-    }
-  };
+  const getStatusMeta = (status: AppointmentPreview["status"]) =>
+    getStatusProps(status as any);
 
   const getAppointmentsForDate = (date: Date) => {
     return mockAppointments.filter(() => Math.random() > 0.6);
@@ -254,11 +232,18 @@ export function CalendarPreview() {
                     <button
                       key={apt.id}
                       onClick={() => setSelectedAppointment(apt)}
-                      className={`w-full rounded-sm px-1 py-0.5 text-[10px] truncate border cursor-pointer hover:shadow-md transition ${getStatusColor(
-                        apt.status
-                      )}`}
+                      className={`w-full rounded-sm px-1 py-0.5 text-[10px] truncate border cursor-pointer hover:shadow-md transition ${getStatusMeta(
+                        apt.status,
+                      ).className}`}
                     >
-                      {apt.time} - {apt.endTime}
+                      <span className="flex items-center gap-1">
+                        <span className="shrink-0 [&>svg]:h-3 [&>svg]:w-3">
+                          {getStatusMeta(apt.status).icon}
+                        </span>
+                        <span className="truncate">
+                          {apt.time} - {apt.endTime}
+                        </span>
+                      </span>
                     </button>
                   ))}
                 </div>
@@ -308,11 +293,18 @@ export function CalendarPreview() {
                       <button
                         key={apt.id}
                         onClick={() => setSelectedAppointment(apt)}
-                        className={`w-full rounded px-0.5 py-0.5 truncate border cursor-pointer hover:shadow-md transition text-left ${getStatusColor(
-                          apt.status
-                        )}`}
+                        className={`w-full rounded px-0.5 py-0.5 truncate border cursor-pointer hover:shadow-md transition text-left ${getStatusMeta(
+                          apt.status,
+                        ).className}`}
                       >
-                        {apt.time} - {apt.endTime}
+                        <span className="flex items-center gap-1">
+                          <span className="shrink-0 [&>svg]:h-3 [&>svg]:w-3">
+                            {getStatusMeta(apt.status).icon}
+                          </span>
+                          <span className="truncate">
+                            {apt.time} - {apt.endTime}
+                          </span>
+                        </span>
                       </button>
                     ))}
                     {appointments.length > 2 && (
@@ -331,7 +323,7 @@ export function CalendarPreview() {
       {/* Legend */}
       <div className="flex flex-wrap gap-2 pt-2 text-[10px]">
         <div className="flex items-center gap-1">
-          <div className="w-2 h-2 rounded-full bg-green-500" />
+          <div className="w-2 h-2 rounded-full bg-blue-500" />
           <span className="text-muted-foreground">{t("Confirmed")}</span>
         </div>
         <div className="flex items-center gap-1">
@@ -339,7 +331,7 @@ export function CalendarPreview() {
           <span className="text-muted-foreground">{t("Pending")}</span>
         </div>
         <div className="flex items-center gap-1">
-          <div className="w-2 h-2 rounded-full bg-blue-500" />
+          <div className="w-2 h-2 rounded-full bg-green-500" />
           <span className="text-muted-foreground">{t("Completed")}</span>
         </div>
       </div>
@@ -362,14 +354,19 @@ export function CalendarPreview() {
                 {selectedAppointment.clientName}
               </h3>
               <Badge
-                className={`${getStatusBadgeColor(
-                  selectedAppointment.status
-                )} px-3 py-1 rounded-full font-semibold border`}
+                className={`${getStatusMeta(selectedAppointment.status).className} px-3 py-1 rounded-full font-semibold border`}
               >
-                {t(
-                  selectedAppointment.status.charAt(0).toUpperCase() +
-                    selectedAppointment.status.slice(1)
-                )}
+                <span className="flex items-center gap-1">
+                  <span className="shrink-0 [&>svg]:h-4 [&>svg]:w-4">
+                    {getStatusMeta(selectedAppointment.status).icon}
+                  </span>
+                  <span>
+                    {t(
+                      selectedAppointment.status.charAt(0).toUpperCase() +
+                        selectedAppointment.status.slice(1),
+                    )}
+                  </span>
+                </span>
               </Badge>
             </div>
 

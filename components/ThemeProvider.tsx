@@ -5,12 +5,18 @@ import type React from "react";
 import { createContext, useContext, useEffect, useState } from "react";
 
 // Дефинирай всички възможни класове на палитрата
-type Theme = "theme-blue" | "theme-green" | "theme-purple" | "theme-red";
+type Theme =
+  | "theme-blue"
+  | "theme-green"
+  | "theme-purple"
+  | "theme-red"
+  | "theme-pink";
 const ALL_THEME_CLASSES: Theme[] = [
   "theme-blue",
   "theme-green",
   "theme-purple",
   "theme-red",
+  "theme-pink",
 ];
 
 interface ThemeContextType {

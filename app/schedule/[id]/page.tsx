@@ -1,22 +1,14 @@
-// staffDailySchedulePage.js
-
 "use client";
-
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useParams, useRouter } from "next/navigation";
 import { usePageTitle } from "@/context/PageTitleContext";
-import { useRightNav } from "@/context/RightNavContext";
-import { GenericTable, Column } from "@/components/GenericTable/GenericTable";
-import { LabeledInput } from "@/components/customUIComponents/LabeledInput";
-import { Switch } from "@/components/ui/switch";
 import callApi from "@/app/Api/callApi";
 import { toast } from "sonner";
 import { format } from "date-fns";
-import { ArrowLeft, Plus, Trash2, ListIcon, CalendarIcon } from "lucide-react"; // Добавени икони за табовете
+import { ArrowLeft } from "lucide-react"; // Добавени икони за табовете
 import { Button } from "@/components/ui/button";
 import { CustomTooltip } from "@/components/customUIComponents/CustomTooltip";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"; // ИМПОРТ ЗА ТАБОВЕ
 import ScheduleCalendarView from "@/components/calendar/ScheduleCalendarView";
 import { DailyScheduleEditModal } from "./DayleScheduleEditModal";
 // ИМПОРТ ЗА НОВИЯ КАЛЕНДАРЕН ИЗГЛЕД
@@ -36,7 +28,6 @@ type WorkHours = {
   breaks: TimeRange[]; // Променено на TimeRange[]
 };
 export default function StaffDailySchedulePage() {
-  const router = useRouter();
   const params = useParams();
   const { t } = useTranslation();
 
@@ -75,13 +66,13 @@ export default function StaffDailySchedulePage() {
       // 2. Създаваме нов масив с обновените данни
       const newDailyData = [...dailyData];
       newDailyData[index] = updatedDayData;
-      const dataToSend = newDailyData.map((item) => ({
-        ...item,
-        date: item.date.toISOString(),
-      }));
+      const dataToSend = {
+        ...updatedDayData,
+        date: updatedDayData.date.toISOString(),
+      };
 
       await callApi(`/api/staff-schedules/${scheduleId}/details`, "PUT", {
-        workHours: dataToSend,
+        workHour: dataToSend,
       });
       setDailyData(newDailyData);
       closeModal();
@@ -96,7 +87,7 @@ export default function StaffDailySchedulePage() {
       try {
         const data = await callApi(
           `/api/staff-schedules/${scheduleId}/details`,
-          "GET"
+          "GET",
         );
         // Обработка на данните, за да се гарантира, че workTime е обект
         const formattedData = data.map((item: any) => ({
@@ -111,19 +102,19 @@ export default function StaffDailySchedulePage() {
         if (formattedData.length > 0) {
           // Уверете се, че датите са сортирани за да получите правилните начална и крайна дата
           const sortedData = [...formattedData].sort(
-            (a, b) => a.date.getTime() - b.date.getTime()
+            (a, b) => a.date.getTime() - b.date.getTime(),
           );
 
           const startDate = format(sortedData[0].date, "dd.MM.yyyy");
           const endDate = format(
             sortedData[sortedData.length - 1].date,
-            "dd.MM.yyyy"
+            "dd.MM.yyyy",
           );
           setPageTitle(
             t("Schedule for period: {{start}} - {{end}}", {
               start: startDate,
               end: endDate,
-            })
+            }),
           );
         } else {
           setPageTitle(t("Schedule"));
@@ -138,14 +129,7 @@ export default function StaffDailySchedulePage() {
   }, [setPageTitle, scheduleId]);
 
   return (
-    <div className="space-y-4">
-      <div className="absolute top-2 right-4  hidden md:block">
-        <CustomTooltip
-          onClick={() => router.back()}
-          tooltipText={t("Go Back")}
-          icon={<ArrowLeft />}
-        />
-      </div>
+    <div>
       <ScheduleCalendarView dailyData={dailyData} onEditDay={handleEditDay} />
       {dayToEdit && (
         <DailyScheduleEditModal

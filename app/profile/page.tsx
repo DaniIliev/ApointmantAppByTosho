@@ -23,14 +23,27 @@ import { User } from "@/context/AuthContextTypes";
 import { useAuthContext } from "@/context/AuthContext";
 import callApi from "../Api/callApi";
 import { usePaletteTheme } from "@/components/ThemeProvider";
+import { usePushNotifications } from "@/hooks/usePushNotifications";
+import { Bell, BellOff } from "lucide-react";
 
 import { Skeleton } from "@/components/ui/skeleton";
+import { useRouter } from "next/navigation";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Modal } from "@/components/customUIComponents/Modal";
 
 // Дефиниране на наличните палитри
 const AVAILABLE_PALETTES = [
   { name: "Blue (Default)", value: "theme-blue", displayColor: "#3b61c0" },
-  { name: "Green", value: "theme-green", displayColor: "#4caf50" },
+  { name: "Pink", value: "theme-pink", displayColor: "#ec4899" },
   { name: "Purple", value: "theme-purple", displayColor: "#8a2be2" },
+  { name: "Green", value: "theme-green", displayColor: "#4caf50" },
   { name: "Red", value: "theme-red", displayColor: "#DC2626" },
 ];
 
@@ -41,7 +54,9 @@ export default function SettingsPage() {
     usePaletteTheme();
   const { t } = useTranslation();
   const { setPageTitle } = usePageTitle();
-  const { user } = useAuthContext();
+  const { user, token } = useAuthContext();
+  const { isSubscribed, subscribeToPush, unsubscribeFromPush } =
+    usePushNotifications();
   const [isLoading, setIsLoading] = useState(true);
   const [isInitialLoad, setIsInitialLoad] = useState(true);
   const [mounted, setMounted] = useState(false); // Флаг за успешно монтиране на клиента
@@ -54,6 +69,11 @@ export default function SettingsPage() {
     theme?: "light" | "dark";
   } | null>(null);
   const [isDirty, setIsDirty] = useState(false);
+  const [leaveDialogOpen, setLeaveDialogOpen] = useState(false);
+  const [pendingNavigation, setPendingNavigation] = useState<string | null>(
+    null,
+  );
+  const router = useRouter();
   const [userData, setUserData] = useState<User>({
     _id: "",
     firstName: "",
@@ -78,10 +98,16 @@ export default function SettingsPage() {
 
       setUserData(response);
 
-      if (response.primaryColor && isInitialLoad) {
+      const hasStoredPalette =
+        typeof window !== "undefined" &&
+        !!localStorage.getItem("selectedPalette");
+      const hasStoredTheme =
+        typeof window !== "undefined" && !!localStorage.getItem("theme");
+
+      if (response.primaryColor && isInitialLoad && !hasStoredPalette) {
         setSelectedPalette(response.primaryColor as any);
       }
-      if (response.theme && isInitialLoad) {
+      if (response.theme && isInitialLoad && !hasStoredTheme) {
         setNextTheme(response.theme as "light" | "dark");
       }
 
@@ -90,8 +116,8 @@ export default function SettingsPage() {
           firstName: response.firstName || "",
           lastName: response.lastName || "",
           phone: response.phone || "",
-          primaryColor: response.primaryColor,
-          theme: (response as any).theme,
+          primaryColor: selectedPalette,
+          theme: (nextTheme as "light" | "dark" | undefined) || undefined,
         };
       }
     } catch (error) {
@@ -100,7 +126,14 @@ export default function SettingsPage() {
       setIsLoading(false);
       setIsInitialLoad(false);
     }
-  }, [user, setSelectedPalette, isInitialLoad]);
+  }, [
+    user,
+    setSelectedPalette,
+    isInitialLoad,
+    selectedPalette,
+    nextTheme,
+    setNextTheme,
+  ]);
 
   useEffect(() => {
     // Активираме mounted, след като компонентът се монтира на клиента
@@ -109,7 +142,6 @@ export default function SettingsPage() {
     setPageTitle(t("Profile Settings"));
 
     if (user && isInitialLoad) {
-      setNextTheme(user.theme as "light" | "dark");
       fetchUserData();
     }
     return () => {
@@ -117,7 +149,61 @@ export default function SettingsPage() {
     };
   }, [setPageTitle, t, fetchUserData, user, isInitialLoad]);
 
-  const handleSave = async () => {
+  useEffect(() => {
+    if (!isDirty) return;
+
+    const handleBeforeUnload = (event: BeforeUnloadEvent) => {
+      event.preventDefault();
+      event.returnValue = "";
+    };
+
+    const handleDocumentClick = (event: MouseEvent) => {
+      if (!isDirty) return;
+      if (event.defaultPrevented) return;
+      if (event.button !== 0) return;
+      if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey)
+        return;
+
+      const target = event.target as HTMLElement | null;
+      const anchor = target?.closest("a[href]") as HTMLAnchorElement | null;
+      if (!anchor) return;
+      if (anchor.target && anchor.target !== "_self") return;
+
+      const href = anchor.getAttribute("href");
+      if (!href || href.startsWith("#")) return;
+
+      const url = new URL(anchor.href, window.location.origin);
+      if (url.origin !== window.location.origin) return;
+
+      const destination = `${url.pathname}${url.search}${url.hash}`;
+      const current = `${window.location.pathname}${window.location.search}${window.location.hash}`;
+
+      if (destination === current) return;
+
+      event.preventDefault();
+      setPendingNavigation(destination);
+      setLeaveDialogOpen(true);
+    };
+
+    window.addEventListener("beforeunload", handleBeforeUnload);
+    document.addEventListener("click", handleDocumentClick, true);
+
+    return () => {
+      window.removeEventListener("beforeunload", handleBeforeUnload);
+      document.removeEventListener("click", handleDocumentClick, true);
+    };
+  }, [isDirty]);
+
+  const handleDiscardAndLeave = () => {
+    const destination = pendingNavigation;
+    setLeaveDialogOpen(false);
+    setPendingNavigation(null);
+    if (destination) {
+      router.push(destination);
+    }
+  };
+
+  const handleSave = async (): Promise<boolean> => {
     const dataToSave = {
       firstName: userData.firstName,
       lastName: userData.lastName,
@@ -129,13 +215,13 @@ export default function SettingsPage() {
     try {
       if (!user?._id) {
         toast.error(t("User not authenticated."));
-        return;
+        return false;
       }
 
       const updatedData: User = await callApi(
         `/api/auth/user/${user._id}`,
         "PUT",
-        dataToSave
+        dataToSave,
       );
 
       setUserData((prev) => ({
@@ -154,8 +240,9 @@ export default function SettingsPage() {
       setIsDirty(false);
 
       toast.success(
-        t("Your profile settings have been updated successfully. 💾")
+        t("Your profile settings have been updated successfully. 💾"),
       );
+      return true;
     } catch (error) {
       toast.error(
         t("Error saving changes: {{message}}", {
@@ -163,8 +250,20 @@ export default function SettingsPage() {
             error instanceof Error
               ? error.message
               : t("An unknown error occurred"),
-        })
+        }),
       );
+      return false;
+    }
+  };
+
+  const handleSaveAndLeave = async () => {
+    const destination = pendingNavigation;
+    const saved = await handleSave();
+    if (!saved) return;
+    setLeaveDialogOpen(false);
+    setPendingNavigation(null);
+    if (destination) {
+      router.push(destination);
     }
   };
 
@@ -222,7 +321,7 @@ export default function SettingsPage() {
         `/api/auth/user/${user._id}/picture`,
         "PUT",
         payload,
-        true
+        true,
       );
 
       setUserData({
@@ -237,7 +336,7 @@ export default function SettingsPage() {
             error instanceof Error
               ? error.message
               : t("An unknown error occurred"),
-        })
+        }),
       );
     }
   };
@@ -436,11 +535,71 @@ export default function SettingsPage() {
           </CardContent>
         </Card>
 
+        {/* Карта за Нотификации */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-primary text-2xl flex items-center gap-2">
+              <Bell className="h-6 w-6" />
+              {t("Notifications")}
+            </CardTitle>
+            <CardDescription>
+              {t("Get real-time updates about your appointments")}
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-6 pt-4 pb-4">
+            <div className="flex items-center justify-between">
+              <div className="space-y-0.5">
+                <label className="text-primary text-base font-medium">
+                  {t("Push Notifications")}
+                </label>
+                <p className="text-sm text-muted-foreground">
+                  {isSubscribed
+                    ? t(
+                        "You are currently receiving notifications on this device",
+                      )
+                    : t("Enable notifications to stay updated")}
+                </p>
+              </div>
+
+              <div className="flex items-center gap-2">
+                {isSubscribed ? (
+                  <Bell className="h-4 w-4 text-primary" />
+                ) : (
+                  <BellOff className="h-4 w-4 text-muted-foreground" />
+                )}
+                <Switch
+                  checked={isSubscribed}
+                  onCheckedChange={async (checked) => {
+                    if (checked) {
+                      const success = await subscribeToPush(token || "");
+                      if (success) {
+                        toast.success(t("Notifications enabled! 🔔"));
+                      } else {
+                        toast.error(
+                          t(
+                            "Failed to enable notifications. Please check your browser settings.",
+                          ),
+                        );
+                      }
+                    } else {
+                      const success = await unsubscribeFromPush();
+                      if (success) {
+                        toast.success(t("Notifications disabled."));
+                      }
+                    }
+                  }}
+                  disabled={!mounted}
+                />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
         {/* Change Password Card - Hidden for social login users */}
         {(!userData.authProvider || userData.authProvider === "local") && (
           <Card>
             <CardHeader>
-              <CardTitle className="text-secondary text-2xl">
+              <CardTitle className="text-primary text-2xl">
                 {t("Change Password")}
               </CardTitle>
               <CardDescription>
@@ -475,8 +634,8 @@ export default function SettingsPage() {
                   onChange={() => {}}
                 />
               </div>
-              <div className="flex justify-start">
-                <Button variant="outline" className="mt-2 text-secondary">
+              <div className="flex justify-center">
+                <Button variant="outline" className="mt-2 text-primary">
                   {t("Update Password")}
                 </Button>
               </div>
@@ -494,6 +653,32 @@ export default function SettingsPage() {
             </Button>
           </div>
         )}
+        <Modal
+          label={t("Unsaved changes")}
+          open={leaveDialogOpen}
+          onOpenChange={setLeaveDialogOpen}
+        >
+          <div>
+            <span>
+              {t(
+                "You have unsaved changes. If you leave now, they will be lost.",
+              )}
+            </span>
+          </div>
+
+          <div className="flex justify-center gap-2 mt-4">
+            <Button
+              variant="outline"
+              iconType="cancel"
+              onClick={handleDiscardAndLeave}
+            >
+              {t("Leave without saving")}
+            </Button>
+            <Button iconType="save" onClick={handleSaveAndLeave}>
+              {t("Save")}
+            </Button>
+          </div>
+        </Modal>
       </div>
     </div>
   );

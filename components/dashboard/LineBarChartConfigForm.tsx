@@ -13,6 +13,8 @@ import { LabeledInput } from "@/components/customUIComponents/LabeledInput";
 import { LabeledSelect } from "@/components/customUIComponents/LabeledSelect";
 import { Modal } from "../customUIComponents/Modal";
 import { useTranslation } from "react-i18next";
+import { useLocationOptions } from "./useLocationOptions";
+import { getThemeChartColorTokens } from "@/lib/themeColors";
 
 interface LineBarChartConfigFormProps {
   open: boolean;
@@ -37,6 +39,7 @@ interface LineBarConfig {
   metric: LineBarMetric;
   compareWeeks: boolean; // Compare current vs previous week
   staffId?: string;
+  locationId?: string;
 }
 
 export function LineBarChartConfigForm({
@@ -47,6 +50,7 @@ export function LineBarChartConfigForm({
 }: LineBarChartConfigFormProps) {
   const { startDate, endDate, groupBy } = useDashboardDate();
   const { staffOptions, loadingStaff } = useStaffOptions();
+  const { locationOptions, loadingLocations } = useLocationOptions();
   const { t } = useTranslation();
 
   const [config, setConfig] = useState<LineBarConfig>({
@@ -55,6 +59,7 @@ export function LineBarChartConfigForm({
     metric: "count",
     compareWeeks: true,
     staffId: "",
+    locationId: "",
   });
 
   const [previewData, setPreviewData] = useState<Record<string, unknown>[]>([]);
@@ -75,6 +80,7 @@ export function LineBarChartConfigForm({
           dataSource: config.dataSource,
           metric: config.metric,
           staffId: config.staffId || undefined,
+          locationId: config.locationId || undefined,
           groupBy,
           startDate,
           endDate,
@@ -87,7 +93,7 @@ export function LineBarChartConfigForm({
             (result.seriesConfig as Record<string, unknown>) || {
               barSeries: [],
               lineSeries: [],
-            }
+            },
           );
         } else {
           // Non-comparison mode: show bars only for returned keys
@@ -117,7 +123,9 @@ export function LineBarChartConfigForm({
     config.compareWeeks,
     groupBy,
     startDate,
+    startDate,
     endDate,
+    config.locationId,
   ]);
 
   const getDataKeys = () => {
@@ -145,14 +153,14 @@ export function LineBarChartConfigForm({
       ? previewSeries && Object.keys(previewSeries).length
         ? previewSeries
         : config.dataSource === "appointments"
-        ? {
-            barSeries: ["count", "completed"],
-            lineSeries: ["prevCount", "prevCompleted"],
-          }
-        : { barSeries: ["revenue"], lineSeries: ["prevRevenue"] }
+          ? {
+              barSeries: ["count", "completed"],
+              lineSeries: ["prevCount", "prevCompleted"],
+            }
+          : { barSeries: ["revenue"], lineSeries: ["prevRevenue"] }
       : config.dataSource === "appointments"
-      ? { barSeries: ["count", "completed"], lineSeries: [] }
-      : { barSeries: ["revenue"], lineSeries: [] };
+        ? { barSeries: ["count", "completed"], lineSeries: [] }
+        : { barSeries: ["revenue"], lineSeries: [] };
 
     const chartConfig: ChartConfig = {
       id: editingChart?.id || `chart-${Date.now()}`,
@@ -161,7 +169,7 @@ export function LineBarChartConfigForm({
       dataKey: config.dataSource,
       dataKeys: previewDataKeys.length ? previewDataKeys : getDataKeys(),
       xAxisKey: "name",
-      colors: ["#3b61c0", "#00bfff", "#f59e0b", "#dc2626", "#1f2937"],
+      colors: getThemeChartColorTokens(),
       data: previewData,
       seriesConfig,
       layout: editingChart?.layout || {
@@ -174,6 +182,7 @@ export function LineBarChartConfigForm({
         dataSource: config.dataSource,
         metric: config.metric,
         staffId: config.staffId?.trim() || undefined,
+        locationId: config.locationId?.trim() || undefined,
         compareWeeks: config.compareWeeks,
       },
     };
@@ -290,13 +299,7 @@ export function LineBarChartConfigForm({
                     previewDataKeys.length ? previewDataKeys : getDataKeys()
                   }
                   xAxisKey="name"
-                  colors={[
-                    "#3b61c0",
-                    "#00bfff",
-                    "#f59e0b",
-                    "#dc2626",
-                    "#1f2937",
-                  ]}
+                  colors={getThemeChartColorTokens()}
                   seriesConfig={previewSeries}
                 />
               </div>
