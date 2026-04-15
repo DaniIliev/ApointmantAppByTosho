@@ -239,8 +239,8 @@ function DashboardPageContent() {
         notes: "",
         staff: { _id: "", name: "" },
       });
-      await getDashboardData();
       toast.success(t("Appointment created successfully!"));
+      await getDashboardData();
     } catch (error) {
       console.error("Failed to create appointment:", error);
       toast.error(t("Failed to create appointment. Please try again."));

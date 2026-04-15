@@ -257,6 +257,7 @@ function BusinessInformationPageContent() {
                   onChange={(e) => handleInputChange("aboutUs", e.target.value)}
                   placeholder={t("Tell customers about your business...")}
                   rows={3}
+                  max={6}
                 />
               </div>
             </Card>

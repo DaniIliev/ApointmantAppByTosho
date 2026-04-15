@@ -8,9 +8,6 @@ import { PaymentOptionSelector } from "@/components/customUIComponents/PaymentOp
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Loader2, X } from "lucide-react";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar"; // Assuming you have Avatar component from shadcn/ui
-import { Badge } from "@/components/ui/badge"; // Assuming you have Badge component from shadcn/ui
-
 import { cn } from "@/lib/utils";
 import callApi from "../Api/callApi";
 import { getCategoryOptions, PaymentOption } from "@/Global/Types/types";
@@ -34,44 +31,6 @@ type StaffMember = {
   _id: string;
   firstName: string;
   lastName: string;
-};
-
-const StaffAvatarsDisplay = ({
-  selectedStaff,
-  onRemove,
-}: {
-  selectedStaff: { _id: string; name: string }[];
-  onRemove: (staffId: string) => void;
-}) => {
-  if (selectedStaff.length === 0) return null;
-
-  return (
-    <div className="flex flex-wrap gap-2 mt-2">
-      {selectedStaff.map((staff) => (
-        <Badge
-          key={staff._id}
-          className="cursor-pointer pr-1 flex items-center bg-secondary hover:bg-secondary/80 transition-colors"
-          onClick={() => onRemove(staff._id)}
-        >
-          <Avatar className="h-6 w-6 mr-1">
-            <AvatarFallback className="bg-primary text-primary-foreground text-xs">
-              {staff.name
-                ? staff.name
-                    .split(" ")
-                    .map((n) => n[0])
-                    .join("")
-                    .substring(0, 2)
-                    .toUpperCase()
-                : "?"}
-            </AvatarFallback>
-          </Avatar>
-          {staff.name}
-          <X className="ml-1 h-3 w-3" />{" "}
-          {/* Add an 'X' icon for visual removal cue */}
-        </Badge>
-      ))}
-    </div>
-  );
 };
 
 // --- Main Component ---
@@ -135,13 +94,6 @@ const CreateAppointmentModal = ({
     }));
   };
 
-  const handleRemoveStaff = (staffId: string) => {
-    setFormData((prev: any) => ({
-      ...prev,
-      staffMembers: prev.staffMembers.filter((s: any) => s._id !== staffId),
-    }));
-  };
-
   const selectedStaffIds: string[] = (formData.staffMembers || []).map(
     (staff: { _id: string }) => staff._id,
   );
@@ -173,10 +125,10 @@ const CreateAppointmentModal = ({
       <form onSubmit={handleSubmit} className="space-y-6">
         <LabeledSelect<string>
           id="category"
-          label="Category"
+          label={t("Category")}
           value={formData?.category || ""}
           onValueChange={handleCategoryChange}
-          placeholder="Select a category"
+          placeholder={t("Select a category")}
           options={categoryOptions}
         />
         <LabeledInput
@@ -191,7 +143,7 @@ const CreateAppointmentModal = ({
         <div className="grid grid-cols-2 gap-4">
           <LabeledInput
             id="duration"
-            label="Duration (minutes)"
+            label={t("Duration (minutes)")}
             value={formData.duration}
             onChange={(e) =>
               setFormData((prev: any) => ({
@@ -204,7 +156,7 @@ const CreateAppointmentModal = ({
           />
           <LabeledInput
             id="price"
-            label="Price ($)"
+            label={t("Price (€)")}
             value={formData.price}
             onChange={(e) =>
               setFormData((prev: any) => ({ ...prev, price: e.target.value }))
