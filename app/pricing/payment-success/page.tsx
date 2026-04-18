@@ -7,8 +7,9 @@ import callApi from "@/app/Api/callApi";
 import { Button } from "@/components/ui/button";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
+import React from "react";
 
-export default function PaymentSuccessPage() {
+function PaymentSuccessContent() {
   const { t } = useTranslation();
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -37,6 +38,7 @@ export default function PaymentSuccessPage() {
       const result = await callApi(
         `/api/stripe/checkout-invoice?sessionId=${encodeURIComponent(sessionId)}`,
         "GET",
+        null,
       );
 
       if (result?.invoiceUrl) {
@@ -103,5 +105,17 @@ export default function PaymentSuccessPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function PaymentSuccessPage() {
+  return (
+    <React.Suspense fallback={
+      <div className="flex h-screen w-full items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    }>
+      <PaymentSuccessContent />
+    </React.Suspense>
   );
 }

@@ -1,5 +1,5 @@
 import type React from "react";
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { GeistSans } from "geist/font/sans";
 import { GeistMono } from "geist/font/mono";
 import "./globals.css";
@@ -14,12 +14,15 @@ export const metadata: Metadata = {
   description: "AppointDI - Smart Appointment Scheduling",
   generator: "Next.js",
   manifest: "/manifest.json",
-  themeColor: "#000000",
   appleWebApp: {
     capable: true,
     statusBarStyle: "default",
     title: "AppointDI",
   },
+};
+
+export const viewport: Viewport = {
+  themeColor: "#000000",
 };
 
 import { LocationProvider } from "@/context/LocationContext";
