@@ -10,8 +10,6 @@ import {
   BarChart3,
   Briefcase,
   CalendarDays,
-  CheckCircle2,
-  Clock3,
   Sparkles,
   TrendingUp,
   UserRound,
@@ -626,8 +624,8 @@ function HomePageContent() {
               })
             ) : (
               <div className="rounded-xl border border-dashed p-6 text-center">
-                <p className="font-semibold">
-                  {t("Your schedule is clear")} ✨
+                <p className="font-semibold text-foreground">
+                  {t("Your schedule is clear")} 
                 </p>
                 <p className="text-sm text-muted-foreground">
                   {t("Add a new appointment from Dashboard to get started.")}

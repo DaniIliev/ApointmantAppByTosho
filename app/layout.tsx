@@ -7,6 +7,7 @@ import ClientLayoutWrapper from "@/components/ClientLayoutWrapper";
 import { AuthProvider } from "@/context/AuthContext";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import { ThemeProvider as NextThemesProvider } from "next-themes";
+import QueryProvider from "@/components/providers/QueryProvider";
 
 export const metadata: Metadata = {
   title: "AppointDI",
@@ -57,8 +58,9 @@ html {
         />
       </head>
       <body>
-        <AuthProvider>
-          <LocationProvider>
+        <QueryProvider>
+          <AuthProvider>
+            <LocationProvider>
             <NextThemesProvider
               attribute="class"
               defaultTheme="light"
@@ -68,8 +70,9 @@ html {
                 <ClientLayoutWrapper>{children}</ClientLayoutWrapper>
               </ThemeProvider>
             </NextThemesProvider>
-          </LocationProvider>
-        </AuthProvider>
+            </LocationProvider>
+          </AuthProvider>
+        </QueryProvider>
       </body>
     </html>
   );

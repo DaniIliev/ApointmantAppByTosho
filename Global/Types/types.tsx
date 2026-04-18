@@ -188,23 +188,26 @@ export interface WorkHour {
   breaks?: TimeRange[];
 }
 
+export interface WeeklyWorkingDay {
+  isDayOff: boolean;
+  workTime: TimeRange;
+  breaks?: TimeRange[];
+}
+
+export interface WeeklyWorkingHours {
+  monday: WeeklyWorkingDay;
+  tuesday: WeeklyWorkingDay;
+  wednesday: WeeklyWorkingDay;
+  thursday: WeeklyWorkingDay;
+  friday: WeeklyWorkingDay;
+  saturday: WeeklyWorkingDay;
+  sunday: WeeklyWorkingDay;
+}
+
 export type LocationsOpeningHours = Record<string, LocationOpeningHours>;
 
-export interface LocationOpeningHours {
+export interface LocationOpeningHours extends WeeklyWorkingHours {
   _id?: string;
-  workTime: TimeRange;
-  isDayOff: {
-    monday: boolean;
-    tuesday: boolean;
-    wednesday: boolean;
-    thursday: boolean;
-    friday: boolean;
-    saturday: boolean;
-    sunday: boolean;
-  };
-  break1: TimeRange;
-  break2: TimeRange;
-  break3: TimeRange;
 }
 
 export interface DailySchedule {
@@ -216,19 +219,6 @@ export interface StaffSchedule {
   _id?: string;
   startDate: string;
   endDate: string;
-  workTime: TimeRange;
-  isDayOff: {
-    monday: boolean;
-    tuesday: boolean;
-    wednesday: boolean;
-    thursday: boolean;
-    friday: boolean;
-    saturday: boolean;
-    sunday: boolean;
-  };
-  break1?: TimeRange;
-  break2?: TimeRange;
-  break3?: TimeRange;
   staff?: string; // Optional for location schedules
   location: string;
   business: string;

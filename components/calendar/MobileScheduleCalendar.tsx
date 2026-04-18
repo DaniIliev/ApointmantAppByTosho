@@ -230,14 +230,14 @@ export default function MobileScheduleCalendar({
             )}
 
             {/* Breaks */}
-            {!selectedDay.isDayOff && selectedDay.breaks.length > 0 && (
+            {!selectedDay.isDayOff && (selectedDay.breaks || []).length > 0 && (
               <div className="space-y-2">
                 <div className="text-primary flex items-center gap-2 text-sm font-semibold">
                   <Coffee className="h-4 w-4" />
-                  <span>Breaks ({selectedDay.breaks.length})</span>
+                  <span>Breaks ({(selectedDay.breaks || []).length})</span>
                 </div>
                 <div className="space-y-2">
-                  {selectedDay.breaks.map((breakTime, index) => (
+                  {(selectedDay.breaks || []).map((breakTime, index) => (
                     <Card
                       key={index}
                       className="p-3 text-text-primary/40 bg-white dark:bg-primary/10 border-primary/20"

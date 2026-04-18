@@ -1,9 +1,10 @@
 // components/ScheduleCalendarView.js
 
 import {
+  addDays,
+  endOfMonth,
   format,
   startOfMonth,
-  endOfMonth,
   addMonths,
   subMonths,
   isSameMonth,
@@ -11,7 +12,6 @@ import {
   isAfter,
 } from "date-fns";
 import { useState, useMemo } from "react";
-import { Card, CardContent } from "@/components/ui/card";
 import {
   ListRestart,
   ChevronLeft,
@@ -23,18 +23,16 @@ import {
 } from "lucide-react";
 import MobileScheduleCalendar from "./MobileScheduleCalendar";
 
-type TimeRange = {
-  start: string;
-  end: string;
-};
+import { 
+  WorkHour as GlobalWorkHour, 
+  TimeRange as GlobalTimeRange 
+} from "@/Global/Types/types";
 
-export type WorkHours = {
+// Unified type for the calendar with date as Date object
+export type WorkHours = Omit<GlobalWorkHour, 'date'> & {
   _id: string;
-  day: string;
   date: Date;
-  isDayOff: boolean;
-  workTime: TimeRange | null;
-  breaks: TimeRange[];
+  scheduleId?: string;
 };
 
 interface ScheduleCalendarViewProps {
@@ -42,14 +40,14 @@ interface ScheduleCalendarViewProps {
   onEditDay: (dayData: WorkHours) => void;
 }
 
-const createDummyDay = (id: string) => ({
+const createDummyDay = (id: string): WorkHours & { isPlaceholder: boolean } => ({
   _id: id,
   day: "",
   date: new Date(0),
   isDayOff: true,
-  workTime: null,
+  workTime: undefined,
   breaks: [],
-  isPlaceholder: true, // Маркер за празна клетка
+  isPlaceholder: true,
 });
 
 /**
@@ -58,14 +56,20 @@ const createDummyDay = (id: string) => ({
  */
 const groupIntoWeeksForMonth = (allData: WorkHours[], monthDate: Date) => {
   const startOfTargetMonth = startOfMonth(monthDate);
+  const endOfTargetMonth = endOfMonth(monthDate);
 
   // 1. Филтрираме данните само за текущия месец
   const monthData = allData
-    .filter((day) => isSameMonth(day.date, monthDate))
-    .sort((a, b) => a.date.getTime() - b.date.getTime());
+    .filter((day) => isSameMonth(new Date(day.date), monthDate))
+    .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
 
-  if (monthData.length === 0) {
-    return [];
+  const byDate = new Map<string, WorkHours>();
+  for (const item of monthData) {
+    const key = format(item.date, "yyyy-MM-dd");
+    const existing = byDate.get(key);
+    if (!existing || (existing.isDayOff && !item.isDayOff)) {
+      byDate.set(key, item);
+    }
   }
 
   const weeks: (WorkHours & { isPlaceholder?: boolean })[][] = [];
@@ -80,13 +84,28 @@ const groupIntoWeeksForMonth = (allData: WorkHours[], monthDate: Date) => {
     currentWeek.push(createDummyDay(`dummy-start-${i}`));
   }
 
-  // 4. Добавяме дните от месеца
-  for (const day of monthData) {
+  // 4. Добавяме дните от месеца (вкл. празни дни вътре в месеца)
+  for (
+    let dayCursor = startOfTargetMonth;
+    dayCursor <= endOfTargetMonth;
+    dayCursor = addDays(dayCursor, 1)
+  ) {
     if (currentWeek.length === 7) {
       weeks.push(currentWeek);
       currentWeek = [];
     }
-    currentWeek.push(day);
+
+    const key = format(dayCursor, "yyyy-MM-dd");
+    const dayItem = byDate.get(key);
+
+    if (dayItem) {
+      currentWeek.push(dayItem);
+    } else {
+      currentWeek.push({
+        ...createDummyDay(`dummy-gap-${key}`),
+        date: new Date(dayCursor),
+      });
+    }
   }
 
   // 5. Добавяме последната недовършена седмица и я запълваме с празни места
@@ -118,7 +137,7 @@ export default function ScheduleCalendarView({
 
   // Сортираме всички данни и намираме границите (първи и последен ден)
   const sortedAllData = useMemo(
-    () => [...dailyData].sort((a, b) => a.date.getTime() - b.date.getTime()),
+    () => [...dailyData].sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()),
     [dailyData],
   );
 
@@ -263,7 +282,7 @@ export default function ScheduleCalendarView({
                 }
 
                 const isToday =
-                  new Date().toDateString() === dayData.date.toDateString();
+                  new Date().toDateString() === new Date(dayData.date).toDateString();
 
                 return (
                   <div
@@ -317,14 +336,14 @@ export default function ScheduleCalendarView({
                       )}
 
                       {/* Почивки - с иконка и заглавие */}
-                      {!dayData.isDayOff && dayData.breaks.length > 0 && (
+                      {!dayData.isDayOff && (dayData.breaks || []).length > 0 && (
                         <div className="text-xs text-gray-700 mt-2 space-y-0.5 overflow-hidden flex-grow border-t pt-1">
                           {/* Заглавие за почивките */}
                           <div className="flex items-center gap-1 font-semibold text-gray-600 mb-0.5">
                             <Coffee className="h-3 w-3 text-yellow-700" />
-                            Почивки ({dayData.breaks.length}):
+                            Почивки ({(dayData.breaks || []).length}):
                           </div>
-                          {dayData.breaks.map((br, i) => (
+                          {(dayData.breaks || []).map((br, i) => (
                             <span
                               key={i}
                               className="ml-3 block leading-tight truncate pl-1"

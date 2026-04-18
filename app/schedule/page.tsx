@@ -1,770 +1,509 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { usePageTitle } from "@/context/PageTitleContext";
-import ProtectedRoute from "@/components/guards/ProtectedRoute";
-import { useRightNav } from "@/context/RightNavContext";
-import { Button } from "@/components/ui/button";
-import { Plus, Trash2, Pencil, Eye } from "lucide-react";
-import { toast } from "sonner";
-import { format } from "date-fns";
-import { GenericTable, Column } from "@/components/GenericTable/GenericTable";
-import { useRouter } from "next/navigation";
-import { LabeledInput } from "@/components/customUIComponents/LabeledInput";
-import { Switch } from "@/components/ui/switch";
+import {  useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { CustomTooltip } from "@/components/customUIComponents/CustomTooltip";
-import { Modal } from "@/components/customUIComponents/Modal";
-import { LabeledSelect } from "@/components/customUIComponents/LabeledSelect";
-import { StatusChip } from "@/components/customUIComponents/StatusChip";
-import callApi from "../Api/callApi";
-import { jwtDecode } from "jwt-decode";
-import { ScheduleModal } from "./ScheduleModal";
+import { useRouter } from "next/navigation";
+import { addWeeks, format, startOfWeek, subWeeks } from "date-fns";
+import {
+  CalendarDays,
+  ChevronLeft,
+  ChevronRight,
+  Info,
+  Pencil,
+  Plus,
+  RefreshCcw,
+} from "lucide-react";
+import { toast } from "sonner";
 
+import { useGetStaff } from "@/hooks/queries/useStaff";
+import {
+  useGetLocations,
+  useUpdateLocationWeeklyHours,
+} from "@/hooks/queries/useLocation";
+import {
+  useGetStaffSchedules,
+  useCreateStaffSchedule,
+  useUpdateStaffSchedule,
+  useDeleteStaffSchedule,
+  useGetScheduleDailyView,
+} from "@/hooks/queries/useScheduleNew";
+import { LocationHoursModal } from "@/components/location/LocationHoursModal";
+import ProtectedRoute from "@/components/guards/ProtectedRoute";
+import { usePageTitle } from "@/context/PageTitleContext";
+import { useLocationContext } from "@/context/LocationContext";
+import { useAuthContext } from "@/context/AuthContext";
+import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 
-// Types
-export type TimeRange = {
-  start: string | null;
-  end: string | null;
-};
+import { ScheduleModal } from "./ScheduleModal";
+import { DesktopScheduleBoard } from "./components/DesktopScheduleBoard";
+import { MobileScheduleBoard } from "./components/MobileScheduleBoard";
+import { LocationHeroCard } from "./components/LocationHeroCard";
+import type {
+  DailyViewData,
+  DayKey,
+  EditableSchedule,
+  LocationDto,
+  Schedule,
+  StaffMember,
+  WeeklyWorkingHours,
+} from "./types";
+import {
+  buildWeekDays,
+  dayTitles,
+  getLocationIdFromSchedule,
+  getScheduleStaffId,
+} from "./utils";
 
-export type Schedule = {
-  _id: string;
-  startDate: string;
-  endDate: string;
-  workTime: TimeRange;
-  isDayOff: {
-    monday: boolean;
-    tuesday: boolean;
-    wednesday: boolean;
-    thursday: boolean;
-    friday: boolean;
-    saturday: boolean;
-    sunday: boolean;
-  };
-  break1: TimeRange;
-  break2: TimeRange;
-  break3: TimeRange;
-  locationId?: string;
-  staff?:
-    | {
-        firstName: string;
-        lastName: string;
-        email: string;
-      }
-    | string;
-};
+// ─── Constants ────────────────────────────────────────────
 
-import { useLocationContext } from "@/context/LocationContext";
+const weekDayRows: Array<{ key: DayKey; label: string }> = [
+  { key: "monday", label: "Monday" },
+  { key: "tuesday", label: "Tuesday" },
+  { key: "wednesday", label: "Wednesday" },
+  { key: "thursday", label: "Thursday" },
+  { key: "friday", label: "Friday" },
+  { key: "saturday", label: "Saturday" },
+  { key: "sunday", label: "Sunday" },
+];
 
-function StaffSchedulePageContent() {
-  type CreateNewDashboardMenuProps = {
-    onOpenModal: () => void;
-  };
+// ─── Page content ─────────────────────────────────────────
 
-  const CreateNewSchedule = ({ onOpenModal }: CreateNewDashboardMenuProps) => {
-    const { t } = useTranslation();
-    return (
-      <CustomTooltip
-        onClick={onOpenModal}
-        tooltipText={t("Add")}
-        icon={<Plus />}
-      />
-    );
-  };
-
+function SchedulePageContent() {
   const { t } = useTranslation();
-  const { setPageTitle } = usePageTitle();
-  const { setExtraRightNavMenu, setIsRightNavVisible } = useRightNav();
-  const { selectedLocation } = useLocationContext();
-  const [selectedScheduleId, setSelectedScheduleId] = useState<string | null>(
-    null,
-  );
-  const [schedules, setSchedules] = useState<Schedule[]>([]);
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [isApplyToAllModalOpen, setIsApplyToAllModalOpen] = useState(false);
-  // We'll keep locations for the modal, but remove selectedLocationId local state
-  const [locations, setLocations] = useState<any[]>([]);
-  const [scheduleToEdit, setScheduleToEdit] = useState<Schedule | null>(null);
-  const [isPageLoading, setIsPageLoading] = useState(true);
-
   const router = useRouter();
+  const { selectedLocation } = useLocationContext();
+  console.log('selected Location', selectedLocation)
+  const { user } = useAuthContext();
+  const { setPageTitle } = usePageTitle();
 
-  // Отваряне на модала за създаване/редактиране
-  const openScheduleModal = (schedule: Schedule | null = null) => {
-    setScheduleToEdit(schedule); // Задава дали е режим на редакция или създаване
-    setIsModalOpen(true);
-  };
+  // ── Data fetching ───────────────────────────────────
+  const { data: staffData, isLoading: staffLoading } = useGetStaff(
+    user?.businessId,
+    selectedLocation?._id,
+  );
+  const {
+    data: schedulesData,
+    isLoading: schedulesLoading,
+  } = useGetStaffSchedules(selectedLocation?._id);
+
+  const [weekStart, setWeekStart] = useState(
+    startOfWeek(new Date(), { weekStartsOn: 1 }),
+  );
+  const weekDays = useMemo(() => buildWeekDays(weekStart), [weekStart]);
+
+  const { data: dailyViewData, isLoading: dailyLoading } =
+    useGetScheduleDailyView({
+      locationId: selectedLocation?._id,
+      startDate: format(weekDays[0], "yyyy-MM-dd"),
+      endDate: format(weekDays[6], "yyyy-MM-dd"),
+    });
+
+  const { data: locationsData, isLoading: locationsLoading } = useGetLocations(
+    user?.businessId,
+  );
+
+  // ── Derived data ────────────────────────────────────
+  const staff = (staffData || []) as unknown as StaffMember[];
+  const schedules: Schedule[] = schedulesData || [];
+  const locations: LocationDto[] = locationsData || [];
+  const dailyView: DailyViewData = dailyViewData || [];
+  const loading =
+    staffLoading || schedulesLoading || locationsLoading || dailyLoading;
+
+  // ── Mutations ───────────────────────────────────────
+  const updateLocationHoursMutation = useUpdateLocationWeeklyHours();
+  const createScheduleMutation = useCreateStaffSchedule();
+  const updateScheduleMutation = useUpdateStaffSchedule();
+  const deleteScheduleMutation = useDeleteStaffSchedule();
+
+  // ── Local state ─────────────────────────────────────
+  const [editingStaff, setEditingStaff] = useState<StaffMember | null>(null);
+  const [editingSchedules, setEditingSchedules] = useState<EditableSchedule[]>(
+    [],
+  );
+  const [locationWeeklyHours, setLocationWeeklyHours] =
+    useState<WeeklyWorkingHours | null>(null);
+  const [savingLocationHours, setSavingLocationHours] = useState(false);
+  const [isLocationHoursModalOpen, setIsLocationHoursModalOpen] =
+    useState(false);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+
+  const selectedLocationId = selectedLocation?._id;
 
   useEffect(() => {
     setPageTitle(t("Schedule"));
-    // Променете onCreateNewSchedule на openScheduleModal
-    setExtraRightNavMenu(
-      <CreateNewSchedule onOpenModal={() => openScheduleModal()} />,
-    );
-    setIsRightNavVisible(true);
     return () => {
       setPageTitle(null);
-      setExtraRightNavMenu(null);
-      setIsRightNavVisible(false);
     };
-  }, [setPageTitle, setExtraRightNavMenu, setIsRightNavVisible, t]);
+  }, [setPageTitle, t]);
 
   useEffect(() => {
-    const fetchSchedules = async () => {
-      try {
-        const locId =
-          selectedLocation?._id || localStorage.getItem("selectedLocationId");
-        const query = locId ? `?locationId=${locId}` : "";
-        const data = await callApi(`/api/staff-schedules${query}`, "GET");
-        setSchedules(data);
-      } catch (error) {
-        toast.error(t("Failed to load schedules."));
-      }
-    };
-
-    const fetchLocations = async () => {
-      const storedToken = localStorage.getItem("token");
-      if (!storedToken) return;
-      try {
-        const decodedUser = jwtDecode<any>(storedToken);
-        const data = await callApi(
-          `/api/locations?businessId=${decodedUser.businessId}`,
-          "GET",
-        );
-        setLocations(data);
-      } catch (error) {
-        console.error("Failed to fetch locations", error);
-      }
-    };
-
-    const loadData = async () => {
-      setIsPageLoading(true);
-      try {
-        await Promise.all([fetchSchedules(), fetchLocations()]);
-      } finally {
-        setIsPageLoading(false);
-      }
-    };
-
-    loadData();
-  }, [selectedLocation?._id, t]);
-
-  const handleSave = async (updatedData: Schedule[]) => {
-    try {
-      // ... (Оставяме handleSave както си е за редактиране на таблица)
-      const changes = updatedData.filter((row) =>
-        schedules.some(
-          (originalRow) =>
-            originalRow._id === row._id &&
-            JSON.stringify(originalRow) !== JSON.stringify(row),
-        ),
-      );
-
-      for (const updatedRow of changes) {
-        await callApi(
-          `/api/staff-schedules/${updatedRow._id}`,
-          "PUT",
-          updatedRow,
-        );
-      }
-
-      setSchedules(updatedData);
-      toast.success(t("Schedule saved successfully!"));
-    } catch (error) {
-      toast.error(t("Failed to save schedule."));
+    const selected = locations.find((loc) => loc._id === selectedLocationId);
+    if (selected?.weeklyWorkingHours) {
+      setLocationWeeklyHours(selected.weeklyWorkingHours);
     }
+  }, [locations, selectedLocationId]);
+
+  // ── Computed / memos ────────────────────────────────
+
+  const locationScopedSchedules = useMemo(() => {
+    if (!selectedLocationId) return [];
+    return schedules.filter(
+      (s) => getLocationIdFromSchedule(s) === selectedLocationId,
+    );
+  }, [schedules, selectedLocationId]);
+
+  const visibleStaff = useMemo(() => {
+    if (!selectedLocationId) return [];
+    return staff;
+  }, [staff, selectedLocationId]);
+
+  const staffSchedulesMap = useMemo(() => {
+    const map = new Map<string, Schedule[]>();
+    for (const schedule of locationScopedSchedules) {
+      const staffId = getScheduleStaffId(schedule);
+      if (!staffId) continue;
+      const list = map.get(staffId) || [];
+      list.push(schedule);
+      map.set(staffId, list);
+    }
+    return map;
+  }, [locationScopedSchedules]);
+
+  const locationNameMap = useMemo(() => {
+    const map = new Map<string, string>();
+    locations.forEach((loc) => map.set(loc._id, loc.name));
+    return map;
+  }, [locations]);
+
+  const selectedLocationData = useMemo(() => {
+    if (!selectedLocationId) return null;
+    return locations.find((loc) => loc._id === selectedLocationId) || null;
+  }, [locations, selectedLocationId]);
+
+  // ── Action handlers ─────────────────────────────────
+
+  const createScheduleForStaff = (staffMember: StaffMember) => {
+    const staffLocationId = selectedLocationId || staffMember.locationIds?.[0];
+    if (!staffLocationId) {
+      toast.error(t("No location is assigned to this staff member."));
+      return;
+    }
+    setEditingStaff(staffMember);
+    setEditingSchedules([]);
+    setIsEditModalOpen(true);
   };
 
-  const removeSchedule = async (scheduleId: string) => {
-    try {
-      await callApi(`/api/staff-schedules/${scheduleId}`, "DELETE");
-      setSchedules((prev) =>
-        prev.filter((schedule) => schedule._id !== scheduleId),
-      );
-      toast.success(t("Schedule deleted successfully!"));
-    } catch (error) {
-      toast.error(t("Failed to delete schedule."));
+  const openStaffCalendar = (
+    scheduleId: string | null,
+    staffId?: string | null,
+  ) => {
+    if (staffId) {
+      const params = new URLSearchParams();
+      if (selectedLocationId) params.set("locationId", selectedLocationId);
+      const query = params.toString();
+      router.push(`/schedule/staff-${staffId}${query ? `?${query}` : ""}`);
+      return;
     }
+    if (!scheduleId) {
+      toast.error(t("No schedule found for this staff member."));
+      return;
+    }
+    router.push(`/schedule/${scheduleId}`);
   };
 
-  const handleCreateOrEdit = async (scheduleData: Schedule) => {
-    const isEditing = !!scheduleData._id;
-
-    // Валидация за препокриване на графици
-    const newStart = new Date(scheduleData.startDate);
-    const newEnd = new Date(scheduleData.endDate);
-
-    const targetStaff =
-      typeof scheduleData.staff === "object"
-        ? (scheduleData.staff as any)?._id
-        : scheduleData.staff;
-
-    const hasOverlap = schedules.some((s) => {
-      if (isEditing && s._id === scheduleData._id) return false;
-
-      const sTarget =
-        typeof s.staff === "object" ? (s.staff as any)?._id : s.staff;
-
-      // Проверяваме дали са за същия човек (или и двата са за локацията)
-      if (sTarget !== targetStaff) return false;
-
-      const sStart = new Date(s.startDate);
-      const sEnd = new Date(s.endDate);
-
-      return newStart <= sEnd && newEnd >= sStart;
-    });
-
-    if (hasOverlap) {
-      toast.error(
-        t("This schedule overlaps with an existing one for the same period."),
-      );
+  const openStaffScheduleEdit = (staffMember: StaffMember) => {
+    const staffMemberSchedules = staffSchedulesMap.get(staffMember._id) || [];
+    if (!staffMemberSchedules.length) {
+      toast.error(t("No schedule found for this staff member."));
       return;
     }
 
+    // Enrich with daily view data if available
+    const dailyGroup = dailyView.find(
+      (g) =>
+        (typeof g.staff === "string" ? g.staff : g.staff._id) === staffMember._id,
+    );
+    const enriched = staffMemberSchedules.map((sch) => {
+      const match = dailyGroup?.schedules.find((s) => s._id === sch._id);
+      return {
+        ...sch,
+        dayleschedules: match?.dayleschedules || [],
+      } as EditableSchedule;
+    });
+
+    setEditingStaff(staffMember);
+    setEditingSchedules(enriched);
+    setIsEditModalOpen(true);
+  };
+
+  const handleSaveEditedSchedules = async (
+    scheduleData: EditableSchedule[],
+  ) => {
+    if (!editingStaff) {
+      toast.error(t("Staff member is missing."));
+      return;
+    }
+
+    const existing = staffSchedulesMap.get(editingStaff._id) || [];
+    const existingById = new Map(existing.map((item) => [item._id, item]));
+    const incomingIds = new Set(
+      scheduleData.filter((item) => item._id).map((item) => item._id),
+    );
+
+    const schedulesToDelete = existing.filter(
+      (item) => !incomingIds.has(item._id),
+    );
+    const schedulesToUpdate = scheduleData.filter((item) => item._id);
+    const schedulesToCreate = scheduleData.filter((item) => !item._id);
+
     try {
-      let result: Schedule;
-      if (isEditing) {
-        // Редактиране
-        result = await callApi(
-          `/api/staff-schedules/${scheduleData._id}`,
-          "PUT",
-          scheduleData,
-        );
-        setSchedules((prev) =>
-          prev.map((s) => (s._id === scheduleData._id ? result : s)),
-        );
-        toast.success(t("Schedule updated successfully!"));
-      } else {
-        const payload = {
-          ...scheduleData,
-          locationId: selectedLocation?._id,
-        };
-        result = await callApi("/api/staff-schedules", "POST", payload);
-        setSchedules((prev) => [...prev, result]);
-        toast.success(t("Schedule created successfully!"));
-      }
-
-      // Проверка дали да отвори модала за прилагане към всички
-      // Само ако това е глобалният график (staff: null/undefined)
-      if (!scheduleData.staff) {
-        setSelectedScheduleId(result._id);
-        const storedToken = localStorage.getItem("token");
-        if (storedToken) {
-          const decodedUser = jwtDecode<any>(storedToken);
-
-          if (decodedUser.role === "business") {
-            const data = await callApi(
-              `/api/staff/staff-list?businessId=${decodedUser.businessId}`,
-              "GET",
-            );
-            if (data.length > 1) {
-              setIsApplyToAllModalOpen(true);
-            }
-          }
-        }
-      }
-    } catch (error) {
-      toast.error(
-        t(
-          isEditing
-            ? "Failed to update schedule."
-            : "Failed to create schedule.",
+      // Delete removed schedules
+      await Promise.all(
+        schedulesToDelete.map((s) =>
+          deleteScheduleMutation.mutateAsync(s._id),
         ),
       );
-    } finally {
-      setIsModalOpen(false);
-      setScheduleToEdit(null);
+
+      // Update existing schedules
+      await Promise.all(
+        schedulesToUpdate.map((schedule) => {
+          const existingSchedule = existingById.get(schedule._id);
+          const locationId =
+            schedule.locationId ||
+            getLocationIdFromSchedule(schedule as unknown as Schedule) ||
+            getLocationIdFromSchedule(existingSchedule as Schedule) ||
+            selectedLocationId ||
+            editingStaff.locationIds?.[0] ||
+            "";
+
+          if (!locationId) throw new Error("Missing locationId");
+
+          return updateScheduleMutation.mutateAsync({
+            id: schedule._id,
+            data: {
+              startDate: schedule.startDate,
+              endDate: schedule.endDate,
+              weeklyWorkingHours: schedule.weeklyWorkingHours,
+              breaks: schedule.breaks,
+              locationId,
+            },
+          });
+        }),
+      );
+
+      // Create new schedules
+      await Promise.all(
+        schedulesToCreate.map((schedule) => {
+          const locationId =
+            schedule.locationId ||
+            getLocationIdFromSchedule(schedule as unknown as Schedule) ||
+            selectedLocationId ||
+            editingStaff.locationIds?.[0] ||
+            "";
+
+          if (!locationId) throw new Error("Missing locationId");
+
+          return createScheduleMutation.mutateAsync({
+            startDate: schedule.startDate,
+            endDate: schedule.endDate,
+            weeklyWorkingHours: schedule.weeklyWorkingHours,
+            breaks: schedule.breaks,
+            locationId,
+            staffId: editingStaff._id,
+          });
+        }),
+      );
+
+      toast.success(t("Schedules saved successfully."));
+      setIsEditModalOpen(false);
+      setEditingStaff(null);
+      setEditingSchedules([]);
+      // await loadData();
+    } catch (error: any) {
+      toast.error(error?.message || t("Failed to save schedules."));
+      throw error;
     }
   };
 
-  const applyScheduleToAll = async (apply: boolean) => {
-    console.log("apply", apply);
+  const openLocationHoursEditor = () => {
+    if (!selectedLocationId) {
+      toast.error(t("Please select a location first."));
+      return;
+    }
+    setIsLocationHoursModalOpen(true);
+  };
+
+  const handleSaveLocationWeeklyHours = async (
+    nextWeeklyHours?: WeeklyWorkingHours,
+  ) => {
+    if (!selectedLocationId) {
+      toast.error(t("Please select a location first."));
+      return;
+    }
     try {
-      if (apply && selectedScheduleId) {
-        await callApi("/api/staff-schedules/apply-to-all", "POST", {
-          scheduleId: selectedScheduleId,
-        });
-        toast.success(t("Schedule applied to all staff successfully!"));
-      }
+      setSavingLocationHours(true);
+      const payloadHours = nextWeeklyHours || locationWeeklyHours;
+      await updateLocationHoursMutation.mutateAsync({
+        locationId: selectedLocationId,
+        weeklyWorkingHours: payloadHours,
+      });
+      setLocationWeeklyHours(payloadHours!);
+      setIsLocationHoursModalOpen(false);
+      toast.success(t("Location weekly working hours updated."));
     } catch (error) {
-      toast.error(t("Failed to apply schedule to all staff."));
+      toast.error(t("Failed to update location weekly working hours."));
+      throw error;
+    } finally {
+      setSavingLocationHours(false);
     }
-    setIsApplyToAllModalOpen(false);
   };
 
-  const columns: Column<Schedule>[] = [
-    {
-      accessorKey: "staff",
-      header: t("Staff Member"),
-      defaultWidth: 190,
-      cell: ({ row }) => (
-        <span className="font-medium">
-          {row.original.staff
-            ? `${(row.original.staff as any).firstName} ${(row.original.staff as any).lastName}`
-            : t("Location Default")}
-        </span>
-      ),
-    },
-    {
-      accessorKey: "period",
-      header: t("Schedule Period"),
-      defaultWidth: 260,
-      cell: ({ row }) => (
-        <>
-          {row.original.startDate
-            ? format(new Date(row.original.startDate), "dd.MM.yyyy")
-            : "-"}{" "}
-          {t("to")}{" "}
-          {row.original.endDate
-            ? format(new Date(row.original.endDate), "dd.MM.yyyy")
-            : "-"}
-        </>
-      ),
-      editableCell: ({ row }, onUpdate) => (
-        <div className="flex space-x-2 min-w-[200px]">
-          <LabeledInput
-            type="date"
-            value={row.original.startDate}
-            onChange={(e) => onUpdate("startDate", e.target.value)}
-            label={""}
-            id={""}
-          />
-          <LabeledInput
-            type="date"
-            value={row.original.endDate}
-            onChange={(e) => onUpdate("endDate", e.target.value)}
-            label={""}
-            id={""}
-          />
-        </div>
-      ),
-    },
-    {
-      accessorKey: "status",
-      header: t("Status"),
-      defaultWidth: 130,
-      cell: ({ row }) => {
-        const now = new Date();
-        const today = new Date(
-          now.getFullYear(),
-          now.getMonth(),
-          now.getDate(),
-        );
-        const start = new Date(row.original.startDate);
-        const startPure = new Date(
-          start.getFullYear(),
-          start.getMonth(),
-          start.getDate(),
-        );
-        const end = new Date(row.original.endDate);
-        const endPure = new Date(
-          end.getFullYear(),
-          end.getMonth(),
-          end.getDate(),
-        );
 
-        let status = "active";
-
-        if (today > endPure) {
-          status = "expired";
-        } else if (today < startPure) {
-          status = "upcoming";
-        }
-
-        return (
-          <div className="flex items-center gap-2">
-            <StatusChip status={status} />
-          </div>
-        );
-      },
-    },
-    {
-      accessorKey: "workTime",
-      header: t("Work Time"),
-      defaultWidth: 150,
-      cell: ({ row }) => (
-        <span>
-          {row.original.workTime.start} - {row.original.workTime.end}
-        </span>
-      ),
-      editableCell: ({ row }, onUpdate) => (
-        <div className="flex space-x-2">
-          <LabeledInput
-            type="time"
-            value={row.original.workTime?.start || ""}
-            onChange={(e) =>
-              onUpdate("workTime", {
-                ...row.original.workTime,
-                start: e.target.value,
-              })
-            }
-            label={""}
-            id={""}
-          />
-          <LabeledInput
-            type="time"
-            value={row.original.workTime?.end || ""}
-            onChange={(e) =>
-              onUpdate("workTime", {
-                ...row.original.workTime,
-                end: e.target.value,
-              })
-            }
-            label={""}
-            id={""}
-          />
-        </div>
-      ),
-    },
-    {
-      accessorKey: "isDayOff.monday",
-      header: t("Mon"),
-      defaultWidth: 80,
-      cell: ({ row }) => (
-        <span className="font-medium">
-          {row.original.isDayOff.monday ? t("Day Off") : t("Working")}
-        </span>
-      ),
-      editableCell: ({ row }, onUpdate) => (
-        <Switch
-          checked={!row.original.isDayOff.monday}
-          onCheckedChange={(checked) =>
-            onUpdate("isDayOff", { ...row.original.isDayOff, monday: !checked })
-          }
-        />
-      ),
-    },
-    {
-      accessorKey: "isDayOff.tuesday",
-      header: t("Tue"),
-      defaultWidth: 80,
-      cell: ({ row }) => (
-        <span className="font-medium">
-          {row.original.isDayOff.tuesday ? t("Day Off") : t("Working")}
-        </span>
-      ),
-      editableCell: ({ row }, onUpdate) => (
-        <Switch
-          checked={!row.original.isDayOff.tuesday}
-          onCheckedChange={(checked) =>
-            onUpdate("isDayOff", {
-              ...row.original.isDayOff,
-              tuesday: !checked,
-            })
-          }
-        />
-      ),
-    },
-    {
-      accessorKey: "isDayOff.wednesday",
-      header: t("Wed"),
-      defaultWidth: 80,
-      cell: ({ row }) => (
-        <span className="font-medium">
-          {row.original.isDayOff.wednesday ? t("Day Off") : t("Working")}
-        </span>
-      ),
-      editableCell: ({ row }, onUpdate) => (
-        <Switch
-          checked={!row.original.isDayOff.wednesday}
-          onCheckedChange={(checked) =>
-            onUpdate("isDayOff", {
-              ...row.original.isDayOff,
-              wednesday: !checked,
-            })
-          }
-        />
-      ),
-    },
-    {
-      accessorKey: "isDayOff.thursday",
-      header: t("Thu"),
-      defaultWidth: 80,
-      cell: ({ row }) => (
-        <span className="font-medium">
-          {row.original.isDayOff.thursday ? t("Day Off") : t("Working")}
-        </span>
-      ),
-      editableCell: ({ row }, onUpdate) => (
-        <Switch
-          checked={!row.original.isDayOff.thursday}
-          onCheckedChange={(checked) =>
-            onUpdate("isDayOff", {
-              ...row.original.isDayOff,
-              thursday: !checked,
-            })
-          }
-        />
-      ),
-    },
-    {
-      accessorKey: "isDayOff.friday",
-      header: t("Fri"),
-      defaultWidth: 80,
-      cell: ({ row }) => (
-        <span className="font-medium">
-          {row.original.isDayOff.friday ? t("Day Off") : t("Working")}
-        </span>
-      ),
-      editableCell: ({ row }, onUpdate) => (
-        <Switch
-          checked={!row.original.isDayOff.friday}
-          onCheckedChange={(checked) =>
-            onUpdate("isDayOff", { ...row.original.isDayOff, friday: !checked })
-          }
-        />
-      ),
-    },
-    {
-      accessorKey: "isDayOff.saturday",
-      header: t("Sat"),
-      defaultWidth: 80,
-      cell: ({ row }) => (
-        <span className="font-medium">
-          {row.original.isDayOff.saturday ? t("Day Off") : t("Working")}
-        </span>
-      ),
-      editableCell: ({ row }, onUpdate) => (
-        <Switch
-          checked={!row.original.isDayOff.saturday}
-          onCheckedChange={(checked) =>
-            onUpdate("isDayOff", {
-              ...row.original.isDayOff,
-              saturday: !checked,
-            })
-          }
-        />
-      ),
-    },
-    {
-      accessorKey: "isDayOff.sunday",
-      header: t("Sun"),
-      defaultWidth: 80,
-      cell: ({ row }) => (
-        <span className="font-medium">
-          {row.original.isDayOff.sunday ? t("Day Off") : t("Working")}
-        </span>
-      ),
-      editableCell: ({ row }, onUpdate) => (
-        <Switch
-          checked={!row.original.isDayOff.sunday}
-          onCheckedChange={(checked) =>
-            onUpdate("isDayOff", { ...row.original.isDayOff, sunday: !checked })
-          }
-        />
-      ),
-    },
-    {
-      accessorKey: "break1",
-      header: t("Break 1"),
-      cell: ({ row }) => (
-        <span>
-          {row.original.break1?.start} - {row.original.break1?.end}
-        </span>
-      ),
-      editableCell: ({ row }, onUpdate) => (
-        <div className="flex space-x-2">
-          <LabeledInput
-            type="time"
-            value={row.original.break1?.start || ""}
-            onChange={(e) =>
-              onUpdate("break1", {
-                ...row.original.break1,
-                start: e.target.value,
-              })
-            }
-            label={""}
-            id={""}
-          />
-          <LabeledInput
-            type="time"
-            value={row.original.break1?.end || ""}
-            onChange={(e) =>
-              onUpdate("break1", {
-                ...row.original.break1,
-                end: e.target.value,
-              })
-            }
-            label={""}
-            id={""}
-          />
-        </div>
-      ),
-    },
-    {
-      accessorKey: "break2",
-      header: t("Break 2"),
-      cell: ({ row }) => (
-        <span>
-          {row.original.break2?.start} - {row.original.break2?.end}
-        </span>
-      ),
-      editableCell: ({ row }, onUpdate) => (
-        <div className="flex space-x-2">
-          <LabeledInput
-            type="time"
-            value={row.original.break2?.start || ""}
-            onChange={(e) =>
-              onUpdate("break2", {
-                ...row.original.break2,
-                start: e.target.value,
-              })
-            }
-            label={""}
-            id={""}
-          />
-          <LabeledInput
-            type="time"
-            value={row.original.break2?.end || ""}
-            onChange={(e) =>
-              onUpdate("break2", {
-                ...row.original.break2,
-                end: e.target.value,
-              })
-            }
-            label={""}
-            id={""}
-          />
-        </div>
-      ),
-    },
-    {
-      accessorKey: "break3",
-      header: t("Break 3"),
-      cell: ({ row }) => (
-        <span>
-          {row.original.break3?.start} - {row.original.break3?.end}
-        </span>
-      ),
-      editableCell: ({ row }, onUpdate) => (
-        <div className="flex space-x-2">
-          <LabeledInput
-            type="time"
-            value={row.original.break3?.start || ""}
-            onChange={(e) =>
-              onUpdate("break3", {
-                ...row.original.break3,
-                start: e.target.value,
-              })
-            }
-            label={""}
-            id={""}
-          />
-          <LabeledInput
-            type="time"
-            value={row.original.break3?.end || ""}
-            onChange={(e) =>
-              onUpdate("break3", {
-                ...row.original.break3,
-                end: e.target.value,
-              })
-            }
-            label={""}
-            id={""}
-          />
-        </div>
-      ),
-    },
-    {
-      accessorKey: "actions",
-      header: t("Actions"),
-      cell: ({ row }) => (
-        <div className="flex items-center gap-0.5 mobile-actions">
-          <CustomTooltip
-            onClick={() => router.push(`/schedule/${row.original._id}`)}
-            tooltipText={t("View Details")}
-            icon={<Eye />}
-          />
-          <CustomTooltip
-            onClick={() => openScheduleModal(row.original)}
-            tooltipText={t("Edit")}
-            icon={<Pencil />}
-          />
-          <CustomTooltip
-            onClick={() => removeSchedule(row.original._id)}
-            tooltipText={t("Delete")}
-            icon={<Trash2 className=" text-red-500" />}
-          />
-        </div>
-      ),
-      enableHiding: false,
-    },
-  ];
-
-  if (isPageLoading) {
+  if (loading) {
     return (
-      <div className="p-6 space-y-6">
-        <Skeleton className="h-10 w-48 mb-6" />
-        <div className="space-y-4">
-          <Skeleton className="h-12 w-full" />
-          <Skeleton className="h-16 w-full" />
-          <Skeleton className="h-16 w-full" />
-          <Skeleton className="h-16 w-full" />
-          <Skeleton className="h-16 w-full" />
-        </div>
+      <div className="p-6 space-y-4">
+        <Skeleton className="h-12 w-72" />
+        <Skeleton className="h-16 w-full" />
+        <Skeleton className="h-[460px] w-full" />
       </div>
     );
   }
 
+
   return (
-    <>
-      <GenericTable
-        data={schedules}
-        columns={columns}
-        editable
-        onSave={handleSave}
-      />
-      {/* Заменен модал за създаване/редактиране */}
+    <div>
+      {/* Location Hero Card */}
+      {selectedLocationId && selectedLocationData && (
+        <div className="mb-6">
+          <LocationHeroCard 
+            location={selectedLocationData} 
+            onEditHours={openLocationHoursEditor} 
+          />
+          
+          {/* Warning for missing hours */}
+          {(!selectedLocationData?.weeklyWorkingHours ||
+            Object.values(selectedLocationData.weeklyWorkingHours).every(
+              (day) => !day.workTime.start && !day.workTime.end,
+            )) && (
+            <div className="mt-4 rounded-xl border border-amber-300 bg-amber-50 p-4 text-amber-900 shadow-sm">
+              <p className="text-sm font-bold flex items-center gap-2">
+                <Info className="h-4 w-4" />
+                {t("няма въведен график и трябва да се създаде")}
+              </p>
+            </div>
+          )}
+        </div>
+      )}
+
+      {!selectedLocationId && (
+        <div className="rounded-2xl border bg-white/80 p-6 shadow-sm backdrop-blur dark:bg-background/80 text-center">
+            <h2 className="text-xl font-black text-muted-foreground uppercase tracking-widest">
+                {t("Всички локации")}
+            </h2>
+            <p className="text-sm text-muted-foreground mt-1">
+                {t("Изберете локация за да видите детайлен график")}
+            </p>
+        </div>
+      )}
+
+      {/* Week view */}
+      <div className="rounded-2xl border bg-white shadow-sm dark:bg-background">
+        <div className="p-4 border-b flex items-center justify-center gap-3 flex-wrap">
+          <div className="flex items-center gap-3">
+            <Button
+              variant="outline"
+              size="icon"
+              onClick={() => setWeekStart((prev) => subWeeks(prev, 1))}
+            >
+              <ChevronLeft className="h-4 w-4" />
+            </Button>
+            <div className="flex items-center gap-2 font-semibold">
+              <CalendarDays className="h-4 w-4" />
+              <span>
+                {format(weekDays[0], "dd.MM.yyyy")} -{" "}
+                {format(weekDays[6], "dd.MM.yyyy")}
+              </span>
+            </div>
+            <Button
+              variant="outline"
+              size="icon"
+              onClick={() => setWeekStart((prev) => addWeeks(prev, 1))}
+            >
+              <ChevronRight className="h-4 w-4" />
+            </Button>
+
+          </div>
+        </div>
+
+        <DesktopScheduleBoard
+          weekDays={weekDays}
+          dayTitles={dayTitles}
+          selectedLocationId={selectedLocationId}
+          locationNameMap={locationNameMap}
+          visibleStaff={visibleStaff}
+          staffSchedulesMap={staffSchedulesMap}
+          dailyViewData={dailyView}
+          onOpenStaffScheduleEdit={openStaffScheduleEdit}
+          onOpenStaffCalendar={openStaffCalendar}
+          onCreateScheduleForStaff={createScheduleForStaff}
+          t={t}
+        />
+
+        <MobileScheduleBoard
+          weekDays={weekDays}
+          dayTitles={dayTitles}
+          selectedLocationId={selectedLocationId}
+          locationNameMap={locationNameMap}
+          visibleStaff={visibleStaff}
+          staffSchedulesMap={staffSchedulesMap}
+          dailyViewData={dailyView}
+          onOpenStaffScheduleEdit={openStaffScheduleEdit}
+          onOpenStaffCalendar={openStaffCalendar}
+          onCreateScheduleForStaff={createScheduleForStaff}
+          t={t}
+        />
+      </div>
+
+      {/* Schedule modal */}
       <ScheduleModal
-        isOpen={isModalOpen}
-        onOpenChange={setIsModalOpen}
-        onSave={handleCreateOrEdit}
-        schedule={scheduleToEdit}
+        isOpen={isEditModalOpen}
+        onOpenChange={(open) => {
+          setIsEditModalOpen(open);
+          if (!open) {
+            setEditingStaff(null);
+            setEditingSchedules([]);
+          }
+        }}
+        onSave={handleSaveEditedSchedules}
+        schedules={editingSchedules}
+        defaultLocationId={selectedLocationId}
         locations={locations}
       />
 
-      <Modal
-        label={t("Apply Schedule to All")}
-        open={isApplyToAllModalOpen}
-        onOpenChange={setIsApplyToAllModalOpen}
-      >
-        <div className="p-4 text-center">
-          <h2 className="text-xl font-bold mb-2">
-            {t("Apply schedule to the whole business?")}
-          </h2>
-          <p className="text-sm text-gray-600 mb-4">
-            {t(
-              "Do you want to apply this schedule to all staff in the business?",
-            )}
-            {t(
-              "Staff members will be able to edit it individually afterwards.",
-            )}
-          </p>
-          <div className="flex justify-center gap-4">
-            <Button
-              variant="outline"
-              onClick={() => {
-                applyScheduleToAll(false);
-              }}
-            >
-              {t("No, for me only")}
-            </Button>
-            <Button onClick={() => applyScheduleToAll(true)}>
-              {t("Yes, apply to all")}
-            </Button>
-          </div>
-        </div>
-      </Modal>
-    </>
+      {/* Location hours modal */}
+      {selectedLocationId && selectedLocationData ? (
+        <LocationHoursModal
+          isOpen={isLocationHoursModalOpen}
+          onOpenChange={setIsLocationHoursModalOpen}
+          locationName={selectedLocationData.name}
+          initialHours={locationWeeklyHours as any}
+          isEditMode={!!selectedLocationData.weeklyWorkingHours}
+          isSaving={savingLocationHours}
+          onSave={handleSaveLocationWeeklyHours}
+        />
+      ) : null}
+    </div>
   );
 }
 
-export default function StaffSchedulePage() {
+// ─── Exported page ────────────────────────────────────────
+
+export default function ScheduleNewPage() {
   return (
     <ProtectedRoute requiredRoles={["business", "staff", "manager"]}>
-      <StaffSchedulePageContent />
+      <SchedulePageContent />
     </ProtectedRoute>
   );
 }

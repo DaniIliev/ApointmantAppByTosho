@@ -51,7 +51,8 @@ function AppointmentTypesPageContent() {
     color: string;
     imageUrl: File | string | null;
     category: string;
-    locationId: string;
+    locationId: string | null;
+    locationIds: string[];
     staffMembers: { _id: string; name: string }[];
     paymentOption: "cash" | "card" | "cash_and_card";
     isGroup: boolean;
@@ -61,7 +62,8 @@ function AppointmentTypesPageContent() {
     category: "",
     description: "",
     duration: "",
-    locationId: "",
+    locationId: null,
+    locationIds: [],
     price: "",
     color: "from-blue-500 to-cyan-500",
     imageUrl: null,
@@ -84,7 +86,7 @@ function AppointmentTypesPageContent() {
   const fetchServices = async () => {
     try {
       const services = await callApi(
-        `/api/service?businessId=${user?.businessId}`,
+        `/api/service?businessId=${user?.businessId}${selectedLocation?._id ? `&locationId=${selectedLocation._id}` : ""}`,
         "GET",
       );
       setAppointmentTypes(services);
@@ -139,7 +141,8 @@ function AppointmentTypesPageContent() {
             name: s.name || `${s.firstName || ""} ${s.lastName || ""}`.trim(),
           })) || [],
         paymentOption: (type as any).paymentOption || "cash",
-        locationId: type.locationId || "",
+        locationId: (type as any).locationId || null,
+        locationIds: (type as any).locationIds || ((type as any).locationId ? [(type as any).locationId] : []),
         isGroup: type.isGroup || false,
         capacity: (type.capacity || 1).toString(),
       });
@@ -155,7 +158,8 @@ function AppointmentTypesPageContent() {
         imageUrl: null,
         staffMembers: [],
         paymentOption: "cash",
-        locationId: "",
+        locationId: null,
+        locationIds: [],
         isGroup: false,
         capacity: "1",
       });
@@ -168,7 +172,6 @@ function AppointmentTypesPageContent() {
     const method = editingType ? "PUT" : "POST";
     const endpoint = `/api/service${editingType ? "/" + editingType._id : ""}`;
     setIsLoading(true);
-    console.log("formdata", formData.staffMembers);
     try {
       const isFile = formData.imageUrl instanceof File;
       const dataToSend = {
@@ -181,12 +184,11 @@ function AppointmentTypesPageContent() {
         category: formData.category,
         staffMembers: JSON.stringify(formData.staffMembers),
         paymentOption: formData.paymentOption,
-        locationId: formData.locationId,
+        locationIds: formData.locationIds,
         businessId: user?.businessId,
         isGroup: formData.isGroup,
         capacity: Number(formData.capacity),
       };
-      console.log("payload", dataToSend);
       await callApi(endpoint, method, dataToSend, isFile);
       fetchServices();
       setIsModalOpen(false);

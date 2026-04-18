@@ -3,7 +3,6 @@ import { Check, X, Clock } from "lucide-react";
 import { AppointmentStatus } from "@/Global/Types/types";
 import { useTranslation } from "react-i18next";
 import React from "react";
-import { getStatusIndicator } from "@/Global/Utils/statusIndicator";
 import { capitalizeFirstLetter } from "@/Global/Utils/commonFn";
 
 interface StatusChipProps {
