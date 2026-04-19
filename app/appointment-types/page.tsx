@@ -27,7 +27,7 @@ const CreateNewTypeMenu = ({ onOpenModal }: CreateNewDashboardMenuProps) => {
     <CustomTooltip
       onClick={onOpenModal}
       tooltipText={t("Add")}
-      icon={<Plus />}
+      icon={<Plus color="white"/>}
     />
   );
 };
@@ -112,17 +112,6 @@ function AppointmentTypesPageContent() {
   useEffect(() => {
     fetchServices();
   }, [user?.businessId, selectedLocation?._id]);
-
-  const colorOptions = [
-    "from-blue-500 to-cyan-500",
-    "from-purple-500 to-pink-500",
-    "from-green-500 to-emerald-500",
-    "from-orange-500 to-red-500",
-    "from-indigo-500 to-purple-500",
-    "from-teal-500 to-green-500",
-    "from-rose-500 to-pink-500",
-    "from-amber-500 to-orange-500",
-  ];
 
   const openModal = (type?: AppointmentType) => {
     if (type) {
@@ -262,7 +251,6 @@ function AppointmentTypesPageContent() {
         setFormData={setFormData}
         handleSubmit={handleSubmit}
         isLoading={isLoading}
-        colorOptions={colorOptions}
       />
 
       <DeleteConfirmationDialog

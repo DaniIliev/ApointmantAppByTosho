@@ -2,9 +2,6 @@
 
 import { format } from "date-fns";
 import { Clock, Eye, Pencil, Plus } from "lucide-react";
-
-import { Button } from "@/components/ui/button";
-
 import type { DailyViewData, DayViewEntry, Schedule, StaffMember } from "../types";
 import { getFullName, getStaffInitials } from "../utils";
 import { CustomTooltip } from "@/components/customUIComponents/CustomTooltip";
@@ -45,8 +42,8 @@ export function DesktopScheduleBoard({
 }: DesktopScheduleBoardProps) {
   return (
     <div className="hidden overflow-auto md:block">
-      <table className="w-full min-w-[1080px] text-sm">
-        <thead>
+      <table className="w-full min-w-[1080px] text-sm ">
+        <thead className="bg-gray-50/80 dark:bg-gray-800/80 backdrop-blur-md shadow-sm">
           <tr className="bg-muted/30 border-b">
             <th className="text-left p-3 font-semibold min-w-[180px]">
               {t("Staff Member")}
@@ -57,7 +54,7 @@ export function DesktopScheduleBoard({
                 className="p-3 text-center min-w-[110px]"
               >
                 <div className="text-xs text-muted-foreground">
-                  {dayTitles[index]}
+                  {t(dayTitles[index])}
                 </div>
                 <div className="font-semibold">{format(day, "dd")}</div>
               </th>
@@ -148,37 +145,40 @@ export function DesktopScheduleBoard({
                       key={`${staffMember._id}-${day.toISOString()}`}
                       className="p-2"
                     >
-                      <button
-                        type="button"
-                        onClick={() =>
-                          onOpenStaffCalendar(
-                            dayData.scheduleId || null,
-                            staffMember._id,
-                          )
-                        }
-                        className={`w-full rounded-md border px-2 py-1.5 text-center transition-colors ${
-                          isDayOff
-                            ? "bg-slate-100 border-slate-200 text-slate-500"
-                            : "bg-blue-50 border-blue-200 text-blue-800 hover:bg-blue-100"
-                        }`}
-                      >
-                        {isDayOff ? (
-                          <span className="text-xs font-medium">
-                            {t("Day Off")}
-                          </span>
-                        ) : (
-                          <span className="text-xs font-semibold">
-                            <Clock className="inline h-3 w-3 mr-1" />
-                            {dayData.workTime?.start} -{" "}
-                            {dayData.workTime?.end}
-                          </span>
-                        )}
-                        {!selectedLocationId && locationName && (
-                          <div className="text-[10px] text-blue-700 mt-1">
-                            {locationName}
-                          </div>
-                        )}
-                      </button>
+<button
+      type="button"
+      onClick={() =>
+        onOpenStaffCalendar(
+          dayData.scheduleId || null,
+          staffMember._id,
+        )
+      }
+      className={`w-full rounded-md border px-2 py-1.5 text-center transition-colors ${
+        isDayOff
+          ? "bg-slate-100 border-slate-200 text-slate-500 dark:bg-slate-800 dark:border-slate-700 dark:text-slate-400"
+          : "bg-blue-50 border-blue-200 text-blue-800 hover:bg-blue-100 dark:bg-blue-900/30 dark:border-blue-800 dark:text-blue-300 dark:hover:bg-blue-900/50"
+      }`}
+    >
+      {isDayOff ? (
+        <span className="text-xs font-medium block">
+          {t("Day Off")}
+        </span>
+      ) : (
+        <span className="text-xs font-semibold flex items-center justify-center">
+          <Clock className="h-3 w-3 mr-1" />
+          {dayData.workTime?.start} - {dayData.workTime?.end}
+        </span>
+      )}
+      {!selectedLocationId && locationName && (
+        <div className={`text-[10px] mt-1 ${
+          isDayOff 
+            ? "text-slate-400 dark:text-slate-500" 
+            : "text-blue-700 dark:text-blue-400"
+        }`}>
+          {locationName}
+        </div>
+      )}
+    </button>
                     </td>
                   );
                 })}

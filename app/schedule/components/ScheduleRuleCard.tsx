@@ -16,6 +16,7 @@ interface ScheduleRuleCardProps {
   onRemove: () => void;
   addRule: () => void;
   allAssignedDays: DayKey[];
+  showBreaks?: boolean;
 }
 
 export const ScheduleRuleCard: React.FC<ScheduleRuleCardProps> = ({
@@ -24,6 +25,7 @@ export const ScheduleRuleCard: React.FC<ScheduleRuleCardProps> = ({
   onRemove,
   addRule,
   allAssignedDays,
+  showBreaks = true,
 }) => {
   const { t } = useTranslation();
 
@@ -56,16 +58,16 @@ export const ScheduleRuleCard: React.FC<ScheduleRuleCardProps> = ({
           <Clock className="h-4 w-4" />
           {t("Work Shift")}
         </div>
-        <div className="flex gap-1">
+        <div className="flex gap-1 items-center">
           <CustomTooltip
             onClick={addRule}
             tooltipText={t("Add")}
-            icon={<Plus />}
+            icon={<Plus className="h-4 w-4" />}
           />
           <CustomTooltip
             onClick={onRemove}
             tooltipText={t("Remove")}
-            icon={<Trash className="text-red-500"/>}
+            icon={<Trash className="h-4 w-4 text-red-500"/>}
           />
 
         </div>
@@ -100,51 +102,53 @@ export const ScheduleRuleCard: React.FC<ScheduleRuleCardProps> = ({
       </div>
 
       {/* Breaks Section */}
-      <div className="space-y-2 pt-3">
-        <div className="flex items-center justify-between">
-          <label className="flex items-center gap-1.5 text-[10px] font-medium uppercase tracking-wider text-muted-foreground">
-            <Coffee className="h-3 w-3" />
-            {t("Breaks")}
-          </label>
-          <Button
-            type="button"
-            variant="ghost"
-            size="sm"
-            className="h-6 px-2 text-[10px]"
-            onClick={addBreak}
-          >
-            <Plus className="mr-1 h-3 w-3" />
-            {t("Add Break")}
-          </Button>
-        </div>
+      {showBreaks && (
+        <div className="space-y-2 pt-3">
+          <div className="flex items-center justify-between">
+            <label className="flex items-center gap-1.5 text-[10px] font-medium uppercase tracking-wider text-muted-foreground">
+              <Coffee className="h-3 w-3" />
+              {t("Breaks")}
+            </label>
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              className="h-6 px-2 text-[10px]"
+              onClick={addBreak}
+            >
+              <Plus className="mr-1 h-3 w-3" />
+              {t("Add Break")}
+            </Button>
+          </div>
 
-        <div className="space-y-2">
-          {rule.breaks.map((br, idx) => (
-            <div key={idx} className="flex items-center gap-2">
-              <TimeRangePicker
-                value={{ startTime: br.start, endTime: br.end }}
-                onChange={({ startTime, endTime }) =>
-                  updateBreak(idx, startTime, endTime)
-                }
-              />
-              <Button
-                type="button"
-                variant="ghost"
-                size="icon"
-                className="h-8 w-8 shrink-0 text-muted-foreground hover:text-red-500"
-                onClick={() => removeBreak(idx)}
-              >
-                <Trash className="h-3.5 w-3.5" />
-              </Button>
-            </div>
-          ))}
-          {rule.breaks.length === 0 && (
-            <p className="py-1 text-center text-xs text-muted-foreground italic">
-              {t("No breaks defined")}
-            </p>
-          )}
+          <div className="space-y-2">
+            {rule.breaks.map((br, idx) => (
+              <div key={idx} className="flex items-center gap-2">
+                <TimeRangePicker
+                  value={{ startTime: br.start, endTime: br.end }}
+                  onChange={({ startTime, endTime }) =>
+                    updateBreak(idx, startTime, endTime)
+                  }
+                />
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon"
+                  className="h-8 w-8 shrink-0 text-muted-foreground hover:text-red-500"
+                  onClick={() => removeBreak(idx)}
+                >
+                  <Trash className="h-3.5 w-3.5" />
+                </Button>
+              </div>
+            ))}
+            {rule.breaks.length === 0 && (
+              <p className="py-1 text-center text-xs text-muted-foreground italic">
+                {t("No breaks defined")}
+              </p>
+            )}
+          </div>
         </div>
-      </div>
+      )}
     </div>
   );
 };

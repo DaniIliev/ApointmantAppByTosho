@@ -30,7 +30,7 @@ export const dayKeys: DayKey[] = [
   "sunday",
 ];
 
-export const dayTitles = ["Пон", "Вто", "Сря", "Чет", "Пет", "Съб", "Нед"];
+export const dayTitles = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 
 export const dayLabels: Record<DayKey, string> = {
   monday: "Mon",

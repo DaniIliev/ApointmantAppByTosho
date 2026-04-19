@@ -8,7 +8,6 @@ import { useRightNav } from "@/context/RightNavContext";
 import { useAuthContext } from "@/context/AuthContext";
 import callApi from "@/app/Api/callApi";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Modal } from "@/components/customUIComponents/Modal";
 import { LabeledInput } from "@/components/customUIComponents/LabeledInput";
 import { ImageUpload } from "@/components/customUIComponents/ImageUpload";
@@ -27,7 +26,7 @@ const AddLocationNav = ({ onOpenModal }: { onOpenModal: () => void }) => {
     <CustomTooltip
       onClick={onOpenModal}
       tooltipText={t("Add Location")}
-      icon={<Plus />}
+      icon={<Plus color="white"/>}
     />
   );
 };

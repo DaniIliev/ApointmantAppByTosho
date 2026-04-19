@@ -141,7 +141,7 @@ export function MobileScheduleBoard({
                       className="min-w-[96px] rounded-xl border border-dashed bg-muted/20 px-2 py-3 text-center text-muted-foreground"
                     >
                       <div className="text-[10px] uppercase tracking-wide">
-                        {dayTitles[index]}
+                        {t(dayTitles[index])}
                       </div>
                       <div className="mt-1 text-sm font-semibold">
                         {format(day, "dd")}
@@ -158,43 +158,47 @@ export function MobileScheduleBoard({
                   : null;
 
                 return (
-                  <button
-                    key={`mobile-${staffMember._id}-${day.toISOString()}`}
-                    type="button"
-                    onClick={() =>
-                      onOpenStaffCalendar(
-                        dayData.scheduleId || null,
-                        staffMember._id,
-                      )
-                    }
-                    className={`min-w-[96px] rounded-xl border px-2 py-3 text-center transition-colors ${
-                      isDayOff
-                        ? "border-slate-200 bg-slate-100 text-slate-500"
-                        : "border-blue-200 bg-blue-50 text-blue-800 hover:bg-blue-100"
-                    }`}
-                  >
-                    <div className="text-[10px] uppercase tracking-wide">
-                      {dayTitles[index]}
-                    </div>
-                    <div className="mt-1 text-sm font-semibold">
-                      {format(day, "dd")}
-                    </div>
-                    <div className="mt-2 text-xs font-semibold">
-                      {isDayOff ? (
-                        t("Day Off")
-                      ) : (
-                        <>
-                          <Clock className="inline h-3 w-3 mr-1" />
-                          {dayData.workTime?.start} - {dayData.workTime?.end}
-                        </>
-                      )}
-                    </div>
-                    {!selectedLocationId && locationName && (
-                      <div className="mt-1 text-[10px] text-blue-700">
-                        {locationName}
-                      </div>
-                    )}
-                  </button>
+<button
+  key={`mobile-${staffMember._id}-${day.toISOString()}`}
+  type="button"
+  onClick={() =>
+    onOpenStaffCalendar(
+      dayData.scheduleId || null,
+      staffMember._id,
+    )
+  }
+  className={`min-w-[96px] rounded-xl border px-2 py-3 text-center transition-colors ${
+    isDayOff
+      ? "border-slate-200 bg-slate-100 text-slate-500 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-400"
+      : "border-blue-200 bg-blue-50 text-blue-800 hover:bg-blue-100 dark:border-blue-800 dark:bg-blue-900/30 dark:text-blue-300 dark:hover:bg-blue-900/50"
+  }`}
+>
+  <div className="text-[10px] uppercase tracking-wide opacity-70">
+    {t(dayTitles[index])}
+  </div>
+  <div className="mt-1 text-sm font-semibold">
+    {format(day, "dd")}
+  </div>
+  <div className="mt-2 text-xs font-semibold">
+    {isDayOff ? (
+      t("Day Off")
+    ) : (
+      <div className="flex items-center justify-center">
+        <Clock className="h-3 w-3 mr-1" />
+        {dayData.workTime?.start} - {dayData.workTime?.end}
+      </div>
+    )}
+  </div>
+  {!selectedLocationId && locationName && (
+    <div className={`mt-1 text-[10px] ${
+      isDayOff 
+        ? "text-slate-400 dark:text-slate-500" 
+        : "text-blue-700 dark:text-blue-400"
+    }`}>
+      {locationName}
+    </div>
+  )}
+</button>
                 );
               })}
             </div>

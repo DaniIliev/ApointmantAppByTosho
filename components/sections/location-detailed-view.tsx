@@ -106,16 +106,16 @@ export function LocationDetailedView({
                   const isToday = dayKey === getTodayDayName();
 
                   const isDayOff =
-                    dayHours === t("Почивен Ден") ||
-                    dayHours === t("Затворено") ||
-                    dayHours === "Почивен Ден" ||
-                    dayHours === "Затворено";
+                    dayHours === "Day Off" ||
+                    dayHours === "Closed" ||
+                    dayHours === t("Day Off") ||
+                    dayHours === t("Closed");
 
                   const isNotSet =
-                    dayHours === t("Не е зададено") ||
-                    dayHours === "Не е зададено";
+                    dayHours === "Not Set" ||
+                    dayHours === t("Not Set");
 
-                  let displayStatus = isDayOff
+                  const displayStatus = isDayOff
                     ? t("Day Off")
                     : isNotSet
                       ? t("Not Set")

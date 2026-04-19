@@ -26,7 +26,6 @@ type CreateAppointmentModalProps = {
   setFormData: (data: any) => void;
   handleSubmit: (e: React.FormEvent) => void;
   isLoading: boolean;
-  colorOptions: string[];
 };
 
 type StaffMember = {
@@ -52,7 +51,6 @@ const CreateAppointmentModal = ({
   setFormData,
   handleSubmit,
   isLoading,
-  colorOptions,
 }: CreateAppointmentModalProps) => {
   const { t } = useTranslation();
   const { user } = useAuthContext();

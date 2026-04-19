@@ -3,8 +3,10 @@
 import React, { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Modal } from "@/components/customUIComponents/Modal";
-import LocationHoursFields from "@/components/location/LocationHoursFields";
 import { Button } from "@/components/ui/button";
+import { WeeklyScheduleEditor } from "@/app/schedule/components/WeeklyScheduleEditor";
+import { WeeklyWorkingHours } from "@/app/schedule/types";
+import { Clock } from "lucide-react";
 
 export type DayKey =
   | "monday"
@@ -46,56 +48,24 @@ export function LocationHoursModal({
   onSave,
 }: LocationHoursModalProps) {
   const { t } = useTranslation();
-  const [draftHours, setDraftHours] = useState<SharedWeeklyHours | null>(null);
+  const [draftHours, setDraftHours] = useState<WeeklyWorkingHours | null>(null);
 
   useEffect(() => {
     if (isOpen && initialHours) {
-      // Deep clone initial hours to prevent reference mutations
-      setDraftHours(JSON.parse(JSON.stringify(initialHours)));
+      // Deep clone initial hours and ensure breaks array exists (even if empty) to satisfy types
+      const cloned = JSON.parse(JSON.stringify(initialHours)) as WeeklyWorkingHours;
+      Object.keys(cloned).forEach((day) => {
+        if (!cloned[day as keyof WeeklyWorkingHours].breaks) {
+          cloned[day as keyof WeeklyWorkingHours].breaks = [];
+        }
+      });
+      setDraftHours(cloned);
     }
   }, [isOpen, initialHours]);
 
-  const handleDayToggle = (day: DayKey) => {
-    setDraftHours((prev) => {
-      if (!prev) return prev;
-      const nextIsDayOff = !prev[day].isDayOff;
-      return {
-        ...prev,
-        [day]: {
-          isDayOff: nextIsDayOff,
-          workTime: nextIsDayOff
-            ? { start: null, end: null }
-            : {
-                start: prev[day].workTime.start || "09:00",
-                end: prev[day].workTime.end || "18:00",
-              },
-        },
-      };
-    });
-  };
-
-  const handleWorkTimeChange = (
-    day: DayKey,
-    next: { start: string | null; end: string | null }
-  ) => {
-    setDraftHours((prev) => {
-      if (!prev) return prev;
-      return {
-        ...prev,
-        [day]: {
-          ...prev[day],
-          workTime: {
-            start: next.start,
-            end: next.end,
-          },
-        },
-      };
-    });
-  };
-
   const handleSave = () => {
     if (draftHours) {
-      onSave(draftHours);
+      onSave(draftHours as unknown as SharedWeeklyHours);
     }
   };
 
@@ -104,21 +74,31 @@ export function LocationHoursModal({
       label={`${isEditMode ? t("Edit") : t("Create")} ${t("Location Hours")}`}
       open={isOpen}
       onOpenChange={onOpenChange}
-      width="4xl"
+      width="5xl"
       confirmClose
       autoDetectDirty
       onConfirmSave={handleSave}
     >
       {draftHours && (
-        <div className="space-y-4">
-          <LocationHoursFields
-            locationName={locationName}
-            value={draftHours as any}
-            onWorkTimeChange={handleWorkTimeChange as any}
-            onDayToggle={handleDayToggle as any}
+        <div className="space-y-6">
+          {/* Header info */}
+          <div className="flex items-center gap-3 rounded-2xl bg-primary/5 p-4 border border-primary/10">
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10 text-primary">
+              <Clock className="h-5 w-5" />
+            </div>
+            <div>
+              <h3 className="font-semibold text-primary">{locationName}</h3>
+              <p className="text-xs text-muted-foreground">{t("Configure standard working hours for this location")}</p>
+            </div>
+          </div>
+
+          <WeeklyScheduleEditor
+            value={draftHours}
+            onChange={(val) => setDraftHours(val)}
+            showBreaks={false}
           />
 
-          <div className="flex flex-col-reverse gap-3 pt-4 sm:flex-row sm:justify-center">
+          <div className="flex justify-center gap-3 py-4">
             <Button
               type="button"
               iconType="cancel"
@@ -133,7 +113,7 @@ export function LocationHoursModal({
               onClick={handleSave}
               disabled={isSaving}
             >
-              {isSaving ? t("Saving...") : t("Save changes")}
+              {isSaving ? t("Saving...") : t("Save")}
             </Button>
           </div>
         </div>

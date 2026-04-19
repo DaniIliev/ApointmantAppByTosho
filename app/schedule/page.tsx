@@ -9,9 +9,6 @@ import {
   ChevronLeft,
   ChevronRight,
   Info,
-  Pencil,
-  Plus,
-  RefreshCcw,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -410,7 +407,7 @@ function SchedulePageContent() {
 
       {/* Week view */}
       <div className="rounded-2xl border bg-white shadow-sm dark:bg-background">
-        <div className="p-4 border-b flex items-center justify-center gap-3 flex-wrap">
+        <div className="p-4 border-b flex items-center justify-center gap-3 flex-wrap dark:border-gray-800 bg-white/50 dark:bg-card/50 backdrop-blur-sm">
           <div className="flex items-center gap-3">
             <Button
               variant="outline"

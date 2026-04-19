@@ -14,7 +14,6 @@ function PublicLocationPageContent() {
   const { t } = useTranslation();
   const { setPageTitle } = usePageTitle();
   const [location, setLocation] = useState<Location | null>(null);
-  const [business, setBusiness] = useState<Business | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const resolvedBusinessId = (id as string) || "";
@@ -32,12 +31,8 @@ function PublicLocationPageContent() {
       setIsLoading(true);
       setError(null);
       try {
-        const [locationRes, businessRes] = await Promise.all([
-          callApi(`/api/locations/${locationId}`, "GET"),
-          callApi(`/api/business/${resolvedBusinessId}`, "GET")
-        ]);
+        const locationRes = await callApi(`/api/locations/${locationId}`, "GET");
         setLocation(locationRes);
-        setBusiness(businessRes);
       } catch (err) {
         console.error(err);
         setError(t("Failed to load details."));
