@@ -1,13 +1,14 @@
 "use client";
 
 import React from "react";
-import { MapPin, Clock } from "lucide-react";
+import { MapPin, Clock, Edit2 } from "lucide-react";
 import { useTranslation } from "react-i18next";
-
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils"; // Стандартна помощна функция за класове в Shadcn
 
-import type { WeeklyWorkingHours, DayKey } from "../types";
+import type { DayKey } from "../types";
+import { dayTitles } from "../utils";
 
 interface LocationHeroCardProps {
   location: any;
@@ -22,81 +23,84 @@ export const LocationHeroCard: React.FC<LocationHeroCardProps> = ({
 
   if (!location) return null;
 
-  const dayKeys: DayKey[] = [
-    "monday",
-    "tuesday",
-    "wednesday",
-    "thursday",
-    "friday",
-    "saturday",
-    "sunday",
-  ];
+  const dayKeys: DayKey[] = ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"];
 
   return (
-    <Card className="overflow-hidden border bg-white shadow-sm dark:bg-slate-900 border-slate-100 dark:border-slate-800">
-      <div className="flex flex-col">
-        {/* Top Section: Location Details */}
-        <div className="flex flex-row items-center justify-between p-4 border-b border-slate-50 dark:border-slate-800/50">
-          <div className="flex items-center gap-4">
-             <div className="h-10 w-10 shrink-0 flex items-center justify-center rounded-2xl bg-primary text-primary-foreground font-black text-xs uppercase shadow-md shadow-primary/20">
-                {location.name?.split(' ').map((n: string) => n[0]).join('').slice(0, 2)}
-             </div>
-             <div className="min-w-0">
-                <h2 className="text-lg font-black tracking-tight text-foreground leading-none mb-1 shadow-primary/5">
-                  {location.name}
-                </h2>
-                <div className="flex items-center gap-1.5 text-[10px] font-bold text-muted-foreground uppercase tracking-[0.15em]">
-                  <MapPin className="h-3 w-3 text-primary/60" />
-                  <span className="truncate">{location.address}, {location.city}</span>
-                </div>
-             </div>
+    <Card className="overflow-hidden border-none shadow-lg bg-white dark:bg-slate-950">
+      {/* Header Section */}
+      <div className="p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div className="flex items-center gap-4">
+          <div className="relative group">
+            <div className="h-12 w-12 flex items-center justify-center rounded-xl bg-primary/10 text-primary font-bold text-sm shadow-inner transition-transform group-hover:scale-105">
+              {location.name?.split(' ').map((n: string) => n[0]).join('').slice(0, 2).toUpperCase()}
+            </div>
+            <div className="absolute -bottom-1 -right-1 h-4 w-4 bg-green-500 border-2 border-white dark:border-slate-950 rounded-full" title="Active" />
           </div>
-
-          <div className="flex shrink-0">
-             {onEditHours && (
-                <Button 
-                variant={'outline'}
-                    onClick={onEditHours}
-                    iconType="edit"
-                >
-                   {t('Edit Hours')}
-                </Button>
-              )}
+          
+          <div className="space-y-1">
+            <h2 className="text-lg font-bold tracking-tight leading-tight text-text-primary">
+              {location.name}
+            </h2>
+            <div className="flex items-center gap-1.5 text-xs text-muted-foreground font-medium">
+              <MapPin className="h-3.5 w-3.5 text-primary/70" />
+              <span>{location.address}, {location.city}</span>
+            </div>
           </div>
         </div>
 
-        {/* Bottom Section: Unified Weekly Timeline */}
-        <div className="bg-slate-50/50 dark:bg-slate-800/30">
-          <div className="grid grid-cols-7 divide-x divide-slate-100 dark:divide-slate-800">
-            {dayKeys.map((dayKey) => {
-              const data = location.weeklyWorkingHours?.[dayKey];
-              const isDayOff = data?.isDayOff;
-              const label = dayKey.slice(0, 3).toUpperCase();
+        {onEditHours && (
+          <Button 
+            type="button"
+            onClick={onEditHours}
+            className="h-9 gap-2 font-semibold text-xs transition-all hover:bg-primary hover:text-primary-foreground"
+          >
+            <Edit2 className="h-3.5 w-3.5" />
+            {t('Edit Hours')}
+          </Button>
+        )}
+      </div>
 
-              return (
-                <div 
-                  key={dayKey} 
-                  className={`flex flex-col items-center justify-center py-2.5 px-1 transition-colors ${
-                    isDayOff ? 'bg-slate-100/30 dark:bg-slate-900/40' : ''
-                  }`}
-                >
-                  <span className={`text-[8px] font-black uppercase tracking-widest mb-1 ${
-                    isDayOff ? 'text-slate-400' : 'text-muted-foreground'
-                  }`}>
-                    {t(label)}
+      {/* Weekly Schedule Grid */}
+      <div className="px-2 pb-2">
+        <div className="grid grid-cols-7 gap-1 p-1.5 rounded-xl bg-card">
+          {dayKeys.map((dayKey, index) => {
+            const data = location.weeklyWorkingHours?.[dayKey];
+            const isDayOff = data?.isDayOff;
+            const label = dayTitles[index];
+
+            return (
+              <div 
+                key={dayKey} 
+                className={cn(
+                  "flex flex-col items-center py-2 rounded-lg transition-all",
+                  isDayOff 
+                    ? "bg-card shadow-sm" 
+                    : "bg-card shadow-sm"
+                )}
+              >
+                <span className="text-[10px] font-bold uppercase text-muted-foreground/80 mb-1">
+                  {t(label)}
+                </span>
+                
+                {isDayOff ? (
+                  <span className="text-xs font-bold text-primary/70">
+                    {t("Day Off")}
                   </span>
-                  <span className={`text-[10px] font-black tracking-tighter ${
-                    isDayOff ? 'text-red-300' : 'text-foreground'
-                  }`}>
-                    {isDayOff 
-                      ? t("OFF") 
-                      : `${data?.workTime?.start}-${data?.workTime?.end}`
-                    }
-                  </span>
-                </div>
-              );
-            })}
-          </div>
+                ) : (
+                  <div className="flex flex-col md:flex-row items-center leading-none">
+                    <Clock className="h-3 w-3 mr-1 text-primary" />
+                    <span className="text-[11px] font-black text-primary tracking-tighter">
+                      {data?.workTime?.start}
+                    </span>
+                    <span className="text-[9px] font-medium text-primary my-0.5">—</span>
+                    <span className="text-[11px] font-black text-primary tracking-tighter">
+                      {data?.workTime?.end}
+                    </span>
+                  </div>
+                )}
+              </div>
+            );
+          })}
         </div>
       </div>
     </Card>

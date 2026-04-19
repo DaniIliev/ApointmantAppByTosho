@@ -7,6 +7,7 @@ import { toast } from "sonner";
 
 import callApi from "@/app/Api/callApi";
 import { LocationHoursModal } from "@/components/location/LocationHoursModal";
+import { LocationHeroCard } from "@/app/schedule/components/LocationHeroCard";
 import { Button } from "@/components/ui/button";
 import {
   Location,
@@ -227,61 +228,17 @@ export default function LocationHoursSetup({
           const value = hours[locationId];
           if (!value) return null;
 
-          const summary = summarizeLocationHours(value);
-          const hasSavedConfig = Boolean(initialData?.[locationId]);
+          const locationWithHours = {
+            ...location,
+            weeklyWorkingHours: value,
+          };
 
           return (
-            <div
+            <LocationHeroCard
               key={locationId}
-              className="rounded-3xl border border-border bg-slate-50/50 p-6 shadow-sm dark:bg-slate-900/50"
-            >
-              <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-                <div>
-                  <h3 className="text-xl font-bold text-primary">
-                    {t("Location")}: {location.name}
-                  </h3>
-                  <div className="mt-3 flex flex-wrap gap-2 text-xs text-muted-foreground">
-                    {summary.every(s => s.isDayOff || (!s.timeLabel.includes('null') && !s.timeLabel.includes('--:--'))) ? summary.map((item) => (
-                      <span
-                        key={item.dayKey}
-                        className={`rounded-full border px-3 py-1 font-medium ${
-                          item.isDayOff
-                            ? "border-red-200 bg-red-50 text-red-700 dark:border-red-500/20 dark:bg-red-500/10 dark:text-red-200"
-                            : "border-green-200 bg-green-50 text-green-700 dark:border-green-500/20 dark:bg-green-500/10 dark:text-green-200"
-                        }`}
-                      >
-                        {t(item.dayKey)} · {item.timeLabel}
-                      </span>
-                    )) : (
-                      <div className="rounded-xl border border-amber-300 bg-amber-50 p-4 text-amber-900 w-full mt-2">
-                        <p className="text-sm font-medium">
-                          {t("няма въведен график и трябва да се създаде")}
-                        </p>
-                      </div>
-                    )}
-                  </div>
-                </div>
-
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={() => openEditor(locationId)}
-                  className="shrink-0"
-                >
-                  {hasSavedConfig ? (
-                    <>
-                      <Pencil className="mr-2 h-4 w-4" />
-                      {t("Edit")}
-                    </>
-                  ) : (
-                    <>
-                      <Plus className="mr-2 h-4 w-4" />
-                      {t("Create")}
-                    </>
-                  )}
-                </Button>
-              </div>
-            </div>
+              location={locationWithHours}
+              onEditHours={() => openEditor(locationId)}
+            />
           );
         })}
 

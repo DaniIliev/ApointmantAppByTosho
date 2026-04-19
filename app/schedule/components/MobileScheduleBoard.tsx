@@ -1,12 +1,13 @@
 "use client";
 
 import { format } from "date-fns";
-import { Clock, ExternalLink, Pencil, Plus } from "lucide-react";
+import { Clock, ExternalLink, Eye, Pencil, Plus } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 
 import type { DailyViewData, DayViewEntry, Schedule, StaffMember } from "../types";
 import { getFullName, getStaffInitials } from "../utils";
+import { CustomTooltip } from "@/components/customUIComponents/CustomTooltip";
 
 // ─── Props ────────────────────────────────────────────────
 
@@ -53,7 +54,7 @@ export function MobileScheduleBoard({
         return (
           <div
             key={`mobile-${staffMember._id}`}
-            className="rounded-2xl border bg-white p-4 shadow-sm dark:bg-background"
+            className="rounded-2xl border bg-card p-4 shadow-sm"
           >
             {/* Header */}
             <div className="flex items-start justify-between gap-3">
@@ -83,36 +84,23 @@ export function MobileScheduleBoard({
 
               {mainSchedule ? (
                 <div className="flex shrink-0 items-center gap-1.5">
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="h-8 rounded-full border border-primary/10 bg-white/70 px-2.5 text-xs font-semibold text-primary shadow-none hover:border-primary/20 hover:bg-primary/5 hover:scale-100"
+                  <CustomTooltip
                     onClick={() => onOpenStaffScheduleEdit(staffMember)}
-                  >
-                    <Pencil className="h-3.5 w-3.5 opacity-80" />
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="h-8 rounded-full border border-primary/10 bg-white/70 px-3 text-xs font-semibold text-primary shadow-none hover:border-primary/20 hover:bg-primary/5 hover:scale-100"
-                    onClick={() =>
-                      onOpenStaffCalendar(mainSchedule._id, staffMember._id)
-                    }
-                  >
-                    <ExternalLink className="h-3.5 w-3.5 mr-1 opacity-80" />
-                    {t("Open")}
-                  </Button>
+                    tooltipText={t("Edit")}
+                    icon={<Pencil />}
+                  />
+                  <CustomTooltip
+                    onClick={() => onOpenStaffCalendar(mainSchedule._id, staffMember._id)}
+                    tooltipText={t("View")}
+                    icon={<Eye />}
+                  />
                 </div>
               ) : (
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="h-8 shrink-0 rounded-full border border-primary/10 bg-white/70 px-3 text-xs font-semibold text-primary shadow-none hover:border-primary/20 hover:bg-primary/5 hover:scale-100"
+                <CustomTooltip
                   onClick={() => onCreateScheduleForStaff(staffMember)}
-                >
-                  <Plus className="h-3.5 w-3.5 mr-1 opacity-80" />
-                  {t("Create")}
-                </Button>
+                  tooltipText={t("Create")}
+                  icon={<Plus />}
+                />
               )}
             </div>
 
@@ -158,47 +146,47 @@ export function MobileScheduleBoard({
                   : null;
 
                 return (
-<button
-  key={`mobile-${staffMember._id}-${day.toISOString()}`}
-  type="button"
-  onClick={() =>
-    onOpenStaffCalendar(
-      dayData.scheduleId || null,
-      staffMember._id,
-    )
-  }
-  className={`min-w-[96px] rounded-xl border px-2 py-3 text-center transition-colors ${
-    isDayOff
-      ? "border-slate-200 bg-slate-100 text-slate-500 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-400"
-      : "border-blue-200 bg-blue-50 text-blue-800 hover:bg-blue-100 dark:border-blue-800 dark:bg-blue-900/30 dark:text-blue-300 dark:hover:bg-blue-900/50"
-  }`}
->
-  <div className="text-[10px] uppercase tracking-wide opacity-70">
-    {t(dayTitles[index])}
-  </div>
-  <div className="mt-1 text-sm font-semibold">
-    {format(day, "dd")}
-  </div>
-  <div className="mt-2 text-xs font-semibold">
-    {isDayOff ? (
-      t("Day Off")
-    ) : (
-      <div className="flex items-center justify-center">
-        <Clock className="h-3 w-3 mr-1" />
-        {dayData.workTime?.start} - {dayData.workTime?.end}
-      </div>
-    )}
-  </div>
-  {!selectedLocationId && locationName && (
-    <div className={`mt-1 text-[10px] ${
-      isDayOff 
-        ? "text-slate-400 dark:text-slate-500" 
-        : "text-blue-700 dark:text-blue-400"
-    }`}>
-      {locationName}
-    </div>
-  )}
-</button>
+                  <button
+                    key={`mobile-${staffMember._id}-${day.toISOString()}`}
+                    type="button"
+                    onClick={() =>
+                      onOpenStaffCalendar(
+                        dayData.scheduleId || null,
+                        staffMember._id,
+                      )
+                    }
+                    className={`min-w-[96px] rounded-xl border px-2 py-3 text-center transition-colors ${
+                    isDayOff
+                      ? "bg-card border-primary/10 text-primary/40"
+                      : "bg-card border-primary/40 text-primary hover:bg-primary/10"
+                    }`}
+                  >
+                    <div className="text-[10px] uppercase tracking-wide opacity-70">
+                      {t(dayTitles[index])}
+                    </div>
+                    <div className="mt-1 text-sm font-semibold">
+                      {format(day, "dd")}
+                    </div>
+                    <div className="mt-2 text-xs font-semibold">
+                      {isDayOff ? (
+                        t("Day Off")
+                      ) : (
+                        <div className="flex items-center justify-center">
+                          <Clock className="h-3 w-3 mr-1" />
+                          {dayData.workTime?.start} - {dayData.workTime?.end}
+                        </div>
+                      )}
+                    </div>
+                    {!selectedLocationId && locationName && (
+                      <div className={`mt-1 text-[10px] ${
+                        isDayOff 
+                          ? "text-slate-400 dark:text-slate-500" 
+                          : "text-blue-700 dark:text-blue-400"
+                      }`}>
+                        {locationName}
+                      </div>
+                    )}
+                  </button>
                 );
               })}
             </div>

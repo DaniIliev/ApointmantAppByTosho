@@ -286,7 +286,7 @@ export default function Calendar({
                               <div
                                 key={mainApt._id}
                                 className={`text-xs p-2 rounded cursor-pointer hover:scale-[1.02] transition-all ${getStatusColor(
-                                  mainApt.status,
+                                  isGroup ? "confirmed" : mainApt.status,
                                 )}`}
                                 onClick={() =>
                                   isGroup
@@ -439,7 +439,7 @@ export default function Calendar({
                                     : handleOpenAppointmentModal(mainApt)
                                 }
                                 className={`text-xs p-1 rounded cursor-pointer hover:scale-[1.02] transition-transform ${getStatusColor(
-                                  mainApt.status,
+                                  isGroup ? "confirmed" : mainApt.status,
                                 )}`}
                               >
                                 <div className="font-medium truncate flex items-center justify-between gap-1">

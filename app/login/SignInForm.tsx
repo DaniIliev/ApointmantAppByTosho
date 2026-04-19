@@ -85,17 +85,9 @@ export function SignInForm({ onSuccess }: SignInFormProps) {
         <div className="w-full relative bg-white/90 dark:bg-gray-900/90 backdrop-blur-2xl rounded-[2.5rem] p-8 md:p-10 border border-primary/10 shadow-2xl overflow-hidden">
           {/* Top Logo */}
           <div className="flex flex-col items-center mb-8">
-            <div className="p-3 bg-primary/5 rounded-2xl mb-4 border border-primary/10">
-              <Image
-                src="/AppointmantPro.png"
-                alt="logo"
-                width={44}
-                height={44}
-                className="w-11 h-auto"
-              />
-            </div>
+            <span className="theme-logo-mask" aria-hidden="true" />
             <div className="text-center">
-              <h1 className="text-3xl font-extrabold tracking-tight theme-text-gradient mb-1">
+              <h1 className="text-xl font-extrabold tracking-tight theme-text-gradient mb-1">
                 {t("AppointDI®")}
               </h1>
               <p className="text-sm text-muted-foreground font-medium">

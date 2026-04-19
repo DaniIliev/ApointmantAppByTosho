@@ -145,40 +145,40 @@ export function DesktopScheduleBoard({
                       key={`${staffMember._id}-${day.toISOString()}`}
                       className="p-2"
                     >
-<button
-      type="button"
-      onClick={() =>
-        onOpenStaffCalendar(
-          dayData.scheduleId || null,
-          staffMember._id,
-        )
-      }
-      className={`w-full rounded-md border px-2 py-1.5 text-center transition-colors ${
-        isDayOff
-          ? "bg-slate-100 border-slate-200 text-slate-500 dark:bg-slate-800 dark:border-slate-700 dark:text-slate-400"
-          : "bg-blue-50 border-blue-200 text-blue-800 hover:bg-blue-100 dark:bg-blue-900/30 dark:border-blue-800 dark:text-blue-300 dark:hover:bg-blue-900/50"
-      }`}
-    >
-      {isDayOff ? (
-        <span className="text-xs font-medium block">
-          {t("Day Off")}
-        </span>
-      ) : (
-        <span className="text-xs font-semibold flex items-center justify-center">
-          <Clock className="h-3 w-3 mr-1" />
-          {dayData.workTime?.start} - {dayData.workTime?.end}
-        </span>
-      )}
-      {!selectedLocationId && locationName && (
-        <div className={`text-[10px] mt-1 ${
-          isDayOff 
-            ? "text-slate-400 dark:text-slate-500" 
-            : "text-blue-700 dark:text-blue-400"
-        }`}>
-          {locationName}
-        </div>
-      )}
-    </button>
+                      <button
+                            type="button"
+                            onClick={() =>
+                              onOpenStaffCalendar(
+                                dayData.scheduleId || null,
+                                staffMember._id,
+                              )
+                            }
+                            className={`w-full rounded-md border px-2 py-1.5 text-center transition-colors ${
+                              isDayOff
+                                ? "bg-card border-primary/10 text-primary/40"
+                                : "bg-card border-primary/40 text-primary hover:bg-primary/10"
+                            }`}
+                          >
+                            {isDayOff ? (
+                              <span className="text-xs font-medium block">
+                                {t("Day Off")}
+                              </span>
+                            ) : (
+                              <span className="text-xs font-semibold flex items-center justify-center">
+                                <Clock className="h-3 w-3 mr-1" />
+                                {dayData.workTime?.start} - {dayData.workTime?.end}
+                              </span>
+                            )}
+                            {!selectedLocationId && locationName && (
+                              <div className={`text-[10px] mt-1 ${
+                                isDayOff 
+                                  ? "text-slate-400 dark:text-slate-500" 
+                                  : "text-blue-700 dark:text-blue-400"
+                              }`}>
+                                {locationName}
+                              </div>
+                            )}
+                          </button>
                     </td>
                   );
                 })}

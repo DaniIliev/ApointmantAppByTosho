@@ -1,9 +1,8 @@
 "use client";
 import React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { MapPin, Phone, Clock } from "lucide-react";
+import { MapPin } from "lucide-react";
 import { useTranslation } from "react-i18next";
-import { cn } from "@/lib/utils";
 import { Location } from "@/Global/Types/types";
 import { LocationCard } from "@/components/business/LocationCard";
 
@@ -39,7 +38,6 @@ export function LocationsSection({
             <LocationCard
               key={loc._id}
               location={loc}
-              isSelected={selectedLocationId === loc._id}
               onClick={() => onLocationSelect(loc._id || "")}
             />
           ))}

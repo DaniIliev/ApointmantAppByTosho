@@ -387,7 +387,7 @@ function SchedulePageContent() {
             <div className="mt-4 rounded-xl border border-amber-300 bg-amber-50 p-4 text-amber-900 shadow-sm">
               <p className="text-sm font-bold flex items-center gap-2">
                 <Info className="h-4 w-4" />
-                {t("няма въведен график и трябва да се създаде")}
+                {t("No working hours set for this location. Please set working hours for this location.")}
               </p>
             </div>
           )}
@@ -397,16 +397,16 @@ function SchedulePageContent() {
       {!selectedLocationId && (
         <div className="rounded-2xl border bg-white/80 p-6 shadow-sm backdrop-blur dark:bg-background/80 text-center">
             <h2 className="text-xl font-black text-muted-foreground uppercase tracking-widest">
-                {t("Всички локации")}
+                {t("All locations")}
             </h2>
             <p className="text-sm text-muted-foreground mt-1">
-                {t("Изберете локация за да видите детайлен график")}
+                {t("Select a location to view detailed schedule")}
             </p>
         </div>
       )}
 
       {/* Week view */}
-      <div className="rounded-2xl border bg-white shadow-sm dark:bg-background">
+      <div className="overflow-hidden rounded-2xl border bg-white shadow-sm dark:bg-background">
         <div className="p-4 border-b flex items-center justify-center gap-3 flex-wrap dark:border-gray-800 bg-white/50 dark:bg-card/50 backdrop-blur-sm">
           <div className="flex items-center gap-3">
             <Button

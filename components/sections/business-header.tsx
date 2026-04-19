@@ -74,12 +74,12 @@ export function BusinessHeader({ business }: BusinessHeaderProps) {
 
             {/* About Us Section */}
             {business.aboutUs && (
-              <div className="mt-8 pt-6 border-t border-border/50">
-                <h3 className="text-lg font-semibold text-foreground mb-3 flex items-center gap-2">
+              <div className="pt-2 border-t border-border/50">
+                <h3 className="text-lg font-semibold text-foreground mb-2 flex items-center gap-2">
                   <Info className="h-5 w-5 text-primary" />
                   {t("About us")}
                 </h3>
-                <p className="text-muted-foreground whitespace-pre-wrap text-[15px] leading-relaxed">
+                <p className="text-muted-foreground whitespace-pre-wrap text-[15px] leading-relaxed max-h-[150px] overflow-y-auto">
                   {business.aboutUs}
                 </p>
               </div>
