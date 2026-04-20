@@ -7,7 +7,7 @@ import { MultiSelectCombobox } from "@/components/customUIComponents/MultiSelect
 import { PaymentOptionSelector } from "@/components/customUIComponents/PaymentOptionSelector";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
-import { Loader2, X, MapPin, Layers, ChevronRight, Plus, Trash2 } from "lucide-react";
+import { Loader2, X, MapPin, Layers, ChevronRight, CheckCircle2, Plus, Trash2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import callApi from "../Api/callApi";
 import { getCategoryOptions, PaymentOption } from "@/Global/Types/types";
@@ -187,19 +187,33 @@ const CreateAppointmentModal = ({
         {/* Single Location Option */}
         <div 
           onClick={() => handleModeSelect("single")}
-          className="group relative p-6 rounded-2xl border-2 border-transparent bg-white shadow-sm hover:shadow-md hover:border-primary/20 transition-all cursor-pointer overflow-hidden"
+          className={cn(
+            "group relative p-4 rounded-2xl border-2 transition-all cursor-pointer overflow-hidden",
+            creationMode === "single"
+              ? "border-primary bg-card shadow-md shadow-primary/5"
+              : "border-card/80 hover:border-primary/20 bg-card shadow-sm hover:shadow-md"
+          )}
         >
-          <div className="relative z-10 space-y-3">
-            <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center text-primary group-hover:scale-110 transition-transform">
+          <div className="relative z-10 flex items-center gap-4 h-full">
+            <div className="w-12 h-12 shrink-0 rounded-xl bg-primary/10 flex items-center justify-center text-primary group-hover:scale-110 transition-transform">
               <MapPin className="w-6 h-6" />
             </div>
-            <div>
-              <h3 className="font-bold text-lg">{t("Current Location")}</h3>
-              <p className="text-sm text-muted-foreground">{selectedLocation?.name || t("Only for the current branch")}</p>
+            
+            <div className="flex-1 min-w-0">
+              <h3 className="font-bold text-slate-900 dark:text-slate-100 text-[15px] leading-tight">
+                {t("Current Location")}
+              </h3>
+              <p className="text-xs text-muted-foreground mt-0.5 line-clamp-2">
+                {selectedLocation?.name || t("Only for the current branch")}
+              </p>
             </div>
-            <div className="flex items-center text-primary text-sm font-semibold opacity-0 group-hover:opacity-100 transition-opacity">
-              <span>{t("Select")}</span>
-              <ChevronRight className="w-4 h-4 ml-1" />
+            
+            <div className="shrink-0 ml-2">
+              {creationMode === "single" ? (
+                <CheckCircle2 className="h-5 w-5 text-primary fill-primary/10 animate-in zoom-in duration-300" />
+              ) : (
+                <ChevronRight className="h-4 w-4 text-slate-300 group-hover:text-slate-400 group-hover:translate-x-0.5 transition-all" />
+              )}
             </div>
           </div>
           <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-full -mr-16 -mt-16 group-hover:bg-primary/10 transition-colors" />
@@ -208,22 +222,36 @@ const CreateAppointmentModal = ({
         {/* Multiple Locations Option */}
         <div 
           onClick={() => handleModeSelect("multiple")}
-          className="group relative p-6 rounded-2xl border-2 border-transparent bg-white shadow-sm hover:shadow-md hover:border-primary/20 transition-all cursor-pointer overflow-hidden"
+          className={cn(
+            "group relative p-4 rounded-2xl border-2 transition-all cursor-pointer overflow-hidden",
+            creationMode === "multiple"
+              ? "border-primary bg-card shadow-md shadow-primary/5"
+              : "border-card/80 hover:border-primary/20 bg-card shadow-sm hover:shadow-md"
+          )}
         >
-          <div className="relative z-10 space-y-3">
-            <div className="w-12 h-12 rounded-xl bg-blue-500/10 flex items-center justify-center text-blue-600 group-hover:scale-110 transition-transform">
+          <div className="relative z-10 flex items-center gap-4 h-full">
+            <div className="w-12 h-12 shrink-0 rounded-xl bg-primary/10 flex items-center justify-center text-primary group-hover:scale-110 transition-transform">
               <Layers className="w-6 h-6" />
             </div>
-            <div>
-              <h3 className="font-bold text-lg">{t("Multiple Locations")}</h3>
-              <p className="text-sm text-muted-foreground">{t("Distribute across various branches")}</p>
+            
+            <div className="flex-1 min-w-0">
+              <h3 className="font-bold text-slate-900 dark:text-slate-100 text-[15px] leading-tight">
+                {t("Multiple Locations")}
+              </h3>
+              <p className="text-xs text-muted-foreground mt-0.5 line-clamp-2">
+                {t("Distribute across various branches")}
+              </p>
             </div>
-            <div className="flex items-center text-blue-600 text-sm font-semibold opacity-0 group-hover:opacity-100 transition-opacity">
-              <span>{t("Select")}</span>
-              <ChevronRight className="w-4 h-4 ml-1" />
+            
+            <div className="shrink-0 ml-2">
+              {creationMode === "multiple" ? (
+                <CheckCircle2 className="h-5 w-5 text-primary fill-primary/10 animate-in zoom-in duration-300" />
+              ) : (
+                <ChevronRight className="h-4 w-4 text-slate-300 group-hover:text-slate-400 group-hover:translate-x-0.5 transition-all" />
+              )}
             </div>
           </div>
-          <div className="absolute top-0 right-0 w-32 h-32 bg-blue-500/5 rounded-full -mr-16 -mt-16 group-hover:bg-blue-500/10 transition-colors" />
+          <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-full -mr-16 -mt-16 group-hover:bg-primary/10 transition-colors" />
         </div>
       </div>
     </div>

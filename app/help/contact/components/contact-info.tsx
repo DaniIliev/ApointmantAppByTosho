@@ -11,7 +11,7 @@ export default function ContactInfo() {
         <Card className="group relative overflow-hidden border-2 p-8 text-center transition-all duration-300 hover:border-primary hover:shadow-xl">
           <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
           <div className="relative space-y-6">
-            <div className="mx-auto flex size-20 items-center justify-center rounded-2xl bg-gradient-to-br from-blue-600 to-blue-400 shadow-lg transition-transform duration-300 group-hover:scale-110">
+            <div className="mx-auto flex size-20 items-center justify-center rounded-2xl bg-gradient-to-br from-primary to-secondary shadow-lg transition-transform duration-300 group-hover:scale-110">
               <Mail className="size-10 text-white" />
             </div>
             <div className="space-y-3">
@@ -32,7 +32,7 @@ export default function ContactInfo() {
         <Card className="group relative overflow-hidden border-2 p-8 text-center transition-all duration-300 hover:border-accent hover:shadow-xl">
           <div className="absolute inset-0 bg-gradient-to-br from-accent/5 to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
           <div className="relative space-y-6">
-            <div className="mx-auto flex size-20 items-center justify-center rounded-2xl bg-gradient-to-br from-cyan-500 to-blue-400 shadow-lg transition-transform duration-300 group-hover:scale-110">
+            <div className="mx-auto flex size-20 items-center justify-center rounded-2xl bg-gradient-to-br from-primary to-secondary shadow-lg transition-transform duration-300 group-hover:scale-110">
               <Phone className="size-10 text-white" />
             </div>
             <div className="space-y-3">

@@ -276,8 +276,8 @@ export default function TopNav({
           )}
           <h1 className="flex items-end gap-1 text-l font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
             <span className="theme-logo-mask" aria-hidden="true" />
-            <span className="sr-only">{t("AppointDI")}</span>
-            <span className=" sm:inline">{t("AppointDI ")}</span>
+            <span className="sr-only" suppressHydrationWarning>{t("AppointDI")}</span>
+            <span className=" sm:inline" suppressHydrationWarning>{t("AppointDI ")}</span>
           </h1>
         </div>
 
@@ -293,7 +293,7 @@ export default function TopNav({
           className={`hidden md:flex justify-center min-w-0 transition-transform duration-300 ${titleOffsetClass}`}
         >
           {pageTitle && (
-            <h2 className="text-xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent tracking-tight">
+            <h2 className="text-xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent tracking-tight" suppressHydrationWarning>
               {t(pageTitle)}
             </h2>
           )}
@@ -318,7 +318,7 @@ export default function TopNav({
                 {hasUnreadAlerts && (
                   <span className="absolute top-0 right-0 h-2 w-2 bg-red-500 rounded-full animate-ping-once" />
                 )}
-                <span className="text-xs text-primary mt-1">{t("Alerts")}</span>
+                <span className="text-xs text-primary mt-1" suppressHydrationWarning>{t("Alerts")}</span>
               </button>
               {isAlertsOpen && (
                 <NotificationsPanel
@@ -336,7 +336,7 @@ export default function TopNav({
                 className="flex flex-col items-center justify-center p-2 rounded-lg hover:bg-white/10 transition-colors duration-200"
               >
                 <Globe className="w-5 h-5 text-primary" />
-                <span className="text-xs text-primary mt-1">
+                <span className="text-xs text-primary mt-1" suppressHydrationWarning>
                   {t("Language")}
                 </span>
               </button>
@@ -391,7 +391,7 @@ export default function TopNav({
                 className="flex flex-col items-center justify-center p-2 rounded-lg hover:bg-white/10 transition-colors duration-200"
               >
                 <Info className="w-5 h-5 text-primary" />
-                <span className="text-xs text-primary mt-1">{t("Help")}</span>
+                <span className="text-xs text-primary mt-1" suppressHydrationWarning>{t("Help")}</span>
               </Link>
             </div>
 
@@ -447,7 +447,7 @@ export default function TopNav({
                 className="flex flex-col items-center justify-center p-2 rounded-lg hover:bg-white/10 transition-colors duration-200"
               >
                 <Globe className="w-5 h-5 text-primary" />
-                <span className="text-xs text-primary mt-1">
+                <span className="text-xs text-primary mt-1" suppressHydrationWarning>
                   {t("Language")}
                 </span>
               </button>

@@ -57,7 +57,7 @@ export function LocationCard({
           title={`${location.name} map`}
           loading="lazy"
           referrerPolicy="no-referrer-when-downgrade"
-          className="absolute inset-0 h-full w-full border-0"
+          className="absolute inset-0 h-full w-full border-0 dark:invert-[0.9] dark:hue-rotate-180 dark:saturate-200 dark:contrast-85 transition-all duration-300"
         />
       ) : (
         <div className="absolute inset-0 flex items-center justify-center bg-muted/40 text-sm text-muted-foreground">

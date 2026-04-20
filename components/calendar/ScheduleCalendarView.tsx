@@ -12,6 +12,8 @@ import {
   isAfter,
 } from "date-fns";
 import { useState, useMemo } from "react";
+import { useTranslation } from "react-i18next";
+import { dayKeys, dayLabels, DayKey } from "@/app/schedule/utils";
 import {
   ListRestart,
   ChevronLeft,
@@ -127,47 +129,51 @@ export default function ScheduleCalendarView({
   dailyData,
   onEditDay,
 }: ScheduleCalendarViewProps) {
-  if (!dailyData || dailyData.length === 0) {
-    return (
-      <div className="p-4 text-center text-gray-500">
-        Няма данни за графика.
-      </div>
+  const { t } = useTranslation();
+
+  const sortedAllData = useMemo(() => {
+    if (!dailyData || dailyData.length === 0) return [];
+    return [...dailyData].sort(
+      (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()
     );
-  }
+  }, [dailyData]);
 
-  // Сортираме всички данни и намираме границите (първи и последен ден)
-  const sortedAllData = useMemo(
-    () => [...dailyData].sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()),
-    [dailyData],
-  );
-
-  const firstAvailableMonth = startOfMonth(sortedAllData[0].date);
-  const lastAvailableMonth = startOfMonth(
-    sortedAllData[sortedAllData.length - 1].date,
-  );
+  const fallbackDate = startOfMonth(new Date());
+  const firstAvailableMonth = sortedAllData.length > 0 ? startOfMonth(sortedAllData[0].date) : fallbackDate;
+  const lastAvailableMonth = sortedAllData.length > 0 ? startOfMonth(sortedAllData[sortedAllData.length - 1].date) : fallbackDate;
   const currentMonth = startOfMonth(new Date());
 
   // ЛОГИКА ЗА ПЪРВОНАЧАЛНА ДАТА (отваряме на текущия месец, ако е в обхвата)
-  let initialDate: Date;
+  let initialDate: Date = currentMonth;
 
-  if (
-    (isSameMonth(currentMonth, firstAvailableMonth) ||
-      isAfter(currentMonth, firstAvailableMonth)) &&
-    (isSameMonth(currentMonth, lastAvailableMonth) ||
-      isBefore(currentMonth, lastAvailableMonth))
-  ) {
-    initialDate = currentMonth;
-  } else {
-    initialDate = firstAvailableMonth;
+  if (sortedAllData.length > 0) {
+    if (
+      (isSameMonth(currentMonth, firstAvailableMonth) ||
+        isAfter(currentMonth, firstAvailableMonth)) &&
+      (isSameMonth(currentMonth, lastAvailableMonth) ||
+        isBefore(currentMonth, lastAvailableMonth))
+    ) {
+      initialDate = currentMonth;
+    } else {
+      initialDate = firstAvailableMonth;
+    }
   }
 
   const [currentDate, setCurrentDate] = useState(initialDate);
 
   // Групираме дните само за текущия месец
-  const weeks = useMemo(
-    () => groupIntoWeeksForMonth(dailyData, currentDate),
-    [dailyData, currentDate],
-  );
+  const weeks = useMemo(() => {
+    if (!dailyData || dailyData.length === 0) return [];
+    return groupIntoWeeksForMonth(dailyData, currentDate);
+  }, [dailyData, currentDate]);
+
+  if (!dailyData || dailyData.length === 0) {
+    return (
+      <div className="p-4 text-center text-gray-500">
+        {t("No schedule data.")}
+      </div>
+    );
+  }
 
   // --- Навигационна Логика ---
 
@@ -194,15 +200,8 @@ export default function ScheduleCalendarView({
   const isFirstMonth = isSameMonth(currentDate, firstAvailableMonth);
   const isLastMonth = isSameMonth(currentDate, lastAvailableMonth);
 
-  const daysOfWeek = [
-    "Неделя",
-    "Понеделник",
-    "Вторник",
-    "Сряда",
-    "Четвъртък",
-    "Петък",
-    "Събота",
-  ];
+  const displayDayKeys = ["sunday", ...dayKeys.filter((k) => k !== "sunday")] as DayKey[];
+  const daysOfWeek = displayDayKeys.map((key) => t(dayLabels[key]));
 
   return (
     <>
@@ -224,7 +223,7 @@ export default function ScheduleCalendarView({
                 ? "text-gray-300 cursor-not-allowed"
                 : "hover:bg-gray-100"
             }`}
-            aria-label="Предишен месец"
+            aria-label={t("Previous month")}
           >
             <ChevronLeft className="h-6 w-6" />
           </button>
@@ -244,7 +243,7 @@ export default function ScheduleCalendarView({
                 ? "text-gray-300 cursor-not-allowed"
                 : "hover:bg-gray-100"
             }`}
-            aria-label="Следващ месец"
+            aria-label={t("Next month")}
           >
             <ChevronRight className="h-6 w-6" />
           </button>
@@ -262,7 +261,7 @@ export default function ScheduleCalendarView({
         </div>
 
         {/* Календарна мрежа по седмици */}
-        <div className="space-y-2">
+        <div className="space-y-2 mt-2">
           {weeks.map((week, weekIndex) => (
             <div key={weekIndex} className="grid grid-cols-7 gap-2">
               {week.map((dayData, dayIndex) => {
@@ -272,10 +271,10 @@ export default function ScheduleCalendarView({
                   return (
                     <div
                       key={`${weekIndex}-${dayIndex}`}
-                      className="min-h-[140px] rounded-lg bg-gray-50/50 border border-gray-200 opacity-50 flex items-center justify-center p-2 text-center"
+                      className="min-h-[140px] rounded-lg bg-card border border-primary/20 opacity-50 flex items-center justify-center p-2 text-center"
                     >
-                      <div className="text-sm font-medium text-gray-500 italic">
-                        Извън обхват
+                      <div className="text-sm font-medium text-muted-foreground">
+                        {t("Out of range")}
                       </div>
                     </div>
                   );
@@ -291,8 +290,8 @@ export default function ScheduleCalendarView({
                     className={`min-h-[140px] p-2 border-2 rounded-lg cursor-pointer transition-all duration-200 hover:scale-[1.01] hover:shadow-lg
 										${
                       dayData.isDayOff
-                        ? "bg-primary/20 border-primary/20"
-                        : "bg-primary/20 border-primary/20"
+                        ? "bg-card border-primary/10"
+                        : "bg-card border-primary/10"
                     }
 										${
                       isToday
@@ -319,17 +318,17 @@ export default function ScheduleCalendarView({
                         >
                           {dayData.isDayOff ? (
                             <>
-                              <Sun className="h-4 w-4" /> Почивен
+                              <Sun className="h-4 w-4" /> {t("Off")}
                             </>
                           ) : (
                             <>
-                              <Clock className="h-4 w-4" /> Работен
+                              <Clock className="h-4 w-4" /> {t("Working")}
                             </>
                           )}
                         </span>
                       </div>
                       {!dayData.isDayOff && dayData.workTime && (
-                        <div className="flex items-center text-primary justify-center text-center text-sm font-bold mt-1 bg-primary/5 rounded-md p-1 border border-gray-300 shadow-sm">
+                        <div className="flex items-center text-primary justify-center text-center text-sm font-bold mt-1 bg-primary/5 rounded-md p-1 border border-primary/40 shadow-sm">
                           <Clock className="h-4 w-4 mr-1 text-primary" />
                           {dayData.workTime.start} - {dayData.workTime.end}
                         </div>
@@ -341,7 +340,7 @@ export default function ScheduleCalendarView({
                           {/* Заглавие за почивките */}
                           <div className="flex items-center gap-1 font-semibold text-gray-600 mb-0.5">
                             <Coffee className="h-3 w-3 text-yellow-700" />
-                            Почивки ({(dayData.breaks || []).length}):
+                            {t("Breaks")} ({(dayData.breaks || []).length}):
                           </div>
                           {(dayData.breaks || []).map((br, i) => (
                             <span
@@ -358,7 +357,7 @@ export default function ScheduleCalendarView({
                       {dayData.isDayOff && (
                         <div className="text-center text-red-400/80 text-lg italic mt-1 flex-grow flex flex-col items-center justify-center space-y-2">
                           <Home className="h-6 w-6 text-red-400" />
-                          <span>Почивен ден</span>
+                          <span>{t("Day off")}</span>
                         </div>
                       )}
                     </div>

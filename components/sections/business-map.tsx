@@ -56,7 +56,7 @@ export function BusinessMap({ selectedLocation }: BusinessMapProps) {
       <CardContent className="pt-6">
         <div className="space-y-4">
           {/* Интерактивна Google Map (iframe) */}
-          <div className="relative w-full h-80 rounded-lg overflow-hidden border-2 border-primary/20 shadow-md">
+          <div className="relative w-full h-80 rounded-lg overflow-hidden border-2 border-primary/20 shadow-md bg-muted/20">
             <iframe
               width="100%"
               height="100%"
@@ -65,7 +65,7 @@ export function BusinessMap({ selectedLocation }: BusinessMapProps) {
               referrerPolicy="no-referrer-when-downgrade"
               src={fallbackEmbedUrl} // Използваме Fallback URL за по-голяма съвместимост без API ключ
               aria-label={`Location of ${address}`}
-              className="border-0"
+              className="border-0 dark:invert-[0.9] dark:hue-rotate-180 dark:saturate-200 dark:contrast-85 transition-all duration-300"
             />
           </div>
         </div>
