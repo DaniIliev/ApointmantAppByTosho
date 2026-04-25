@@ -130,7 +130,6 @@ function LocationsPageContent() {
       setLocations(data);
     } catch (error) {
       console.error("Failed to fetch locations:", error);
-      toast.error(t("Failed to load locations"));
     } finally {
       if (isInitial) setIsInitialLoading(false);
     }
@@ -203,14 +202,10 @@ function LocationsPageContent() {
       const isFile = formData.imageUrl instanceof File;
       const payload = { ...formData, businessId: user?.businessId };
       await callApi(endpoint, method, payload, isFile);
-      toast.success(
-        editingLocation ? t("Location updated") : t("Location created"),
-      );
       fetchLocations();
       setIsModalOpen(false);
     } catch (error) {
       console.error("Failed to save location:", error);
-      toast.error(t("Failed to save location"));
     } finally {
       setIsLoading(false);
     }
@@ -225,11 +220,9 @@ function LocationsPageContent() {
     if (!locationToDelete) return;
     try {
       await callApi(`/api/locations/${locationToDelete._id}`, "DELETE");
-      toast.success(t("Location deleted"));
       fetchLocations();
     } catch (error) {
       console.error("Failed to delete location:", error);
-      toast.error(t("Failed to delete location"));
     } finally {
       setIsDeleteDialogOpen(false);
       setLocationToDelete(null);

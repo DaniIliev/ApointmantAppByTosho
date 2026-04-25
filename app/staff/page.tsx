@@ -4,15 +4,10 @@ import { useEffect, useState } from "react";
 import { usePageTitle } from "@/context/PageTitleContext";
 import ProtectedRoute from "@/components/guards/ProtectedRoute";
 import { useRightNav } from "@/context/RightNavContext";
-import { Button } from "@/components/ui/button";
 import { Plus, Eye, Pencil, Trash2 } from "lucide-react";
-import { toast } from "sonner";
 import { GenericTable, Column } from "@/components/GenericTable/GenericTable";
-import { LabeledInput } from "@/components/customUIComponents/LabeledInput";
 import { useTranslation } from "react-i18next";
 import { CustomTooltip } from "@/components/customUIComponents/CustomTooltip";
-import { Modal } from "@/components/customUIComponents/Modal";
-import { MultiSelectCombobox } from "@/components/customUIComponents/MultiSelectCombobox";
 import { StaffMember } from "./types";
 import { StaffModal } from "./StaffModal";
 import { useAuthContext } from "@/context/AuthContext";
@@ -49,7 +44,7 @@ function StaffPageContent() {
   const [modalMode, setModalMode] = useState<"view" | "edit" | "create">("create");
   const [selectedStaff, setSelectedStaff] = useState<StaffMember | null>(null);
 
-  const { data: staffData, isLoading: isStaffLoading } = useGetStaff(user?.businessId);
+  const { data: staffData, isLoading: isStaffLoading } = useGetStaff(user?.businessId, selectedLocation?._id);
   const { data: locationsData, isLoading: isLocationsLoading } = useGetLocations(user?.businessId);
   
   const staff = staffData || [];
@@ -96,9 +91,8 @@ function StaffPageContent() {
   const removeStaff = async (staffId: string) => {
     try {
       await deleteStaffMutation.mutateAsync(staffId);
-      toast.success(t("Staff member removed successfully") as string);
     } catch (error) {
-      toast.error(t("Failed to remove staff member") as string);
+      console.error("Failed to remove staff member:", error);
     }
   };
 

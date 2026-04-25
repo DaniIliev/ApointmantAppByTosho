@@ -98,11 +98,9 @@ function CancelAppointmentPageContent() {
       await callApi(`/api/appointment/${appointment._id}/status`, "PUT", {
         status: "cancelled",
       });
-      toast.success(t("Appointment cancelled successfully!"));
       router.push("/dashboard");
     } catch (error) {
       console.error("Failed to cancel appointment:", error);
-      toast.error(t("Failed to cancel appointment. Please try again."));
     } finally {
       setIsCancelling(false);
     }

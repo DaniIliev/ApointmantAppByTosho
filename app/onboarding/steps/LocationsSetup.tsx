@@ -7,8 +7,8 @@ import { useTranslation } from "react-i18next";
 import { ArrowLeft, ArrowRight, MapPin, Plus, Trash2 } from "lucide-react";
 import callApi from "@/app/Api/callApi";
 import { toast } from "sonner";
-
 import { Location } from "@/Global/Types/types";
+import { useMutation } from "@tanstack/react-query";
 
 interface LocationsSetupProps {
   onNext: (locations: Location[]) => void;
@@ -24,7 +24,6 @@ export default function LocationsSetup({
   initialData,
 }: LocationsSetupProps) {
   const { t } = useTranslation();
-  const [loading, setLoading] = useState(false);
   const [submitted, setSubmitted] = useState(false);
 
   type LocationField =
@@ -135,23 +134,10 @@ export default function LocationsSetup({
     }
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setSubmitted(true);
-
-    const errors = validateAllLocations(locations);
-    setValidationErrors(errors);
-
-    if (Object.keys(errors).length > 0) {
-      toast.error(t("Please fix location form errors"));
-      return;
-    }
-
-    setLoading(true);
-    try {
-      // Save each location (POST for new, PUT for existing)
-      const savedLocations = await Promise.all(
-        locations.map(async (loc) => {
+  const mutation = useMutation({
+    mutationFn: async (locationsToSave: Location[]) => {
+      return await Promise.all(
+        locationsToSave.map(async (loc) => {
           const isNew = !loc._id;
 
           if (!isNew) {
@@ -183,13 +169,28 @@ export default function LocationsSetup({
           return callApi(endpoint, method, loc, useMultipart);
         }),
       );
+    },
+    onSuccess: (savedLocations) => {
       onNext(savedLocations);
-    } catch (error) {
+    },
+    onError: (error) => {
       console.error("Failed to save locations:", error);
-      onNext(locations); // Fallback
-    } finally {
-      setLoading(false);
+    },
+  });
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setSubmitted(true);
+
+    const errors = validateAllLocations(locations);
+    setValidationErrors(errors);
+
+    if (Object.keys(errors).length > 0) {
+      toast.error(t("Please fix location form errors"));
+      return;
     }
+
+    mutation.mutate(locations);
   };
 
   return (
@@ -346,8 +347,8 @@ export default function LocationsSetup({
           >
             {t("Back")}
           </Button>
-          <Button type="submit" disabled={loading} iconType="next">
-            {loading ? t("Saving...") : t("Next Step")}
+          <Button type="submit" disabled={mutation.isPending} iconType="next">
+            {mutation.isPending ? t("Saving...") : t("Next Step")}
           </Button>
         </div>
       </form>

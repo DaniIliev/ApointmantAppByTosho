@@ -9,6 +9,7 @@ import { ArrowLeft, ArrowRight, Building } from "lucide-react";
 import { LabeledSelect } from "@/components/customUIComponents/LabeledSelect";
 import { Business } from "@/Global/Types/types";
 import { getBusinessCategories } from "@/Global/Types/types";
+import { useMutation } from "@tanstack/react-query";
 
 interface BusinessInfoStepProps {
   onNext: (info: Business) => void;
@@ -29,7 +30,6 @@ export default function BusinessInfoStep({
   const { t } = useTranslation();
   const { refreshToken, user } = useAuthContext();
   const BUSINESS_CATEGORIES = getBusinessCategories(t);
-  const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
     businessName: initialData?.businessName || "",
     category: initialData?.category || "",
@@ -53,53 +53,53 @@ export default function BusinessInfoStep({
       });
     }
   }, [initialData]);
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoading(true);
-    try {
+  const mutation = useMutation({
+    mutationFn: async (payload: any) => {
       const isUpdate = !!initialData?._id;
       const method = isUpdate ? "PUT" : "POST";
       const endpoint = isUpdate
         ? `/api/business/${initialData._id}`
         : "/api/business";
-
-      const payload = { ...formData };
-
-      // Optional: Check for changes if it's an update
-      if (isUpdate) {
-        const hasChanged =
-          formData.businessName !== initialData.businessName ||
-          formData.category !== initialData.category ||
-          formData.aboutUs !== (initialData.aboutUs || "") ||
-          formData.email !== (initialData.email || "") ||
-          formData.phone !== (initialData.phone || "") ||
-          formData.website !== (initialData.website || "") ||
-          formData.businessImageUrl instanceof File; // If it's a File, it's a new upload
-
-        if (!hasChanged) {
-          onNext({ ...initialData, ...formData } as any);
-          setLoading(false);
-          return;
-        }
-      }
-
-      const response = await callApi(
+      return callApi(
         endpoint,
         method,
         payload,
         !!(formData.businessImageUrl instanceof File),
       );
+    },
+    onSuccess: async (response) => {
+      const isUpdate = !!initialData?._id;
       if (!isUpdate) {
         await refreshToken();
       }
-      onNext({ ...formData, ...(response || {}) });
-    } catch (error) {
+      onNext({ ...formData, ...(response || {}) } as any);
+    },
+    onError: (error) => {
       console.error("Failed to save business info:", error);
-      onNext(formData as any); // Fallback
-    } finally {
-      setLoading(false);
+    },
+  });
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const isUpdate = !!initialData?._id;
+
+    if (isUpdate) {
+      const hasChanged =
+        formData.businessName !== initialData.businessName ||
+        formData.category !== initialData.category ||
+        formData.aboutUs !== (initialData.aboutUs || "") ||
+        formData.email !== (initialData.email || "") ||
+        formData.phone !== (initialData.phone || "") ||
+        formData.website !== (initialData.website || "") ||
+        formData.businessImageUrl instanceof File;
+
+      if (!hasChanged) {
+        onNext({ ...initialData, ...formData } as any);
+        return;
+      }
     }
+
+    mutation.mutate(formData);
   };
 
   return (
@@ -207,8 +207,8 @@ export default function BusinessInfoStep({
           >
             {t("Back")}
           </Button>
-          <Button type="submit" disabled={loading} iconType="next">
-            {loading ? t("Saving...") : t("Next Step")}
+          <Button type="submit" disabled={mutation.isPending} iconType="next">
+            {mutation.isPending ? t("Saving...") : t("Next Step")}
           </Button>
         </div>
       </form>

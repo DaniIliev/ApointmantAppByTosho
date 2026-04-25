@@ -313,13 +313,11 @@ function SchedulePageContent() {
         }),
       );
 
-      toast.success(t("Schedules saved successfully."));
       setIsEditModalOpen(false);
       setEditingStaff(null);
       setEditingSchedules([]);
-      // await loadData();
     } catch (error: any) {
-      toast.error(error?.message || t("Failed to save schedules."));
+      console.error("Failed to save schedules:", error);
       throw error;
     }
   };
@@ -348,9 +346,8 @@ function SchedulePageContent() {
       });
       setLocationWeeklyHours(payloadHours!);
       setIsLocationHoursModalOpen(false);
-      toast.success(t("Location weekly working hours updated."));
     } catch (error) {
-      toast.error(t("Failed to update location weekly working hours."));
+      console.error("Failed to update location weekly working hours:", error);
       throw error;
     } finally {
       setSavingLocationHours(false);

@@ -63,7 +63,7 @@ export const LocationSelector = ({ isOpen }: { isOpen: boolean }) => {
               className={`cursor-pointer ${selectedLocation?._id === loc._id ? "bg-primary/10 font-bold" : ""}`}
             >
               <div className="flex flex-col">
-                <span className="text-sm font-medium">{loc.name}</span>
+                <span className="text-sm text-text-primary font-medium">{loc.name}</span>
                 <span className="text-[10px] text-muted-foreground truncate">{loc.address}, {loc.city}</span>
               </div>
             </DropdownMenuItem>

@@ -7,7 +7,6 @@ import { LabeledInput } from "@/components/customUIComponents/LabeledInput";
 import { LabeledSelect } from "@/components/customUIComponents/LabeledSelect";
 import { StaffMember } from "./types";
 import { useTranslation } from "react-i18next";
-import { toast } from "sonner";
 import { MultiSelectCombobox } from "@/components/customUIComponents/MultiSelectCombobox";
 import { Eye, Edit2, Plus } from "lucide-react";
 import { useCreateStaff, useUpdateStaff } from "@/hooks/queries/useStaff";
@@ -79,11 +78,8 @@ export const StaffModal: React.FC<StaffModalProps> = ({
         const result = await createStaffMutation.mutateAsync(formData);
         onStaffCreated?.(result.staff || result);
         onOpenChange(false);
-        toast.success(
-          t("Staff member invited successfully! An email with a temporary password has been sent") as string,
-        );
       } catch (error) {
-        toast.error(t("Failed to invite staff member") as string);
+        console.error("Failed to invite staff member:", error);
       } finally {
         setIsSubmitting(false);
       }
@@ -96,9 +92,8 @@ export const StaffModal: React.FC<StaffModalProps> = ({
         });
         onStaffUpdated?.(updatedStaff);
         onOpenChange(false);
-        toast.success(t("Staff member updated successfully") as string);
       } catch (error) {
-        toast.error(t("Failed to update staff member") as string);
+        console.error("Failed to update staff member:", error);
       } finally {
         setIsSubmitting(false);
       }

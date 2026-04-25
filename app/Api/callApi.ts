@@ -1,4 +1,6 @@
 import { redirect } from "next/navigation";
+import { toast } from "sonner";
+import i18n from "../../i18n";
 
 const callApi = async (
   endpoint: string,
@@ -83,10 +85,31 @@ const callApi = async (
       }
     }
 
-    throw new Error(errorData.message || `API error - ${result.statusText}`);
+    // Handle localized error messages
+    if (errorData.errorCode) {
+      const translationKey = `api_errors.${errorData.errorCode}`;
+      const translatedMessage = i18n.t(translationKey, { defaultValue: errorData.message });
+      toast.error(translatedMessage);
+    }
+
+    const error: any = new Error(errorData.message || `API error - ${result.statusText}`);
+    error.errorCode = errorData.errorCode;
+    error.status = result.status;
+    error.data = errorData;
+    throw error;
   }
 
-  return await result.json();
+  const data = await result.json();
+
+  // Handle success messages if present
+  if (data.messageCode && method !== "GET") {
+    const translationKey = `success_messages.${data.messageCode}`;
+    const translatedMessage = i18n.t(translationKey, { defaultValue: data.message });
+    toast.success(translatedMessage);
+  }
+
+  // Support backward compatibility by returning the wrapped data if it exists
+  return data.data !== undefined ? data.data : data;
 };
 
 export default callApi;

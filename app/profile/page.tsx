@@ -121,7 +121,7 @@ export default function SettingsPage() {
         };
       }
     } catch (error) {
-      toast.error(t("Failed to load profile data."));
+      console.error("Failed to load profile data:", error);
     } finally {
       setIsLoading(false);
       setIsInitialLoad(false);
@@ -239,19 +239,9 @@ export default function SettingsPage() {
       };
       setIsDirty(false);
 
-      toast.success(
-        t("Your profile settings have been updated successfully. 💾"),
-      );
       return true;
     } catch (error) {
-      toast.error(
-        t("Error saving changes: {{message}}", {
-          message:
-            error instanceof Error
-              ? error.message
-              : t("An unknown error occurred"),
-        }),
-      );
+      console.error("Error saving changes:", error);
       return false;
     }
   };
@@ -313,7 +303,7 @@ export default function SettingsPage() {
 
     try {
       if (!user?._id) {
-        toast.error(t("User not authenticated."));
+        console.error("User not authenticated.");
         return;
       }
 
@@ -328,16 +318,8 @@ export default function SettingsPage() {
         ...userData,
         profilePictureUrl: updatedData.profilePictureUrl,
       });
-      toast.success(t("Profile picture uploaded successfully! 🖼️"));
     } catch (error) {
-      toast.error(
-        t("Image upload failed: {{message}}", {
-          message:
-            error instanceof Error
-              ? error.message
-              : t("An unknown error occurred"),
-        }),
-      );
+      console.error("Image upload failed:", error);
     }
   };
 

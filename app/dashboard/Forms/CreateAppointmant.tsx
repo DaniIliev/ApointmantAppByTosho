@@ -14,7 +14,6 @@ import { Modal } from "@/components/customUIComponents/Modal";
 import { Clock } from "lucide-react";
 import { LabeledInput } from "@/components/customUIComponents/LabeledInput";
 import { formatPriceEUR } from "@/Global/Utils/commonFn";
-import { toast } from "sonner";
 
 // Общ тип за данните, който включва и _id за Edit
 export interface AppointmentFormData {
@@ -216,12 +215,10 @@ const AppointmentForm = ({
         serviceId: appointmentData.appointmentTypeId,
         appointmentData: appointmentPayload,
       });
-      toast.success(t("Appointment created successfully!"));
       if (res?.url && typeof window !== "undefined") {
         window.location.href = res.url;
       }
     } catch (e) {
-      toast.error(t("Failed to create appointment. Please try again."));
       console.error(e);
     }
   };

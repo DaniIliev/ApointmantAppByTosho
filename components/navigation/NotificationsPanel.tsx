@@ -3,7 +3,6 @@ import React, { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Check, X, Trash2 } from "lucide-react";
 import callApi from "@/app/Api/callApi";
-import { toast } from "sonner";
 import { Button } from "../ui/button";
 import { CustomTooltip } from "../customUIComponents/CustomTooltip";
 import { formatDateAndTime } from "@/Global/Utils/commonFn";
@@ -75,7 +74,6 @@ export default function NotificationsPanel({
       const alertId = alert._id;
 
       if (!appointmentId) {
-        toast.error(t("This alert has no appointment to confirm."));
         return;
       }
 
@@ -88,11 +86,9 @@ export default function NotificationsPanel({
       if (confirmedAppointment) {
         await callApi(`/api/alerts/${alertId}`, "DELETE");
         onAlertsChange(alerts.filter((a) => a._id !== alert._id));
-        toast.success(t("Appointment confirmed successfully!"));
       }
     } catch (error) {
       console.error("Failed to confirm appointment:", error);
-      toast.error(t("Failed to confirm appointment. Please try again."));
     }
   };
 
@@ -102,7 +98,6 @@ export default function NotificationsPanel({
       const alertId = alert._id;
 
       if (!appointmentId) {
-        toast.error(t("This alert has no appointment to cancel."));
         return;
       }
 
@@ -115,11 +110,9 @@ export default function NotificationsPanel({
       if (cancelledAppointment) {
         await callApi(`/api/alerts/${alertId}`, "DELETE");
         onAlertsChange(alerts.filter((a) => a._id !== alert._id));
-        toast.success(t("Appointment cancelled successfully!"));
       }
     } catch (error) {
       console.error("Failed to cancel appointment:", error);
-      toast.error(t("Failed to cancel appointment. Please try again."));
     }
   };
 
@@ -127,21 +120,13 @@ export default function NotificationsPanel({
     try {
       await callApi(`/api/alerts/${alertId}`, "DELETE");
       onAlertsChange(alerts.filter((a) => a._id !== alertId));
-      toast.success(t("Notification deleted successfully!"));
     } catch (error) {
       console.error("Failed to delete notification:", error);
-      toast.error(t("Failed to delete notification. Please try again."));
     }
   };
 
   const handleConfirmAllAppointments = async () => {
     const appointmentAlerts = alerts.filter((alert) => alert.appointment?._id);
-
-    if (appointmentAlerts.length === 0) {
-      toast.info(t("No appointments to confirm."));
-      return;
-    }
-
     setIsConfirmingAll(true);
     let successCount = 0;
     let errorCount = 0;
@@ -180,18 +165,6 @@ export default function NotificationsPanel({
             ),
         ),
       );
-
-      if (successCount > 0 && errorCount === 0) {
-        toast.success(
-          t(`${successCount} appointment(s) confirmed successfully!`),
-        );
-      } else if (successCount > 0 && errorCount > 0) {
-        toast.warning(
-          t(`${successCount} appointment(s) confirmed, ${errorCount} failed.`),
-        );
-      } else {
-        toast.error(t("Failed to confirm all appointments."));
-      }
     } finally {
       setIsConfirmingAll(false);
     }

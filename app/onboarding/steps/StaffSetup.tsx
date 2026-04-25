@@ -4,11 +4,12 @@ import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { LabeledInput } from "@/components/customUIComponents/LabeledInput";
 import { useTranslation } from "react-i18next";
-import { ArrowLeft, ArrowRight, UserPlus, Trash2, Shield } from "lucide-react";
+import {  UserPlus, Trash2 } from "lucide-react";
 import callApi from "@/app/Api/callApi";
 import { LabeledSelect } from "@/components/customUIComponents/LabeledSelect";
-
 import { Location } from "@/Global/Types/types";
+import { useMutation } from "@tanstack/react-query";
+import { toast } from "sonner";
 
 export type StaffRole = "manager" | "staff" | "business";
 
@@ -36,24 +37,49 @@ export default function StaffSetup({
   initialData,
 }: StaffSetupProps) {
   const { t } = useTranslation();
-  const [loading, setLoading] = useState(false);
-  const [staff, setStaff] = useState<Staff[]>(
-    initialData && initialData.length > 0
-      ? initialData
-      : [
-          {
-            firstName: "",
-            lastName: "",
-            email: "",
-            role: "staff",
-            locationIds: [locations[0]?._id || ""],
-          },
-        ],
-  );
+  const getInitialStaff = (data?: Staff[]): Staff[] => {
+    if (data && data.length > 0) {
+      return data.map((s) => {
+        if (s.role === "business") {
+          return { ...s, locationIds: locations.map((l) => l._id as string) };
+        }
+        return s;
+      });
+    }
+    return [
+      {
+        firstName: "",
+        lastName: "",
+        email: "",
+        role: "staff",
+        locationIds: [locations[0]?._id || ""],
+      },
+    ];
+  };
+
+  const [staff, setStaff] = useState<Staff[]>(() => getInitialStaff(initialData));
+
+  const knownStaffRef = React.useRef<{
+    invitedLocations: Record<string, string[]>;
+    staffIds: Record<string, string>;
+  }>({ invitedLocations: {}, staffIds: {} });
 
   useEffect(() => {
     if (initialData && initialData.length > 0) {
-      setStaff(initialData);
+      setStaff(getInitialStaff(initialData));
+
+      const invitedLocs: Record<string, string[]> = {};
+      const sIds: Record<string, string> = {};
+      initialData.forEach((s) => {
+        if (s.email) {
+          const emailLower = s.email.toLowerCase();
+          invitedLocs[emailLower] = s.locationIds || [];
+          if (s._id) {
+            sIds[emailLower] = s._id;
+          }
+        }
+      });
+      knownStaffRef.current = { invitedLocations: invitedLocs, staffIds: sIds };
     }
   }, [initialData]);
 
@@ -82,10 +108,8 @@ export default function StaffSetup({
     setStaff(newStaff);
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoading(true);
-    try {
+  const mutation = useMutation({
+    mutationFn: async () => {
       // Group staff by normalized email to avoid duplicate parallel requests for the same person
       const staffMap = new Map<string, Staff>();
 
@@ -107,73 +131,88 @@ export default function StaffSetup({
         }
       });
 
-      // Send invitations for staff (only for newly added locations to avoid redundant API calls)
+      const errors: string[] = [];
+      const newInvitedLocs = { ...knownStaffRef.current.invitedLocations };
+      const newStaffIds = { ...knownStaffRef.current.staffIds };
       const invitedStaffMap = new Map<string, any>();
 
       for (const s of Array.from(staffMap.values())) {
-        let lastResStaff = null;
-
-        // Find existing locationIds for this staff if from initialData
-        const originalStaff = (initialData || []).find(
-          (o) => o.email.toLowerCase() === s.email.toLowerCase(),
-        );
-        const originalLocIds = (originalStaff?.locationIds || []).map((id) =>
-          id.toString(),
-        );
+        const emailLower = s.email.toLowerCase();
+        const originalLocIds = newInvitedLocs[emailLower] || [];
 
         // Identify new locations that need an invite/assignment call
         const newLocIds = s.locationIds.filter(
           (locId) => !originalLocIds.includes(locId.toString()),
         );
 
-        for (const locId of newLocIds) {
+        let lastResStaff = null;
+
+        if (newLocIds.length > 0) {
           try {
             const res = await callApi("/api/staff/invite", "POST", {
               ...s,
-              locationId: locId,
+              locationIds: newLocIds,
             });
             if (res.staff) {
               lastResStaff = res.staff;
+              newInvitedLocs[emailLower] = [...originalLocIds, ...newLocIds];
+              newStaffIds[emailLower] = res.staff._id;
             }
-          } catch (err) {
-            console.error(
-              `Failed to invite ${s.email} to location ${locId}:`,
-              err,
-            );
+          } catch (err: any) {
+            if (
+              err.errorCode === "OWNER_ALREADY_ADDED" ||
+              err.errorCode === "STAFF_ALREADY_ADDED"
+            ) {
+              // Treat as success
+              newInvitedLocs[emailLower] = [...originalLocIds, ...newLocIds];
+            } else {
+              const errorText = err.errorCode 
+                ? t(`api_errors.${err.errorCode}`) 
+                : (err.message || t("Failed to invite staff members"));
+              errors.push(`${s.email}: ${errorText}`);
+            }
           }
         }
 
-        if (lastResStaff) {
-          invitedStaffMap.set(lastResStaff.email.toLowerCase(), lastResStaff);
-        } else if (originalStaff) {
-          // If no new locations were added, keep the original staff data with updated local state
-          invitedStaffMap.set(s.email.toLowerCase(), {
-            ...originalStaff,
-            ...s,
-          });
-        }
+        invitedStaffMap.set(emailLower, lastResStaff || { 
+          ...s, 
+          _id: newStaffIds[emailLower], 
+          locationIds: newInvitedLocs[emailLower] || [] 
+        });
       }
+
+      // Update the ref immediately so subsequent retries have the latest state
+      knownStaffRef.current = { invitedLocations: newInvitedLocs, staffIds: newStaffIds };
 
       // Update the original staff array with IDs
       const finalStaff = staff.map((s) => {
-        const invited = invitedStaffMap.get(s.email.toLowerCase());
-        if (invited) {
-          return {
-            ...s,
-            _id: invited._id,
-            locationIds: invited.locationIds || s.locationIds,
-          };
-        }
-        return s;
+        const emailLower = s.email.toLowerCase();
+        const invited = invitedStaffMap.get(emailLower);
+        return {
+          ...s,
+          _id: newStaffIds[emailLower] || s._id,
+          locationIds: newInvitedLocs[emailLower] || s.locationIds,
+        };
       });
 
+      if (errors.length > 0) {
+        // Collect errors to throw them so onError is triggered
+        throw new Error(errors.join("\n"));
+      }
+
+      return finalStaff;
+    },
+    onSuccess: (finalStaff) => {
       onNext(finalStaff);
-    } catch (error) {
+    },
+    onError: (error: any) => {
       console.error("Failed to invite staff:", error);
-      onNext(staff);
-    } finally {
-      setLoading(false);
-    }
+    },
+  });
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    mutation.mutate();
   };
 
   return (
@@ -305,8 +344,8 @@ export default function StaffSetup({
           >
             {t("Back")}
           </Button>
-          <Button type="submit" disabled={loading} iconType="next">
-            {loading ? t("Sending...") : t("Next Step")}
+          <Button type="submit" disabled={mutation.isPending} iconType="next">
+            {mutation.isPending ? t("Sending...") : t("Next Step")}
           </Button>
         </div>
       </form>

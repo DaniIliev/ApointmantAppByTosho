@@ -12,7 +12,6 @@ import {
   SelectOptionsAppointmentType,
 } from "@/Global/Types/types";
 import { useTranslation } from "react-i18next";
-import { toast } from "sonner";
 import callApi from "@/app/Api/callApi";
 import moment from "moment";
 import { useAuthContext } from "@/context/AuthContext";
@@ -189,12 +188,8 @@ export const AppointmentEditModal: React.FC<AppointmentEditModalProps> = ({
 
       onAppointmentUpdated(updatedAppointment);
       onOpenChange(false);
-      toast.success(t("Appointment updated successfully") as string);
     } catch (error) {
       console.error("Failed to update appointment:", error);
-      toast.error(
-        t("Failed to update appointment. Please try again.") as string
-      );
     } finally {
       setIsSubmitting(false);
     }
@@ -215,10 +210,8 @@ export const AppointmentEditModal: React.FC<AppointmentEditModalProps> = ({
       onAppointmentUpdated(updatedAppointment);
       setShowCancelConfirm(false);
       onOpenChange(false);
-      toast.success(t("Appointment cancelled successfully!"));
     } catch (error) {
       console.error("Failed to cancel appointment:", error);
-      toast.error(t("Failed to cancel appointment. Please try again."));
     } finally {
       setIsCancelling(false);
     }

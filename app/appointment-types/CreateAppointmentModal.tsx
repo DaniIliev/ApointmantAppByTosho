@@ -82,14 +82,12 @@ const CreateAppointmentModal = ({
       const fetchData = async () => {
         try {
           const [staffList, locs] = await Promise.all([
-            callApi(`/api/staff/staff-list?businessId=${user?.businessId}`, "GET"),
+            callApi(`/api/staff/staff-list?businessId=${user?.businessId}&ignoreLocation=true`, "GET"),
             callApi(`/api/locations?businessId=${user?.businessId}`, "GET")
           ]);
           
           const mappedLocs = locs.map((l: any) => ({ id: l._id, name: l.name }));
           setLocations(mappedLocs);
-          
-          // Pre-populate staffByLocation cache with whole business list (filtered per location in the backend later if needed, but here we have the full data already)
           const staffMap: Record<string, StaffMember[]> = {};
           locs.forEach((l: any) => {
             staffMap[l._id] = staffList.filter((s: any) => 

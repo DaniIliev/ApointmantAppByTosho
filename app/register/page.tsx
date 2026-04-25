@@ -6,7 +6,6 @@ import { useTranslation } from "react-i18next";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { LabeledInput } from "@/components/customUIComponents/LabeledInput";
-import { Eye, EyeOff } from "lucide-react";
 import callApi from "../Api/callApi";
 import { useAuthContext } from "@/context/AuthContext";
 import { toast } from "sonner";
@@ -15,8 +14,6 @@ export default function RegisterPage() {
   const { t } = useTranslation();
   const router = useRouter();
   const { setUser } = useAuthContext();
-  // const [showPassword, setShowPassword] = useState(false);
-  // const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -52,7 +49,6 @@ export default function RegisterPage() {
 
       await callApi("/api/auth/register", "POST", payload);
 
-      // Silent login to start onboarding
       try {
         const loginResp: any = await callApi("/api/auth/login", "POST", {
           email: formData.email,
@@ -69,7 +65,6 @@ export default function RegisterPage() {
       router.push("/onboarding");
     } catch (err: any) {
       setError(err?.message || t("Registration failed"));
-      toast.error(err?.message || t("Registration failed"));
     } finally {
       setLoading(false);
     }
@@ -84,15 +79,7 @@ export default function RegisterPage() {
         <div className="w-full relative bg-white/90 dark:bg-gray-900/90 backdrop-blur-2xl rounded-[2.5rem] p-8 md:p-10 border border-primary/10 shadow-2xl overflow-hidden">
           {/* Top Logo */}
           <div className="flex flex-col items-center mb-8">
-            <div className="p-3 bg-primary/5 rounded-2xl mb-4 border border-primary/10">
-              <Image
-                src="/AppointmantPro.png"
-                alt="logo"
-                width={44}
-                height={44}
-                className="w-11 h-auto"
-              />
-            </div>
+              <span className="theme-logo-mask" aria-hidden="true" />
             <div className="text-center">
               <h1 className="text-3xl font-extrabold tracking-tight theme-text-gradient mb-1">
                 {t("Join AppointDI®")}

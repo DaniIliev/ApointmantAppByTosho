@@ -44,13 +44,8 @@ export function SignInForm({ onSuccess }: SignInFormProps) {
         const payload = { email, password };
         await login(payload);
       }
-      if (!user) {
-        setError(t("Login failed. Invalid email or password."));
-        toast.error(t("Login failed. Invalid email or password."));
-      }
     } catch (err: any) {
       setError(t("Login failed. Invalid email or password."));
-      toast.error(t("Login failed. Invalid email or password."));
       console.log("Login error:", err);
     } finally {
       setLoading(false);

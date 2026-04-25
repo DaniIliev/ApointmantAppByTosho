@@ -4,6 +4,7 @@ import React, { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Clock, Pencil, Plus } from "lucide-react";
 import { toast } from "sonner";
+import { useMutation } from "@tanstack/react-query";
 
 import callApi from "@/app/Api/callApi";
 import { LocationHoursModal } from "@/components/location/LocationHoursModal";
@@ -79,19 +80,6 @@ const toWeeklyWorkingHoursPayload = (value: LocationOpeningHours) =>
     >,
   );
 
-const summarizeLocationHours = (value: LocationOpeningHours) =>
-  dayKeys.map((dayKey) => {
-    const dayValue = value[dayKey];
-
-    return {
-      dayKey,
-      timeLabel: dayValue.isDayOff
-        ? "Off"
-        : `${dayValue.workTime.start || "--:--"} - ${dayValue.workTime.end || "--:--"}`,
-      isDayOff: dayValue.isDayOff,
-    };
-  });
-
 export default function LocationHoursSetup({
   locations,
   staff: _staff,
@@ -100,7 +88,6 @@ export default function LocationHoursSetup({
   initialData,
 }: LocationHoursSetupProps) {
   const { t } = useTranslation();
-  const [loading, setLoading] = useState(false);
   const [hours, setHours] = useState<LocationsOpeningHours>({});
   const [isEditorOpen, setIsEditorOpen] = useState(false);
   const [editingLocationId, setEditingLocationId] = useState<string | null>(null);
@@ -155,11 +142,8 @@ export default function LocationHoursSetup({
     ? Boolean(initialData?.[editingLocationId])
     : false;
 
-  const handleSubmit = async (event: React.FormEvent) => {
-    event.preventDefault();
-    setLoading(true);
-
-    try {
+  const mutation = useMutation({
+    mutationFn: async () => {
       await Promise.all(
         locations.map(async (location, index) => {
           const locationId = String(location._id || index);
@@ -171,13 +155,18 @@ export default function LocationHoursSetup({
           });
         }),
       );
-
+    },
+    onSuccess: () => {
       onNext(hours);
-    } catch (error) {
-      toast.error(t("Failed to save location working hours"));
-    } finally {
-      setLoading(false);
-    }
+    },
+    onError: (error) => {
+      console.error("Failed to save location working hours:", error);
+    },
+  });
+
+  const handleSubmit = async (event: React.FormEvent) => {
+    event.preventDefault();
+    mutation.mutate();
   };
 
   if (locations.length === 0) {
@@ -251,8 +240,8 @@ export default function LocationHoursSetup({
           >
             {t("Back")}
           </Button>
-          <Button type="submit" disabled={loading} iconType="save">
-            {loading ? t("Saving...") : t("Save")}
+          <Button type="submit" disabled={mutation.isPending} iconType="save">
+            {mutation.isPending ? t("Saving...") : t("Save")}
           </Button>
         </div>
       </form>

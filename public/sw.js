@@ -32,6 +32,11 @@ self.addEventListener('activate', (event) => {
 
 // Fetch Event
 self.addEventListener('fetch', (event) => {
+  // Skip API calls from service worker caching - always network
+  if (event.request.url.includes('/api/')) {
+    return;
+  }
+
   // Strategy: Network First for Navigations, Cache First for others
   if (event.request.mode === 'navigate') {
     event.respondWith(

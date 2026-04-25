@@ -4,12 +4,19 @@ import callApi from "@/app/Api/callApi";
 import { useAuthContext } from "@/context/AuthContext";
 import type { Appointment } from "@/Global/Types/types";
 
-export default function AutoCompletePastAppointments() {
+interface AutoCompletePastAppointmentsProps {
+  disabled?: boolean;
+}
+
+export default function AutoCompletePastAppointments({
+  disabled,
+}: AutoCompletePastAppointmentsProps) {
   const { user } = useAuthContext();
   const isRunningRef = useRef(false);
 
   const run = useCallback(async () => {
-    if (!user || (user.role !== "staff" && user.role !== "business")) return;
+    if (disabled || !user || (user.role !== "staff" && user.role !== "business"))
+      return;
     if (isRunningRef.current) return; // prevent overlapping runs
     isRunningRef.current = true;
 

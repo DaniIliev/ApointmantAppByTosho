@@ -11,7 +11,6 @@ import { KanbanBoard as KanbanBoardComponent } from "./components/KanbanBoard";
 import { CardModal } from "./components/CardModal";
 import { ColumnModal } from "./components/ColumnModal";
 import { KanbanColumn, KanbanCard, User, KanbanBoard } from "./types";
-import { toast } from "sonner";
 import callApi from "@/app/Api/callApi";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
@@ -32,6 +31,7 @@ import {
   GenericFiltersData,
   FilterConfig,
 } from "@/components/customUIComponents/GenericFilters";
+import { toast } from "sonner";
 
 interface KanbanFiltersData extends GenericFiltersData {
   searchText: string;
@@ -98,7 +98,6 @@ function KanbanPageContent() {
 
   const loadKanbanData = async () => {
     if (!user?.businessId) {
-      toast.error(t("Business context not found"));
       setLoading(false);
       return;
     }
@@ -132,7 +131,6 @@ function KanbanPageContent() {
       setAvailableUsers(members);
     } catch (error) {
       console.error("Failed to load kanban data:", error);
-      toast.error(t("Failed to load kanban board"));
     } finally {
       setLoading(false);
     }
@@ -168,9 +166,8 @@ function KanbanPageContent() {
             setSelectedBoardId(null);
             setColumns([]);
           }
-          toast.success(t("Board deleted"));
         } catch (e) {
-          toast.error(t("Failed to delete board"));
+          console.error("Failed to delete board:", e);
         }
       }
     };
@@ -225,7 +222,6 @@ function KanbanPageContent() {
         });
         setBoards((prev) => [...prev, newBoard]);
         handleSelectBoard(newBoard._id);
-        toast.success(t("Board created"));
       } else {
         const upBoard = await callApi(
           `/api/kanban/boards/${selectedBoardId}`,
@@ -237,11 +233,10 @@ function KanbanPageContent() {
             b._id === selectedBoardId ? { ...b, title: upBoard.title } : b,
           ),
         );
-        toast.success(t("Board renamed"));
       }
       setBoardModalOpen(false);
     } catch (e) {
-      toast.error(t("Failed to save board"));
+      console.error("Failed to save board:", e);
     }
   };
 
@@ -253,7 +248,6 @@ function KanbanPageContent() {
       setColumns(fullBoard.columns || []);
     } catch (error) {
       console.error("Failed to load board:", error);
-      toast.error(t("Failed to load board"));
       setColumns([]);
     } finally {
       setLoading(false);
@@ -392,7 +386,6 @@ function KanbanPageContent() {
           boardId: selectedBoardId,
         });
         setColumns((prev) => [...prev, { ...newColumn, cards: [] }]);
-        toast.success(t("Column created successfully"));
       } else {
         const updatedColumn = await callApi(
           `/api/kanban/columns/${columnData._id}`,
@@ -408,19 +401,17 @@ function KanbanPageContent() {
             col._id === updatedColumn._id ? { ...col, ...updatedColumn } : col,
           ),
         );
-        toast.success(t("Column updated successfully"));
       }
     } catch (error) {
-      toast.error(t("Failed to save column"));
+      console.error("Failed to save column:", error);
     }
   };
   const handleDeleteColumn = async (columnId: string) => {
     try {
       await callApi(`/api/kanban/columns/${columnId}`, "DELETE");
       setColumns((prev) => prev.filter((col) => col._id !== columnId));
-      toast.success(t("Column deleted successfully"));
     } catch (error) {
-      toast.error(t("Failed to delete column"));
+      console.error("Failed to delete column:", error);
     }
   };
 
@@ -431,12 +422,14 @@ function KanbanPageContent() {
     setSelectedColumnId(columnId);
     setCardModalOpen(true);
   };
+
   const handleEditCard = (card: KanbanCard) => {
     setCardModalMode("edit");
     setSelectedCard(card);
     setSelectedColumnId(undefined);
     setCardModalOpen(true);
   };
+
   const handleSaveCard = async (
     cardData: Partial<KanbanCard>,
     mode: "create" | "edit",
@@ -460,7 +453,6 @@ function KanbanPageContent() {
               : col,
           ),
         );
-        toast.success(t("Card created successfully"));
       } else {
         const updatedCard = await callApi(
           `/api/kanban/cards/${cardData._id}`,
@@ -478,12 +470,12 @@ function KanbanPageContent() {
             ),
           })),
         );
-        toast.success(t("Card updated successfully"));
       }
     } catch (error) {
-      toast.error(t("Failed to save card"));
+      console.error("Failed to save card:", error);
     }
   };
+
   const handleDeleteCard = async (cardId: string) => {
     try {
       await callApi(`/api/kanban/cards/${cardId}`, "DELETE");
@@ -493,9 +485,8 @@ function KanbanPageContent() {
           cards: col.cards.filter((card) => card._id !== cardId),
         })),
       );
-      toast.success(t("Card deleted successfully"));
     } catch (error) {
-      toast.error(t("Failed to delete card"));
+      console.error("Failed to delete card:", error);
     }
   };
 

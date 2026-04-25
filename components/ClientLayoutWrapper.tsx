@@ -71,10 +71,10 @@ export default function ClientLayoutWrapper({
       <PageTitleProvider>
         <PaddingProvider>
           <RightNavProvider>
+            <Toaster expand={false} visibleToasts={3} />
             {user ? (
               <ClientLayout hideLeftNav={hideLeftNav}>
-                <Toaster />
-                <AutoCompletePastAppointments />
+                <AutoCompletePastAppointments disabled={isOnboarding} />
                 {children}
                 <ChangePasswordModal
                   open={showChangePassword}

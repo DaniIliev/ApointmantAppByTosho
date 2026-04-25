@@ -27,7 +27,6 @@ import AppointmentsTable from "@/components/AppointmantTable/AppointmantTable";
 import callApi from "../Api/callApi";
 import { useAuthContext } from "@/context/AuthContext";
 import moment from "moment";
-import { toast } from "sonner";
 import AppointmentForm, {
   AppointmentFormData,
 } from "./Forms/CreateAppointmant";
@@ -192,10 +191,8 @@ function DashboardPageContent() {
         setIsViewModalOpen(false);
         setSelectedAppointment(null);
         await getDashboardData();
-        toast.success(t("Appointment deleted successfully!"));
       } catch (error) {
         console.error("Failed to delete appointment:", error);
-        toast.error(t("Failed to delete appointment. Please try again."));
       }
     })();
   };
@@ -207,7 +204,7 @@ function DashboardPageContent() {
       (s) => s._id === appointmentData.appointmentTypeId,
     );
     if (!service) {
-      toast.error(t("Invalid service selected."));
+      console.error("Invalid service selected.");
       return;
     }
 
@@ -239,11 +236,9 @@ function DashboardPageContent() {
         notes: "",
         staff: { _id: "", name: "" },
       });
-      toast.success(t("Appointment created successfully!"));
       await getDashboardData();
     } catch (error) {
       console.error("Failed to create appointment:", error);
-      toast.error(t("Failed to create appointment. Please try again."));
     }
   };
 
@@ -336,12 +331,8 @@ function DashboardPageContent() {
               try {
                 await callApi(`/api/appointment/${id}`, "DELETE");
                 setAppointments((prev) => prev.filter((a) => a._id !== id));
-                toast.success(t("Appointment deleted successfully!"));
               } catch (error) {
                 console.error("Failed to delete appointment:", error);
-                toast.error(
-                  t("Failed to delete appointment. Please try again."),
-                );
               }
             }}
           />

@@ -23,12 +23,18 @@ export default function RoleSelection({ onNext }: RoleSelectionProps) {
     }
     
     try {
-      const updatedUser = await callApi("/api/auth/update-role", "PUT", { role });
-      if (setUser) setUser(updatedUser.user);
+      const userData = await callApi("/api/auth/update-role", "PUT", { role });
+      if (setUser && userData) {
+        setUser(userData);
+      }
       onNext(role);
     } catch (error) {
       console.error("Failed to update role:", error);
-      onNext(role);
+      // Even if API fails, if we want to proceed we can, but usually we shouldn't if it's a critical step.
+      // However, for onboarding we might want to be resilient.
+      // But the user says it "supposedly updates but doesn't lead to next step".
+      // If it fails, we should probably show an error and stay on the page.
+      // callApi already shows a toast.
     }
   };
 
