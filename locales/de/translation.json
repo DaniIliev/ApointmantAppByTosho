@@ -1099,6 +1099,8 @@
     "INVALID_ID_FORMAT": "Ungültiges ID-Format.",
     "INVALID_USER_ROLE": "Ungültige Benutzerrolle.",
     "MISSING_BUSINESS_CONTEXT": "Fehlender Geschäftskontext.",
+    "GENERIC_ERROR": "Ein unerwarteter Fehler ist aufgetreten. Bitte versuchen Sie es erneut.",
+    "NETWORK_ERROR": "Netzwerkfehler. Bitte überprüfen Sie Ihre Internetverbindung.",
     "INVALID_CREDENTIALS": "Ungültige E-Mail oder Passwort.",
     "USER_NOT_FOUND": "Benutzer nicht gefunden.",
     "EMAIL_ALREADY_EXISTS": "E-Mail existiert bereits.",
