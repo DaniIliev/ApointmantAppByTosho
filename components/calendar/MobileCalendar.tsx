@@ -270,10 +270,7 @@ const WeeklyCalendar: React.FC<WeeklyCalendarProps> = ({
               >
                 {format(date, "d")}
                 {isToday && (
-                  <span className={cn(
-                    "absolute -bottom-1.5 w-1.5 h-1.5 rounded-full shadow-sm",
-                    isSelected ? "bg-white" : "bg-red-500"
-                  )} />
+                  <span className="absolute bottom-0.5 w-1 h-1 rounded-full bg-red-500 shadow-sm" />
                 )}
               </span>
             </button>
@@ -365,10 +362,7 @@ const MonthlyCalendar: React.FC<MonthlyCalendarProps> = ({
               >
                 {format(date, "d")}
                 {isToday && (
-                  <span className={cn(
-                    "absolute -bottom-1.5 w-1.5 h-1.5 rounded-full shadow-sm",
-                    isSelected ? "bg-white" : "bg-red-500"
-                  )} />
+                  <span className="absolute bottom-0.5 w-1 h-1 rounded-full bg-red-500 shadow-sm" />
                 )}
               </span>
             </button>
