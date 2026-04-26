@@ -46,7 +46,7 @@ export default function TopNav({
   const { t, i18n } = useTranslation();
   const { pageTitle } = usePageTitle();
   const { logout, user } = useAuthContext();
-
+  const { setPageTitle} = usePageTitle()
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [isHelpOpen, setIsHelpOpen] = useState(false);
   const [isAlertsOpen, setIsAlertsOpen] = useState(false);
@@ -65,6 +65,7 @@ export default function TopNav({
   useClickOutside(languagesRef, () => setIsLanguagesOpen(false));
 
   const handleSignOut = () => {
+    setPageTitle(null)
     logout();
     setIsProfileOpen(false);
   };

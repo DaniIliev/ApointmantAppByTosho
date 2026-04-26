@@ -162,9 +162,7 @@ function DashboardPageContent() {
     }
   };
 
-  // ФУНКЦИЯ ЗА ОБНОВЯВАНЕ НА СРЕЩАТА В СПИСЪКА
   const handleAppointmentUpdated = (updatedAppointment: Appointment) => {
-    // If the appointment was cancelled, remove it from the list
     if (updatedAppointment.status === "cancelled") {
       setAppointments((prev) =>
         prev.filter((apt) => apt._id !== updatedAppointment._id),
@@ -273,7 +271,7 @@ function DashboardPageContent() {
         className="w-full h-full flex flex-col pb-0 md:pb-0"
       >
         {/* Desktop Tabs - Top */}
-        <TabsList className="hidden md:flex mb-4 bg-transparent p-0 mx-auto w-fit flex-shrink-0">
+        <TabsList className="hidden md:flex mb-4 bg-transparent p-0 mx-auto w-fit flex-shrink-0 border-none">
           <TabsTrigger
             value="calendar"
             className="data-[state=active]:bg-transparent data-[state=active]:text-primary data-[state=active]:shadow-none transition-colors px-6 py-3 border-b-2 data-[state=active]:border-primary border-transparent"
@@ -289,7 +287,7 @@ function DashboardPageContent() {
         </TabsList>
 
         {/* Mobile Tabs - Bottom Fixed */}
-        <TabsList className="md:hidden fixed bottom-0 left-0 right-0 z-5 bg-primary-foreground/95 backdrop-blur-xl border-t border-white/10 p-2 grid grid-cols-2 gap-2 h-16 shadow-lg w-full">
+        <TabsList className="md:hidden fixed bottom-0 left-0 right-0 z-5 bg-primary-foreground/95 backdrop-blur-xl p-2 grid grid-cols-2 gap-2 h-16 shadow-lg w-full">
           <TabsTrigger
             value="calendar"
             className="data-[state=active]:bg-primary data-[state=active]:text-white data-[state=inactive]:text-muted-foreground flex flex-col items-center justify-center gap-1 rounded-lg transition-all py-2 px-3"

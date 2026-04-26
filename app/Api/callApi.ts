@@ -5,7 +5,8 @@ const callApi = async (
   endpoint: string,
   method: "GET" | "POST" | "PUT" | "DELETE",
   variables?: any,
-  multipartForm: boolean = false
+  multipartForm: boolean = false,
+  showToast: boolean = true
 ) => {
   const token = localStorage.getItem("token");
   const selectedLocationId = localStorage.getItem("selectedLocationId");
@@ -58,7 +59,13 @@ const callApi = async (
     });
   } catch (fetchError: any) {
     console.error("Network or fetch error:", fetchError);
-    toast.error(i18n.t("api_errors.NETWORK_ERROR", { defaultValue: "Network error. Please check your connection." }));
+    if (showToast) {
+      toast.error(
+        i18n.t("api_errors.NETWORK_ERROR", {
+          defaultValue: "Network error. Please check your connection.",
+        })
+      );
+    }
     throw fetchError;
   }
 
@@ -106,17 +113,27 @@ const callApi = async (
     }
 
     // Handle localized error messages
-    if (errorData && errorData.errorCode) {
-      const translationKey = `api_errors.${errorData.errorCode}`;
-      const translatedMessage = i18n.t(translationKey, { defaultValue: errorData.message });
-      toast.error(translatedMessage);
-    } else {
-      // Fallback generic error toast if no specific errorCode
-      const genericMessage = errorData?.message || i18n.t("api_errors.GENERIC_ERROR", { defaultValue: "Something went wrong. Please try again." });
-      toast.error(genericMessage);
+    if (showToast) {
+      if (errorData && errorData.errorCode) {
+        const translationKey = `api_errors.${errorData.errorCode}`;
+        const translatedMessage = i18n.t(translationKey, {
+          defaultValue: errorData.message,
+        });
+        toast.error(translatedMessage);
+      } else {
+        // Fallback generic error toast if no specific errorCode
+        const genericMessage =
+          errorData?.message ||
+          i18n.t("api_errors.GENERIC_ERROR", {
+            defaultValue: "Something went wrong. Please try again.",
+          });
+        toast.error(genericMessage);
+      }
     }
 
-    const error: any = new Error(errorData?.message || `API error - ${result.statusText}`);
+    const error: any = new Error(
+      errorData?.message || `API error - ${result.statusText}`
+    );
     error.errorCode = errorData?.errorCode;
     error.status = result.status;
     error.data = errorData;
@@ -130,9 +147,11 @@ const callApi = async (
   }
 
   // Handle success messages if present
-  if (data.messageCode && method !== "GET") {
+  if (data.messageCode && method !== "GET" && showToast) {
     const translationKey = `success_messages.${data.messageCode}`;
-    const translatedMessage = i18n.t(translationKey, { defaultValue: data.message });
+    const translatedMessage = i18n.t(translationKey, {
+      defaultValue: data.message,
+    });
     toast.success(translatedMessage);
   }
 

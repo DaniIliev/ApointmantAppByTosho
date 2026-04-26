@@ -7,6 +7,8 @@ import { usePageTitle } from "@/context/PageTitleContext";
 import { useRightNav } from "@/context/RightNavContext";
 import { useAuthContext } from "@/context/AuthContext";
 import callApi from "@/app/Api/callApi";
+import { canAddLocation, getPlanFromName } from "@/lib/permissions";
+import { UpgradeModal } from "@/components/customUIComponents/UpgradeModal";
 import { Button } from "@/components/ui/button";
 import { Modal } from "@/components/customUIComponents/Modal";
 import { LabeledInput } from "@/components/customUIComponents/LabeledInput";
@@ -46,6 +48,7 @@ function LocationsPageContent() {
   );
   const [isLoading, setIsLoading] = useState(false);
   const [isInitialLoading, setIsInitialLoading] = useState(true);
+  const [showUpgradeModal, setShowUpgradeModal] = useState(false);
   const router = useRouter();
 
   const phoneRegex = /^\+?[0-9\s()\-]{6,20}$/;
@@ -149,6 +152,13 @@ function LocationsPageContent() {
   }, [setPageTitle, t, user?.businessId]);
 
   const openModal = (location?: Location) => {
+    if (!location) {
+      const userPlan = getPlanFromName(user?.subscriptionPlan || user?.plan);
+      if (!canAddLocation(locations.length, userPlan)) {
+        setShowUpgradeModal(true);
+        return;
+      }
+    }
     if (location) {
       setEditingLocation(location);
       setFormData({
@@ -384,6 +394,15 @@ function LocationsPageContent() {
           </div>
         </form>
       </Modal>
+
+      <UpgradeModal
+        open={showUpgradeModal}
+        onOpenChange={setShowUpgradeModal}
+        title={t("Location Limit Reached")}
+        description={t(
+          "You have reached the maximum number of locations allowed by your current plan. Please upgrade to add more locations.",
+        )}
+      />
 
       <DeleteConfirmationDialog
         isOpen={isDeleteDialogOpen}

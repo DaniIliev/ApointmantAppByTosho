@@ -48,7 +48,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       const decodedUser = jwtDecode<DecodedToken>(authedUser.token);
       const userId = decodedUser._id || decodedUser.id;
       if (userId) {
-        findUserByID(userId)
+        findUserByID(userId, false)
           .then((fetchedUser) => {
             setUser(fetchedUser);
             if (
@@ -77,6 +77,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const logout = () => {
     setUser(null);
     setToken(null);
+    
     localStorage.removeItem("token");
     router.push("/login");
   };
@@ -103,7 +104,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           const decodedUser = jwtDecode<DecodedToken>(storedToken);
           const userId = decodedUser?._id || decodedUser?.id;
           if (decodedUser && userId) {
-            const fetchedUser: User = await findUserByID(userId);
+            const fetchedUser: User = await findUserByID(userId, false);
             setUser(fetchedUser);
             setToken(storedToken);
 

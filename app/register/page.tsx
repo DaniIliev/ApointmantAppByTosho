@@ -8,7 +8,6 @@ import { Button } from "@/components/ui/button";
 import { LabeledInput } from "@/components/customUIComponents/LabeledInput";
 import callApi from "../Api/callApi";
 import { useAuthContext } from "@/context/AuthContext";
-import { toast } from "sonner";
 
 export default function RegisterPage() {
   const { t } = useTranslation();

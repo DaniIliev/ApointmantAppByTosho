@@ -1,8 +1,3 @@
-/**
- * Plan and Permission Configuration
- * Defines feature access based on user roles and subscription plans
- */
-
 export type PlanType = "none" | "starter" | "professional" | "enterprise";
 export type UserRole = "personal" | "business" | "staff" | "admin" | "manager";
 
@@ -22,6 +17,7 @@ export interface PlanLimits {
     customIntegrations: boolean;
     prioritySupport: boolean;
     phoneSupport: boolean;
+    customBranding: boolean;
   };
 }
 
@@ -45,29 +41,31 @@ export const PLAN_LIMITS: Record<PlanType, PlanLimits> = {
       customIntegrations: false,
       prioritySupport: false,
       phoneSupport: false,
+      customBranding: false,
     },
   },
   starter: {
-    maxStaff: 3,
-    maxAppointmentTypes: 15,
+    maxStaff: 1,
+    maxAppointmentTypes: -1,
     maxLocations: 1,
     features: {
       analytics: true,
-      advancedAnalytics: false,
-      smsNotifications: false,
+      advancedAnalytics: true,
+      smsNotifications: true,
       emailNotifications: true,
       kanban: true,
       taskManager: true,
-      multiLocation: false,
-      apiAccess: false,
-      customIntegrations: false,
-      prioritySupport: false,
-      phoneSupport: false,
+      multiLocation: true,
+      apiAccess: true,
+      customIntegrations: true,
+      prioritySupport: true,
+      phoneSupport: true,
+      customBranding: false,
     },
   },
   professional: {
-    maxStaff: 10,
-    maxAppointmentTypes: 50,
+    maxStaff: 5,
+    maxAppointmentTypes: -1,
     maxLocations: 3,
     features: {
       analytics: true,
@@ -77,10 +75,11 @@ export const PLAN_LIMITS: Record<PlanType, PlanLimits> = {
       kanban: true,
       taskManager: true,
       multiLocation: true,
-      apiAccess: false,
-      customIntegrations: false,
+      apiAccess: true,
+      customIntegrations: true,
       prioritySupport: true,
-      phoneSupport: false,
+      phoneSupport: true,
+      customBranding: false,
     },
   },
   enterprise: {
@@ -99,6 +98,7 @@ export const PLAN_LIMITS: Record<PlanType, PlanLimits> = {
       customIntegrations: true,
       prioritySupport: true,
       phoneSupport: true,
+      customBranding: true,
     },
   },
 };
@@ -196,13 +196,6 @@ export const ROUTE_PERMISSIONS: RoutePermission[] = [
     requiredFeature: "kanban",
     requiredPlan: ["starter", "professional", "enterprise"],
   },
-  {
-    path: "/taskManager",
-    allowedRoles: ["business", "staff", "manager"],
-    requiresAuth: true,
-    requiredFeature: "taskManager",
-    requiredPlan: ["starter", "professional", "enterprise"],
-  },
 
   // Shared authenticated routes (all authenticated users)
   {
@@ -251,7 +244,7 @@ export function hasRouteAccess(
 
   // Business accounts must have an active subscription for business-only routes
   if (
-    (userRole === "business" || userRole === "staff") &&
+    (userRole === "business" || userRole === "staff" || userRole === "manager") &&
     routePermission.requiresAuth &&
     !routePermission.path.startsWith("/profile") &&
     !routePermission.path.startsWith("/pricing") &&
@@ -288,6 +281,17 @@ export function canAddStaff(
 ): boolean {
   const limit = PLAN_LIMITS[userPlan].maxStaff;
   return limit === -1 || currentStaffCount < limit;
+}
+
+/**
+ * Check if user can add more locations
+ */
+export function canAddLocation(
+  currentLocationCount: number,
+  userPlan: PlanType,
+): boolean {
+  const limit = PLAN_LIMITS[userPlan].maxLocations;
+  return limit === -1 || currentLocationCount < limit;
 }
 
 /**

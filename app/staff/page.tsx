@@ -13,6 +13,8 @@ import { StaffModal } from "./StaffModal";
 import { useAuthContext } from "@/context/AuthContext";
 import { useGetStaff, useDeleteStaff } from "@/hooks/queries/useStaff";
 import { useGetLocations } from "@/hooks/queries/useLocation";
+import { canAddStaff, getPlanFromName } from "@/lib/permissions";
+import { UpgradeModal } from "@/components/customUIComponents/UpgradeModal";
 
 import { Skeleton } from "@/components/ui/skeleton";
 import { LabeledSelect } from "@/components/customUIComponents/LabeledSelect";
@@ -43,6 +45,7 @@ function StaffPageContent() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalMode, setModalMode] = useState<"view" | "edit" | "create">("create");
   const [selectedStaff, setSelectedStaff] = useState<StaffMember | null>(null);
+  const [showUpgradeModal, setShowUpgradeModal] = useState(false);
 
   const { data: staffData, isLoading: isStaffLoading } = useGetStaff(user?.businessId, selectedLocation?._id);
   const { data: locationsData, isLoading: isLocationsLoading } = useGetLocations(user?.businessId);
@@ -74,6 +77,11 @@ function StaffPageContent() {
   };
 
   const openCreateModal = () => {
+    const userPlan = getPlanFromName(user?.subscriptionPlan || user?.plan);
+    if (!canAddStaff(staff.length, userPlan)) {
+      setShowUpgradeModal(true);
+      return;
+    }
     setSelectedStaff(null);
     setModalMode("create");
     setIsModalOpen(true);
@@ -187,6 +195,15 @@ function StaffPageContent() {
         onStaffUpdated={handleStaffUpdated}
         onStaffCreated={handleStaffCreated}
         locations={locations}
+      />
+
+      <UpgradeModal
+        open={showUpgradeModal}
+        onOpenChange={setShowUpgradeModal}
+        title={t("Staff Limit Reached")}
+        description={t(
+          "You have reached the maximum number of staff members allowed by your current plan. Please upgrade to add more staff.",
+        )}
       />
     </>
   );

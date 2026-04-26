@@ -15,13 +15,6 @@ import callApi from "@/app/Api/callApi";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
 import { Plus, Pencil, Trash2, MoreVertical } from "lucide-react";
-import {
-  DropdownMenu,
-  DropdownMenuTrigger,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-} from "@/components/ui/dropdown-menu";
 import { LabeledSelect } from "@/components/customUIComponents/LabeledSelect";
 import { LabeledInput } from "@/components/customUIComponents/LabeledInput";
 import { Modal } from "@/components/customUIComponents/Modal";
@@ -32,6 +25,7 @@ import {
   FilterConfig,
 } from "@/components/customUIComponents/GenericFilters";
 import { toast } from "sonner";
+import { CustomTooltip } from "@/components/customUIComponents/CustomTooltip";
 
 interface KanbanFiltersData extends GenericFiltersData {
   searchText: string;
@@ -173,33 +167,23 @@ function KanbanPageContent() {
     };
 
     setExtraRightNavMenu([
-      <Button
-        key="create"
-        variant="ghost"
+      <CustomTooltip
         onClick={handleCreateClick}
-        className="w-full justify-start gap-3 px-3 py-2 h-9 font-medium hover:bg-accent rounded-lg"
-      >
-        <Plus className="w-4 h-4 text-muted-foreground" /> {t("Create Board")}
-      </Button>,
+        tooltipText={t("Create Board")}
+        icon={<Plus />}
+      />,
       ...(selectedBoardId
         ? [
-            <Button
-              key="edit"
-              variant="ghost"
+            <CustomTooltip
               onClick={handleEditClick}
-              className="w-full justify-start gap-3 px-3 py-2 h-9 font-medium hover:bg-accent rounded-lg"
-            >
-              <Pencil className="w-4 h-4 text-muted-foreground" />{" "}
-              {t("Rename Board")}
-            </Button>,
-            <Button
-              key="delete"
-              variant="ghost"
+              tooltipText={t("Rename Board")}
+              icon={<Pencil />}
+            />,
+            <CustomTooltip
               onClick={handleDeleteClick}
-              className="w-full justify-start gap-3 px-3 py-2 h-9 font-medium text-destructive hover:text-destructive hover:bg-destructive/15 rounded-lg"
-            >
-              <Trash2 className="w-4 h-4" /> {t("Delete Board")}
-            </Button>,
+              tooltipText={t("Delete Board")}
+              icon={<Trash2 />}
+            />,
           ]
         : []),
     ]);
@@ -563,6 +547,9 @@ function KanbanPageContent() {
       {boards.length === 0 ? (
         <div className="flex-1 flex items-center justify-center p-4">
           <div className="max-w-md w-full p-8 rounded-xl border border-border/40 bg-card shadow-sm text-center space-y-4">
+            <div className="mx-auto w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center">
+              <Plus className="w-8 h-8 text-primary" />
+            </div>  
             <h3 className="text-xl font-semibold">{t("No Boards Created")}</h3>
             <p className="text-muted-foreground">
               {t(
