@@ -176,7 +176,7 @@ export const Modal = ({
   return (
     <>
       {isMobile ? (
-        <Drawer open={open} onOpenChange={handleOpenChange}>
+        <Drawer open={open} onOpenChange={handleOpenChange} dismissible={false}>
           <DrawerContent className="h-auto max-h-[90dvh] overflow-hidden pb-[env(safe-area-inset-bottom)]">
             <div className={mobileContentClasses}>
               <DrawerHeader

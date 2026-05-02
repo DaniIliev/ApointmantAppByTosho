@@ -20,6 +20,7 @@ import {
 } from "@/components/ui/popover";
 import callApi from "@/app/Api/callApi";
 import { useDashboardDate } from "@/context/DashboardDateContext";
+import { useAuthContext } from "@/context/AuthContext";
 
 interface Location {
   _id: string;
@@ -29,6 +30,7 @@ interface Location {
 export function LocationSelector() {
   const { t } = useTranslation();
   const { locationId, setLocationId } = useDashboardDate();
+  const { user } = useAuthContext();
   const [open, setOpen] = useState(false);
   const [locations, setLocations] = useState<Location[]>([]);
   const [loading, setLoading] = useState(true);
@@ -36,7 +38,15 @@ export function LocationSelector() {
   useEffect(() => {
     const fetchLocations = async () => {
       try {
-        const data = await callApi("/api/locations", "GET");
+        if (!user?.businessId) {
+          setLocations([]);
+          return;
+        }
+
+        const data = await callApi(
+          `/api/locations?businessId=${user.businessId}`,
+          "GET",
+        );
         setLocations(data || []);
       } catch (err) {
         console.error("Failed to fetch locations", err);
@@ -45,7 +55,7 @@ export function LocationSelector() {
       }
     };
     fetchLocations();
-  }, []);
+  }, [user?.businessId]);
 
   const selectedLocation = locations.find((loc) => loc._id === locationId);
 
@@ -68,7 +78,10 @@ export function LocationSelector() {
           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-[200px] p-0 shadow-xl border-slate-200 dark:border-slate-800" align="start">
+      <PopoverContent
+        className="w-[200px] p-0 shadow-xl border-slate-200 dark:border-slate-800"
+        align="start"
+      >
         <Command className="dark:bg-slate-950">
           <CommandInput placeholder={t("Search location...")} className="h-9" />
           <CommandList>
@@ -85,7 +98,7 @@ export function LocationSelector() {
                 <Check
                   className={cn(
                     "mr-2 h-4 w-4",
-                    locationId === null ? "opacity-100" : "opacity-0"
+                    locationId === null ? "opacity-100" : "opacity-0",
                   )}
                 />
                 {t("All Locations")}
@@ -103,7 +116,7 @@ export function LocationSelector() {
                   <Check
                     className={cn(
                       "mr-2 h-4 w-4",
-                      locationId === loc._id ? "opacity-100" : "opacity-0"
+                      locationId === loc._id ? "opacity-100" : "opacity-0",
                     )}
                   />
                   {loc.name}

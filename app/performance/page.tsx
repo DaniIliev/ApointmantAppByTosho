@@ -194,6 +194,7 @@ function PerformancePageContent() {
   );
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [isInitialLoad, setIsInitialLoad] = useState(true);
   const itemsRef = useRef<DashboardItem[]>([]);
   const layoutSaveTimer = useRef<NodeJS.Timeout | null>(null);
 
@@ -752,6 +753,7 @@ function PerformancePageContent() {
         }),
       );
       setItems(hydrated);
+      setIsInitialLoad(false);
     } catch (err) {
       console.error("Failed to load dashboard", err);
       setError("Failed to load dashboard");
@@ -896,7 +898,13 @@ function PerformancePageContent() {
 
       layoutSaveTimer.current = setTimeout(async () => {
         try {
-          await callApi("/api/dashboard/layout", "PUT", { device, layout });
+          await callApi(
+            "/api/dashboard/layout",
+            "PUT",
+            { device, layout },
+            false,
+            false,
+          );
         } catch (err) {
           console.error("Failed to save layout", err);
           setError("Failed to save layout");
@@ -1012,7 +1020,7 @@ function PerformancePageContent() {
         </div>
         {/* Dashboard Grid Section */}
         <div className="flex-1 overflow-auto">
-          {isLoading && (
+          {isLoading && isInitialLoad && (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 p-4">
               <Skeleton className="h-32 w-full rounded-xl" />
               <Skeleton className="h-32 w-full rounded-xl" />

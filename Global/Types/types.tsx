@@ -36,8 +36,15 @@ export interface Appointment {
   notes?: string;
   staff: {
     _id: string;
-    name: string;
+    firstName: string;
+    lastName: string;
   };
+  location?: {
+    _id: string;
+    name: string;
+    address: string;
+  };
+  businessName?: string; // Added for easier access in cancellation page
   paymentStatus?:
     | "not_required"
     | "pending"

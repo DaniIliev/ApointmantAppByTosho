@@ -1,8 +1,12 @@
 import { SelectOption } from "@/Global/Types/types";
-import { Popover, PopoverTrigger } from "@radix-ui/react-popover";
 import React, { useState } from "react";
 import { Check, ChevronsUpDown } from "lucide-react";
-import { PopoverContent } from "../ui/popover";
+import {
+  Popover,
+  PopoverContent,
+  PopoverOverlay,
+  PopoverTrigger,
+} from "../ui/popover";
 import {
   Command,
   CommandEmpty,
@@ -70,7 +74,11 @@ export function MultiSelectCombobox<T extends SelectOption>({
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
-        <div className="relative group/labeled-input w-full cursor-pointer">
+        <button
+          type="button"
+          className="relative group/labeled-input w-full cursor-pointer text-left"
+          aria-expanded={open}
+        >
           {label && (
             <label
               className={labeledCn(
@@ -110,15 +118,27 @@ export function MultiSelectCombobox<T extends SelectOption>({
               open || isFocused || selectedIds.length > 0 ? "w-full" : "w-0",
             )}
           />
-        </div>
+        </button>
       </PopoverTrigger>
-      {/* Класът за ширина w-[var(--radix-popover-trigger-width)] е специфичен за shadcn/ui, 
-          тук го симулираме с w-full в нашия псевдо-PopoverContent */}
-      <PopoverContent className="w-full">
-        <Command>
-          <CommandInput placeholder={searchPlaceholder} />
+      {open && <PopoverOverlay onPointerDown={() => setOpen(false)} />}
+      <PopoverContent
+        align="start"
+        sideOffset={8}
+        className="z-[70] w-[var(--radix-popover-trigger-width)] min-w-[var(--radix-popover-trigger-width)] max-w-[calc(100vw-2rem)] p-0 overflow-hidden rounded-xl border border-border/60 shadow-2xl"
+        onEscapeKeyDown={() => setOpen(false)}
+        onInteractOutside={(event) => {
+          // Keep the overlay responsible for outside clicks so we don't click through.
+          event.preventDefault();
+          setOpen(false);
+        }}
+      >
+        <Command className="w-full">
+          <CommandInput
+            placeholder={searchPlaceholder}
+            className="text-text-primary h-11"
+          />
           <CommandEmpty>{emptyMessage}</CommandEmpty>
-          <CommandGroup>
+          <CommandGroup className="max-h-[280px] overflow-auto">
             {items.map((item) => {
               const label = getLabel(item);
               const isSelected = selectedIds.includes(item.id);

@@ -27,7 +27,7 @@ const CreateNewTypeMenu = ({ onOpenModal }: CreateNewDashboardMenuProps) => {
     <CustomTooltip
       onClick={onOpenModal}
       tooltipText={t("Add")}
-      icon={<Plus color="white"/>}
+      icon={<Plus color="white" />}
     />
   );
 };
@@ -131,7 +131,9 @@ function AppointmentTypesPageContent() {
           })) || [],
         paymentOption: (type as any).paymentOption || "cash",
         locationId: (type as any).locationId || null,
-        locationIds: (type as any).locationIds || ((type as any).locationId ? [(type as any).locationId] : []),
+        locationIds:
+          (type as any).locationIds ||
+          ((type as any).locationId ? [(type as any).locationId] : []),
         isGroup: type.isGroup || false,
         capacity: (type.capacity || 1).toString(),
       });

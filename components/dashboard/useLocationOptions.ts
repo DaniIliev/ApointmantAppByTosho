@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import callApi from "@/app/Api/callApi";
+import { useAuthContext } from "@/context/AuthContext";
 
 export type Location = {
   _id: string;
@@ -7,14 +8,24 @@ export type Location = {
 };
 
 export function useLocationOptions() {
+  const { user } = useAuthContext();
   const [locationOptions, setLocationOptions] = useState<Location[]>([]);
   const [loadingLocations, setLoadingLocations] = useState(false);
 
   useEffect(() => {
     const fetchLocations = async () => {
       try {
+        if (!user?.businessId) {
+          setLocationOptions([]);
+          return;
+        }
+
         setLoadingLocations(true);
-        const locations = await callApi("/api/locations", "GET");
+        // Filter locations by current business ID
+        const locations = await callApi(
+          `/api/locations?businessId=${user.businessId}`,
+          "GET",
+        );
         if (Array.isArray(locations)) {
           setLocationOptions(locations as Location[]);
         }
@@ -26,7 +37,7 @@ export function useLocationOptions() {
     };
 
     fetchLocations();
-  }, []);
+  }, [user?.businessId]);
 
   return { locationOptions, loadingLocations };
 }

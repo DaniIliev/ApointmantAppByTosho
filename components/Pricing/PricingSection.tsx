@@ -43,7 +43,7 @@ const PricingSection = () => {
   const { t } = useTranslation();
   const [loadingPlan, setLoadingPlan] = useState<string | null>(null);
   const [billingCycle, setBillingCycle] = useState<"monthly" | "annual">(
-    "monthly"
+    "monthly",
   ); // Ограничаваме възможните стойности
   const { setRemovePadding } = usePaddingControl();
 
@@ -78,7 +78,7 @@ const PricingSection = () => {
         const data = await callApi(
           "/api/stripe/checkout-session",
           "POST",
-          payload
+          payload,
         );
 
         if (data.url) {
@@ -92,12 +92,12 @@ const PricingSection = () => {
         setLoadingPlan(null); // Деактивира зареждащия индикатор
       }
     },
-    [user?.businessId]
+    [user?.businessId],
   );
 
   // Хелпер функция за рендиране на бутона (с TS типове)
   const renderPlanButton = (
-    checkoutPlanName: string
+    checkoutPlanName: string,
     // isPrimary: boolean = false
   ): ReactNode => {
     const isLoading = loadingPlan === checkoutPlanName;
@@ -128,7 +128,7 @@ const PricingSection = () => {
       {
         name: "Starter",
         monthlyPrice: 12,
-        annualPrice: 132, 
+        annualPrice: 132,
         description: t("Ideal for small and emerging businesses."),
         features: [
           t("1 Staff member"),
@@ -157,8 +157,8 @@ const PricingSection = () => {
       },
       {
         name: "Enterprise",
-        monthlyPrice: 99,
-        annualPrice: 990, // €20 * 11 месеца
+        monthlyPrice: 60,
+        annualPrice: 660, // €20 * 11 месеца
         description: t("For large organizations requiring scalability."),
         features: [
           t("Unlimited staff members"),
@@ -172,7 +172,7 @@ const PricingSection = () => {
         isPopular: false,
       },
     ],
-    [t]
+    [t],
   );
 
   const filteredPlans = useMemo(() => {
@@ -224,7 +224,7 @@ const PricingSection = () => {
               </h2>
               <p className="text-xl sm:text-lg text-text-primary text-balance max-w-3xl mx-auto pt-2">
                 {t(
-                  "Choose the perfect plan for your business. Annual plans give you 1 month free!"
+                  "Choose the perfect plan for your business. Annual plans give you 1 month free!",
                 )}
               </p>
             </ScrollReveal>
@@ -244,7 +244,9 @@ const PricingSection = () => {
                     <span className="text-xl font-bold">{staffCount}</span>
                   </div>
                   <div className="flex gap-1 items-center justify-center">
-                    <span className="text-sm opacity-70">{t("Locations: ")}</span>
+                    <span className="text-sm opacity-70">
+                      {t("Locations: ")}
+                    </span>
                     <span className="text-xl font-bold">{locationCount}</span>
                   </div>
                 </div>
@@ -292,7 +294,11 @@ const PricingSection = () => {
                 planData;
 
               return (
-                <ScrollReveal key={plan.name} delay={100 * (index + 1)} className="w-full max-w-[400px] lg:flex-1 lg:max-w-[380px]">
+                <ScrollReveal
+                  key={plan.name}
+                  delay={100 * (index + 1)}
+                  className="w-full max-w-[400px] lg:flex-1 lg:max-w-[380px]"
+                >
                   <Card
                     className={`h-full flex flex-col transition-all duration-300 hover:-translate-y-2 
                             ${
@@ -359,7 +365,7 @@ const PricingSection = () => {
           <div className="text-center mt-12 text-sm text-gray-500">
             <p className="mt-2 text-red-500 font-semibold">
               {t(
-                "IMPORTANT: The first time you will see a 50% discount on the Stripe Checkout page."
+                "IMPORTANT: The first time you will see a 50% discount on the Stripe Checkout page.",
               )}
             </p>
           </div>

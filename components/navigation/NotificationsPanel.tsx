@@ -250,6 +250,7 @@ export default function NotificationsPanel({
                   </p>
                   <div className="flex justify-end mt-2">
                     <CustomTooltip
+                      stopPropagation
                       onClick={() => {
                         handleDeleteNotification(alert._id);
                       }}
