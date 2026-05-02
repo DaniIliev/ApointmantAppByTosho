@@ -5,10 +5,12 @@ import { Button } from "@/components/ui/button";
 import { LabeledInput } from "@/components/customUIComponents/LabeledInput";
 import { useTranslation } from "react-i18next";
 import { ArrowLeft, ArrowRight, MapPin, Plus, Trash2 } from "lucide-react";
-import callApi from "@/app/Api/callApi";
 import { toast } from "sonner";
 import { Location } from "@/Global/Types/types";
-import { useMutation } from "@tanstack/react-query";
+import {
+  useCreateLocation,
+  useUpdateLocation,
+} from "@/hooks/queries/useLocation";
 
 interface LocationsSetupProps {
   onNext: (locations: Location[]) => void;
@@ -25,6 +27,8 @@ export default function LocationsSetup({
 }: LocationsSetupProps) {
   const { t } = useTranslation();
   const [submitted, setSubmitted] = useState(false);
+  const createLocationMutation = useCreateLocation({ showToast: false });
+  const updateLocationMutation = useUpdateLocation({ showToast: false });
 
   type LocationField =
     | "name"
@@ -134,10 +138,21 @@ export default function LocationsSetup({
     }
   };
 
-  const mutation = useMutation({
-    mutationFn: async (locationsToSave: Location[]) => {
-      return await Promise.all(
-        locationsToSave.map(async (loc) => {
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setSubmitted(true);
+
+    const errors = validateAllLocations(locations);
+    setValidationErrors(errors);
+
+    if (Object.keys(errors).length > 0) {
+      toast.error(t("Please fix location form errors"));
+      return;
+    }
+
+    try {
+      const savedLocations = await Promise.all(
+        locations.map(async (loc) => {
           const isNew = !loc._id;
 
           if (!isNew) {
@@ -156,41 +171,35 @@ export default function LocationsSetup({
                 loc.postalCode !== original.postalCode ||
                 loc.imageUrl instanceof File;
 
-              if (!hasChanged) return loc; // Return original if no changes
+              if (!hasChanged) return loc;
             }
           }
 
-          const method = isNew ? "POST" : "PUT";
-          const endpoint = isNew
-            ? "/api/locations"
-            : `/api/locations/${loc._id}`;
-          const useMultipart = (loc.imageUrl as any) instanceof File;
+          if (isNew) {
+            return await createLocationMutation.mutateAsync({
+              location: loc,
+              showToast: false,
+            });
+          }
 
-          return callApi(endpoint, method, loc, useMultipart);
+          return await updateLocationMutation.mutateAsync({
+            locationId: loc._id!,
+            location: loc,
+            showToast: false,
+          });
         }),
       );
-    },
-    onSuccess: (savedLocations) => {
+
+      toast.success(t("All locations were saved successfully."));
       onNext(savedLocations);
-    },
-    onError: (error) => {
+    } catch (error: any) {
+      const message = error?.errorCode
+        ? t(`api_errors.${error.errorCode}`)
+        : error?.message || t("Failed to save locations");
+
+      toast.error(message);
       console.error("Failed to save locations:", error);
-    },
-  });
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setSubmitted(true);
-
-    const errors = validateAllLocations(locations);
-    setValidationErrors(errors);
-
-    if (Object.keys(errors).length > 0) {
-      toast.error(t("Please fix location form errors"));
-      return;
     }
-
-    mutation.mutate(locations);
   };
 
   return (
@@ -347,8 +356,18 @@ export default function LocationsSetup({
           >
             {t("Back")}
           </Button>
-          <Button type="submit" disabled={mutation.isPending} iconType="next">
-            {mutation.isPending ? t("Saving...") : t("Next Step")}
+          <Button
+            type="submit"
+            disabled={
+              createLocationMutation.isPending ||
+              updateLocationMutation.isPending
+            }
+            iconType="next"
+          >
+            {createLocationMutation.isPending ||
+            updateLocationMutation.isPending
+              ? t("Saving...")
+              : t("Next Step")}
           </Button>
         </div>
       </form>

@@ -28,7 +28,7 @@ export default function BusinessInfoStep({
   initialData,
 }: BusinessInfoStepProps) {
   const { t } = useTranslation();
-  const { refreshToken, user } = useAuthContext();
+  const { refreshToken } = useAuthContext();
   const BUSINESS_CATEGORIES = getBusinessCategories(t);
   const [formData, setFormData] = useState({
     businessName: initialData?.businessName || "",

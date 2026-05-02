@@ -1,12 +1,11 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Plus, MapPin, Phone, Clock, Pencil, Trash2 } from "lucide-react";
+import { Plus, MapPin } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { usePageTitle } from "@/context/PageTitleContext";
 import { useRightNav } from "@/context/RightNavContext";
 import { useAuthContext } from "@/context/AuthContext";
-import callApi from "@/app/Api/callApi";
 import { canAddLocation, getPlanFromName } from "@/lib/permissions";
 import { UpgradeModal } from "@/components/customUIComponents/UpgradeModal";
 import { Button } from "@/components/ui/button";
@@ -21,6 +20,15 @@ import { useRouter } from "next/navigation";
 import { LocationCard } from "@/components/business/LocationCard";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Location } from "@/Global/Types/types";
+import { LocationDto } from "@/app/schedule/types";
+import {
+  useCreateLocation,
+  useDeleteLocation,
+  useGetLocations,
+  useUpdateLocation,
+} from "@/hooks/queries/useLocation";
+
+type BusinessLocation = LocationDto & Partial<Location>;
 
 const AddLocationNav = ({ onOpenModal }: { onOpenModal: () => void }) => {
   const { t } = useTranslation();
@@ -28,7 +36,7 @@ const AddLocationNav = ({ onOpenModal }: { onOpenModal: () => void }) => {
     <CustomTooltip
       onClick={onOpenModal}
       tooltipText={t("Add Location")}
-      icon={<Plus color="white"/>}
+      icon={<Plus color="white" />}
     />
   );
 };
@@ -38,16 +46,19 @@ function LocationsPageContent() {
   const { setPageTitle } = usePageTitle();
   const { setExtraRightNavMenu, setIsRightNavVisible } = useRightNav();
   const { user } = useAuthContext();
+  const { data: locationDtos = [], isLoading: isInitialLoading } =
+    useGetLocations(user?.businessId);
+  const locations = locationDtos as BusinessLocation[];
+  const createLocationMutation = useCreateLocation({ showToast: false });
+  const updateLocationMutation = useUpdateLocation({ showToast: false });
+  const deleteLocationMutation = useDeleteLocation({ showToast: false });
 
-  const [locations, setLocations] = useState<Location[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [editingLocation, setEditingLocation] = useState<Location | null>(null);
+  const [editingLocation, setEditingLocation] =
+    useState<BusinessLocation | null>(null);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
-  const [locationToDelete, setLocationToDelete] = useState<Location | null>(
-    null,
-  );
-  const [isLoading, setIsLoading] = useState(false);
-  const [isInitialLoading, setIsInitialLoading] = useState(true);
+  const [locationToDelete, setLocationToDelete] =
+    useState<BusinessLocation | null>(null);
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
   const router = useRouter();
 
@@ -122,27 +133,10 @@ function LocationsPageContent() {
     return Object.keys(errors).length === 0;
   };
 
-  const fetchLocations = async (isInitial = false) => {
-    if (!user?.businessId) return;
-    if (isInitial) setIsInitialLoading(true);
-    try {
-      const data = await callApi(
-        `/api/locations?businessId=${user.businessId}`,
-        "GET",
-      );
-      setLocations(data);
-    } catch (error) {
-      console.error("Failed to fetch locations:", error);
-    } finally {
-      if (isInitial) setIsInitialLoading(false);
-    }
-  };
-
   useEffect(() => {
     setPageTitle(t("Manage Locations"));
     setExtraRightNavMenu(<AddLocationNav onOpenModal={() => openModal()} />);
     setIsRightNavVisible(true);
-    fetchLocations(true);
 
     return () => {
       setPageTitle(null);
@@ -151,7 +145,7 @@ function LocationsPageContent() {
     };
   }, [setPageTitle, t, user?.businessId]);
 
-  const openModal = (location?: Location) => {
+  const openModal = (location?: BusinessLocation) => {
     if (!location) {
       const userPlan = getPlanFromName(user?.subscriptionPlan || user?.plan);
       if (!canAddLocation(locations.length, userPlan)) {
@@ -162,13 +156,13 @@ function LocationsPageContent() {
     if (location) {
       setEditingLocation(location);
       setFormData({
-        name: location.name,
-        address: location.address,
+        name: location.name || "",
+        address: location.address || "",
         addressLine2: location.addressLine2 || "",
         postalCode: location.postalCode || "",
-        city: location.city,
+        city: location.city || "",
         country: location.country || "България",
-        phone: location.phone,
+        phone: location.phone || "",
         imageUrl: location.imageUrl || "",
         email: location.email || "",
         website: location.website || "",
@@ -202,26 +196,39 @@ function LocationsPageContent() {
       return;
     }
 
-    setIsLoading(true);
-    const method = editingLocation ? "PUT" : "POST";
-    const endpoint = editingLocation
-      ? `/api/locations/${editingLocation._id}`
-      : "/api/locations";
-
     try {
-      const isFile = formData.imageUrl instanceof File;
       const payload = { ...formData, businessId: user?.businessId };
-      await callApi(endpoint, method, payload, isFile);
-      fetchLocations();
+
+      if (editingLocation?._id) {
+        await updateLocationMutation.mutateAsync({
+          locationId: editingLocation._id,
+          location: payload,
+          showToast: false,
+        });
+      } else {
+        await createLocationMutation.mutateAsync({
+          location: payload,
+          showToast: false,
+        });
+      }
+
+      toast.success(
+        editingLocation
+          ? t("Location updated successfully")
+          : t("Location created successfully"),
+      );
       setIsModalOpen(false);
-    } catch (error) {
+    } catch (error: any) {
+      const message = error?.errorCode
+        ? t(`api_errors.${error.errorCode}`)
+        : error?.message || t("Failed to save location");
+
+      toast.error(message);
       console.error("Failed to save location:", error);
-    } finally {
-      setIsLoading(false);
     }
   };
 
-  const handleDelete = (location: Location) => {
+  const handleDelete = (location: BusinessLocation) => {
     setLocationToDelete(location);
     setIsDeleteDialogOpen(true);
   };
@@ -229,9 +236,17 @@ function LocationsPageContent() {
   const confirmDelete = async () => {
     if (!locationToDelete) return;
     try {
-      await callApi(`/api/locations/${locationToDelete._id}`, "DELETE");
-      fetchLocations();
-    } catch (error) {
+      await deleteLocationMutation.mutateAsync({
+        locationId: locationToDelete._id!,
+        showToast: false,
+      });
+      toast.success(t("Location deleted successfully"));
+    } catch (error: any) {
+      const message = error?.errorCode
+        ? t(`api_errors.${error.errorCode}`)
+        : error?.message || t("Failed to delete location");
+
+      toast.error(message);
       console.error("Failed to delete location:", error);
     } finally {
       setIsDeleteDialogOpen(false);
@@ -383,13 +398,26 @@ function LocationsPageContent() {
             <Button
               variant="outline"
               onClick={() => setIsModalOpen(false)}
-              disabled={isLoading}
+              disabled={
+                createLocationMutation.isPending ||
+                updateLocationMutation.isPending
+              }
               iconType="cancel"
             >
               {t("Cancel")}
             </Button>
-            <Button type="submit" disabled={isLoading} iconType="save">
-              {isLoading ? t("Saving...") : t("Save")}
+            <Button
+              type="submit"
+              disabled={
+                createLocationMutation.isPending ||
+                updateLocationMutation.isPending
+              }
+              iconType="save"
+            >
+              {createLocationMutation.isPending ||
+              updateLocationMutation.isPending
+                ? t("Saving...")
+                : t("Save")}
             </Button>
           </div>
         </form>

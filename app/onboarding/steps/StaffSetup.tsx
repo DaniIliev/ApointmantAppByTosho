@@ -4,12 +4,12 @@ import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { LabeledInput } from "@/components/customUIComponents/LabeledInput";
 import { useTranslation } from "react-i18next";
-import {  UserPlus, Trash2 } from "lucide-react";
-import callApi from "@/app/Api/callApi";
+import { UserPlus, Trash2 } from "lucide-react";
 import { LabeledSelect } from "@/components/customUIComponents/LabeledSelect";
 import { Location } from "@/Global/Types/types";
-import { useMutation } from "@tanstack/react-query";
 import { toast } from "sonner";
+import { MultiSelectCombobox } from "@/components/customUIComponents/MultiSelectCombobox";
+import { useCreateStaff, useUpdateStaff } from "@/hooks/queries/useStaff";
 
 export type StaffRole = "manager" | "staff" | "business";
 
@@ -21,7 +21,6 @@ export interface Staff {
   role: StaffRole;
   locationIds: string[];
 }
-import { MultiSelectCombobox } from "@/components/customUIComponents/MultiSelectCombobox";
 
 interface StaffSetupProps {
   locations: Location[];
@@ -57,7 +56,11 @@ export default function StaffSetup({
     ];
   };
 
-  const [staff, setStaff] = useState<Staff[]>(() => getInitialStaff(initialData));
+  const [staff, setStaff] = useState<Staff[]>(() =>
+    getInitialStaff(initialData),
+  );
+  const createStaffMutation = useCreateStaff({ showToast: false });
+  const updateStaffMutation = useUpdateStaff();
 
   const knownStaffRef = React.useRef<{
     invitedLocations: Record<string, string[]>;
@@ -108,14 +111,44 @@ export default function StaffSetup({
     setStaff(newStaff);
   };
 
-  const mutation = useMutation({
-    mutationFn: async () => {
-      // Group staff by normalized email to avoid duplicate parallel requests for the same person
+  const normalizeEmail = (value: string) => value.trim().toLowerCase();
+
+  const hasStaffChanged = (current: Staff, original?: Staff) => {
+    if (!original) return true;
+
+    const currentEmail = normalizeEmail(current.email);
+    const originalEmail = normalizeEmail(original.email);
+
+    if (
+      current.firstName !== original.firstName ||
+      current.lastName !== original.lastName ||
+      currentEmail !== originalEmail ||
+      current.role !== original.role
+    ) {
+      return true;
+    }
+
+    const currentLocations = [...current.locationIds].sort();
+    const originalLocations = [...original.locationIds].sort();
+
+    if (currentLocations.length !== originalLocations.length) return true;
+
+    return currentLocations.some(
+      (locationId, index) => locationId !== originalLocations[index],
+    );
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    try {
       const staffMap = new Map<string, Staff>();
 
       staff.forEach((s) => {
         if (!s.email) return;
-        const normalizedEmail = s.email.trim().toLowerCase();
+
+        const normalizedEmail = normalizeEmail(s.email);
+
         if (staffMap.has(normalizedEmail)) {
           const existing = staffMap.get(normalizedEmail)!;
           s.locationIds.forEach((locId) => {
@@ -134,85 +167,146 @@ export default function StaffSetup({
       const errors: string[] = [];
       const newInvitedLocs = { ...knownStaffRef.current.invitedLocations };
       const newStaffIds = { ...knownStaffRef.current.staffIds };
-      const invitedStaffMap = new Map<string, any>();
+      const originalByEmail = new Map(
+        (initialData || [])
+          .filter((staffMember) => staffMember.email)
+          .map(
+            (staffMember) =>
+              [normalizeEmail(staffMember.email), staffMember] as const,
+          ),
+      );
+      const finalStaffMap = new Map<string, Staff>();
 
       for (const s of Array.from(staffMap.values())) {
-        const emailLower = s.email.toLowerCase();
+        const emailLower = normalizeEmail(s.email);
         const originalLocIds = newInvitedLocs[emailLower] || [];
-
-        // Identify new locations that need an invite/assignment call
-        const newLocIds = s.locationIds.filter(
+        const originalStaff = originalByEmail.get(emailLower);
+        const currentLocIds = s.locationIds.map((locId) => locId.toString());
+        const newLocIds = currentLocIds.filter(
           (locId) => !originalLocIds.includes(locId.toString()),
         );
+        const shouldUpdateExisting =
+          Boolean(s._id) && hasStaffChanged(s, originalStaff);
+        const shouldCreate = !s._id;
 
-        let lastResStaff = null;
-
-        if (newLocIds.length > 0) {
+        if (shouldCreate) {
           try {
-            const res = await callApi("/api/staff/invite", "POST", {
-              ...s,
-              locationIds: newLocIds,
+            const res = await createStaffMutation.mutateAsync({
+              staffData: {
+                ...s,
+                locationIds: currentLocIds,
+              },
+              showToast: false,
             });
-            if (res.staff) {
-              lastResStaff = res.staff;
-              newInvitedLocs[emailLower] = [...originalLocIds, ...newLocIds];
-              newStaffIds[emailLower] = res.staff._id;
+
+            const createdStaff = res?.staff || res;
+            if (createdStaff?._id) {
+              newStaffIds[emailLower] = createdStaff._id;
             }
+
+            newInvitedLocs[emailLower] = [...originalLocIds, ...currentLocIds];
           } catch (err: any) {
             if (
-              err.errorCode === "OWNER_ALREADY_ADDED" ||
-              err.errorCode === "STAFF_ALREADY_ADDED"
+              err?.errorCode === "OWNER_ALREADY_ADDED" ||
+              err?.errorCode === "STAFF_ALREADY_ADDED"
             ) {
-              // Treat as success
+              newInvitedLocs[emailLower] = [
+                ...originalLocIds,
+                ...currentLocIds,
+              ];
+            } else {
+              const errorText = err?.errorCode
+                ? t(`api_errors.${err.errorCode}`)
+                : err?.message || t("Failed to invite staff members");
+              errors.push(`${s.email}: ${errorText}`);
+            }
+          }
+        } else if (shouldUpdateExisting) {
+          try {
+            await updateStaffMutation.mutateAsync({
+              id: s._id!,
+              data: {
+                firstName: s.firstName,
+                lastName: s.lastName,
+                email: s.email,
+                role: s.role,
+                locationIds: currentLocIds,
+              },
+              showToast: false,
+            });
+
+            newStaffIds[emailLower] = s._id!;
+            newInvitedLocs[emailLower] = currentLocIds;
+          } catch (err: any) {
+            const errorText = err?.errorCode
+              ? t(`api_errors.${err.errorCode}`)
+              : err?.message || t("Failed to update staff member");
+            errors.push(`${s.email}: ${errorText}`);
+          }
+        } else if (newLocIds.length > 0) {
+          try {
+            const res = await createStaffMutation.mutateAsync({
+              staffData: {
+                ...s,
+                locationIds: newLocIds,
+              },
+              showToast: false,
+            });
+
+            const createdStaff = res?.staff || res;
+            if (createdStaff?._id) {
+              newStaffIds[emailLower] = createdStaff._id;
+            }
+
+            newInvitedLocs[emailLower] = [...originalLocIds, ...newLocIds];
+          } catch (err: any) {
+            if (
+              err?.errorCode === "OWNER_ALREADY_ADDED" ||
+              err?.errorCode === "STAFF_ALREADY_ADDED"
+            ) {
               newInvitedLocs[emailLower] = [...originalLocIds, ...newLocIds];
             } else {
-              const errorText = err.errorCode 
-                ? t(`api_errors.${err.errorCode}`) 
-                : (err.message || t("Failed to invite staff members"));
+              const errorText = err?.errorCode
+                ? t(`api_errors.${err.errorCode}`)
+                : err?.message || t("Failed to invite staff members");
               errors.push(`${s.email}: ${errorText}`);
             }
           }
         }
 
-        invitedStaffMap.set(emailLower, lastResStaff || { 
-          ...s, 
-          _id: newStaffIds[emailLower], 
-          locationIds: newInvitedLocs[emailLower] || [] 
+        finalStaffMap.set(emailLower, {
+          ...s,
+          _id: newStaffIds[emailLower] || s._id,
+          locationIds: newInvitedLocs[emailLower] || currentLocIds,
         });
       }
 
-      // Update the ref immediately so subsequent retries have the latest state
-      knownStaffRef.current = { invitedLocations: newInvitedLocs, staffIds: newStaffIds };
+      knownStaffRef.current = {
+        invitedLocations: newInvitedLocs,
+        staffIds: newStaffIds,
+      };
 
-      // Update the original staff array with IDs
-      const finalStaff = staff.map((s) => {
-        const emailLower = s.email.toLowerCase();
-        const invited = invitedStaffMap.get(emailLower);
-        return {
-          ...s,
-          _id: newStaffIds[emailLower] || s._id,
-          locationIds: newInvitedLocs[emailLower] || s.locationIds,
-        };
-      });
+      const finalStaff = staff.map(
+        (s) => finalStaffMap.get(s.email.trim().toLowerCase()) || s,
+      );
 
       if (errors.length > 0) {
-        // Collect errors to throw them so onError is triggered
-        throw new Error(errors.join("\n"));
+        toast.error(t("Some team members could not be created."), {
+          description: errors.join("\n"),
+        });
+        return;
       }
 
-      return finalStaff;
-    },
-    onSuccess: (finalStaff) => {
+      toast.success(t("All team members were created successfully."));
       onNext(finalStaff);
-    },
-    onError: (error: any) => {
-      console.error("Failed to invite staff:", error);
-    },
-  });
+    } catch (error: any) {
+      const message = error?.errorCode
+        ? t(`api_errors.${error.errorCode}`)
+        : error?.message || t("Failed to invite staff members");
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    mutation.mutate();
+      toast.error(message);
+      console.error("Failed to invite staff:", error);
+    }
   };
 
   return (
@@ -344,8 +438,12 @@ export default function StaffSetup({
           >
             {t("Back")}
           </Button>
-          <Button type="submit" disabled={mutation.isPending} iconType="next">
-            {mutation.isPending ? t("Sending...") : t("Next Step")}
+          <Button
+            type="submit"
+            disabled={createStaffMutation.isPending}
+            iconType="next"
+          >
+            {createStaffMutation.isPending ? t("Sending...") : t("Next Step")}
           </Button>
         </div>
       </form>

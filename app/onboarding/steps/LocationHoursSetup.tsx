@@ -2,11 +2,8 @@
 
 import React, { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { Clock, Pencil, Plus } from "lucide-react";
+import { Clock } from "lucide-react";
 import { toast } from "sonner";
-import { useMutation } from "@tanstack/react-query";
-
-import callApi from "@/app/Api/callApi";
 import { LocationHoursModal } from "@/components/location/LocationHoursModal";
 import { LocationHeroCard } from "@/app/schedule/components/LocationHeroCard";
 import { Button } from "@/components/ui/button";
@@ -17,6 +14,7 @@ import {
   Staff,
   TimeRange,
 } from "@/Global/Types/types";
+import { useUpdateLocationWeeklyHours } from "@/hooks/queries/useLocation";
 
 const dayKeys = [
   "monday",
@@ -90,7 +88,12 @@ export default function LocationHoursSetup({
   const { t } = useTranslation();
   const [hours, setHours] = useState<LocationsOpeningHours>({});
   const [isEditorOpen, setIsEditorOpen] = useState(false);
-  const [editingLocationId, setEditingLocationId] = useState<string | null>(null);
+  const [editingLocationId, setEditingLocationId] = useState<string | null>(
+    null,
+  );
+  const updateLocationHoursMutation = useUpdateLocationWeeklyHours({
+    showToast: false,
+  });
 
   useEffect(() => {
     if (!locations.length) return;
@@ -142,31 +145,49 @@ export default function LocationHoursSetup({
     ? Boolean(initialData?.[editingLocationId])
     : false;
 
-  const mutation = useMutation({
-    mutationFn: async () => {
+  const handleSubmit = async (event: React.FormEvent) => {
+    event.preventDefault();
+
+    try {
+      const errors: string[] = [];
+      const savedHours = { ...hours };
+
       await Promise.all(
         locations.map(async (location, index) => {
           const locationId = String(location._id || index);
           const locationHours = hours[locationId];
+
           if (!location._id || !locationHours) return;
 
-          await callApi(`/api/locations/${location._id}/weekly-hours`, "PUT", {
-            weeklyWorkingHours: toWeeklyWorkingHoursPayload(locationHours),
-          });
+          try {
+            await updateLocationHoursMutation.mutateAsync({
+              locationId: location._id,
+              weeklyWorkingHours: toWeeklyWorkingHoursPayload(locationHours),
+              showToast: false,
+            });
+          } catch (error: any) {
+            const message = error?.errorCode
+              ? t(`api_errors.${error.errorCode}`)
+              : error?.message || t("Failed to save location working hours.");
+
+            errors.push(`${location.name}: ${message}`);
+          }
         }),
       );
-    },
-    onSuccess: () => {
-      onNext(hours);
-    },
-    onError: (error) => {
-      console.error("Failed to save location working hours:", error);
-    },
-  });
 
-  const handleSubmit = async (event: React.FormEvent) => {
-    event.preventDefault();
-    mutation.mutate();
+      if (errors.length > 0) {
+        toast.error(t("Some location hours could not be saved."), {
+          description: errors.join("\n"),
+        });
+        return;
+      }
+
+      toast.success(t("All location hours were saved successfully."));
+      onNext(savedHours);
+    } catch (error) {
+      console.error("Failed to save location working hours:", error);
+      toast.error(t("Failed to save location working hours."));
+    }
   };
 
   if (locations.length === 0) {
@@ -240,8 +261,12 @@ export default function LocationHoursSetup({
           >
             {t("Back")}
           </Button>
-          <Button type="submit" disabled={mutation.isPending} iconType="save">
-            {mutation.isPending ? t("Saving...") : t("Save")}
+          <Button
+            type="submit"
+            disabled={updateLocationHoursMutation.isPending}
+            iconType="save"
+          >
+            {updateLocationHoursMutation.isPending ? t("Saving...") : t("Save")}
           </Button>
         </div>
       </form>
@@ -254,7 +279,9 @@ export default function LocationHoursSetup({
             else setIsEditorOpen(true);
           }}
           locationName={selectedLocation.name}
-          initialHours={(hours[editingLocationId!] ?? createDefaultLocationHours()) as any}
+          initialHours={
+            (hours[editingLocationId!] ?? createDefaultLocationHours()) as any
+          }
           isEditMode={selectedLocationHasSavedConfig}
           onSave={handleSaveHours}
         />
