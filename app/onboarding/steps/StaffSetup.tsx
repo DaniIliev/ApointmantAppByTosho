@@ -18,6 +18,7 @@ export interface Staff {
   firstName: string;
   lastName: string;
   email: string;
+  phone: string;
   role: StaffRole;
   locationIds: string[];
 }
@@ -50,6 +51,7 @@ export default function StaffSetup({
         firstName: "",
         lastName: "",
         email: "",
+        phone: "",
         role: "staff",
         locationIds: [locations[0]?._id || ""],
       },
@@ -93,6 +95,7 @@ export default function StaffSetup({
         firstName: "",
         lastName: "",
         email: "",
+        phone: "",
         role: "staff",
         locationIds: [locations[0]?._id || ""],
       },
@@ -229,6 +232,7 @@ export default function StaffSetup({
                 firstName: s.firstName,
                 lastName: s.lastName,
                 email: s.email,
+                phone: s.phone,
                 role: s.role,
                 locationIds: currentLocIds,
               },
@@ -368,19 +372,24 @@ export default function StaffSetup({
                   placeholder={t("Last name")}
                   required
                 />
-                <div className="md:col-span-2">
-                  <LabeledInput
-                    id={`email-${index}`}
-                    label={t("Email Address")}
-                    type="email"
-                    value={s.email}
-                    onChange={(e) =>
-                      updateStaff(index, "email", e.target.value)
-                    }
-                    placeholder={t("staff@example.com")}
-                    required
-                  />
-                </div>
+                <LabeledInput
+                  id={`email-${index}`}
+                  label={t("Email Address")}
+                  type="email"
+                  value={s.email}
+                  onChange={(e) => updateStaff(index, "email", e.target.value)}
+                  placeholder={t("staff@example.com")}
+                  required
+                />
+                <LabeledInput
+                  id={`phone-${index}`}
+                  label={t("Phone Number")}
+                  type="phone"
+                  value={s.phone}
+                  onChange={(e) => updateStaff(index, "phone", e.target.value)}
+                  placeholder={t("+359 888 123 456")}
+                  required
+                />
                 <LabeledSelect
                   id={`role-${index}`}
                   label={t("Role")}

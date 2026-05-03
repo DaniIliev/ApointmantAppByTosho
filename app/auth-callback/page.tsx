@@ -6,6 +6,7 @@ import { useAuthContext } from "@/context/AuthContext";
 import { toast } from "sonner";
 import { jwtDecode } from "jwt-decode";
 import { findUserByID } from "@/app/Api/services/userService";
+import { useTranslation } from "react-i18next";
 
 interface DecodedToken {
   id: string;
@@ -17,55 +18,54 @@ function AuthCallbackPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { setUser } = useAuthContext();
-  const hasProcessed = useRef(false);
+  const { t } = useTranslation();
 
   useEffect(() => {
-    if (hasProcessed.current) return;
-
     const token = searchParams.get("token");
 
-    if (token) {
-      hasProcessed.current = true;
-      localStorage.setItem("token", token);
+    // Prevent duplicate processing using sessionStorage (survives React Strict Mode re-mounts)
+    const cacheKey = `auth_processed_${token}`;
+    if (!token || sessionStorage.getItem(cacheKey)) return;
+
+    sessionStorage.setItem(cacheKey, "true");
+    localStorage.setItem("token", token);
+
+    (async () => {
       try {
         const decodedToken = jwtDecode<DecodedToken>(token);
         const userId = decodedToken._id || decodedToken.id;
 
         if (userId) {
-          findUserByID(userId)
-            .then((fullUser) => {
-              setUser(fullUser);
-              toast.success("Successfully logged in!");
+          try {
+            const fullUser = await findUserByID(userId);
+            setUser(fullUser);
+            toast.success(t("Successfully logged in"));
 
-              // Check if user needs onboarding
-              if (
-                !fullUser.role ||
-                fullUser.role === "guest" ||
-                fullUser.role === "none"
-              ) {
-                router.push("/onboarding");
-              } else {
-                router.push("/dashboard");
-              }
-            })
-            .catch((error) => {
-              console.error("Error fetching full user data:", error);
-              toast.error("Authentication failed. Please try again.");
-              router.push("/login");
-            });
+            // Check if user needs onboarding
+            if (
+              !fullUser.role ||
+              fullUser.role === "guest" ||
+              fullUser.role === "none"
+            ) {
+              router.push("/onboarding");
+            } else {
+              router.push("/dashboard");
+            }
+          } catch (error) {
+            console.error("Error fetching full user data:", error);
+            toast.error(t("Failed to retrieve user data"));
+            router.push("/login");
+          }
         } else {
-          toast.error("Authentication failed. Invalid token.");
+          toast.error(t("auth.invalidToken"));
           router.push("/login");
         }
       } catch (error) {
         console.error("Error decoding token:", error);
-        toast.error("Authentication failed. Please try again.");
+        toast.error(t("Sign-in failed. Invalid token received."));
         router.push("/login");
       }
-    } else {
-      toast.error("Authentication failed. Missing data.");
-      router.push("/login");
-    }
+    })();
   }, [router, searchParams, setUser]);
 
   return null;

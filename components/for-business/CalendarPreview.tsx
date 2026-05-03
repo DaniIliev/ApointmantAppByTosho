@@ -16,12 +16,7 @@ import {
   getWeekDates,
   monthNames,
 } from "@/Global/Utils/commonFn";
-import { Badge } from "@/components/ui/badge";
-import { Modal } from "@/components/customUIComponents/Modal";
-import {
-  getStatusProps,
-  StatusChip,
-} from "@/components/customUIComponents/StatusChip";
+import { getStatusProps } from "@/components/customUIComponents/StatusChip";
 
 interface AppointmentPreview {
   id: string;
@@ -338,126 +333,6 @@ export function CalendarPreview() {
           <span className="text-muted-foreground">{t("Completed")}</span>
         </div>
       </div>
-
-      {/* Appointment Details Modal */}
-      <Modal
-        label={t("Appointment Details")}
-        open={Boolean(selectedAppointment)}
-        onOpenChange={(nextOpen) => {
-          if (!nextOpen) setSelectedAppointment(null);
-        }}
-        width="md"
-        confirmClose={false}
-      >
-        {selectedAppointment && (
-          <div className="space-y-6 px-1 md:px-0">
-            {/* Client Name and Status */}
-            <div className="flex items-center justify-between gap-3">
-              <h3 className="text-xl font-bold">
-                {selectedAppointment.clientName}
-              </h3>
-              <Badge
-                className={`${getStatusMeta(selectedAppointment.status).className} px-3 py-1 rounded-full font-semibold border`}
-              >
-                <span className="flex items-center gap-1">
-                  <span className="shrink-0 [&>svg]:h-4 [&>svg]:w-4">
-                    {getStatusMeta(selectedAppointment.status).icon}
-                  </span>
-                  <span>
-                    {t(
-                      selectedAppointment.status.charAt(0).toUpperCase() +
-                        selectedAppointment.status.slice(1),
-                    )}
-                  </span>
-                </span>
-              </Badge>
-            </div>
-
-            {/* Contact Information */}
-            <div className="space-y-3">
-              <div className="flex items-center gap-3">
-                <Mail className="h-5 w-5 text-primary flex-shrink-0" />
-                <span className="text-sm">
-                  {selectedAppointment.clientEmail}
-                </span>
-              </div>
-              <div className="flex items-center gap-3">
-                <Phone className="h-5 w-5 text-primary flex-shrink-0" />
-                <span className="text-sm">
-                  {selectedAppointment.clientPhone}
-                </span>
-              </div>
-            </div>
-
-            {/* Service Information */}
-            <div className="space-y-3 border-t border-primary/10 pt-4">
-              <div>
-                <p className="text-sm text-muted-foreground mb-1">
-                  {t("Service")}
-                </p>
-                <p className="font-semibold text-lg">
-                  {selectedAppointment.serviceName}
-                </p>
-              </div>
-              <div>
-                <p className="text-sm text-muted-foreground mb-1">
-                  {t("Staff Member")}
-                </p>
-                <p className="font-semibold">{selectedAppointment.staffName}</p>
-              </div>
-            </div>
-
-            {/* Appointment Time */}
-            <div className="space-y-3 border-t border-primary/10 pt-4">
-              <div className="flex items-center gap-3">
-                <Clock className="h-5 w-5 text-primary flex-shrink-0" />
-                <div>
-                  <p className="text-sm text-muted-foreground">{t("Time")}</p>
-                  <p className="font-semibold">
-                    {selectedAppointment.time} - {selectedAppointment.endTime}
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            {/* Duration and Price */}
-            <div className="grid grid-cols-2 gap-3 border-t border-primary/10 pt-4">
-              <div className="flex items-center gap-2">
-                <Clock className="h-4 w-4 text-primary" />
-                <div>
-                  <p className="text-xs text-muted-foreground">
-                    {t("Duration")}
-                  </p>
-                  <p className="font-semibold text-sm">
-                    {selectedAppointment.duration} {t("min")}
-                  </p>
-                </div>
-              </div>
-              <div className="flex items-center gap-2">
-                <DollarSign className="h-4 w-4 text-primary" />
-                <div>
-                  <p className="text-xs text-muted-foreground">{t("Price")}</p>
-                  <p className="font-semibold text-sm">
-                    €{selectedAppointment.price.toFixed(2)}
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            {/* Notes */}
-            {selectedAppointment.notes && (
-              <div className="border-t border-primary/10 pt-4 space-y-2">
-                <p className="text-sm font-semibold text-primary">
-                  {t("Notes")}
-                </p>
-                <p className="text-sm text-muted-foreground bg-muted/50 p-3 rounded-lg">
-                  {selectedAppointment.notes}
-                </p>
-              </div>
-            )}
-          </div>
-        )}
-      </Modal>
     </div>
   );
 }

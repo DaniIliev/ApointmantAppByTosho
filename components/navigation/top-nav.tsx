@@ -46,7 +46,7 @@ export default function TopNav({
   const { t, i18n } = useTranslation();
   const { pageTitle } = usePageTitle();
   const { logout, user } = useAuthContext();
-  const { setPageTitle} = usePageTitle()
+  const { setPageTitle } = usePageTitle();
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [isHelpOpen, setIsHelpOpen] = useState(false);
   const [isAlertsOpen, setIsAlertsOpen] = useState(false);
@@ -65,7 +65,7 @@ export default function TopNav({
   useClickOutside(languagesRef, () => setIsLanguagesOpen(false));
 
   const handleSignOut = () => {
-    setPageTitle(null)
+    setPageTitle(null);
     logout();
     setIsProfileOpen(false);
   };
@@ -206,32 +206,28 @@ export default function TopNav({
   };
 
   useEffect(() => {
-    console.log("user", user);
     if (user && (user.role === "staff" || user.role === "business")) {
       const socket = io(
         process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080",
       );
 
       socket.on("connect", () => {
-        console.log("Connected to Socket.IO server:", socket.id);
         if (user && user._id) {
           socket.emit("joinRoom", user._id);
         }
       });
 
       socket.on("newAppointment", (newAlert) => {
-        console.log("Received new alert:", newAlert);
         const normalized = normalizeAlert(newAlert);
         if (!normalized) return;
         setAlerts((prevAlerts) => [normalized, ...prevAlerts]);
       });
 
       socket.on("disconnect", (reason) => {
-        console.log("Socket.IO disconnected:", reason);
+        console.log("Socket disconnected:", reason);
       });
 
       const fetchAlerts = async () => {
-        console.log("Fetching alerts from API...");
         try {
           const fetchedAlerts = await callApi("/api/alerts", "GET");
           if (Array.isArray(fetchedAlerts)) {
@@ -277,8 +273,12 @@ export default function TopNav({
           )}
           <h1 className="flex items-end gap-1 text-l font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
             <span className="theme-logo-mask" aria-hidden="true" />
-            <span className="sr-only" suppressHydrationWarning>{t("AppointDI")}</span>
-            <span className=" sm:inline" suppressHydrationWarning>{t("AppointDI ")}</span>
+            <span className="sr-only" suppressHydrationWarning>
+              {t("AppointDI")}
+            </span>
+            <span className=" sm:inline" suppressHydrationWarning>
+              {t("AppointDI ")}
+            </span>
           </h1>
         </div>
 
@@ -294,7 +294,10 @@ export default function TopNav({
           className={`hidden md:flex justify-center min-w-0 transition-transform duration-300 ${titleOffsetClass}`}
         >
           {pageTitle && (
-            <h2 className="text-xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent tracking-tight" suppressHydrationWarning>
+            <h2
+              className="text-xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent tracking-tight"
+              suppressHydrationWarning
+            >
               {t(pageTitle)}
             </h2>
           )}
@@ -319,7 +322,12 @@ export default function TopNav({
                 {hasUnreadAlerts && (
                   <span className="absolute top-0 right-0 h-2 w-2 bg-red-500 rounded-full animate-ping-once" />
                 )}
-                <span className="text-xs text-primary mt-1" suppressHydrationWarning>{t("Alerts")}</span>
+                <span
+                  className="text-xs text-primary mt-1"
+                  suppressHydrationWarning
+                >
+                  {t("Alerts")}
+                </span>
               </button>
               {isAlertsOpen && (
                 <NotificationsPanel
@@ -337,7 +345,10 @@ export default function TopNav({
                 className="flex flex-col items-center justify-center p-2 rounded-lg hover:bg-white/10 transition-colors duration-200"
               >
                 <Globe className="w-5 h-5 text-primary" />
-                <span className="text-xs text-primary mt-1" suppressHydrationWarning>
+                <span
+                  className="text-xs text-primary mt-1"
+                  suppressHydrationWarning
+                >
                   {t("Language")}
                 </span>
               </button>
@@ -392,7 +403,12 @@ export default function TopNav({
                 className="flex flex-col items-center justify-center p-2 rounded-lg hover:bg-white/10 transition-colors duration-200"
               >
                 <Info className="w-5 h-5 text-primary" />
-                <span className="text-xs text-primary mt-1" suppressHydrationWarning>{t("Help")}</span>
+                <span
+                  className="text-xs text-primary mt-1"
+                  suppressHydrationWarning
+                >
+                  {t("Help")}
+                </span>
               </Link>
             </div>
 
@@ -448,7 +464,10 @@ export default function TopNav({
                 className="flex flex-col items-center justify-center p-2 rounded-lg hover:bg-white/10 transition-colors duration-200"
               >
                 <Globe className="w-5 h-5 text-primary" />
-                <span className="text-xs text-primary mt-1" suppressHydrationWarning>
+                <span
+                  className="text-xs text-primary mt-1"
+                  suppressHydrationWarning
+                >
                   {t("Language")}
                 </span>
               </button>

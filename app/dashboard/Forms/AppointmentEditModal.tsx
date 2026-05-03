@@ -71,11 +71,11 @@ export const AppointmentEditModal: React.FC<AppointmentEditModalProps> = ({
     if (appointment && open) {
       // Find service ID by matching serviceName
       const serviceId = appointmentTypes?.find(
-        (s) => s.name === appointment.serviceName
+        (s) => s.name === appointment.serviceName,
       )?._id;
       console.log(
         "Setting form data for appointment:",
-        formatDateAndTime(appointment.appointmentTime.start, "time")
+        formatDateAndTime(appointment.appointmentTime.start, "time"),
       );
       setFormData({
         clientName: appointment.clientName,
@@ -95,7 +95,7 @@ export const AppointmentEditModal: React.FC<AppointmentEditModalProps> = ({
     const fetchStaff = async () => {
       if (formData.appointmentTypeId) {
         const selectedService = appointmentTypes?.find(
-          (type) => type._id === formData.appointmentTypeId
+          (type) => type._id === formData.appointmentTypeId,
         );
         if (selectedService && selectedService.staffMembers) {
           const staffDetails = await callApi(`/api/staff/by-ids`, "POST", {
@@ -113,25 +113,30 @@ export const AppointmentEditModal: React.FC<AppointmentEditModalProps> = ({
   // Fetch available slots when staff and date change
   useEffect(() => {
     const fetchSlots = async () => {
-      if (formData.staffId && formData.date && formData.appointmentTypeId && appointment) {
+      if (
+        formData.staffId &&
+        formData.date &&
+        formData.appointmentTypeId &&
+        appointment
+      ) {
         const slots = await callApi(
           `/api/appointment/availability?staffId=${formData.staffId}&date=${formData.date}&serviceId=${formData.appointmentTypeId}&locationId=${appointment.locationId?._id || appointment.locationId}`,
-          "GET"
+          "GET",
         );
 
         let finalSlots = slots.slots || [];
         if (appointment && formData.time) {
           const currentSlotExists = finalSlots.some(
-            (slot: SlotOption) => slot.startTime === formData.time
+            (slot: SlotOption) => slot.startTime === formData.time,
           );
 
           if (!currentSlotExists) {
             const service = appointmentTypes?.find(
-              (s) => s._id === formData.appointmentTypeId
+              (s) => s._id === formData.appointmentTypeId,
             );
             const endTime = moment(
               `${formData.date}T${formData.time}`,
-              "YYYY-MM-DDTHH:mm"
+              "YYYY-MM-DDTHH:mm",
             )
               .add(service?.duration || 20, "minutes")
               .format("HH:mm");
@@ -166,7 +171,7 @@ export const AppointmentEditModal: React.FC<AppointmentEditModalProps> = ({
       setIsSubmitting(true);
 
       const startDateTime = moment(
-        `${formData.date}T${formData.time}`
+        `${formData.date}T${formData.time}`,
       ).toISOString();
 
       const payload = {
@@ -183,7 +188,7 @@ export const AppointmentEditModal: React.FC<AppointmentEditModalProps> = ({
       const updatedAppointment: Appointment = await callApi(
         `/api/appointment/${appointment._id}`,
         "PUT",
-        payload
+        payload,
       );
 
       onAppointmentUpdated(updatedAppointment);
@@ -204,7 +209,7 @@ export const AppointmentEditModal: React.FC<AppointmentEditModalProps> = ({
         "PUT",
         {
           status: "cancelled",
-        }
+        },
       );
 
       onAppointmentUpdated(updatedAppointment);
@@ -217,7 +222,6 @@ export const AppointmentEditModal: React.FC<AppointmentEditModalProps> = ({
     }
   };
 
-  console.log(availableSlots);
   const handleAppointmentTypeChange = (value: string) => {
     setFormData((prev) => ({
       ...prev,
@@ -357,7 +361,7 @@ export const AppointmentEditModal: React.FC<AppointmentEditModalProps> = ({
           <div className="p-4 bg-primary/10 rounded-xl border border-primary/20">
             {(() => {
               const selectedType = appointmentTypes?.find(
-                (type) => type._id === formData.appointmentTypeId
+                (type) => type._id === formData.appointmentTypeId,
               );
               return selectedType ? (
                 <div className="space-y-2">
@@ -431,7 +435,7 @@ export const AppointmentEditModal: React.FC<AppointmentEditModalProps> = ({
               </h3>
               <p className="text-muted-foreground mb-6">
                 {t(
-                  "Are you sure you want to cancel this appointment? This action cannot be undone."
+                  "Are you sure you want to cancel this appointment? This action cannot be undone.",
                 )}
               </p>
               <div className="flex justify-center gap-3">

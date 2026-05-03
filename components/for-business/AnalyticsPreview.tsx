@@ -1,6 +1,6 @@
 "use client";
 
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import {
   TrendingUp,
   TrendingDown,
@@ -9,15 +9,13 @@ import {
   GripHorizontal,
   Trash2,
 } from "lucide-react";
-import dynamic from "next/dynamic";
 import { useMemo, useState, useCallback, useEffect, useRef } from "react";
 import GridLayout, { Layout } from "react-grid-layout";
 import "react-grid-layout/css/styles.css";
 import "react-resizable/css/styles.css";
 import { useTranslation } from "react-i18next";
-
-// Dynamic import to avoid SSR issues
-const ReactECharts = dynamic(() => import("echarts-for-react"), { ssr: false });
+import { PerformanceChart } from "@/components/performance/PerformanceChart";
+import { getThemeChartColorTokens } from "@/lib/themeColors";
 
 // Mock data for the preview
 const mockChartData = {
@@ -98,6 +96,7 @@ export function AnalyticsPreview() {
   const { t } = useTranslation();
   const containerRef = useRef<HTMLDivElement>(null);
   const [containerWidth, setContainerWidth] = useState(360);
+  const chartColors = useMemo(() => getThemeChartColorTokens(), []);
   const fixedHeight = 660;
   const rowHeight = 44;
   const isMobile = containerWidth <= 768;
@@ -181,7 +180,7 @@ export function AnalyticsPreview() {
     if (isMobile && !wasMobile.current) {
       setLayout((prev) => {
         const sorted = [...prev].sort((a, b) =>
-          a.y === b.y ? a.x - b.x : a.y - b.y
+          a.y === b.y ? a.x - b.x : a.y - b.y,
         );
 
         let currentY = 0;
@@ -210,7 +209,7 @@ export function AnalyticsPreview() {
           ...item,
           w: Math.min(item.w, 12),
           x: Math.max(0, Math.min(item.x, 12 - item.w)),
-        }))
+        })),
       );
       wasMobile.current = false;
     }
@@ -223,7 +222,7 @@ export function AnalyticsPreview() {
         ...item,
         name: t(item.name),
       })),
-    [t]
+    [t],
   );
 
   const translatedRevenue = useMemo(
@@ -232,7 +231,7 @@ export function AnalyticsPreview() {
         ...item,
         name: t(item.name),
       })),
-    [t]
+    [t],
   );
 
   const translatedServices = useMemo(
@@ -241,7 +240,7 @@ export function AnalyticsPreview() {
         ...item,
         name: t(item.name),
       })),
-    [t]
+    [t],
   );
 
   // Line chart for appointments
@@ -305,7 +304,7 @@ export function AnalyticsPreview() {
         },
       ],
     }),
-    [translatedAppointments, isMobile]
+    [translatedAppointments, isMobile],
   );
 
   // Bar chart for revenue
@@ -318,7 +317,7 @@ export function AnalyticsPreview() {
         borderWidth: 1,
         textStyle: { color: "#fff" },
         formatter: (
-          params: { name: string; marker: string; value: number }[]
+          params: { name: string; marker: string; value: number }[],
         ) => {
           const data = params[0];
           return `${data.name}<br/>${data.marker}€${data.value}`;
@@ -369,7 +368,7 @@ export function AnalyticsPreview() {
         },
       ],
     }),
-    [translatedRevenue, isMobile]
+    [translatedRevenue, isMobile],
   );
 
   // Pie chart for services
@@ -417,7 +416,7 @@ export function AnalyticsPreview() {
         },
       ],
     }),
-    [translatedServices]
+    [translatedServices],
   );
 
   return (
@@ -508,110 +507,88 @@ export function AnalyticsPreview() {
           {visibleIds.includes("appointments") && (
             <div
               key="appointments"
-              className="cursor-grab active:cursor-grabbing"
+              className="relative h-full cursor-grab active:cursor-grabbing group"
             >
-              <Card className="border-primary/20 shadow-sm h-full transition-all flex flex-col overflow-hidden">
-                <CardHeader className="pb-2 relative group">
-                  <div className="absolute top-2 left-0 right-0 flex items-center justify-center pointer-events-none">
-                    <div className="drag-handle pointer-events-auto rounded-full bg-white/5 px-3 py-1 shadow-sm border border-white/10 flex items-center gap-1 text-xs text-muted-foreground">
-                      <GripHorizontal className="h-4 w-4" />
-                    </div>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={() => handleRemove("appointments")}
-                    className="absolute top-2 right-2 p-1.5 rounded-full bg-white/5 border border-white/10 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity hover:text-red-500 hover:border-red-400 hover:bg-red-500/10"
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </button>
-                  <CardTitle className="text-sm font-semibold text-text-primary">
-                    {t("Appointments This Week")}
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="p-2 flex-1 overflow-hidden">
-                  <ReactECharts
-                    option={appointmentsOption}
-                    style={{
-                      height: "100%",
-                      width: "100%",
-                      minHeight: `${chartMinHeight}px`,
-                    }}
-                    opts={{ renderer: "svg" }}
-                  />
-                </CardContent>
-              </Card>
+              <div className="absolute top-2 left-0 right-0 z-10 flex items-center justify-center pointer-events-none">
+                <div className="drag-handle pointer-events-auto rounded-full bg-white/5 px-3 py-1 shadow-sm border border-white/10 flex items-center gap-1 text-xs text-muted-foreground">
+                  <GripHorizontal className="h-4 w-4" />
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => handleRemove("appointments")}
+                className="absolute top-2 right-2 z-10 p-1.5 rounded-full bg-white/5 border border-white/10 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity hover:text-red-500 hover:border-red-400 hover:bg-red-500/10"
+              >
+                <Trash2 className="h-4 w-4" />
+              </button>
+              <PerformanceChart
+                title={t("Appointments This Week")}
+                data={translatedAppointments}
+                type="line"
+                dataKeys={["total", "completed"]}
+                xAxisKey="name"
+                className="h-full"
+                colors={chartColors}
+              />
             </div>
           )}
 
           {/* Revenue Chart */}
           {visibleIds.includes("revenue") && (
-            <div key="revenue" className="cursor-grab active:cursor-grabbing">
-              <Card className="border-primary/20 shadow-sm h-full transition-all flex flex-col overflow-hidden">
-                <CardHeader className="pb-2 relative group">
-                  <div className="absolute top-2 left-0 right-0 flex items-center justify-center pointer-events-none">
-                    <div className="drag-handle pointer-events-auto rounded-full bg-white/5 px-3 py-1 shadow-sm border border-white/10 flex items-center gap-1 text-xs text-muted-foreground">
-                      <GripHorizontal className="h-4 w-4" />
-                    </div>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={() => handleRemove("revenue")}
-                    className="absolute top-2 right-2 p-1.5 rounded-full bg-white/5 border border-white/10 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity hover:text-red-500 hover:border-red-400 hover:bg-red-500/10"
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </button>
-                  <CardTitle className="text-sm font-semibold text-text-primary">
-                    {t("Weekly Revenue")}
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="p-2 flex-1 overflow-hidden">
-                  <ReactECharts
-                    option={revenueOption}
-                    style={{
-                      height: "100%",
-                      width: "100%",
-                      minHeight: `${smallChartMinHeight}px`,
-                    }}
-                    opts={{ renderer: "svg" }}
-                  />
-                </CardContent>
-              </Card>
+            <div
+              key="revenue"
+              className="relative h-full cursor-grab active:cursor-grabbing group"
+            >
+              <div className="absolute top-2 left-0 right-0 z-10 flex items-center justify-center pointer-events-none">
+                <div className="drag-handle pointer-events-auto rounded-full bg-white/5 px-3 py-1 shadow-sm border border-white/10 flex items-center gap-1 text-xs text-muted-foreground">
+                  <GripHorizontal className="h-4 w-4" />
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => handleRemove("revenue")}
+                className="absolute top-2 right-2 z-10 p-1.5 rounded-full bg-white/5 border border-white/10 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity hover:text-red-500 hover:border-red-400 hover:bg-red-500/10"
+              >
+                <Trash2 className="h-4 w-4" />
+              </button>
+              <PerformanceChart
+                title={t("Weekly Revenue")}
+                data={translatedRevenue}
+                type="bar"
+                xAxisKey="name"
+                className="h-full"
+                colors={chartColors}
+              />
             </div>
           )}
 
           {/* Services Pie Chart */}
           {visibleIds.includes("services") && (
-            <div key="services" className="cursor-grab active:cursor-grabbing">
-              <Card className="border-primary/20 shadow-sm h-full transition-all flex flex-col overflow-hidden">
-                <CardHeader className="pb-2 relative group">
-                  <div className="absolute top-2 left-0 right-0 flex items-center justify-center pointer-events-none">
-                    <div className="drag-handle pointer-events-auto rounded-full bg-white/5 px-3 py-1 shadow-sm border border-white/10 flex items-center gap-1 text-xs text-muted-foreground">
-                      <GripHorizontal className="h-4 w-4" />
-                    </div>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={() => handleRemove("services")}
-                    className="absolute top-2 right-2 p-1.5 rounded-full bg-white/5 border border-white/10 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity hover:text-red-500 hover:border-red-400 hover:bg-red-500/10"
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </button>
-                  <CardTitle className="text-sm font-semibold text-text-primary">
-                    {t("Popular Services")}
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="p-2 flex-1 overflow-hidden">
-                  <ReactECharts
-                    option={servicesOption}
-                    style={{
-                      height: "100%",
-                      width: "100%",
-                      minHeight: `${smallChartMinHeight}px`,
-                    }}
-                    opts={{ renderer: "svg" }}
-                  />
-                </CardContent>
-              </Card>
+            <div
+              key="services"
+              className="relative h-full cursor-grab active:cursor-grabbing group"
+            >
+              <div className="absolute top-2 left-0 right-0 z-10 flex items-center justify-center pointer-events-none">
+                <div className="drag-handle pointer-events-auto rounded-full bg-white/5 px-3 py-1 shadow-sm border border-white/10 flex items-center gap-1 text-xs text-muted-foreground">
+                  <GripHorizontal className="h-4 w-4" />
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => handleRemove("services")}
+                className="absolute top-2 right-2 z-10 p-1.5 rounded-full bg-white/5 border border-white/10 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity hover:text-red-500 hover:border-red-400 hover:bg-red-500/10"
+              >
+                <Trash2 className="h-4 w-4" />
+              </button>
+              <PerformanceChart
+                title={t("Popular Services")}
+                data={translatedServices}
+                type="pie"
+                dataKey="value"
+                xAxisKey="name"
+                className="h-full"
+                colors={chartColors}
+              />
             </div>
           )}
         </GridLayout>
@@ -637,7 +614,8 @@ export function AnalyticsPreview() {
           will-change: width, height;
 
           .react-grid-item.resizing .border-primary\\/20 {
-            box-shadow: 0 10px 25px -5px rgba(59, 97, 192, 0.3),
+            box-shadow:
+              0 10px 25px -5px rgba(59, 97, 192, 0.3),
               0 8px 10px -6px rgba(59, 97, 192, 0.15);
           }
         }
@@ -650,7 +628,8 @@ export function AnalyticsPreview() {
           opacity: 0.8;
 
           .react-grid-item.react-draggable-dragging .border-primary\\/20 {
-            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.15),
+            box-shadow:
+              0 20px 25px -5px rgba(0, 0, 0, 0.15),
               0 8px 10px -6px rgba(0, 0, 0, 0.1);
             transform: rotate(2deg);
           }

@@ -47,7 +47,6 @@ export default function LocationsSetup({
     Record<number, LocationValidationErrors>
   >({});
 
-  const phoneRegex = /^\+?[0-9\s()\-]{6,20}$/;
   const [locations, setLocations] = useState<Location[]>(
     initialData && initialData.length > 0
       ? initialData
