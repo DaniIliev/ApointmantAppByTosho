@@ -8,6 +8,7 @@ import { AuthProvider } from "@/context/AuthContext";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import { ThemeProvider as NextThemesProvider } from "next-themes";
 import QueryProvider from "@/components/providers/QueryProvider";
+import CookieBanner from "@/components/Global/CookieBanner";
 
 export const metadata: Metadata = {
   title: "AppointDI",
@@ -71,6 +72,7 @@ html {
             >
               <ThemeProvider>
                 <ClientLayoutWrapper>{children}</ClientLayoutWrapper>
+                <CookieBanner />
               </ThemeProvider>
             </NextThemesProvider>
             </LocationProvider>

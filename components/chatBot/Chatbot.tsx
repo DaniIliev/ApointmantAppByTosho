@@ -97,7 +97,7 @@ export default function Chatbot({ businessId }: { businessId?: string }) {
         "POST",
         {
           message: input,
-          userId: user?._id,
+          userId: user?._id || "guest",
           businessId: businessId, // Предаваме businessId
         }
       );

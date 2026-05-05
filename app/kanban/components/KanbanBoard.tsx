@@ -178,7 +178,7 @@ export function KanbanBoard({
         {/* Add Column Button */}
         <button
           onClick={onAddColumn}
-          className="flex-shrink-0 w-[320px] h-[100px] border-2 border-dashed border-border/50 hover:border-primary/60 hover:bg-primary/5 rounded-2xl flex items-center justify-center gap-3 transition-all duration-300 text-muted-foreground hover:text-primary shadow-sm group"
+          className="flex-shrink-0 w-[320px] h-[50px] border-2 border-dashed border-border/50 hover:border-primary/60 hover:bg-primary/5 rounded-2xl flex items-center justify-center gap-3 transition-all duration-300 text-muted-foreground hover:text-primary shadow-sm group"
         >
           <Plus className="w-5 h-5 transition-transform group-hover:scale-110" />
           <span className="text-sm font-semibold tracking-wide">Add Column</span>

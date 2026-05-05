@@ -24,6 +24,12 @@ import { format } from "date-fns";
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { cn } from "@/lib/utils";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 interface KanbanCardProps {
   card: KanbanCardType;
@@ -31,11 +37,11 @@ interface KanbanCardProps {
   onDelete: (cardId: string) => void;
 }
 
-const priorityConfig: Record<Priority, { bg: string; text: string; label: string; Icon: React.ComponentType<any> }> = {
-  low: { bg: "bg-gray-100 dark:bg-gray-800", text: "text-gray-600 dark:text-gray-300", label: "Low", Icon: ArrowDown },
-  medium: { bg: "bg-blue-100 dark:bg-blue-900/40", text: "text-blue-600 dark:text-blue-400", label: "Medium", Icon: ArrowRight },
-  high: { bg: "bg-orange-100 dark:bg-orange-900/40", text: "text-orange-600 dark:text-orange-400", label: "High", Icon: ArrowUp },
-  urgent: { bg: "bg-red-100 dark:bg-red-900/40", text: "text-red-600 dark:text-red-400", label: "Urgent", Icon: Flame },
+const priorityConfig: Record<Priority, { bg: string; text: string; label: string; Icon: React.ComponentType<any>; color: string }> = {
+  low: { bg: "bg-slate-100 dark:bg-slate-800/60", text: "text-slate-600 dark:text-slate-400", label: "Low", Icon: ArrowDown, color: "text-slate-500" },
+  medium: { bg: "bg-blue-100 dark:bg-blue-900/40", text: "text-blue-600 dark:text-blue-400", label: "Medium", Icon: ArrowRight, color: "text-blue-500" },
+  high: { bg: "bg-orange-100 dark:bg-orange-900/40", text: "text-orange-600 dark:text-orange-400", label: "High", Icon: ArrowUp, color: "text-orange-500" },
+  urgent: { bg: "bg-red-100 dark:bg-red-900/40", text: "text-red-600 dark:text-red-400", label: "Urgent", Icon: Flame, color: "text-red-500" },
 };
 
 const statusConfig: Record<NonNullable<KanbanCardType["status"]>, { label: string; className: string; Icon: React.ComponentType<any> }> = {
@@ -93,12 +99,30 @@ export function KanbanCard({ card, onEdit, onDelete }: KanbanCardProps) {
         )}
         onClick={() => onEdit(card)}
       >
-        <CardContent className="p-3.5 flex flex-col gap-3">
+        <CardContent className="p-3.5 flex flex-col gap-3.5">
           {/* Header */}
-          <div className="flex items-start justify-between gap-2">
-            <h3 className="font-medium text-[13px] leading-tight text-foreground/90 line-clamp-2 mt-0.5">
-              {card.title}
-            </h3>
+          <div className="flex items-start justify-between gap-2.5">
+            <div className="flex items-start gap-2 mt-0.5 min-w-0">
+              {(() => {
+                const pc = getPriorityConfig();
+                const PIcon = pc.Icon;
+                return (
+                  <TooltipProvider delayDuration={200}>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <PIcon className={cn("w-3.5 h-3.5 shrink-0 mt-[2px] cursor-help", pc.color)} />
+                      </TooltipTrigger>
+                      <TooltipContent side="top" align="start" className="text-[10px] font-bold px-2 py-1">
+                        {pc.label} Priority
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
+                );
+              })()}
+              <h3 className="font-semibold text-[13.5px] leading-[1.3] text-foreground/90 break-words">
+                {card.title}
+              </h3>
+            </div>
             <button
               onClick={(e) => {
                 e.stopPropagation();
@@ -109,106 +133,110 @@ export function KanbanCard({ card, onEdit, onDelete }: KanbanCardProps) {
                 showMenu ? "opacity-100 bg-accent text-foreground" : "opacity-0 group-hover:opacity-100 text-muted-foreground hover:bg-accent hover:text-foreground"
               )}
             >
-              <MoreVertical className="w-3.5 h-3.5" />
+              <MoreVertical className="w-4 h-4" />
             </button>
           </div>
 
           {/* Description Preview */}
           {card.description && (
-            <p className="text-[11px] text-muted-foreground/80 line-clamp-2 leading-relaxed">
+            <p className="text-[11.5px] text-muted-foreground/70 leading-relaxed -mt-2 line-clamp-2">
               {card.description}
             </p>
           )}
 
-          {/* Status & Priority */}
-          <div className="flex flex-wrap items-center gap-1.5 mt-0.5">
-            {/* Status */}
-            {card.status && (() => {
-              const sc = statusConfig[card.status!];
-              const SIcon = sc.Icon;
-              return (
-                <span className={cn("inline-flex items-center gap-1 rounded-md px-1.5 py-0.5 text-[10px] font-medium tracking-tight", sc.className)}>
-                  <SIcon className="w-[10px] h-[10px]" />
-                  {sc.label}
-                </span>
-              );
-            })()}
+          {/* Footer containing Status, Priority, Dates, Attachments and Users */}
+          <div className="flex flex-col gap-3 pt-3 border-t border-border/30 mt-0.5">
+            <div className="flex items-center justify-between gap-2">
+              <div className="flex flex-wrap items-center gap-1.5">
+                {/* Status */}
+                {card.status && (() => {
+                  const sc = statusConfig[card.status!];
+                  const SIcon = sc.Icon;
+                  return (
+                    <span className={cn("inline-flex items-center gap-1 rounded-md px-1.5 py-0.5 text-[9px] font-bold tracking-tight uppercase", sc.className)}>
+                      <SIcon className="w-[10px] h-[10px]" />
+                      {sc.label}
+                    </span>
+                  );
+                })()}
 
-            {/* Priority */}
-            {(() => {
-              const pc = getPriorityConfig();
-              const PIcon = pc.Icon;
-              return (
-                <span className={cn("inline-flex items-center gap-1 rounded-md px-1.5 py-0.5 text-[10px] font-medium tracking-tight", pc.bg, pc.text)}>
-                  <PIcon className="w-[10px] h-[10px]" />
-                  {pc.label}
-                </span>
-              );
-            })()}
+                {/* Priority Badge */}
+                {(() => {
+                  const pc = getPriorityConfig();
+                  const PIcon = pc.Icon;
+                  return (
+                    <span className={cn("inline-flex items-center gap-1 rounded-md px-1.5 py-0.5 text-[9px] font-bold tracking-tight uppercase", pc.bg, pc.text)}>
+                      <PIcon className="w-[10px] h-[10px]" />
+                      {pc.label}
+                    </span>
+                  );
+                })()}
 
-            {/* Overdue Badge */}
-            {isOverdue && (
-              <span className="inline-flex items-center gap-1 rounded-md bg-destructive/10 text-destructive px-1.5 py-0.5 text-[10px] font-semibold tracking-tight">
-                <AlertCircle className="w-[10px] h-[10px]" />
-                Overdue
-              </span>
-            )}
-          </div>
+                {/* Overdue Badge */}
+                {isOverdue && (
+                  <span className="inline-flex items-center gap-1 rounded-md bg-destructive/10 text-destructive px-1.5 py-0.5 text-[9px] font-bold tracking-tight uppercase">
+                    <AlertCircle className="w-[10px] h-[10px]" />
+                    Overdue
+                  </span>
+                )}
+              </div>
 
-          {/* Footer containing Dates, Attachments and Users */}
-          <div className="flex items-end justify-between pt-2 border-t border-border/30 mt-1.5">
-            <div className="flex flex-col gap-2">
-              {/* Dates */}
-              {card.startDate && card.endDate && (
-                <div className="flex items-center gap-1.5 text-[10px] text-muted-foreground font-medium bg-secondary/30 px-1.5 py-0.5 rounded-md w-fit border border-border/20">
-                  <Calendar className="w-3 h-3 text-muted-foreground/70" />
-                  <span>{format(new Date(card.startDate), "MMM d")} - {format(new Date(card.endDate), "MMM d")}</span>
+              {/* Assigned Users Array */}
+              <div className="flex -space-x-2 shrink-0">
+                {card.assignedUsers.slice(0, 3).map((user) => (
+                  <Avatar
+                    key={user._id}
+                    className="w-6.5 h-6.5 border-2 border-card ring-1 ring-border/5 shadow-sm transition-transform hover:scale-110 hover:z-20 cursor-pointer"
+                    title={`${user.firstName} ${user.lastName}`}
+                  >
+                    <AvatarImage src={user.avatar} />
+                    <AvatarFallback
+                      className="text-[9px] font-bold text-white shadow-inner"
+                      style={{ backgroundColor: colorFor(user._id) }}
+                    >
+                      {user.firstName[0]}
+                      {user.lastName[0]}
+                    </AvatarFallback>
+                  </Avatar>
+                ))}
+                {card.assignedUsers.length > 3 && (
+                  <div className="w-6.5 h-6.5 rounded-full bg-muted border-2 border-card flex items-center justify-center text-[9px] font-bold text-muted-foreground z-10 shadow-sm ring-1 ring-border/5">
+                    +{card.assignedUsers.length - 3}
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Bottom Row: Dates & Stats */}
+            {(card.startDate || card.comments.length > 0 || card.attachments.length > 0) && (
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  {/* Dates */}
+                  {card.startDate && card.endDate && (
+                    <div className="flex items-center gap-1.5 text-[10px] text-muted-foreground font-semibold bg-secondary/40 px-1.5 py-0.5 rounded-md border border-border/10">
+                      <Calendar className="w-3 h-3 text-muted-foreground/60" />
+                      <span>{format(new Date(card.startDate), "MMM d")} - {format(new Date(card.endDate), "MMM d")}</span>
+                    </div>
+                  )}
                 </div>
-              )}
-              
-              {/* Stats */}
-              {(card.comments.length > 0 || card.attachments.length > 0) && (
-                <div className="flex items-center gap-3 text-[10px] text-muted-foreground font-medium px-1">
+
+                {/* Stats */}
+                <div className="flex items-center gap-3 text-[10px] text-muted-foreground font-semibold">
                   {card.comments.length > 0 && (
-                    <div className="flex items-center gap-1">
-                      <MessageSquare className="w-3 h-3" />
+                    <div className="flex items-center gap-1.5">
+                      <MessageSquare className="w-3 h-3 opacity-70" />
                       <span>{card.comments.length}</span>
                     </div>
                   )}
                   {card.attachments.length > 0 && (
-                    <div className="flex items-center gap-1">
-                      <Paperclip className="w-3 h-3" />
+                    <div className="flex items-center gap-1.5">
+                      <Paperclip className="w-3 h-3 opacity-70" />
                       <span>{card.attachments.length}</span>
                     </div>
                   )}
                 </div>
-              )}
-            </div>
-
-            {/* Assigned Users Array */}
-            <div className="flex -space-x-1.5">
-              {card.assignedUsers.slice(0, 3).map((user) => (
-                <Avatar
-                  key={user._id}
-                  className="w-6 h-6 border-2 border-card ring-1 ring-border/5 shadow-sm transition-transform hover:scale-110 hover:z-20 cursor-pointer"
-                  title={`${user.firstName} ${user.lastName}`}
-                >
-                  <AvatarImage src={user.avatar} />
-                  <AvatarFallback
-                    className="text-[9px] font-bold text-white shadow-inner"
-                    style={{ backgroundColor: colorFor(user._id) }}
-                  >
-                    {user.firstName[0]}
-                    {user.lastName[0]}
-                  </AvatarFallback>
-                </Avatar>
-              ))}
-              {card.assignedUsers.length > 3 && (
-                <div className="w-6 h-6 rounded-full bg-muted border-2 border-card flex items-center justify-center text-[9px] font-semibold text-muted-foreground z-10 shadow-sm ring-1 ring-border/5">
-                  +{card.assignedUsers.length - 3}
-                </div>
-              )}
-            </div>
+              </div>
+            )}
           </div>
         </CardContent>
       </Card>

@@ -66,7 +66,9 @@ export default function GuestLayout({
                   ? RIGHT_NAV_OPEN_WIDTH_CLASS
                   : RIGHT_NAV_CLOSED_WIDTH_CLASS
               }`}
-      ></div>
+      >
+        <Footer />
+      </div>
     </div>
   );
 }

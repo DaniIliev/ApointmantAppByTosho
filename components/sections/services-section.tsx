@@ -17,6 +17,7 @@ import AppointmentForm, {
 import { useAuthContext } from "@/context/AuthContext";
 import { toast } from "sonner";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import React from "react";
 
 const groupServicesByCategory = (services: AppointmentType[]) => {
   if (!services || !Array.isArray(services)) return {};
@@ -110,6 +111,7 @@ export function ServicesSection({
         email: data.email,
         staff: data.staff._id,
         notes: data.notes,
+        locationId: locationId,
       };
       await callApi(`/api/appointment`, "POST", payload);
       toast.success(t("Appointment created successfully"));
@@ -128,139 +130,143 @@ export function ServicesSection({
           {t("Services and Price List")}
         </CardTitle>
       </CardHeader>
-
-      <CardContent className="p-0">
-        <div className="space-y-8 p-6">
+    <CardContent className="p-0">
+      <div className="p-6">
+        {/* Глобалният Grid контейнер, който държи всички услуги заедно */}
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
           {categories.map((category) => (
-            <div key={category}>
-              <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-                {services &&
-                  services[category].map((service) => (
-                    <div
-                      key={service._id}
-                      className="relative overflow-hidden rounded-[28px] min-h-[320px] bg-slate-200 shadow-lg group cursor-pointer"
-                      onClick={() =>
-                        setExpandedServiceId((prev) =>
-                          prev === service._id ? null : service._id,
-                        )
-                      }
-                    >
-                      <div className="absolute inset-0">
-                        <img
-                          src={service.imageUrl || "/default-service.png"}
-                          alt={service.name}
-                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
-                        />
-                        <div className="absolute inset-0 bg-gradient-to-t from-slate-900/85 via-slate-900/30 to-slate-900/10" />
+            <React.Fragment key={category}>
+              {services &&
+                services[category].map((service) => (
+                  <div
+                    key={service._id}
+                    className="relative overflow-hidden rounded-[28px] min-h-[320px] bg-slate-200 shadow-lg group cursor-pointer"
+                    onClick={() =>
+                      setExpandedServiceId((prev) =>
+                        prev === service._id ? null : service._id,
+                      )
+                    }
+                  >
+                    {/* Изображение и Overlay */}
+                    <div className="absolute inset-0">
+                      <img
+                        src={service.imageUrl || "/default-service.png"}
+                        alt={service.name}
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-slate-900/85 via-slate-900/30 to-slate-900/10" />
+                    </div>
+
+                    {/* Категория (Badge) */}
+                    <div className="absolute top-3 left-3 z-10">
+                      <span className="rounded-full bg-black/45 px-2.5 py-1 text-xs font-semibold text-white border border-white/20 backdrop-blur-sm">
+                        {category}
+                      </span>
+                    </div>
+
+                    {/* Съдържание на картата */}
+                    <div className="relative z-10 flex h-full flex-col justify-end p-3.5 md:p-4">
+                      <div className="mb-1.5 flex justify-center">
+                        <div className="h-1.5 w-12 rounded-full bg-white/70" />
                       </div>
 
-                      <div className="absolute top-3 left-3 z-10">
-                        <span className="rounded-full bg-black/45 px-2.5 py-1 text-xs font-semibold text-white border border-white/20 backdrop-blur-sm">
-                          {category}
-                        </span>
-                      </div>
-
-                      <div className="relative z-10 flex h-full flex-col justify-end p-3.5 md:p-4">
-                        <div className="mb-1.5 flex justify-center">
-                          <div className="h-1.5 w-12 rounded-full bg-white/70" />
+                      <div className="rounded-[22px] bg-black/30 backdrop-blur-md border border-white/15 p-3 text-white">
+                        <div className="flex items-center gap-0.5 mb-2">
+                          <h4 className="flex-1 text-l font-bold leading-tight truncate pr-1">
+                            {service.name}
+                          </h4>
+                          <span className="shrink-0 rounded-full bg-black/45 px-2 py-0.5 text-sm font-semibold border border-white/20">
+                            {formatPriceEUR(service.price)}
+                          </span>
+                          <span className="shrink-0 inline-flex items-center gap-0.5 rounded-full bg-white/15 px-2 py-0.5 text-sm font-semibold border border-white/20">
+                            <Clock className="h-3.5 w-3.5" />
+                            {service.duration}
+                          </span>
                         </div>
 
-                        <div className="rounded-[22px] bg-black/30 backdrop-blur-md border border-white/15 p-3 text-white">
-                          <div className="flex items-center gap-0.5 mb-2">
-                            <h4 className="flex-1 text-l font-bold leading-tight truncate pr-1">
-                              {service.name}
-                            </h4>
-                            <span className="shrink-0 rounded-full bg-black/45 px-2 py-0.5 text-sm font-semibold border border-white/20">
-                              {formatPriceEUR(service.price)}
-                            </span>
-                            <span className="shrink-0 inline-flex items-center gap-0.5 rounded-full bg-white/15 px-2 py-0.5 text-sm font-semibold border border-white/20">
-                              <Clock className="h-3.5 w-3.5" />
-                              {service.duration}
-                            </span>
-                          </div>
+                        {/* Разширяема секция с детайли */}
+                        <div
+                          className={`overflow-hidden transition-all duration-300 ${
+                            expandedServiceId === service._id
+                              ? "max-h-52 opacity-100 mb-3"
+                              : "max-h-0 opacity-0 mb-0"
+                          }`}
+                        >
+                          <p className="text-sm text-white/85 line-clamp-2 mb-2.5">
+                            {service.description ||
+                              t("Premium service with professional care.")}
+                          </p>
 
-                          <div
-                            className={`overflow-hidden transition-all duration-300 ${
-                              expandedServiceId === service._id
-                                ? "max-h-52 opacity-100 mb-3"
-                                : "max-h-0 opacity-0 mb-0"
-                            }`}
-                          >
-                            <p className="text-sm text-white/85 line-clamp-2 mb-2.5">
-                              {service.description ||
-                                t("Premium service with professional care.")}
-                            </p>
+                          <div className="flex items-center justify-between gap-2">
+                            <div className="flex -space-x-2">
+                              {(service.staffMembers || [])
+                                .slice(0, 5)
+                                .map((staff) => (
+                                  <Avatar
+                                    key={staff._id}
+                                    className="h-7 w-7 ring-1 ring-black/20"
+                                  >
+                                    <AvatarImage
+                                      src={staff.profilePictureUrl || ""}
+                                      alt={`${staff.firstName} ${staff.lastName}`}
+                                      className="object-cover"
+                                    />
+                                    <AvatarFallback className="bg-slate-700 text-white text-[10px] font-semibold">
+                                      {getInitials(
+                                        `${staff.firstName || ""} ${staff.lastName || ""}`,
+                                      )}
+                                    </AvatarFallback>
+                                  </Avatar>
+                                ))}
 
-                            <div className="flex items-center justify-between gap-2">
-                              <div className="flex -space-x-2">
-                                {(service.staffMembers || [])
-                                  .slice(0, 5)
-                                  .map((staff) => (
-                                    <Avatar
-                                      key={staff._id}
-                                      className="h-7 w-7 ring-1 ring-black/20"
-                                    >
-                                      <AvatarImage
-                                        src={staff.profilePictureUrl || ""}
-                                        alt={`${staff.firstName} ${staff.lastName}`}
-                                        className="object-cover"
-                                      />
-                                      <AvatarFallback className="bg-slate-700 text-white text-[10px] font-semibold">
-                                        {getInitials(
-                                          `${staff.firstName || ""} ${staff.lastName || ""}`,
-                                        )}
-                                      </AvatarFallback>
-                                    </Avatar>
-                                  ))}
-
-                                {(service.staffMembers?.length || 0) > 5 && (
-                                  <span className="h-7 min-w-7 px-1.5 inline-flex items-center justify-center rounded-full bg-white/20 text-[10px] font-semibold border border-white/30 text-white">
-                                    +{(service.staffMembers?.length || 0) - 5}
-                                  </span>
-                                )}
-                              </div>
+                              {(service.staffMembers?.length || 0) > 5 && (
+                                <span className="h-7 min-w-7 px-1.5 inline-flex items-center justify-center rounded-full bg-white/20 text-[10px] font-semibold border border-white/30 text-white">
+                                  +{(service.staffMembers?.length || 0) - 5}
+                                </span>
+                              )}
                             </div>
                           </div>
+                        </div>
 
-                          <div className="flex items-center gap-1.5">
-                            <Button
-                              type="button"
-                              variant="secondary"
-                              size="sm"
-                              className="h-7 rounded-full bg-white/20 text-white hover:bg-white/30 border border-white/20 px-3 text-xs"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                setExpandedServiceId((prev) =>
-                                  prev === service._id ? null : service._id,
-                                );
-                              }}
-                            >
-                              {expandedServiceId === service._id
-                                ? t("Hide details")
-                                : t("More details")}
-                            </Button>
+                        {/* Бутони за действие */}
+                        <div className="flex items-center gap-1.5">
+                          <Button
+                            type="button"
+                            variant="secondary"
+                            size="sm"
+                            className="h-7 rounded-full bg-white/20 text-white hover:bg-white/30 border border-white/20 px-3 text-xs"
+                            onClick={(e) => {
+                              e.stopPropagation(); // Спира onClick на цялата карта
+                              setExpandedServiceId((prev) =>
+                                prev === service._id ? null : service._id,
+                              );
+                            }}
+                          >
+                            {expandedServiceId === service._id
+                              ? t("Hide details")
+                              : t("More details")}
+                          </Button>
 
-                            <Button
-                              size="default"
-                              className="flex-1 rounded-full bg-white/70 text-slate-900 hover:bg-white/90 font-bold h-7 text-sm"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                handleBookService(service);
-                              }}
-                            >
-                              {t("Reserve")}
-                            </Button>
-                          </div>
+                          <Button
+                            size="default"
+                            className="flex-1 rounded-full bg-white/70 text-slate-900 hover:bg-white/90 font-bold h-7 text-sm"
+                            onClick={(e) => {
+                              e.stopPropagation(); // Спира onClick на цялата карта
+                              handleBookService(service); // Пълна функционалност за резервация
+                            }}
+                          >
+                            {t("Reserve")}
+                          </Button>
                         </div>
                       </div>
                     </div>
-                  ))}
-              </div>
-            </div>
+                  </div>
+                ))}
+            </React.Fragment>
           ))}
         </div>
-      </CardContent>
-      {/* Create Appointment Modal for clients */}
+      </div>
+    </CardContent>
       <Modal
         label={t("Create Appointment")}
         open={isCreateOpen}

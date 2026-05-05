@@ -14,6 +14,7 @@ import {
   Settings,
   Clock,
   UserCog,
+  CreditCard,
   // New Icons for better context
   Info, // For Business Information
   BarChart3, // For Performance
@@ -262,6 +263,15 @@ export default function LeftNav({ isOpen, onClose }: LeftNavProps) {
                     label: t("Service Types"),
                     icon: CircleDollarSign,
                   },
+                  ...(user?.role === "business"
+                    ? [
+                        {
+                          href: "/settings/payments",
+                          label: t("Payments"),
+                          icon: CreditCard,
+                        },
+                      ]
+                    : []),
                 ],
               },
             ],

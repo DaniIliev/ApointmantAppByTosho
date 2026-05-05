@@ -185,7 +185,8 @@ const AppointmentForm = ({
     !!appointmentData.date &&
     !!appointmentData.time &&
     !!appointmentData.appointmentTypeId &&
-    !!appointmentData.staff._id;
+    !!appointmentData.staff._id &&
+    !!locationId;
 
   const handlePayOnline = async () => {
     if (!canSubmitBase || !selectedType || !businessId) return;
@@ -207,7 +208,7 @@ const AppointmentForm = ({
         end: endISO.toISOString(),
       },
       notes: appointmentData.notes,
-      location: locationId,
+      locationId: locationId,
     };
 
     try {

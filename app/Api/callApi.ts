@@ -92,14 +92,14 @@ const callApi = async (
       if (typeof window !== "undefined") {
         const currentPath = window.location.pathname;
         const publicPaths = [
-          "/business/",
+          "/business",
           "/home",
           "/about",
           "/pricing",
           "/for-business",
         ];
         const isPublicPage = publicPaths.some((path) =>
-          currentPath.startsWith(path)
+          currentPath === path || currentPath.startsWith(path + "/")
         );
 
         if (!isPublicPage && currentPath !== "/login") {

@@ -49,6 +49,12 @@ export default function NotificationsPanel({
     return formatted === value ? "N/A" : formatted;
   };
 
+  const formatDate = (value?: string) => {
+    if (!value) return "N/A";
+    const formatted = formatDateAndTime(value, "date");
+    return formatted === value ? "N/A" : formatted;
+  };
+
   const formatDateTime = (value?: string) => {
     if (!value) return t("Unknown date");
     const formatted = formatDateAndTime(value, "dateTime");
@@ -212,6 +218,9 @@ export default function NotificationsPanel({
                 <>
                   <p className="text-xs text-white/60 mt-1">
                     {t("Appointment from")}: {appt?.clientName ?? t("Unknown")}
+                  </p>
+                  <p className="text-xs text-white/60">
+                    {t("Date")}: {formatDate(appt?.appointmentTime?.start)}
                   </p>
                   <p className="text-xs text-white/60">
                     {t("Time")}: {formatTime(appt?.appointmentTime?.start)}-
