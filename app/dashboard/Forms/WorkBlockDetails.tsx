@@ -74,11 +74,11 @@ const WorkBlockDetails = ({
             </span>
           </div>
 
-          {selectedAppointment.staff?.name && (
+          {selectedAppointment.staff?.firstName + " " + selectedAppointment.staff?.lastName && (
             <div className="flex items-center gap-3">
               <User className="h-5 w-5 text-primary" />
               <span>
-                {t("Staff")}: {selectedAppointment.staff.name}
+                {t("Staff")}: {selectedAppointment.staff.firstName + " " + selectedAppointment.staff.lastName}
               </span>
             </div>
           )}
