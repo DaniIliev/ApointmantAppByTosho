@@ -101,8 +101,6 @@ export function AnalyticsPreview() {
   const rowHeight = 44;
   const isMobile = containerWidth <= 768;
   const maxWidth = 960;
-  const chartMinHeight = isMobile ? 200 : 240;
-  const smallChartMinHeight = isMobile ? 170 : 200;
   const wasMobile = useRef(false);
   const [layout, setLayout] = useState<Layout[]>([
     { i: "kpi1", x: 0, y: 0, w: 6, h: 2, minW: 4, minH: 2, maxW: 12, maxH: 4 },
@@ -423,7 +421,7 @@ export function AnalyticsPreview() {
     <div
       className="relative"
       ref={containerRef}
-      style={{ maxWidth, margin: "0 auto", padding: isMobile ? "0 0.5rem" : 0 }}
+      style={{ maxWidth, margin: "0 auto" }}
     >
       {/* Info badge */}
       <div className="absolute -top-10 right-0 text-xs text-primary/70 flex items-center gap-1.5 z-10 bg-primary/10 px-3 py-1.5 rounded-full border border-primary/20">

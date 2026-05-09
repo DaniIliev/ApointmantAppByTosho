@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { Modal } from "@/components/customUIComponents/Modal";
 import { Button } from "@/components/ui/button";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { KanbanCard, Priority, User, Comment, Attachment } from "../types";
 import { CardDetails } from "./card-modal/CardDetails";
 import { CardDates } from "./card-modal/CardDates";
@@ -55,6 +56,22 @@ export function CardModal({
 
   // Snapshot of initial values to detect changes
   const [initialSnapshot, setInitialSnapshot] = useState<string>("{}");
+
+  useEffect(() => {
+    if (open) {
+      setFormData({
+        title: card?.title || "",
+        description: card?.description || "",
+        startDate: card?.startDate || "",
+        endDate: card?.endDate || "",
+        priority: (card?.priority || "medium") as Priority,
+        status: (card?.status || "Planned") as "Planned" | "In Progress" | "Finished",
+        assignedUsers: card?.assignedUsers.map((u) => u._id) || [],
+      });
+      setComments(card?.comments || []);
+      setAttachments(card?.attachments || []);
+    }
+  }, [open, card]);
 
   useEffect(() => {
     const snapshot = {
@@ -203,41 +220,52 @@ export function CardModal({
       width="7xl"
     >
       <div className="space-y-6">
-        {/* Top Section - Two Columns */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* Left Column - Main Content */}
-          <CardDetails formData={formData} onChange={handleFieldChange} />
+        <Tabs defaultValue="details" className="w-full">
+          <TabsList className="grid w-full max-w-[400px] grid-cols-2 mb-6">
+            <TabsTrigger value="details">Details</TabsTrigger>
+            <TabsTrigger value="comments" className="relative">
+              Comments
+              {comments.length > 0 && (
+                <span className="ml-2 flex h-5 w-5 items-center justify-center rounded-full bg-primary/10 text-[10px] text-primary">
+                  {comments.length}
+                </span>
+              )}
+            </TabsTrigger>
+          </TabsList>
+          
+          <TabsContent value="details" className="mt-0 outline-none">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <CardDetails formData={formData} onChange={handleFieldChange} />
+              <div className="space-y-5">
+                <CardDates
+                  startDate={formData.startDate}
+                  endDate={formData.endDate}
+                  onChange={handleFieldChange}
+                />
+                <CardAssignees
+                  assignedUserIds={formData.assignedUsers}
+                  availableUsers={availableUsers}
+                  onToggleUser={toggleUserAssignment}
+                />
+                <CardAttachments
+                  attachments={attachments}
+                  onFileUpload={handleFileUpload}
+                  onDeleteAttachment={(id) =>
+                    setAttachments(attachments.filter((a) => a._id !== id))
+                  }
+                />
+              </div>
+            </div>
+          </TabsContent>
 
-          {/* Right Column - Sidebar */}
-          <div className="space-y-5">
-            <CardDates
-              startDate={formData.startDate}
-              endDate={formData.endDate}
-              onChange={handleFieldChange}
-            />
-
-            <CardAssignees
-              assignedUserIds={formData.assignedUsers}
+          <TabsContent value="comments" className="mt-0 outline-none min-h-[300px]">
+            <CardComments
+              comments={comments}
               availableUsers={availableUsers}
-              onToggleUser={toggleUserAssignment}
+              onAddComment={handleAddComment}
             />
-
-            <CardAttachments
-              attachments={attachments}
-              onFileUpload={handleFileUpload}
-              onDeleteAttachment={(id) =>
-                setAttachments(attachments.filter((a) => a._id !== id))
-              }
-            />
-          </div>
-        </div>
-
-        {/* Comments Section - Full Width at Bottom */}
-        <CardComments
-          comments={comments}
-          availableUsers={availableUsers}
-          onAddComment={handleAddComment}
-        />
+          </TabsContent>
+        </Tabs>
       </div>
 
       {/* Actions - show only when there are changes */}

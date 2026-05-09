@@ -517,7 +517,7 @@ const MobileCalendar = ({
   }, []);
 
   return (
-    <div className="flex flex-col h-full max-w-lg mx-auto bg-white dark:bg-black text-gray-900 dark:text-gray-100 font-sans">
+    <div className="flex flex-col h-full mx-auto bg-white dark:bg-black text-gray-900 dark:text-gray-100 font-sans">
       <style>
         {`
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
@@ -592,7 +592,7 @@ const MobileCalendar = ({
       </div>
       {/* Appointments List */}
       <div
-        className="flex-1 overflow-y-auto space-y-4 px-4 pb-4 scrolling-container"
+        className="flex-1 overflow-y-auto px-4 scrolling-container"
         ref={containerRef}
       >
         {allDatesInYear.length > 0 ? (

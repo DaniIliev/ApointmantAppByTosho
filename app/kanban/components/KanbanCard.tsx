@@ -37,11 +37,11 @@ interface KanbanCardProps {
   onDelete: (cardId: string) => void;
 }
 
-const priorityConfig: Record<Priority, { bg: string; text: string; label: string; Icon: React.ComponentType<any>; color: string }> = {
-  low: { bg: "bg-slate-100 dark:bg-slate-800/60", text: "text-slate-600 dark:text-slate-400", label: "Low", Icon: ArrowDown, color: "text-slate-500" },
-  medium: { bg: "bg-blue-100 dark:bg-blue-900/40", text: "text-blue-600 dark:text-blue-400", label: "Medium", Icon: ArrowRight, color: "text-blue-500" },
-  high: { bg: "bg-orange-100 dark:bg-orange-900/40", text: "text-orange-600 dark:text-orange-400", label: "High", Icon: ArrowUp, color: "text-orange-500" },
-  urgent: { bg: "bg-red-100 dark:bg-red-900/40", text: "text-red-600 dark:text-red-400", label: "Urgent", Icon: Flame, color: "text-red-500" },
+const priorityConfig: Record<Priority, { bg: string; text: string; label: string; Icon: React.ComponentType<any>; color: string; borderColor: string }> = {
+  low: { bg: "bg-slate-100 dark:bg-slate-800/60", text: "text-slate-600 dark:text-slate-400", label: "Low", Icon: ArrowDown, color: "text-slate-500", borderColor: "border-t-slate-400 dark:border-t-slate-500" },
+  medium: { bg: "bg-blue-100 dark:bg-blue-900/40", text: "text-blue-600 dark:text-blue-400", label: "Medium", Icon: ArrowRight, color: "text-blue-500", borderColor: "border-t-blue-400 dark:border-t-blue-500" },
+  high: { bg: "bg-orange-100 dark:bg-orange-900/40", text: "text-orange-600 dark:text-orange-400", label: "High", Icon: ArrowUp, color: "text-orange-500", borderColor: "border-t-orange-400 dark:border-t-orange-500" },
+  urgent: { bg: "bg-red-100 dark:bg-red-900/40", text: "text-red-600 dark:text-red-400", label: "Urgent", Icon: Flame, color: "text-red-500", borderColor: "border-t-red-500 dark:border-t-red-600" },
 };
 
 const statusConfig: Record<NonNullable<KanbanCardType["status"]>, { label: string; className: string; Icon: React.ComponentType<any> }> = {
@@ -93,7 +93,8 @@ export function KanbanCard({ card, onEdit, onDelete }: KanbanCardProps) {
     <div ref={setNodeRef} style={style} {...attributes} {...listeners} className="relative z-0 outline-none">
       <Card
         className={cn(
-          "cursor-pointer bg-card/95 border-border/40 transition-all duration-200 shadow-sm hover:shadow-md hover:border-primary/20",
+          "cursor-pointer bg-card/95 border-x-border/40 border-b-border/40 border-t-[4px] transition-all duration-200 shadow-sm hover:shadow-md",
+          getPriorityConfig().borderColor,
           isDragging && "opacity-60 scale-[0.98] rotate-1 shadow-xl ring-2 ring-primary ring-offset-1 z-50",
           "group rounded-xl overflow-hidden"
         )}

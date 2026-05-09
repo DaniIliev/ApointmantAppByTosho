@@ -70,7 +70,7 @@ export default function RegisterPage() {
   };
 
   return (
-    <div className="w-full flex items-center justify-center p-3 animate-in fade-in duration-700">
+    <div className="w-full flex items-center justify-center h-full py-2 md:py-6 lg:py-8 animate-in fade-in duration-700">
       <div className="relative w-full max-w-md">
         {/* Animated Background Glow */}
         <div className="absolute -inset-1 bg-gradient-to-br from-cyan-500 via-primary to-pink-500 rounded-[2.5rem] opacity-70 blur-md dark:blur-2xl" />
