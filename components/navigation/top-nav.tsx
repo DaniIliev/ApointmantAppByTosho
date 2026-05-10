@@ -10,27 +10,8 @@ import { useAuthContext } from "@/context/AuthContext";
 import io from "socket.io-client";
 import callApi from "@/app/Api/callApi";
 import NotificationsPanel from "./NotificationsPanel";
+import { Alert } from "@/Global/Types/types";
 
-interface AppointmentInfo {
-  _id: string;
-  clientName: string;
-  clientPhone?: string;
-  email?: string;
-  appointmentTime: { start: string; end: string };
-  service?: { _id: string; name: string } | string;
-  status?: string;
-  staff?: string;
-}
-
-interface Alert {
-  _id: string;
-  isRead: boolean;
-  message: string;
-  createdAt?: string;
-  updatedAt?: string;
-  type: string;
-  appointment?: AppointmentInfo;
-}
 
 interface TopNavProps {
   onToggleLeftNav: () => void;
@@ -190,10 +171,8 @@ export default function TopNav({
     return {
       _id: typeof source._id === "string" ? source._id : crypto.randomUUID(),
       isRead: typeof source.isRead === "boolean" ? source.isRead : false,
-      message:
-        typeof source.message === "string"
-          ? source.message
-          : "New notification",
+      messageKey: source.messageKey as string,
+      params: source.params,
       createdAt:
         typeof source.createdAt === "string"
           ? source.createdAt
@@ -218,6 +197,12 @@ export default function TopNav({
       });
 
       socket.on("newAppointment", (newAlert) => {
+        const normalized = normalizeAlert(newAlert);
+        if (!normalized) return;
+        setAlerts((prevAlerts) => [normalized, ...prevAlerts]);
+      });
+
+      socket.on("newAlert", (newAlert) => {
         const normalized = normalizeAlert(newAlert);
         if (!normalized) return;
         setAlerts((prevAlerts) => [normalized, ...prevAlerts]);

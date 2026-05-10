@@ -1,4 +1,11 @@
 {
+  "ALERTS": {
+    "NEW_APPOINTMENT": "Нова заявка от {{clientName}} за услуга \"{{serviceName}}\"",
+    "APPOINTMENT_UPDATED": "Променена заявка от {{clientName}} за услуга \"{{serviceName}}\"",
+    "SUBSCRIPTION_PURCHASED": "Новият план {{planName}} е активиран за {{businessName}}!",
+    "SUBSCRIPTION_EXPIRING": "Вашият план {{planName}} изтича на {{expirationDate}}. Моля, обновете абонамента си.",
+    "KANBAN_ASSIGNMENT": "Бяхте назначени към карта: {{cardTitle}}"
+  },
   "12345": "",
   "About AppointmentPro": "Относно AppointmentPro",
   "AppointmentPro is a modern, intuitive appointment management system designed to streamline your business operations and enhance customer experience.": "AppointmentPro е модерна, интуитивна система за управление на часове, създадена да оптимизира Вашите бизнес процеси и да подобри клиентското преживяване.",

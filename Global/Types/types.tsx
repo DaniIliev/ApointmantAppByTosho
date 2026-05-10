@@ -5,6 +5,27 @@ export interface SelectOptionsAppointmentType {
   price?: number;
 }
 
+export interface Alert {
+  _id: string;
+  isRead: boolean;
+  messageKey: string;
+  params?: any;
+  createdAt?: string;
+  updatedAt?: string;
+  type: string;
+  appointment?: AppointmentInfo;
+}
+interface AppointmentInfo {
+  _id: string;
+  clientName: string;
+  clientPhone?: string;
+  email?: string;
+  appointmentTime: { start: string; end: string };
+  service?: { _id: string; name: string } | string;
+  status?: string;
+  staff?: string;
+}
+
 export type PaymentOption = "cash" | "card" | "cash_and_card";
 
 export type AppointmentStatus =

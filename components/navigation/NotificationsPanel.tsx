@@ -6,28 +6,8 @@ import callApi from "@/app/Api/callApi";
 import { Button } from "../ui/button";
 import { CustomTooltip } from "../customUIComponents/CustomTooltip";
 import { formatDateAndTime } from "@/Global/Utils/commonFn";
+import { Alert } from "@/Global/Types/types";
 
-// Interfaces
-interface AppointmentInfo {
-  _id: string;
-  clientName: string;
-  clientPhone?: string;
-  email?: string;
-  appointmentTime: { start: string; end: string };
-  service?: { _id: string; name: string } | string;
-  status?: string;
-  staff?: string;
-}
-
-interface Alert {
-  _id: string;
-  isRead: boolean;
-  message: string;
-  createdAt?: string;
-  updatedAt?: string;
-  type: string;
-  appointment?: AppointmentInfo;
-}
 
 interface NotificationsPanelProps {
   isOpen: boolean;
@@ -182,7 +162,7 @@ export default function NotificationsPanel({
     <div className="absolute right-0 mt-2 w-72 md:w-80 bg-slate-900/90 backdrop-blur-xl border border-white/20 rounded-xl shadow-2xl p-3 max-h-96 overflow-y-auto">
       <div className="flex items-center justify-between mb-2">
         <h3 className="text-white font-bold">{t("Notifications")}</h3>
-        {alerts.filter((a) => a.appointment?._id).length > 0 && (
+        {alerts?.filter((a) => a.appointment?._id).length > 0 && (
           <Button
             onClick={handleConfirmAllAppointments}
             disabled={isConfirmingAll}
@@ -196,7 +176,7 @@ export default function NotificationsPanel({
         )}
       </div>
 
-      {alerts.length > 0 ? (
+      {alerts?.length > 0 ? (
         alerts.map((alert) => {
           const appt = alert.appointment;
           const hasAppt = !!appt && !!appt._id;
@@ -212,7 +192,7 @@ export default function NotificationsPanel({
               } hover:bg-primary/15`}
             >
               <p className="text-sm font-semibold text-white/90">
-                {alert.message}
+                {t(alert.messageKey, alert.params || {}) as string}
               </p>
               {hasAppt ? (
                 <>

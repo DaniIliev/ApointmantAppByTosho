@@ -1,4 +1,11 @@
 {
+  "ALERTS": {
+    "NEW_APPOINTMENT": "New request from {{clientName}} for service \"{{serviceName}}\"",
+    "APPOINTMENT_UPDATED": "Updated request from {{clientName}} for service \"{{serviceName}}\"",
+    "SUBSCRIPTION_PURCHASED": "New plan {{planName}} has been activated for {{businessName}}!",
+    "SUBSCRIPTION_EXPIRING": "Your plan {{planName}} expires on {{expirationDate}}. Please renew your subscription.",
+    "KANBAN_ASSIGNMENT": "You have been assigned to card: {{cardTitle}}"
+  },
   "12345": "",
   "About AppointmentPro": "About AppointmentPro",
   "AppointmentPro is a modern, intuitive appointment management system designed to streamline your business operations and enhance customer experience.": "AppointmentPro is a modern, intuitive appointment management system designed to streamline your business operations and enhance customer experience.",
@@ -35,7 +42,6 @@
   "How modern appointment systems can enhance customer satisfaction and loyalty.": "How modern appointment systems can enhance customer satisfaction and loyalty.",
   "6 min read": "6 min read",
   "Blog & Insights": "Blog & Insights",
-  "Read More": "Read More",
   "No business id provided.": "No business id provided.",
   "Failed to load business configuration.": "Failed to load business configuration.",
   "Loading business configuration...": "Loading business configuration...",

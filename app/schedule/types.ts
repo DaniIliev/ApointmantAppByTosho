@@ -132,3 +132,4 @@ export interface UpdateDailySchedulePayload {
   workHour?: WorkHourEntry;
   workHours?: WorkHourEntry[];
 }
+
