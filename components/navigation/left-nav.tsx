@@ -217,10 +217,18 @@ export default function LeftNav({ isOpen, onClose }: LeftNavProps) {
   };
 
   const navItems: NavItem[] =
-    user?.role === "business" ||
-    user?.role === "manager" ||
-    user?.role === "staff" ||
     user?.role === "admin"
+      ? [
+          { href: "/admin/dashboard", label: t("Admin Dashboard"), icon: LayoutDashboard },
+          {
+            href: "/admin/grant-access",
+            label: t("Grant Access"),
+            icon: ShieldCheck,
+          },
+        ]
+      : user?.role === "business" ||
+        user?.role === "manager" ||
+        user?.role === "staff"
       ? [
           { href: "/home", label: t("Home"), icon: House },
 
@@ -288,16 +296,6 @@ export default function LeftNav({ isOpen, onClose }: LeftNavProps) {
               },
             ],
           },
-          ...(user?.role === "admin"
-            ? [
-                // Array to be spread if true
-                {
-                  href: "/admin/grant-access",
-                  label: t("Grant Access"),
-                  icon: ShieldCheck,
-                },
-              ]
-            : []),
           {
             href: "/performance",
             label: t("Performance"),
