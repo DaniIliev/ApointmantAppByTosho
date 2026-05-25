@@ -13,7 +13,6 @@ import {
   ArrowRight,
   QrCode,
   Smartphone,
-  MessageSquare,
   Bell,
   CalendarCheck,
   Phone,
@@ -61,13 +60,11 @@ export default function BusinessLandingPage() {
             </div>
 
             <h1 className="text-4xl sm:text-5xl md:text-5xl font-bold tracking-tight text-text-primary mb-4">
-              {t("Smart Scheduling for Multi‑Location Businesses")}
+              {t("Manage all your locations in one place")}
             </h1>
 
             <p className="text-base text-muted-foreground max-w-2xl mx-auto mb-6">
-              {t(
-                "Manage staff, services and bookings across multiple locations — all from one account.",
-              )}
+              {t("Everything you need to run your business, from staff schedules to client bookings, simplified.")}
             </p>
 
             <div className="flex items-center justify-center gap-3">
@@ -84,12 +81,10 @@ export default function BusinessLandingPage() {
         <div className="container mx-auto px-4">
           <div className="max-w-4xl mx-auto text-center mb-8">
             <h2 className="text-4xl sm:text-5xl font-bold">
-              {t("Multiple locations, one dashboard")}
+              {t("Your whole business, one screen")}
             </h2>
             <p className="text-base text-muted-foreground mt-4">
-              {t(
-                "Create locations for every branch — staff, services and opening hours are managed centrally.",
-              )}
+              {t("Whether you have one shop or ten, manage your team and services from a single central hub.")}
             </p>
           </div>
 
@@ -126,12 +121,10 @@ export default function BusinessLandingPage() {
         <div className="container mx-auto px-4">
           <div className="max-w-6xl mx-auto text-center space-y-4">
             <h2 className="text-4xl sm:text-5xl md:text-5xl font-bold text-balance">
-              {t("Everything Clients And Staff Need")}
+              {t("Built for your team and your clients")}
             </h2>
             <p className="text-base text-muted-foreground max-w-3xl mx-auto">
-              {t(
-                "Booking via link, QR in the salon, or directly from the phone — with a helpful AI assistant.",
-              )}
+              {t("Give your clients the easiest way to book—online, via QR code, or straight from their phone.")}
             </p>
           </div>
 
@@ -141,22 +134,18 @@ export default function BusinessLandingPage() {
               <div className="flex items-start gap-3">
                 <QrCode className="h-6 w-6 text-primary flex-shrink-0" />
                 <div>
-                  <h3 className="font-semibold">{t("Book via QR or Link")}</h3>
+                  <h3 className="font-semibold">{t("Simple Online Booking")}</h3>
                   <p className="text-base text-muted-foreground">
-                    {t(
-                      "Clients book from a shared link or by scanning a QR code displayed in your salon.",
-                    )}
+                    {t("Your clients pick a time that works for them using a simple link or a QR code in your shop.")}
                   </p>
                 </div>
               </div>
               <div className="flex items-start gap-3">
                 <Smartphone className="h-6 w-6 text-primary flex-shrink-0" />
                 <div>
-                  <h3 className="font-semibold">{t("Mobile Friendly")}</h3>
+                  <h3 className="font-semibold">{t("Always Ready on Mobile")}</h3>
                   <p className="text-base text-muted-foreground">
-                    {t(
-                      "Optimized for phones, so clients quickly pick a service and a free slot.",
-                    )}
+                    {t("Booking takes seconds. It's fast, smooth, and works perfectly on any phone.")}
                   </p>
                 </div>
               </div>
@@ -185,10 +174,10 @@ export default function BusinessLandingPage() {
                 <CalendarCheck className="h-5 w-5 text-primary flex-shrink-0" />
                 <div>
                   <p className="text-base font-semibold">
-                    {t("Client Portal")}
+                    {t("Client Space")}
                   </p>
                   <p className="text-base text-muted-foreground">
-                    {t("Clients review bookings and cancel on their own.")}
+                    {t("Clients can manage their own appointments, saving you from constant phone calls.")}
                   </p>
                 </div>
               </div>
@@ -196,10 +185,10 @@ export default function BusinessLandingPage() {
                 <Bell className="h-5 w-5 text-primary flex-shrink-0" />
                 <div>
                   <p className="text-base font-semibold">
-                    {t("Notifications & Approvals")}
+                    {t("You're in Control")}
                   </p>
                   <p className="text-base text-muted-foreground">
-                    {t("Get notified, approve or decline appointments.")}
+                    {t("Get instant alerts for new bookings. You decide which ones to accept.")}
                   </p>
                 </div>
               </div>
@@ -207,10 +196,10 @@ export default function BusinessLandingPage() {
                 <Zap className="h-5 w-5 text-primary flex-shrink-0" />
                 <div>
                   <p className="text-base font-semibold">
-                    {t("Automatic Reminders")}
+                    {t("No More No-Shows")}
                   </p>
                   <p className="text-base text-muted-foreground">
-                    {t("Reduce missed visits with timely reminders.")}
+                    {t("We send automatic reminders so your clients never miss their spot.")}
                   </p>
                 </div>
               </div>
@@ -224,12 +213,10 @@ export default function BusinessLandingPage() {
                 <Users className="h-6 w-6 text-primary flex-shrink-0" />
                 <div>
                   <h3 className="font-semibold">
-                    {t("Multiple Staff & Schedules")}
+                    {t("Team Management")}
                   </h3>
                   <p className="text-base text-muted-foreground">
-                    {t(
-                      "Add many staff members with their own working hours and breaks.",
-                    )}
+                    {t("Organize your team effortlessly with custom schedules and breaks for everyone.")}
                   </p>
                 </div>
               </div>
@@ -237,12 +224,10 @@ export default function BusinessLandingPage() {
                 <CheckCircle2 className="h-6 w-6 text-primary flex-shrink-0" />
                 <div>
                   <h3 className="font-semibold">
-                    {t("Services Assigned To Staff")}
+                    {t("Flexible Services")}
                   </h3>
                   <p className="text-base text-muted-foreground">
-                    {t(
-                      "Create services and assign them to specific staff members.",
-                    )}
+                    {t("Set up your services and choose exactly which team members handle them.")}
                   </p>
                 </div>
               </div>
@@ -250,12 +235,10 @@ export default function BusinessLandingPage() {
                 <ListChecks className="h-6 w-6 text-primary flex-shrink-0" />
                 <div>
                   <h3 className="font-semibold">
-                    {t("Centralized Appointment Management")}
+                    {t("Everything in One Place")}
                   </h3>
                   <p className="text-base text-muted-foreground">
-                    {t(
-                      "Manage all bookings in one place—create, review, approve or decline.",
-                    )}
+                    {t("Keep your calendar organized. Review, approve, or move bookings with a few clicks.")}
                   </p>
                 </div>
               </div>
@@ -263,23 +246,19 @@ export default function BusinessLandingPage() {
                 <Phone className="h-6 w-6 text-primary flex-shrink-0" />
                 <div>
                   <h3 className="font-semibold">
-                    {t("Staff Can Book For Clients")}
+                    {t("Quick Manual Bookings")}
                   </h3>
                   <p className="text-base text-muted-foreground">
-                    {t(
-                      "Take bookings on behalf of clients when they call or visit the salon.",
-                    )}
+                    {t("Take phone or walk-in bookings yourself and stay organized instantly.")}
                   </p>
                 </div>
               </div>
               <div className="flex items-start gap-3">
                 <BarChart3 className="h-6 w-6 text-primary flex-shrink-0" />
                 <div>
-                  <h3 className="font-semibold">{t("Analytics")}</h3>
+                  <h3 className="font-semibold">{t("Smart Insights")}</h3>
                   <p className="text-base text-muted-foreground">
-                    {t(
-                      "See popular services, staff workload, and trends over time.",
-                    )}
+                    {t("See what’s working and what’s not with simple, easy-to-read numbers.")}
                   </p>
                 </div>
               </div>
@@ -297,91 +276,79 @@ export default function BusinessLandingPage() {
           <div className="mx-auto">
             <div className="text-center mb-12">
               <h2 className="text-4xl sm:text-5xl font-bold mb-4">
-                {t("Visualize Your Business Performance")}
+                {t("Understand your growth")}
               </h2>
               <p className="text-base text-muted-foreground text-balance max-w-3xl mx-auto">
-                {t(
-                  "Create custom analytics dashboards with drag-and-drop charts. Build the perfect view of your business data with our flexible, responsive grid layout.",
-                )}
+                {t("See your success in real-time. We help you track your revenue, bookings, and team performance without the complicated spreadsheets.")}
               </p>
             </div>
 
-            <div className="grid lg:grid-cols-2 gap-12 items-center mb-12">
-              <div className="space-y-6">
-                <div className="flex gap-4">
-                  <div className="flex-shrink-0">
-                    <BarChart3 className="h-6 w-6 text-primary" />
-                  </div>
-                  <div>
-                    <h3 className="text-base font-semibold mb-2">
-                      {t("Customizable Chart Types")}
-                    </h3>
-                    <p className="text-base text-muted-foreground">
-                      {t(
-                        "Choose from line, bar, pie, and combined charts. Visualize appointments, revenue, services, and more with your preferred chart style.",
-                      )}
-                    </p>
-                  </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-16">
+              <div className="flex flex-col gap-4">
+                <div className="flex-shrink-0">
+                  <BarChart3 className="h-6 w-6 text-primary" />
                 </div>
-                <div className="flex gap-4">
-                  <div className="flex-shrink-0">
-                    <Palette className="h-6 w-6 text-primary" />
-                  </div>
-                  <div>
-                    <h3 className="text-base font-semibold mb-2">
-                      {t("Drag & Drop Grid Layout")}
-                    </h3>
-                    <p className="text-base text-muted-foreground">
-                      {t(
-                        "Arrange your dashboard exactly how you want. Resize and reposition charts with intuitive drag-and-drop. Your layout automatically adapts to mobile devices.",
-                      )}
-                    </p>
-                  </div>
-                </div>
-                <div className="flex gap-4">
-                  <div className="flex-shrink-0">
-                    <TrendingUp className="h-6 w-6 text-primary" />
-                  </div>
-                  <div>
-                    <h3 className="text-base font-semibold mb-2">
-                      {t("Real-Time KPI Cards")}
-                    </h3>
-                    <p className="text-base text-muted-foreground">
-                      {t(
-                        "Track key metrics at a glance with live KPI cards. Monitor total appointments, revenue, client retention, and more with automatic change indicators.",
-                      )}
-                    </p>
-                  </div>
-                </div>
-                <div className="flex gap-4">
-                  <div className="flex-shrink-0">
-                    <Zap className="h-6 w-6 text-primary" />
-                  </div>
-                  <div>
-                    <h3 className="text-base font-semibold mb-2">
-                      {t("Filter by Date & Staff")}
-                    </h3>
-                    <p className="text-base text-muted-foreground">
-                      {t(
-                        "Analyze data by custom date ranges or individual staff members. Get the insights that matter most to your business decisions.",
-                      )}
-                    </p>
-                  </div>
+                <div>
+                  <h3 className="text-base font-semibold mb-2">
+                    {t("Visual Reports")}
+                  </h3>
+                  <p className="text-sm text-muted-foreground">
+                    {t("Pick the charts that make sense to you. See your revenue and bookings grow month by month.")}
+                  </p>
                 </div>
               </div>
+              <div className="flex flex-col gap-4">
+                <div className="flex-shrink-0">
+                  <Palette className="h-6 w-6 text-primary" />
+                </div>
+                <div>
+                  <h3 className="text-base font-semibold mb-2">
+                    {t("Your Dashboard, Your Way")}
+                  </h3>
+                  <p className="text-sm text-muted-foreground">
+                    {t("Organize your stats exactly how you like them. It’s your business, viewed your way.")}
+                  </p>
+                </div>
+              </div>
+              <div className="flex flex-col gap-4">
+                <div className="flex-shrink-0">
+                  <TrendingUp className="h-6 w-6 text-primary" />
+                </div>
+                <div>
+                  <h3 className="text-base font-semibold mb-2">
+                    {t("Live Stats")}
+                  </h3>
+                  <p className="text-base text-muted-foreground">
+                    {t("Keep an eye on the numbers that matter most—total bookings, earnings, and new clients.")}
+                  </p>
+                </div>
+              </div>
+              <div className="flex flex-col gap-4">
+                <div className="flex-shrink-0">
+                  <Zap className="h-6 w-6 text-primary" />
+                </div>
+                <div>
+                  <h3 className="text-base font-semibold mb-2">
+                    {t("Deep Dive")}
+                  </h3>
+                  <p className="text-base text-muted-foreground">
+                    {t("Filter by date or team member to see exactly who’s performing best.")}
+                  </p>
+                </div>
+              </div>
+            </div>
 
-              <div className="space-y-6">
-                <AnalyticsPreview />
-              </div>
+            <div className="w-full mx-auto">
+              <AnalyticsPreview />
             </div>
           </div>
         </div>
       </section>
       <section className="bg-gray-50 dark:bg-gray-900 py-12">
-        <div className="container mx-auto px-4">
+        <div className="mx-auto px-4">
           <div className="mx-auto text-center space-y-6">
-            <h2 className="max-w-5xl text-4xl sm:text-5xl md:text-5xl align-center font-bold text-balance mb-10 mx-auto">
-              {t("Organize work easily with Kanban")}
+            <h2 className="text-4xl sm:text-5xl md:text-5xl align-center font-bold text-balance mb-10 mx-auto">
+              {t("Never lose track of a task")}
             </h2>
             {/* Kanban Board Interactive Preview */}
             <div className="flex justify-center mb-6">
@@ -390,42 +357,34 @@ export default function BusinessLandingPage() {
               </div>
             </div>
             <p className="text-base text-muted-foreground max-w-3xl mx-auto">
-              {t(
-                "Stay on top of every task, deadline, and project with our intuitive Kanban Board. Designed for teams and individuals, it helps you visualize work, track progress, and boost productivity—all in one place.",
-              )}
+              {t("Keep your daily tasks organized. From shop maintenance to client follow-ups, see everything that needs to be done in one clear view.")}
             </p>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mt-8">
               <div className="flex flex-col items-center">
                 <Check className="h-10 w-10 text-primary mb-2" />
                 <h3 className="font-semibold text-base mb-2">
-                  {t("Drag & Drop Tasks")}
+                  {t("Move Tasks Fast")}
                 </h3>
                 <p className="text-base text-muted-foreground">
-                  {t(
-                    "Easily move tasks between columns to reflect their status. Simple, fast, and visual.",
-                  )}
+                  {t("Move things around as they get done. It's simple, fast, and keeps you moving.")}
                 </p>
               </div>
               <div className="flex flex-col items-center">
                 <BarChart3 className="h-10 w-10 text-primary mb-2" />
                 <h3 className="font-semibold text-base mb-2">
-                  {t("Track Progress")}
+                  {t("See What's Done")}
                 </h3>
                 <p className="text-base text-muted-foreground">
-                  {t(
-                    "See what’s in progress, completed, or overdue at a glance. Perfect for managing team workloads.",
-                  )}
+                  {t("Know exactly what's pending and what's finished. No more guessing what to do next.")}
                 </p>
               </div>
               <div className="flex flex-col items-center">
                 <Users className="h-10 w-10 text-primary mb-2" />
                 <h3 className="font-semibold text-base mb-2">
-                  {t("Collaborate in Real Time")}
+                  {t("Team Sync")}
                 </h3>
                 <p className="text-base text-muted-foreground">
-                  {t(
-                    "Assign tasks, add comments, and keep everyone in sync—no matter where you work from.",
-                  )}
+                  {t("Work together with your team. Assign tasks and keep everyone on the same page.")}
                 </p>
               </div>
             </div>
@@ -446,12 +405,10 @@ export default function BusinessLandingPage() {
                   {t("Results")}
                 </p>
                 <h2 className="text-4xl sm:text-5xl md:text-5xl font-bold text-balance">
-                  {t("Why Businesses Choose AppointDI")}
+                  {t("Why it works for you")}
                 </h2>
                 <p className="text-base text-muted-foreground max-w-2xl mx-auto">
-                  {t(
-                    "From fewer no-shows to happier staff, see how the platform impacts daily operations and growth.",
-                  )}
+                  {t("We focus on making your life easier, your team happier, and your business more profitable.")}
                 </p>
               </div>
 
@@ -461,12 +418,10 @@ export default function BusinessLandingPage() {
                     <CheckCircle2 className="h-14 w-14 text-primary" />
                     <div>
                       <h4 className="text-base font-semibold text-primary mb-1">
-                        {t("Save Time & Reduce No-Shows")}
+                        {t("Save Time Every Day")}
                       </h4>
                       <p className="text-base text-muted-foreground">
-                        {t(
-                          "Automated notifications and confirmations cut no-shows and save staff time.",
-                        )}
+                        {t("Let the system handle the reminders so you can focus on your work.")}
                       </p>
                     </div>
                   </div>
@@ -476,12 +431,10 @@ export default function BusinessLandingPage() {
                     <TrendingUp className="h-7 w-14 text-primary" />
                     <div>
                       <h4 className="text-base font-semibold text-primary mb-2">
-                        {t("Increase Revenue")}
+                        {t("Grow Your Income")}
                       </h4>
                       <p className="text-base text-muted-foreground">
-                        {t(
-                          "Fill more slots and optimize services with performance insights.",
-                        )}
+                        {t("Fill your calendar and spot new opportunities to increase your earnings.")}
                       </p>
                     </div>
                   </div>
@@ -491,12 +444,10 @@ export default function BusinessLandingPage() {
                     <Users className="h-7 w-12 text-primary" />
                     <div>
                       <h4 className="text-base font-semibold text-primary mb-2">
-                        {t("Empower Your Team")}
+                        {t("A Happier Team")}
                       </h4>
                       <p className="text-base text-muted-foreground">
-                        {t(
-                          "Staff manage schedules and bookings while you stay in control.",
-                        )}
+                        {t("Give your team the tools to manage their own day while you stay in total control.")}
                       </p>
                     </div>
                   </div>
@@ -506,12 +457,10 @@ export default function BusinessLandingPage() {
                     <Shield className="h-7 w-12 text-primary" />
                     <div>
                       <h4 className="text-base font-semibold text-primary mb-2">
-                        {t("Professional & Reliable")}
+                        {t("Look Professional")}
                       </h4>
                       <p className="text-base text-muted-foreground">
-                        {t(
-                          "Deliver a seamless booking experience that reflects your brand.",
-                        )}
+                        {t("Give your clients a high-end booking experience that matches your great service.")}
                       </p>
                     </div>
                   </div>
@@ -527,12 +476,10 @@ export default function BusinessLandingPage() {
         <div className="container mx-auto px-4">
           <div className="max-w-6xl mx-auto text-center mb-8">
             <h2 className="text-4xl sm:text-5xl md:text-5xl font-bold text-balance mb-4">
-              {t("Custom Branded Public Pages")}
+              {t("Your own professional website")}
             </h2>
             <p className="text-base text-muted-foreground text-balance max-w-3xl mx-auto">
-              {t(
-                "We create a tailored client-facing landing page (website) for your business — with your logo and a preferred layout. We agree on the design, build the page, and provide it for you to use as your site. The page connects to AppointDI for live schedules and bookings.",
-              )}
+              {t("Need a custom look? We can build a beautiful, branded website just for you. It’ll have your logo, your colors, and it’ll be fully connected to your AppointDI calendar.")}
             </p>
           </div>
 
@@ -541,7 +488,7 @@ export default function BusinessLandingPage() {
               <Palette className="h-6 w-6 text-primary flex-shrink-0" />
               <div>
                 <h3 className="font-semibold text-base mb-1">
-                  {t("Branding & Logo")}
+                  {t("Your Brand First")}
                 </h3>
                 <p className="text-base text-muted-foreground">
                   {t("Page styled to your brand — logo, colors, typography.")}
@@ -552,12 +499,10 @@ export default function BusinessLandingPage() {
               <ListChecks className="h-6 w-6 text-primary flex-shrink-0" />
               <div>
                 <h3 className="font-semibold text-base mb-1">
-                  {t("Preferred Layout")}
+                  {t("Custom Design")}
                 </h3>
                 <p className="text-base text-muted-foreground">
-                  {t(
-                    "You choose how content is visualized — list, calendar, staff-first or service-first.",
-                  )}
+                  {t("You choose how content is visualized — list, calendar, staff-first or service-first.")}
                 </p>
               </div>
             </div>
@@ -565,12 +510,10 @@ export default function BusinessLandingPage() {
               <CalendarCheck className="h-6 w-6 text-primary flex-shrink-0" />
               <div>
                 <h3 className="font-semibold text-base mb-1">
-                  {t("Connected To AppointDI")}
+                  {t("Fully Synced")}
                 </h3>
                 <p className="text-base text-muted-foreground">
-                  {t(
-                    "Live connection to schedules and bookings from our software.",
-                  )}
+                  {t("Live connection to schedules and bookings from our software.")}
                 </p>
               </div>
             </div>
@@ -595,12 +538,10 @@ export default function BusinessLandingPage() {
         <div className="container mx-auto px-4 text-center">
           <div className="max-w-3xl mx-auto space-y-4">
             <h2 className="text-4xl sm:text-5xl md:text-5xl font-bold text-text-primary">
-              {t("Ready to Transform Your Business?")}
+              {t("Ready to simplify your day?")}
             </h2>
             <p className="text-base text-primary-foreground/90 text-balance">
-              {t(
-                "Join thousands of businesses that have streamlined their operations and increased revenue with AppointDI.",
-              )}
+              {t("Join other businesses who are saving time and growing faster with AppointDI.")}
             </p>
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4">
               <Button
@@ -608,7 +549,7 @@ export default function BusinessLandingPage() {
                 className="text-base sm:text-lg px-7 py-6 shadow-xl hover:shadow-2xl hover:scale-[1.02] transition-transform theme-gradient-primary text-white ring-1 ring-white/20"
                 onClick={() => router.push("/register")}
               >
-                <span className="mr-2">{t("Join Us")}</span>
+                <span className="mr-2">{t("Start Now")}</span>
                 <ArrowRight className="h-5 w-5" />
               </Button>
             </div>

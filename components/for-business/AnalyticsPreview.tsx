@@ -8,6 +8,7 @@ import {
   Euro,
   GripHorizontal,
   Trash2,
+  Users,
 } from "lucide-react";
 import { useMemo, useState, useCallback, useEffect, useRef } from "react";
 import GridLayout, { Layout } from "react-grid-layout";
@@ -97,43 +98,46 @@ export function AnalyticsPreview() {
   const containerRef = useRef<HTMLDivElement>(null);
   const [containerWidth, setContainerWidth] = useState(360);
   const chartColors = useMemo(() => getThemeChartColorTokens(), []);
-  const fixedHeight = 660;
+  const fixedHeight = 400;
+  const maxHeight = 700;
   const rowHeight = 44;
   const isMobile = containerWidth <= 768;
-  const maxWidth = 960;
+  // const maxWidth = 960;
   const wasMobile = useRef(false);
   const [layout, setLayout] = useState<Layout[]>([
-    { i: "kpi1", x: 0, y: 0, w: 6, h: 2, minW: 4, minH: 2, maxW: 12, maxH: 4 },
-    { i: "kpi2", x: 6, y: 0, w: 6, h: 2, minW: 4, minH: 2, maxW: 12, maxH: 4 },
+    { i: "kpi1", x: 0, y: 0, w: 3, h: 2, minW: 2, minH: 2, maxW: 6, maxH: 4 },
+    { i: "kpi2", x: 3, y: 0, w: 3, h: 2, minW: 2, minH: 2, maxW: 6, maxH: 4 },
+    { i: "kpi3", x: 6, y: 0, w: 3, h: 2, minW: 2, minH: 2, maxW: 6, maxH: 4 },
+    { i: "kpi4", x: 9, y: 0, w: 3, h: 2, minW: 2, minH: 2, maxW: 6, maxH: 4 },
     {
       i: "services",
       x: 0,
       y: 2,
-      w: 12,
+      w: 4,
       h: 6,
-      minW: 6,
+      minW: 3,
       minH: 4,
       maxW: 12,
       maxH: 16,
     },
     {
       i: "revenue",
-      x: 0,
-      y: 8,
-      w: 6,
+      x: 4,
+      y: 2,
+      w: 4,
       h: 6,
-      minW: 4,
+      minW: 3,
       minH: 4,
       maxW: 12,
       maxH: 20,
     },
     {
       i: "appointments",
-      x: 6,
-      y: 8,
-      w: 6,
+      x: 8,
+      y: 2,
+      w: 4,
       h: 6,
-      minW: 4,
+      minW: 3,
       minH: 4,
       maxW: 12,
       maxH: 20,
@@ -142,6 +146,8 @@ export function AnalyticsPreview() {
   const [visibleIds, setVisibleIds] = useState<string[]>([
     "kpi1",
     "kpi2",
+    "kpi3",
+    "kpi4",
     "appointments",
     "revenue",
     "services",
@@ -150,7 +156,7 @@ export function AnalyticsPreview() {
     const updateWidth = () => {
       const measured = containerRef.current?.offsetWidth ?? window.innerWidth;
       const safeWidth = Math.max(320, measured);
-      setContainerWidth(Math.min(safeWidth, maxWidth));
+      setContainerWidth(safeWidth);
     };
 
     updateWidth();
@@ -159,13 +165,32 @@ export function AnalyticsPreview() {
   }, []);
 
   const handleLayoutChange = useCallback((newLayout: Layout[]) => {
-    // Clamp horizontally, allow vertical growth
-    const clampedLayout = newLayout.map((item) => ({
-      ...item,
-      x: Math.max(0, Math.min(item.x, 12 - item.w)),
-    }));
-    setLayout(clampedLayout);
-  }, []);
+    // Calculate max rows based on maxHeight
+    const maxRows = Math.floor(maxHeight / (rowHeight + 8));
+
+      const clampedLayout = newLayout.map((item) => {
+        let finalY = item.y;
+        let finalH = item.h;
+
+        // Strict row limit
+        if (finalY + finalH > maxRows) {
+          finalH = Math.max(item.minH || 1, maxRows - finalY);
+          if (finalY + finalH > maxRows) {
+            finalY = Math.max(0, maxRows - finalH);
+          }
+        }
+
+        return {
+          ...item,
+          x: Math.max(0, Math.min(item.x, 12 - item.w)),
+          y: finalY,
+          h: finalH,
+          // Dynamically set maxH so the UI prevents resizing further
+          maxH: maxRows - finalY,
+        };
+      });
+      setLayout(clampedLayout);
+  }, [maxHeight, rowHeight]);
 
   const handleRemove = useCallback((id: string) => {
     setLayout((prev) => prev.filter((item) => item.i !== id));
@@ -182,18 +207,49 @@ export function AnalyticsPreview() {
         );
 
         let currentY = 0;
+        let currentX = 0;
+        let maxRowHeight = 0;
+
         return sorted.map((item) => {
+          const isKPI = item.i.startsWith("kpi");
+          const width = isKPI ? 6 : 12;
           const height = Math.max(item.h, item.minH ?? item.h);
+
+          // If it's a KPI and it doesn't fit on the current row, move to next row
+          if (isKPI) {
+            if (currentX + width > 12) {
+              currentX = 0;
+              currentY += maxRowHeight;
+              maxRowHeight = 0;
+            }
+          } else {
+            // Charts always start on a new row
+            if (currentX !== 0) {
+              currentY += maxRowHeight;
+              currentX = 0;
+              maxRowHeight = 0;
+            }
+          }
+
           const nextItem = {
             ...item,
-            x: 0,
-            w: 12,
+            x: currentX,
+            w: width,
             y: currentY,
             h: height,
             maxW: 12,
             maxH: Math.max(item.maxH ?? height, 20),
           };
-          currentY += height;
+
+          maxRowHeight = Math.max(maxRowHeight, height);
+          currentX += width;
+
+          if (currentX >= 12) {
+            currentX = 0;
+            currentY += maxRowHeight;
+            maxRowHeight = 0;
+          }
+
           return nextItem;
         });
       });
@@ -421,7 +477,7 @@ export function AnalyticsPreview() {
     <div
       className="relative"
       ref={containerRef}
-      style={{ maxWidth, margin: "0 auto" }}
+      style={{  margin: "0 auto" }}
     >
       {/* Info badge */}
       <div className="absolute -top-10 right-0 text-xs text-primary/70 flex items-center gap-1.5 z-10 bg-primary/10 px-3 py-1.5 rounded-full border border-primary/20">
@@ -429,7 +485,7 @@ export function AnalyticsPreview() {
         <span className="font-medium">Drag & resize to customize</span>
       </div>
 
-      <div style={{ minHeight: fixedHeight, overflow: "visible" }}>
+      <div style={{ minHeight: fixedHeight, maxHeight: maxHeight, overflow: "visible" }}>
         <GridLayout
           className="layout"
           layout={layout}
@@ -495,6 +551,62 @@ export function AnalyticsPreview() {
                   change={8.3}
                   changeType="increase"
                   icon={<Euro className="h-5 w-5 text-primary" />}
+                  className="h-full overflow-hidden"
+                />
+              </div>
+            </div>
+          )}
+
+          {/* KPI Card 3 */}
+          {visibleIds.includes("kpi3") && (
+            <div key="kpi3" className="cursor-grab active:cursor-grabbing">
+              <div className="relative h-full group">
+                <div className="absolute top-2 left-0 right-0 flex items-center justify-center pointer-events-none">
+                  <div className="drag-handle pointer-events-auto rounded-full bg-white/5 px-3 py-1 shadow-sm border border-white/10 flex items-center gap-1 text-xs text-muted-foreground">
+                    <GripHorizontal className="h-4 w-4" />
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => handleRemove("kpi3")}
+                  className="absolute top-2 right-2 p-1.5 rounded-full bg-white/5 border border-white/10 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity hover:text-red-500 hover:border-red-400 hover:bg-red-500/10"
+                >
+                  <Trash2 className="h-4 w-4" />
+                </button>
+                <KPICard
+                  title={t("Active Clients")}
+                  value="1,240"
+                  change={5.2}
+                  changeType="increase"
+                  icon={<Users className="h-5 w-5 text-primary" />}
+                  className="h-full overflow-hidden"
+                />
+              </div>
+            </div>
+          )}
+
+          {/* KPI Card 4 */}
+          {visibleIds.includes("kpi4") && (
+            <div key="kpi4" className="cursor-grab active:cursor-grabbing">
+              <div className="relative h-full group">
+                <div className="absolute top-2 left-0 right-0 flex items-center justify-center pointer-events-none">
+                  <div className="drag-handle pointer-events-auto rounded-full bg-white/5 px-3 py-1 shadow-sm border border-white/10 flex items-center gap-1 text-xs text-muted-foreground">
+                    <GripHorizontal className="h-4 w-4" />
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => handleRemove("kpi4")}
+                  className="absolute top-2 right-2 p-1.5 rounded-full bg-white/5 border border-white/10 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity hover:text-red-500 hover:border-red-400 hover:bg-red-500/10"
+                >
+                  <Trash2 className="h-4 w-4" />
+                </button>
+                <KPICard
+                  title={t("Avg. Rating")}
+                  value="4.9"
+                  change={0.2}
+                  changeType="increase"
+                  icon={<TrendingUp className="h-5 w-5 text-primary" />}
                   className="h-full overflow-hidden"
                 />
               </div>

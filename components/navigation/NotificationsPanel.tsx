@@ -1,7 +1,8 @@
 "use client";
 import React, { useState } from "react";
 import { useTranslation } from "react-i18next";
-import { Check, X, Trash2 } from "lucide-react";
+import { Check, X, Trash2, CreditCard } from "lucide-react";
+
 import callApi from "@/app/Api/callApi";
 import { Button } from "../ui/button";
 import { CustomTooltip } from "../customUIComponents/CustomTooltip";
@@ -237,7 +238,20 @@ export default function NotificationsPanel({
                   <p className="text-xs text-white/60 mt-1">
                     {formatDateTime(alert.createdAt)}
                   </p>
-                  <div className="flex justify-end mt-2">
+                  <div className="flex justify-end mt-2 gap-2">
+                    {alert.type === "subscription_expiring" && (
+                      <Button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          window.location.href = "/dashboard/subscription";
+                        }}
+                        size="sm"
+                        className="h-7 px-2 text-xs font-semibold text-white bg-primary/80 rounded-md border border-white/10 flex items-center gap-1"
+                      >
+                        <CreditCard className="w-3 h-3" />
+                        {t("Manage")}
+                      </Button>
+                    )}
                     <CustomTooltip
                       stopPropagation
                       onClick={() => {
@@ -249,6 +263,7 @@ export default function NotificationsPanel({
                   </div>
                 </>
               )}
+
             </div>
           );
         })

@@ -1,3 +1,5 @@
+"use client";
+
 import React from "react";
 import Link from "next/link";
 import { useTranslation } from "react-i18next";
@@ -5,7 +7,7 @@ import { Mail, Phone, MapPin, Facebook, Instagram, Twitter } from "lucide-react"
 
 const Footer = () => {
   const { t } = useTranslation();
-  
+
   return (
     <footer className="bg-primary-foreground mt-auto pt-16 pb-8">
       <div className="container mx-auto px-4">
@@ -17,8 +19,8 @@ const Footer = () => {
                 AppointDI
               </h1>
             </Link>
-            <p className="text-muted-foreground text-sm leading-relaxed max-w-xs">
-              {t("AppointmentPro is a modern, intuitive appointment management system designed to streamline your business operations and enhance customer experience.")}
+            <p className="text-base text-muted-foreground max-w-2xl mx-auto mb-8 leading-relaxed">
+              {t("AppointDI is an easy tool to manage your bookings. It helps you stay organized and gives your clients a better way to book their spots.")}
             </p>
             <div className="flex items-center gap-4">
               <a href="#" className="p-2 bg-background rounded-full border border-border hover:border-primary hover:text-primary transition-all duration-300">

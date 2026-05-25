@@ -35,9 +35,6 @@ import { formatDateAndTime } from "@/Global/Utils/commonFn";
 import { useTranslation } from "react-i18next";
 import { StatusChip } from "@/components/customUIComponents/StatusChip";
 
-const ReactECharts = dynamic(() => import("echarts-for-react"), {
-  ssr: false,
-});
 
 type QuickAction = {
   label: string;

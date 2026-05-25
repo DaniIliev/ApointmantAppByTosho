@@ -442,11 +442,6 @@ export function KanbanPreview() {
           ) : null}
         </DragOverlay>
       </DndContext>
-
-      {/* Info text */}
-      <div className="mt-4 text-center text-sm text-muted-foreground">
-        <p>💡 {t("Drag cards between columns to organize salon tasks")}</p>
-      </div>
     </div>
   );
 }

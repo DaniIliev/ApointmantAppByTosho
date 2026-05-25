@@ -60,41 +60,35 @@ export default function AboutPage() {
       <section className="relative overflow-hidden py-12 isolate">
         <div className="absolute inset-0 -z-10 bg-gradient-to-b from-primary/15 via-background to-background" />
         <div className="absolute inset-0 -z-10 opacity-60 [background-image:radial-gradient(circle_at_1px_1px,rgba(148,163,184,0.2)_1px,transparent_0)] [background-size:24px_24px]" />
-        <div className="absolute -left-16 top-0 -z-10 h-64 w-64 rounded-full bg-primary/25 blur-3xl" />
-        <div className="absolute right-0 top-20 -z-10 h-80 w-80 rounded-full bg-accent/25 blur-3xl" />
-        <div className="absolute bottom-0 left-1/2 -z-10 h-48 w-[40rem] -translate-x-1/2 rounded-full bg-primary/15 blur-3xl" />
-
+        
         <div className="container mx-auto px-4">
           <div className="mx-auto max-w-4xl text-center relative">
-            <div className="absolute left-1/2 top-0 -z-10 h-64 w-64 -translate-x-1/2 rounded-full bg-white/60 blur-3xl dark:bg-white/10" />
-
             <div>
               <div className="inline-flex items-center gap-2 rounded-full border border-primary/15 bg-card/80 px-4 py-2 shadow-sm backdrop-blur mb-6">
-                <span className="theme-logo-mask" aria-hidden="true" />
                 <span className="text-sm font-semibold text-primary">
-                  {t("Our Mission")}
+                  {t("About Us")}
                 </span>
               </div>
 
               <h1 className="text-4xl sm:text-5xl md:text-5xl font-bold tracking-tight text-text-primary mb-4 leading-tight">
-                {t("Transforming how")} <br />
-                <span className="theme-text-gradient">{t("Businesses Schedule")}</span>
+                {t("Scheduling made")} <br />
+                <span className="theme-text-gradient">{t("simple for everyone")}</span>
               </h1>
 
               <p className="text-base text-muted-foreground max-w-2xl mx-auto mb-8 leading-relaxed">
-                {t("AppointDI is a modern, intuitive appointment management system designed to streamline your business operations and enhance customer experience.")}
+                {t("AppointDI helps you manage bookings without the stress. It’s a simple tool built to keep your calendar organized and your customers happy.")}
               </p>
 
               <div className="flex flex-wrap items-center justify-center gap-4">
                 <Button size="lg" className="rounded-xl px-8 h-12 shadow-lg shadow-primary/20" asChild>
                   <Link href="/register">
-                    <span className="mr-1">{t("Join Us")}</span>
+                    <span className="mr-1">{t("Get Started")}</span>
                     <ArrowRight className="h-5 w-5" />
                   </Link>
                 </Button>
                 <Button variant="outline" size="lg" className="rounded-xl px-8 h-12" asChild>
                   <Link href="/help/contact">
-                    <span className="mr-1">{t("Contact Us")}</span>
+                    <span className="mr-1">{t("Talk to Us")}</span>
                     <Mail className="h-5 w-5" />
                   </Link>
                 </Button>
@@ -108,10 +102,10 @@ export default function AboutPage() {
       <section className="py-12 bg-muted/30 border-y border-border/50">
         <div className="container mx-auto px-4">
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-6">
-            <StatsCard icon={Users} label={t("Active Businesses")} value="2,500+" />
-            <StatsCard icon={Calendar} label={t("Appointments Booked")} value="1.2M+" />
-            <StatsCard icon={Globe} label={t("Countries Reached")} value="15+" />
-            <StatsCard icon={Clock} label={t("Hours Saved")} value="10k+" />
+            <StatsCard icon={Users} label={t("Active Businesses")} value="150+" />
+            <StatsCard icon={Calendar} label={t("Total Bookings")} value="8,000+" />
+            <StatsCard icon={Globe} label={t("Countries")} value="3+" />
+            <StatsCard icon={Clock} label={t("Hours Saved")} value="500+" />
           </div>
         </div>
       </section>
@@ -120,32 +114,32 @@ export default function AboutPage() {
       <section className="py-12 bg-gray-50 dark:bg-gray-900">
         <div className="container mx-auto px-4">
           <div className="text-center mb-20 space-y-4">
-            <h2 className="text-4xl font-bold">{t("Why We Exist")}</h2>
+            <h2 className="text-4xl font-bold">{t("How we help")}</h2>
             <p className="text-muted-foreground max-w-2xl mx-auto">
-              {t("Our platform combines cutting-edge technology with user-friendly design to provide a comprehensive solution for appointment scheduling.")}
+              {t("We focused on building something that actually works for your daily routine.")}
             </p>
           </div>
 
           <div className="grid md:grid-cols-2 gap-12 max-w-5xl mx-auto">
             <ValueItem 
               icon={Target} 
-              title={t("Our Mission")} 
-              description={t("To empower businesses with efficient appointment management tools that save time and improve customer satisfaction.")} 
+              title={t("Clear Focus")} 
+              description={t("Spend less time on phone calls and more time doing your work.")} 
             />
             <ValueItem 
               icon={Zap} 
-              title={t("Efficiency First")} 
-              description={t("We believe scheduling should be seamless and automatic, allowing you to focus on what you do best.")} 
+              title={t("Fast & Easy")} 
+              description={t("Everything is automatic. Your clients pick a time, pay, and you're done.")} 
             />
             <ValueItem 
               icon={CheckCircle2} 
-              title={t("Trust & Security")} 
-              description={t("Your data and your clients' privacy are our top priorities. We build with security from the ground up.")} 
+              title={t("Safe & Private")} 
+              description={t("We keep your data secure. Your privacy is never an afterthought.")} 
             />
             <ValueItem 
               icon={BarChart3} 
-              title={t("Data-Driven Growth")} 
-              description={t("We provide the insights you need to understand your business performance and grow exponentially.")} 
+              title={t("Real Results")} 
+              description={t("See exactly how your business is doing with easy-to-read numbers.")} 
             />
           </div>
         </div>
@@ -155,16 +149,16 @@ export default function AboutPage() {
       <section className="py-12 bg-muted/30 relative overflow-hidden">
         <div className="container mx-auto px-4 relative z-10">
           <div className="max-w-4xl mx-auto text-center space-y-8">
-            <h2 className="text-4xl font-bold">{t("Our Story")}</h2>
+            <h2 className="text-4xl font-bold">{t("Why we started")}</h2>
             <div className="space-y-6 text-lg text-muted-foreground leading-relaxed">
               <p>
-                {t("Born out of a need for better scheduling tools, AppointDI started in 2024 with a simple goal: to make appointment management as easy as a single click.")}
+                {t("In 2024, we noticed that booking appointments was often a headache. Calendars were messy and clients were frustrated.")}
               </p>
               <p>
-                {t("We saw too many businesses struggling with messy calendars, missed appointments, and frustrated clients. We knew there had to be a better way.")}
+                {t("We built AppointDI to fix that. We wanted a tool that just works—no complicated manuals, just a simple way to manage your day.")}
               </p>
               <p>
-                {t("Today, we serve thousands of businesses across various industries, from hair salons to dental clinics, helping them grow and succeed in the digital age.")}
+                {t("Today, businesses of all sizes use us to stay organized and save time.")}
               </p>
             </div>
           </div>
@@ -173,15 +167,14 @@ export default function AboutPage() {
 
       {/* CTA Section */}
       <section>
-        <div >
+        <div>
           <div className="bg-primary p-12 md:p-20 text-center text-primary-foreground relative overflow-hidden shadow-2xl shadow-primary/30">
-            <div className="absolute inset-0 bg-gradient-to-br from-primary via-primary to-accent opacity-50" />
             <div className="relative z-10 space-y-8">
               <h2 className="text-4xl md:text-5xl font-bold max-w-3xl mx-auto leading-tight">
-                {t("Ready to Transform Your Business?")}
+                {t("Ready to try it?")}
               </h2>
               <p className="text-primary-foreground/80 text-xl max-w-xl mx-auto">
-                {t("Join thousands of businesses that have streamlined their operations and increased revenue with AppointDI.")}
+                {t("Set up your account in 5 minutes and see how much easier scheduling can be.")}
               </p>
               <div className="flex justify-center gap-4">
               <Button
@@ -189,7 +182,7 @@ export default function AboutPage() {
                 className="text-base sm:text-lg px-7 py-6 shadow-xl hover:shadow-2xl hover:scale-[1.02] transition-transform theme-gradient-primary text-white ring-1 ring-white/20"
                 onClick={() => router.push("/register")}
               >
-                <span className="mr-1">{t("Join Us")}</span>
+                <span className="mr-1">{t("Start Now")}</span>
                 <ArrowRight className="h-5 w-5" />
               </Button>
               </div>

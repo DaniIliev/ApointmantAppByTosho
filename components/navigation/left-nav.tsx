@@ -26,7 +26,9 @@ import {
   LayoutList,
   ShieldCheck, // For QR Code page
   MapPin,
+  Receipt,
 } from "lucide-react";
+
 
 import { useAuthContext } from "@/context/AuthContext";
 import useClickOutside from "@/Global/Hooks/useClickOutside";
@@ -178,9 +180,14 @@ export default function LeftNav({ isOpen, onClose }: LeftNavProps) {
   const router = useRouter();
   const { user, logout } = useAuthContext();
   const [isLangOpen, setIsLangOpen] = useState(false);
+  const [mounted, setMounted] = useState(false);
   const langRef = useRef<HTMLDivElement>(null);
   const touchStartX = useRef<number>(0);
   const touchCurrentX = useRef<number>(0);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   // ... (rest of the component logic)
 
@@ -270,6 +277,11 @@ export default function LeftNav({ isOpen, onClose }: LeftNavProps) {
                           label: t("Payments"),
                           icon: CreditCard,
                         },
+                        {
+                          href: "/dashboard/subscription",
+                          label: t("Subscription"),
+                          icon: Receipt,
+                        },
                       ]
                     : []),
                 ],
@@ -303,6 +315,8 @@ export default function LeftNav({ isOpen, onClose }: LeftNavProps) {
           { href: "/login", label: t("Sign in"), icon: LogIn },
         ];
 
+  if (!mounted) return null;
+
   return (
     <nav
       className={`zIndex-100 bg-primary-foreground fixed left-0 top-17.5 bottom-0 backdrop-blur-xl z-40 transition-all duration-300 
@@ -318,9 +332,11 @@ export default function LeftNav({ isOpen, onClose }: LeftNavProps) {
       onTouchMove={handleTouchMove}
       onTouchEnd={handleTouchEnd}
     >
-      <div className={`p-4 h-full flex flex-col relative`}>
-        <LocationSelector isOpen={isOpen} />
-        <div className="space-y-2 flex-1 overflow-y-auto pb-20">
+      <div className={`h-full flex flex-col relative`}>
+        <div className="pt-2 px-3">
+          <LocationSelector isOpen={isOpen} />
+        </div>
+        <div className="space-y-2 flex-1 overflow-y-auto pt-2pb-20 px-3">
           {navItems.map((item) => (
             <SubMenu
               key={item.label}

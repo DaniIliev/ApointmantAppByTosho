@@ -138,13 +138,6 @@ export function KanbanCard({ card, onEdit, onDelete }: KanbanCardProps) {
             </button>
           </div>
 
-          {/* Description Preview */}
-          {card.description && (
-            <p className="text-[11.5px] text-muted-foreground/70 leading-relaxed -mt-2 line-clamp-2">
-              {card.description}
-            </p>
-          )}
-
           {/* Footer containing Status, Priority, Dates, Attachments and Users */}
           <div className="flex flex-col gap-3 pt-3 border-t border-border/30 mt-0.5">
             <div className="flex items-center justify-between gap-2">
@@ -157,18 +150,6 @@ export function KanbanCard({ card, onEdit, onDelete }: KanbanCardProps) {
                     <span className={cn("inline-flex items-center gap-1 rounded-md px-1.5 py-0.5 text-[9px] font-bold tracking-tight uppercase", sc.className)}>
                       <SIcon className="w-[10px] h-[10px]" />
                       {sc.label}
-                    </span>
-                  );
-                })()}
-
-                {/* Priority Badge */}
-                {(() => {
-                  const pc = getPriorityConfig();
-                  const PIcon = pc.Icon;
-                  return (
-                    <span className={cn("inline-flex items-center gap-1 rounded-md px-1.5 py-0.5 text-[9px] font-bold tracking-tight uppercase", pc.bg, pc.text)}>
-                      <PIcon className="w-[10px] h-[10px]" />
-                      {pc.label}
                     </span>
                   );
                 })()}

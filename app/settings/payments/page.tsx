@@ -95,9 +95,9 @@ export default function PaymentsSettingsPage() {
   }
 
   return (
-    <div className="space-y-12">
+    <div className="space-y-6">
       {/* Header Section */}
-      <div className="relative overflow-hidden rounded-[2.5rem] bg-gradient-to-br from-primary/10 via-background to-accent/5 border border-primary/10 p-8 md:p-12">
+      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-primary/10 via-background to-accent/5 border border-primary/10 p-8 md:p-12">
         <div className="absolute top-0 right-0 -mt-20 -mr-20 w-64 h-64 bg-primary/10 rounded-full blur-3xl" />
         <div className="absolute bottom-0 left-0 -mb-20 -ml-20 w-64 h-64 bg-accent/10 rounded-full blur-3xl" />
         
@@ -105,19 +105,19 @@ export default function PaymentsSettingsPage() {
           <div className="flex-1 space-y-6 text-center md:text-left">
             <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 text-primary text-sm font-medium border border-primary/20">
               <Sparkles className="w-4 h-4" />
-              {t("Professional Payments")}
+              {t("Easy Payments")}
             </div>
             <h1 className="text-4xl md:text-5xl font-extrabold tracking-tight text-foreground leading-tight">
-              {t("Accept Card Payments")} <br/>
-              <span className="text-primary">{t("Directly on AppointDI")}</span>
+              {t("Accept card payments right in")} <br/>
+              <span className="text-primary">{t("AppointDI")}</span>
             </h1>
             <p className="text-lg text-muted-foreground max-w-xl leading-relaxed">
-              {t("Enable professional card payments for your business. Link your Stripe account to allow clients to pay securely when booking appointments. No hidden fees, instant authorization.")}
+              {t("Let your clients pay quickly and securely while they book their spot. Just connect your Stripe account and you're good to go. No hidden fees, no stress.")}
             </p>
           </div>
           
           <div className="w-full md:w-auto">
-            <div className="bg-card/50 backdrop-blur-xl border border-white/10 rounded-3xl p-6 shadow-2xl space-y-6 min-w-[300px]">
+            <div className="bg-card/50 backdrop-blur-xl border border-white/10 rounded-2xl p-6 shadow-2xl space-y-6 min-w-[300px]">
               <div className="flex items-center justify-between">
                 <div className="p-3 bg-primary/20 rounded-2xl">
                   <CreditCard className="w-6 h-6 text-primary" />
@@ -167,8 +167,8 @@ export default function PaymentsSettingsPage() {
       </div>
 
       {/* Why Stripe Section */}
-      <div className="grid md:grid-cols-3 gap-8">
-        <div className="bg-card border border-border/50 rounded-3xl p-8 hover:border-primary/30 transition-all group">
+      <div className="grid md:grid-cols-3 gap-4">
+        <div className="bg-card border border-border/50 rounded-2xl p-8 hover:border-primary/30 transition-all group">
           <div className="w-12 h-12 rounded-2xl bg-blue-500/10 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
             <ShieldCheck className="w-6 h-6 text-blue-500" />
           </div>
@@ -178,7 +178,7 @@ export default function PaymentsSettingsPage() {
           </p>
         </div>
         
-        <div className="bg-card border border-border/50 rounded-3xl p-8 hover:border-primary/30 transition-all group">
+        <div className="bg-card border border-border/50 rounded-2xl p-8 hover:border-primary/30 transition-all group">
           <div className="w-12 h-12 rounded-2xl bg-orange-500/10 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
             <Zap className="w-6 h-6 text-orange-500" />
           </div>
@@ -188,7 +188,7 @@ export default function PaymentsSettingsPage() {
           </p>
         </div>
 
-        <div className="bg-card border border-border/50 rounded-3xl p-8 hover:border-primary/30 transition-all group">
+        <div className="bg-card border border-border/50 rounded-2xl p-8 hover:border-primary/30 transition-all group">
           <div className="w-12 h-12 rounded-2xl bg-emerald-500/10 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
             <Wallet className="w-6 h-6 text-emerald-500" />
           </div>
@@ -200,7 +200,7 @@ export default function PaymentsSettingsPage() {
       </div>
 
       {/* Integration Details Card */}
-      <div className="bg-card border border-border rounded-[2rem] p-8 md:p-10 shadow-sm relative overflow-hidden">
+      <div className="bg-card border border-border rounded-2xl p-8 md:p-10 shadow-sm relative overflow-hidden">
         <div className="absolute top-0 right-0 p-4 opacity-5">
            <Lock className="w-32 h-32" />
         </div>
@@ -221,25 +221,25 @@ export default function PaymentsSettingsPage() {
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8 pt-6 border-t border-border/50">
             <div className="space-y-6">
-              <div className="flex gap-4">
-                <div className={`mt-1 flex-shrink-0 w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold ${status?.details_submitted ? 'bg-green-500 text-white' : 'bg-muted text-muted-foreground'}`}>
-                  {status?.details_submitted ? <CheckCircle2 className="w-4 h-4" /> : "1"}
+              <div className="flex gap-6 items-start">
+                <div className={`text-4xl font-black leading-none mt-1 shrink-0 ${status?.details_submitted ? 'text-green-500' : 'text-primary'}`}>
+                  {status?.details_submitted ? <CheckCircle2 className="w-8 h-8" /> : "1"}
                 </div>
                 <div className="space-y-1">
                   <h4 className="font-semibold text-lg">{t("Register Business Details")}</h4>
-                  <p className="text-sm text-muted-foreground">
+                  <p className="text-sm text-muted-foreground leading-relaxed">
                     {t("Verify your identity and provide legal business information to Stripe.")}
                   </p>
                 </div>
               </div>
 
-              <div className="flex gap-4">
-                <div className={`mt-1 flex-shrink-0 w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold ${status?.charges_enabled ? 'bg-green-500 text-white' : 'bg-muted text-muted-foreground'}`}>
-                  {status?.charges_enabled ? <CheckCircle2 className="w-4 h-4" /> : "2"}
+              <div className="flex gap-6 items-start">
+                <div className={`text-4xl font-black leading-none mt-1 shrink-0 ${status?.charges_enabled ? 'text-green-500' : 'text-primary'}`}>
+                  {status?.charges_enabled ? <CheckCircle2 className="w-8 h-8" /> : "2"}
                 </div>
                 <div className="space-y-1">
                   <h4 className="font-semibold text-lg">{t("Enable Card Payments")}</h4>
-                  <p className="text-sm text-muted-foreground">
+                  <p className="text-sm text-muted-foreground leading-relaxed">
                     {t("Activate the capability to accept payments from Visa, Mastercard, and more.")}
                   </p>
                 </div>
@@ -247,25 +247,25 @@ export default function PaymentsSettingsPage() {
             </div>
 
             <div className="space-y-6">
-              <div className="flex gap-4">
-                <div className={`mt-1 flex-shrink-0 w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold ${status?.payouts_enabled ? 'bg-green-500 text-white' : 'bg-muted text-muted-foreground'}`}>
-                  {status?.payouts_enabled ? <CheckCircle2 className="w-4 h-4" /> : "3"}
+              <div className="flex gap-6 items-start">
+                <div className={`text-4xl font-black leading-none mt-1 shrink-0 ${status?.payouts_enabled ? 'text-green-500' : 'text-primary'}`}>
+                  {status?.payouts_enabled ? <CheckCircle2 className="w-8 h-8" /> : "3"}
                 </div>
                 <div className="space-y-1">
                   <h4 className="font-semibold text-lg">{t("Set Payout Account")}</h4>
-                  <p className="text-sm text-muted-foreground">
+                  <p className="text-sm text-muted-foreground leading-relaxed">
                     {t("Link your bank account where you want to receive your earnings.")}
                   </p>
                 </div>
               </div>
 
-              <div className="flex gap-4">
-                <div className={`mt-1 flex-shrink-0 w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold ${status?.ready ? 'bg-green-500 text-white' : 'bg-muted text-muted-foreground'}`}>
-                   {status?.ready ? <CheckCircle2 className="w-4 h-4" /> : "4"}
+              <div className="flex gap-6 items-start">
+                <div className={`text-4xl font-black leading-none mt-1 shrink-0 ${status?.ready ? 'text-green-500' : 'text-primary'}`}>
+                   {status?.ready ? <CheckCircle2 className="w-8 h-8" /> : "4"}
                 </div>
                 <div className="space-y-1">
                   <h4 className="font-semibold text-lg">{t("Ready for Bookings")}</h4>
-                  <p className="text-sm text-muted-foreground">
+                  <p className="text-sm text-muted-foreground leading-relaxed">
                     {t("Once configured, card payment options will automatically appear on your booking form.")}
                   </p>
                 </div>
@@ -277,11 +277,11 @@ export default function PaymentsSettingsPage() {
 
       {/* Final CTA if not ready */}
       {!status?.ready && (
-        <div className="bg-primary p-1 rounded-[2rem]">
-          <div className="bg-background rounded-[1.9rem] p-10 text-center space-y-6">
+        <div className="bg-primary p-1 rounded-2xl">
+          <div className="bg-background rounded-2xl p-10 text-center space-y-6">
              <h2 className="text-3xl font-bold">{t("Ready to scale your business?")}</h2>
              <p className="text-muted-foreground max-w-2xl mx-auto">
-               {t("Join thousands of professionals who have simplified their workflow with automated card payments. Setting up takes less than 5 minutes.")}
+               {t("Get paid automatically and save time. It takes just 5 minutes to set up.")}
              </p>
              <Button 
                 onClick={handleConnect} 
