@@ -92,24 +92,56 @@ const PricingSection = () => {
         setLoadingPlan(null); // Деактивира зареждащия индикатор
       }
     },
-    [user?.businessId],
+    [user?.businessId, t],
+  );
+
+  const handleCustomerPortal = useCallback(
+    async (checkoutPlanName: string) => {
+      setLoadingPlan(checkoutPlanName);
+      try {
+        const data = await callApi("/api/stripe/customer-portal", "POST", {});
+        if (data.url) {
+          window.location.href = data.url;
+        } else {
+          console.error(t("Portal URL missing."));
+        }
+      } catch (error) {
+        console.error("Error opening customer portal:", error);
+      } finally {
+        setLoadingPlan(null);
+      }
+    },
+    [t],
   );
 
   // Хелпер функция за рендиране на бутона (с TS типове)
   const renderPlanButton = (
     checkoutPlanName: string,
-    // isPrimary: boolean = false
   ): ReactNode => {
     const isLoading = loadingPlan === checkoutPlanName;
+    const activePlan = user?.subscriptionPlan || user?.plan;
+    const hasActiveSubscription = user?.subscriptionStatus === "active" && activePlan && activePlan !== "none";
+    const isCurrentPlan = hasActiveSubscription && activePlan === checkoutPlanName;
 
-    // Определяне на стиловете
+    let buttonText = t("Purchase Plan / Start Trial");
+    let onClickAction = () => handleCheckout(checkoutPlanName);
+    let isDisabled = isLoading;
+    let buttonVariantClasses = "bg-primary hover:bg-primary-dark text-white";
+
+    if (isCurrentPlan) {
+      buttonText = t("Current Plan");
+      isDisabled = true;
+      buttonVariantClasses = "bg-gray-400 text-white opacity-80 cursor-not-allowed";
+    } else if (hasActiveSubscription) {
+      buttonText = t("Switch Plan");
+      onClickAction = () => handleCustomerPortal(checkoutPlanName);
+    }
 
     return (
       <Button
-        className={`w-full bg-primary hover:bg-primary-dark mt-6 text-white`}
-        // variant={isPrimary ? "default" : "outline"}
-        onClick={() => handleCheckout(checkoutPlanName)}
-        disabled={isLoading}
+        className={`w-full mt-6 ${buttonVariantClasses}`}
+        onClick={onClickAction}
+        disabled={isDisabled}
       >
         {isLoading ? (
           <span className="flex items-center justify-center">
@@ -117,7 +149,7 @@ const PricingSection = () => {
             {t("Loading...")}
           </span>
         ) : (
-          t("Purchase Plan / Start Trial")
+          buttonText
         )}
       </Button>
     );

@@ -11,6 +11,8 @@ import {
   XCircle,
   Loader2,
   Eye,
+  Gift,
+  Copy,
 } from "lucide-react";
 import callApi from "@/app/Api/callApi";
 import { Button } from "@/components/ui/button";
@@ -279,6 +281,53 @@ export default function SubscriptionPage() {
                     {t("Cancel Subscription")}
                   </Button>
               )}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Referral Program Card */}
+      <div className="grid md:grid-cols-1 gap-6">
+        <div className="md:col-span-1 bg-gradient-to-r from-primary/10 via-accent/10 to-primary/5 border border-primary/20 rounded-2xl p-6 md:p-8 shadow-sm space-y-6">
+          <div className="flex items-center gap-3 mb-2">
+            <div className="p-2 bg-primary text-white rounded-lg">
+              <Gift className="w-6 h-6" />
+            </div>
+            <h2 className="text-xl font-bold text-primary">{t("Refer & Earn 50% Off")}</h2>
+          </div>
+          <p className="text-muted-foreground text-sm">
+            {t("Invite other businesses to AppointDI using your unique link below. When they register and purchase a subscription, you will automatically receive a 50% discount for 1 month on your next invoice! The more businesses you refer, the more discounted months you earn.")}
+          </p>
+          
+          <div className="flex flex-col md:flex-row gap-4 items-center mt-4">
+            <div className="flex-1 w-full flex items-center bg-background border rounded-xl overflow-hidden p-1">
+              <input 
+                type="text" 
+                readOnly 
+                className="flex-1 bg-transparent px-3 text-sm outline-none text-muted-foreground"
+                value={`${typeof window !== 'undefined' ? window.location.origin : 'https://appointdi.com'}/register?ref=${user?.businessId}`}
+              />
+              <Button 
+                variant="default" 
+                size="sm" 
+                className="rounded-lg shadow-none"
+                onClick={() => {
+                  navigator.clipboard.writeText(`${window.location.origin}/register?ref=${user?.businessId}`);
+                  toast.success(t("Referral link copied!"));
+                }}
+              >
+                <Copy className="w-4 h-4 mr-2" />
+                {t("Copy Link")}
+              </Button>
+            </div>
+            
+            <div className="bg-white dark:bg-slate-900 border rounded-xl px-3 py-1 flex items-center gap-3 whitespace-nowrap min-w-fit shadow-sm">
+              <div className="text-sm text-muted-foreground">
+                {t("Discount Months Earned:")}
+              </div>
+              <div className="text-md font-black text-primary">
+                {businessData?.earnedDiscountMonths || 0}
+              </div>
             </div>
           </div>
         </div>

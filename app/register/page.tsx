@@ -15,6 +15,21 @@ export default function RegisterPage() {
   const { setUser } = useAuthContext();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [searchParams, setSearchParams] = useState<URLSearchParams | null>(null);
+
+  React.useEffect(() => {
+    // Client-side only
+    setSearchParams(new URLSearchParams(window.location.search));
+  }, []);
+
+  React.useEffect(() => {
+    if (searchParams) {
+      const ref = searchParams.get("ref");
+      if (ref) {
+        localStorage.setItem("referredBy", ref);
+      }
+    }
+  }, [searchParams]);
 
   const [formData, setFormData] = useState({
     email: "",

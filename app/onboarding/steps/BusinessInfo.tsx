@@ -97,6 +97,13 @@ export default function BusinessInfoStep({
         onNext({ ...initialData, ...formData } as any);
         return;
       }
+    } else {
+      // For new business creation, attach referredBy from localStorage if present
+      const referredBy = typeof window !== "undefined" ? localStorage.getItem("referredBy") : null;
+      if (referredBy) {
+        mutation.mutate({ ...formData, referredBy });
+        return;
+      }
     }
 
     mutation.mutate(formData);

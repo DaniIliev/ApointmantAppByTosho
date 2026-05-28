@@ -96,12 +96,12 @@ function KPICard({
 export function AnalyticsPreview() {
   const { t } = useTranslation();
   const containerRef = useRef<HTMLDivElement>(null);
-  const [containerWidth, setContainerWidth] = useState(360);
+  const [containerWidth, setContainerWidth] = useState(1200);
   const chartColors = useMemo(() => getThemeChartColorTokens(), []);
   const fixedHeight = 400;
-  const maxHeight = 700;
-  const rowHeight = 44;
   const isMobile = containerWidth <= 768;
+  const maxHeight = isMobile ? 1600 : 800;
+  const rowHeight = 44;
   // const maxWidth = 960;
   const wasMobile = useRef(false);
   const [layout, setLayout] = useState<Layout[]>([
@@ -160,8 +160,22 @@ export function AnalyticsPreview() {
     };
 
     updateWidth();
+    
+    let observer: ResizeObserver | null = null;
+    if (containerRef.current) {
+      observer = new ResizeObserver(() => {
+        updateWidth();
+      });
+      observer.observe(containerRef.current);
+    }
+
     window.addEventListener("resize", updateWidth);
-    return () => window.removeEventListener("resize", updateWidth);
+    return () => {
+      window.removeEventListener("resize", updateWidth);
+      if (observer) {
+        observer.disconnect();
+      }
+    };
   }, []);
 
   const handleLayoutChange = useCallback((newLayout: Layout[]) => {
