@@ -30,6 +30,7 @@ interface LabeledInputProps {
   min?: string | number;
   max?: string | number;
   disabled?: boolean;
+  icon?: React.ReactNode;
 }
 
 export const LabeledInput = forwardRef<
@@ -52,6 +53,7 @@ export const LabeledInput = forwardRef<
       errorText,
       showError,
       disabled,
+      icon,
       ...props
     },
     ref,
@@ -81,7 +83,8 @@ export const LabeledInput = forwardRef<
     const inputType = isPassword ? (showPassword ? "text" : "password") : type;
 
     const baseClasses = cn(
-      "peer w-full rounded-t-md transition-all duration-300 px-4 pt-4 pb-1",
+      "peer w-full rounded-t-md transition-all duration-300 pt-4 pb-1",
+      icon ? "pl-10 pr-4" : "px-4",
       disabled
         ? "bg-gray-200/50 dark:bg-muted/20 text-muted-foreground cursor-not-allowed"
         : "bg-gray-100 dark:bg-card/80 focus:bg-gray-200 dark:focus:bg-card/90 text-text-primary/75 focus:text-text-primary",
@@ -89,7 +92,7 @@ export const LabeledInput = forwardRef<
       isErroredEmpty ? "border-red-500" : "border-transparent",
       "outline-none",
       isFocused && !disabled ? "placeholder-gray-400" : "placeholder-transparent",
-      isClearable && !disabled || disabled ? "pr-10" : "pr-4",
+      isClearable && !disabled || disabled ? "pr-10" : "",
       className,
     );
 
@@ -115,10 +118,10 @@ export const LabeledInput = forwardRef<
     const finalLabelPosition = isErroredEmpty
       ? "text-red-500"
       : isFocused || hasValue
-        ? "-top-0.5 text-xs left-3"
+        ? `-top-0.5 text-xs ${icon ? 'left-10' : 'left-3'}`
         : isTextarea
-          ? "top-3 text-sm left-4"
-          : "top-1/2 -translate-y-1/2 text-sm left-4";
+          ? `top-3 text-sm ${icon ? 'left-10' : 'left-4'}`
+          : `top-1/2 -translate-y-1/2 text-sm ${icon ? 'left-10' : 'left-4'}`;
 
     const hideLabelForDate = type === "date" && !isFocused && !hasValue;
 
@@ -167,6 +170,12 @@ export const LabeledInput = forwardRef<
           >
             {label}
           </label>
+
+          {icon && (
+            <div className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground z-20 pointer-events-none">
+              {icon}
+            </div>
+          )}
 
           {isTextarea ? (
             <textarea

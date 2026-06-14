@@ -470,3 +470,101 @@ export const getCategoryOptions = (
     parentCategory: "OTHER SERVICES",
   },
 ];
+
+// ─── Chat Types ───────────────────────────────────────────────────
+
+export type ChannelType =
+  | "admin_support"
+  | "location"
+  | "business"
+  | "direct"
+  | "group"
+  | "client_location";
+
+export interface ChatMember {
+  user: {
+    _id: string;
+    firstName: string;
+    lastName: string;
+    profilePictureUrl?: string;
+    email?: string;
+    role?: string;
+  };
+  role: "owner" | "admin" | "member";
+  isBlocked: boolean;
+  isMuted: boolean;
+  joinedAt?: string;
+  lastReadAt?: string;
+  blockedAt?: string;
+  blockedBy?: string;
+}
+
+export interface LastMessage {
+  text?: string;
+  sender?: string;
+  senderName?: string;
+  sentAt?: string;
+  type?: "text" | "image" | "file" | "voice" | "system";
+}
+
+export interface ChatChannel {
+  _id: string;
+  type: ChannelType;
+  name?: string;
+  description?: string;
+  avatar?: string;
+  businessId?: any;
+  locationId?: string;
+  members: ChatMember[];
+  createdBy?: string;
+  isArchived?: boolean;
+  lastMessage?: LastMessage;
+  unreadCount?: number;
+  isMuted?: boolean;
+  isBlocked?: boolean;
+  inviteCode?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface ChatAttachment {
+  url: string;
+  type: "image" | "file" | "voice";
+  name?: string;
+  size?: number;
+  duration?: number;
+  mimeType?: string;
+}
+
+export interface ChatReaction {
+  emoji: string;
+  user: string;
+}
+
+export interface ChatMessage {
+  _id: string;
+  channel: string;
+  sender: {
+    _id: string;
+    firstName: string;
+    lastName: string;
+    profilePictureUrl?: string;
+    email?: string;
+  };
+  type: "text" | "image" | "file" | "voice" | "system";
+  text?: string;
+  attachments?: ChatAttachment[];
+  replyTo?: ChatMessage;
+  isEdited?: boolean;
+  editedAt?: string;
+  isDeleted?: boolean;
+  reactions?: ChatReaction[];
+  createdAt: string;
+  updatedAt?: string;
+}
+
+export interface UnreadCounts {
+  total: number;
+  channels: Record<string, number>;
+}
+

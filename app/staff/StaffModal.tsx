@@ -263,7 +263,7 @@ export const StaffModal: React.FC<StaffModalProps> = ({
                 }
                 label={t("Email") as string}
                 id="email"
-                disabled={true}
+                disabled={mode !== "create"}
               />
 
               <LabeledInput

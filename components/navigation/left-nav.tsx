@@ -27,6 +27,7 @@ import {
   ShieldCheck, // For QR Code page
   MapPin,
   Receipt,
+  MessageCircle,
 } from "lucide-react";
 
 
@@ -300,6 +301,11 @@ export default function LeftNav({ isOpen, onClose }: LeftNavProps) {
             href: "/performance",
             label: t("Performance"),
             icon: BarChart3,
+          },
+          {
+            href: "/chat",
+            label: t("Messages"),
+            icon: MessageCircle,
           },
           {
             href: "/kanban",

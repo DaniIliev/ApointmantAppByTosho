@@ -143,8 +143,8 @@
 /* Define CSS variables for scrollbar colors */
 :root {
   --scrollbar-track: transparent;
-  --scrollbar-thumb: #ffffff; /* white thumb on light */
-  --scrollbar-thumb-hover: #e5e7eb; /* tailwind zinc-200 */
+  --scrollbar-thumb: #d1d5db; /* gray-300 for visibility on light backgrounds */
+  --scrollbar-thumb-hover: #9ca3af; /* gray-400 */
 }
 .dark {
   --scrollbar-track: transparent;

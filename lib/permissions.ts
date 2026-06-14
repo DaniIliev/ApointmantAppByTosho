@@ -208,6 +208,11 @@ export const ROUTE_PERMISSIONS: RoutePermission[] = [
     allowedRoles: ["admin"],
     requiresAuth: true,
   },
+  {
+    path: "/chat",
+    allowedRoles: ["business", "staff", "manager", "personal"],
+    requiresAuth: true,
+  },
 ];
 
 /**

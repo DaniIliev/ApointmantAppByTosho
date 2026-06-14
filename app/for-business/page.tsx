@@ -17,6 +17,7 @@ import {
   CalendarCheck,
   Phone,
   ListChecks,
+  MessageCircle,
 } from "lucide-react";
 import { usePaddingControl } from "@/context/PaddingContext";
 import { useEffect } from "react";
@@ -26,6 +27,7 @@ import { useTranslation } from "react-i18next";
 import { AnalyticsPreview } from "@/components/for-business/AnalyticsPreview";
 import { KanbanPreview } from "@/components/for-business/KanbanPreview";
 import { CalendarPreview } from "@/components/for-business/CalendarPreview";
+import { ChatPreview } from "@/components/for-business/ChatPreview";
 import { LocationCard } from "@/components/business/LocationCard";
 
 export default function BusinessLandingPage() {
@@ -390,6 +392,55 @@ export default function BusinessLandingPage() {
                 </h3>
                 <p className="text-base text-muted-foreground">
                   {t("Work together with your team. Assign tasks and keep everyone on the same page.")}
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Internal Communication Section */}
+      <section className="bg-white dark:bg-background py-12">
+        <div className="mx-auto px-4">
+          <div className="mx-auto text-center space-y-6">
+            <h2 className="text-4xl sm:text-5xl md:text-5xl align-center font-bold text-balance mb-10 mx-auto">
+              {t("Seamless Team Communication")}
+            </h2>
+            {/* Chat Interactive Preview */}
+            <div className="flex justify-center mb-6">
+              <div className="w-full">
+                <ChatPreview />
+              </div>
+            </div>
+            <p className="text-base text-muted-foreground max-w-3xl mx-auto">
+              {t("Employees can chat with each other instantly. Keep everyone on the same page with direct messages, team channels, and direct access to real-time support.")}
+            </p>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mt-8">
+              <div className="flex flex-col items-center">
+                <MessageCircle className="h-10 w-10 text-primary mb-2" />
+                <h3 className="font-semibold text-base mb-2">
+                  {t("Team Channels")}
+                </h3>
+                <p className="text-base text-muted-foreground">
+                  {t("Discuss location-specific topics or general business updates in dedicated channels.")}
+                </p>
+              </div>
+              <div className="flex flex-col items-center">
+                <Users className="h-10 w-10 text-primary mb-2" />
+                <h3 className="font-semibold text-base mb-2">
+                  {t("Direct Messages")}
+                </h3>
+                <p className="text-base text-muted-foreground">
+                  {t("Send quick messages to specific team members without leaving the platform.")}
+                </p>
+              </div>
+              <div className="flex flex-col items-center">
+                <Shield className="h-10 w-10 text-primary mb-2" />
+                <h3 className="font-semibold text-base mb-2">
+                  {t("Real-Time Support")}
+                </h3>
+                <p className="text-base text-muted-foreground">
+                  {t("Got a question? Our support team is just a message away, directly in the app.")}
                 </p>
               </div>
             </div>

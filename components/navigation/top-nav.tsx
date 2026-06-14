@@ -3,7 +3,7 @@ import { useState, useRef, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useTranslation } from "react-i18next";
-import { User, Menu, X, Info, Bell, Globe } from "lucide-react";
+import { User, Menu, X, Info, Bell, Globe, MessageCircle } from "lucide-react";
 import { usePageTitle } from "@/context/PageTitleContext";
 import useClickOutside from "@/Global/Hooks/useClickOutside";
 import { useAuthContext } from "@/context/AuthContext";
@@ -34,6 +34,7 @@ export default function TopNav({
   const [isLanguagesOpen, setIsLanguagesOpen] = useState(false);
   const [alerts, setAlerts] = useState<Alert[]>([]);
   const hasUnreadAlerts = alerts.some((alert) => !alert.isRead);
+  const [unreadChatCount, setUnreadChatCount] = useState(0);
 
   const profileRef = useRef<HTMLDivElement>(null);
   const helpRef = useRef<HTMLDivElement>(null);
@@ -208,6 +209,14 @@ export default function TopNav({
         setAlerts((prevAlerts) => [normalized, ...prevAlerts]);
       });
 
+      socket.on("chatNotification", () => {
+        setUnreadChatCount((prev) => prev + 1);
+      });
+
+      socket.on("chatReadGlobal", () => {
+        fetchChatUnread();
+      });
+
       socket.on("disconnect", (reason) => {
         console.log("Socket disconnected:", reason);
       });
@@ -226,6 +235,19 @@ export default function TopNav({
         }
       };
       fetchAlerts();
+
+      // Fetch chat unread counts
+      const fetchChatUnread = async () => {
+        try {
+          const data = await callApi("/api/chat/unread", "GET");
+          if (data && typeof data.total === "number") {
+            setUnreadChatCount(data.total);
+          }
+        } catch (error) {
+          // Chat may not be available yet, silently ignore
+        }
+      };
+      fetchChatUnread();
 
       return () => {
         console.log("Cleaning up Socket.IO connection...");
@@ -321,6 +343,31 @@ export default function TopNav({
                   onAlertsChange={setAlerts}
                 />
               )}
+            </div>
+
+            {/* Chat Messages Button */}
+            <div className="relative">
+              <Link
+                href="/chat"
+                className="flex flex-col items-center justify-center p-2 rounded-lg hover:bg-white/10 transition-colors duration-200 relative"
+              >
+                <MessageCircle
+                  className={`w-5 h-5 transition-colors duration-200 ${
+                    unreadChatCount > 0 ? "text-primary" : "text-primary"
+                  }`}
+                />
+                {unreadChatCount > 0 && (
+                  <span className="absolute -top-0.5 -right-0.5 min-w-[18px] h-[18px] px-1 rounded-full bg-red-500 text-white text-[10px] font-bold flex items-center justify-center">
+                    {unreadChatCount > 99 ? "99+" : unreadChatCount}
+                  </span>
+                )}
+                <span
+                  className="text-xs text-primary mt-1"
+                  suppressHydrationWarning
+                >
+                  {t("Chat")}
+                </span>
+              </Link>
             </div>
 
             {/* Language Button: show only on md+ when authorized */}

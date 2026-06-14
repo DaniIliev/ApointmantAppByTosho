@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import callApi from "@/app/Api/callApi";
 import { Business, Location } from "@/Global/Types/types";
 import { LocationDetailedView } from "@/components/sections/location-detailed-view";
+import Chatbot from "@/components/chatBot/Chatbot";
 
 function PublicLocationPageContent() {
   const { id, locationId } = useParams();
@@ -60,12 +61,15 @@ function PublicLocationPageContent() {
   }
 
   return (
-    <LocationDetailedView
-      location={location}
-      businessId={resolvedBusinessId}
-      backUrl={`/business/${resolvedBusinessId}`}
-      backLabel={t("Back to Business")}
-    />
+    <>
+      <LocationDetailedView
+        location={location}
+        businessId={resolvedBusinessId}
+        backUrl={`/business/${resolvedBusinessId}`}
+        backLabel={t("Back to Business")}
+      />
+      <Chatbot businessId={resolvedBusinessId} locationId={locationId as string} />
+    </>
   );
 }
 
