@@ -47,6 +47,7 @@ export default function SubscriptionPage() {
   const [cancelling, setCancelling] = useState(false);
   const [businessData, setBusinessData] = useState<any>(null);
   const [defaultPaymentMethod, setDefaultPaymentMethod] = useState<any>(null);
+  const [upcomingInvoice, setUpcomingInvoice] = useState<any>(null);
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
@@ -58,8 +59,29 @@ export default function SubscriptionPage() {
           callApi("/api/stripe/invoices", "GET"),
           callApi(`/api/business/${user?.businessId}`, "GET")
         ]);
-        setInvoices(invoicesRes.invoices || []);
+        const fetchedInvoices = invoicesRes.invoices || [];
+        const upcoming = invoicesRes.upcomingInvoice;
+
+        if (upcoming && !upcoming.error) {
+          const upcomingItem: Invoice = {
+            id: "upcoming_invoice",
+            number: "UPCOMING",
+            amount_paid: upcoming.amount_due,
+            currency: upcoming.currency,
+            status: "upcoming",
+            created: upcoming.next_payment_attempt || upcoming.period_start || (Date.now() / 1000),
+            hosted_invoice_url: "",
+            invoice_pdf: "",
+            period_start: upcoming.period_start || upcoming.period_end,
+            period_end: upcoming.period_end,
+          };
+          setInvoices([upcomingItem, ...fetchedInvoices]);
+        } else {
+          setInvoices(fetchedInvoices);
+        }
+
         setDefaultPaymentMethod(invoicesRes.defaultPaymentMethod);
+        setUpcomingInvoice(upcoming);
         setBusinessData(businessRes);
       } catch (error) {
         console.error("Failed to fetch subscription data:", error);
@@ -138,8 +160,8 @@ export default function SubscriptionPage() {
       accessorKey: "number",
       header: t("Number"),
       cell: ({ row }) => (
-        <span className="text-[11px] font-mono text-muted-foreground uppercase">
-          {row.original.number}
+        <span className={`text-[11px] font-mono uppercase ${row.original.status === 'upcoming' ? 'text-primary font-bold' : 'text-muted-foreground'}`}>
+          {row.original.status === 'upcoming' ? t("Upcoming") : row.original.number}
         </span>
       ),
       defaultWidth: 150,
@@ -179,19 +201,25 @@ export default function SubscriptionPage() {
     {
       accessorKey: "status",
       header: t("Status"),
-      cell: ({ row }) => (
-        <span className={`inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold uppercase ${
-          row.original.status === 'paid' ? 'bg-green-500/10 text-green-500' : 'bg-slate-500/10 text-slate-500'
-        }`}>
-          {t(row.original.status)}
-        </span>
-      ),
+      cell: ({ row }) => {
+        let badgeClass = "bg-slate-500/10 text-slate-500";
+        if (row.original.status === 'paid') badgeClass = "bg-green-500/10 text-green-500";
+        if (row.original.status === 'upcoming') badgeClass = "bg-blue-500/10 text-blue-500";
+        
+        return (
+          <span className={`inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold uppercase ${badgeClass}`}>
+            {t(row.original.status)}
+          </span>
+        );
+      },
       defaultWidth: 100,
     },
     {
       accessorKey: "actions",
       header: t("Action"),
-      cell: ({ row }) => (
+      cell: ({ row }) => {
+        if (row.original.status === 'upcoming') return <span className="text-xs text-muted-foreground italic">-</span>;
+        return (
           <div className="flex items-center gap-0.5 mobile-actions">
             <CustomTooltip
               onClick={() => router.push(row.original.invoice_pdf)}
@@ -204,7 +232,8 @@ export default function SubscriptionPage() {
               icon={<Eye />}
             />
           </div>
-      ),
+        );
+      },
       defaultWidth: 150,
     },
   ];
@@ -245,9 +274,35 @@ export default function SubscriptionPage() {
               </div>
               <div className="space-y-0.5">
                 <p className="text-sm text-muted-foreground">{t("Next Payment")}</p>
-                <p className="font-semibold">
-                  {nextPaymentDate ? moment(nextPaymentDate).format("DD.MM.YYYY") : t("N/A")}
-                </p>
+                <div className="flex flex-col gap-0.5">
+                  <p className="font-semibold">
+                    {nextPaymentDate ? moment(nextPaymentDate).format("DD.MM.YYYY") : t("N/A")}
+                  </p>
+                  {upcomingInvoice && !upcomingInvoice.error && (
+                    <div className="font-medium mt-0.5">
+                      {upcomingInvoice.discount ? (
+                        <div className="flex flex-col">
+                          <span className="text-primary font-bold text-lg leading-none">
+                            {(upcomingInvoice.amount_due / 100).toFixed(2)} {upcomingInvoice.currency?.toUpperCase()}
+                          </span>
+                          <div className="flex items-center gap-2 mt-1.5">
+                            <span className="line-through text-muted-foreground text-xs">
+                              {(upcomingInvoice.subtotal / 100).toFixed(2)} {upcomingInvoice.currency?.toUpperCase()}
+                            </span>
+                            <span className="text-emerald-600 bg-emerald-500/10 px-2 py-0.5 rounded uppercase font-bold text-[10px] tracking-wider border border-emerald-500/20 flex items-center gap-1">
+                              <Gift className="w-3 h-3" />
+                              {upcomingInvoice.discount.coupon?.percent_off ? `${upcomingInvoice.discount.coupon.percent_off}% ${t("OFF")}` : t("Discount Applied")}
+                            </span>
+                          </div>
+                        </div>
+                      ) : (
+                        <span className="text-primary font-bold">
+                          {(upcomingInvoice.amount_due / 100).toFixed(2)} {upcomingInvoice.currency?.toUpperCase()}
+                        </span>
+                      )}
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
             

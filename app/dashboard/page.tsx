@@ -271,16 +271,16 @@ function DashboardPageContent() {
         className="w-full h-full flex flex-col pb-0 md:pb-0"
       >
         {/* Desktop Tabs - Top */}
-        <TabsList className="hidden md:flex mb-4 bg-transparent p-0 mx-auto w-fit flex-shrink-0 border-none">
+        <TabsList className="hidden md:flex mb-1 bg-transparent p-0 mx-auto w-fit flex-shrink-0 border-none">
           <TabsTrigger
             value="calendar"
-            className="data-[state=active]:bg-transparent data-[state=active]:text-primary data-[state=active]:shadow-none transition-colors px-6 py-3 border-b-2 data-[state=active]:border-primary border-transparent"
+            className="data-[state=active]:bg-transparent data-[state=active]:text-primary data-[state=active]:shadow-none transition-colors px-6 py-1.5 border-b-2 data-[state=active]:border-primary border-transparent"
           >
             {t("Calendar View")}
           </TabsTrigger>
           <TabsTrigger
             value="table"
-            className="data-[state=active]:bg-transparent data-[state=active]:text-primary data-[state=active]:shadow-none transition-colors px-6 py-3 border-b-2 data-[state=active]:border-primary border-transparent"
+            className="data-[state=active]:bg-transparent data-[state=active]:text-primary data-[state=active]:shadow-none transition-colors px-6 py-1.5 border-b-2 data-[state=active]:border-primary border-transparent"
           >
             {t("Table View")}
           </TabsTrigger>

@@ -96,7 +96,7 @@ export default function DesktopCalendar({
     });
   };
 
-  const dayNames = [t("Sun"), t("Mon"), t("Tue"), t("Wed"), t("Thu"), t("Fri"), t("Sat")];
+  const dayNames = [t("Mon"), t("Tue"), t("Wed"), t("Thu"), t("Fri"), t("Sat"), t("Sun")];
   const translatedMonthNames = monthNames.map((name) => t(name));
 
   const headerTitle =

@@ -7,7 +7,9 @@ export const getWeekDates = (date: Date) => {
   const week: Date[] = [];
   const startOfWeek = new Date(date);
   const day = startOfWeek.getDay();
-  startOfWeek.setDate(date.getDate() - day);
+  // Adjust offset to make Monday the start of the week
+  const offset = day === 0 ? -6 : 1 - day;
+  startOfWeek.setDate(date.getDate() + offset);
   for (let i = 0; i < 7; i++) {
     const weekDate = new Date(startOfWeek);
     weekDate.setDate(startOfWeek.getDate() + i);
@@ -24,8 +26,13 @@ export const getMonthDates = (date: Date) => {
   const startDate = new Date(firstDay);
   const endDate = new Date(lastDay);
 
-  startDate.setDate(firstDay.getDate() - firstDay.getDay());
-  endDate.setDate(lastDay.getDate() + (6 - lastDay.getDay()));
+  // Adjust for Monday start
+  const startOffset = firstDay.getDay() === 0 ? -6 : 1 - firstDay.getDay();
+  startDate.setDate(firstDay.getDate() + startOffset);
+
+  // Adjust for Sunday end
+  const endOffset = lastDay.getDay() === 0 ? 0 : 7 - lastDay.getDay();
+  endDate.setDate(lastDay.getDate() + endOffset);
 
   const dates: Date[] = [];
   const current = new Date(startDate);

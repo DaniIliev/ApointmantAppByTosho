@@ -212,7 +212,7 @@ function QRCodePageContent() {
 
   return (
     <div>
-      <div className=" mx-auto space-y-6">
+      <div className="mx-auto space-y-6">
         {/* Main QR Code Card */}
         <Card className="overflow-hidden">
           <CardHeader className="bg-gradient-to-r from-primary/10 to-primary/5">

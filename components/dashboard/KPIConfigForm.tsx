@@ -27,7 +27,7 @@ interface KPIConfigFormProps {
   onOpenChange: (open: boolean) => void;
   onSave: (config: KPIConfig) => void;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  mockPerformanceData: any;
+
 }
 
 const kpiOptions = [
@@ -72,7 +72,7 @@ export function KPIConfigForm({
   open,
   onOpenChange,
   onSave,
-  mockPerformanceData,
+
 }: KPIConfigFormProps) {
   const { t } = useTranslation();
   const { startDate, endDate, groupBy } = useDashboardDate();

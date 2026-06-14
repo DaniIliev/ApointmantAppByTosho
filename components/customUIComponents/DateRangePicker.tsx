@@ -41,6 +41,7 @@ interface DateRangePickerProps {
     endDate: Date | null;
     clear: () => void;
   }) => React.ReactNode;
+  error?: boolean | string;
 }
 
 // Map i18n language to date-fns locale
@@ -66,6 +67,7 @@ export const DateRangePicker: React.FC<DateRangePickerProps> = ({
   disablePast,
   className,
   renderTrigger,
+  error,
 }) => {
   const { t } = useTranslation();
   const locale = useLocale();
@@ -94,6 +96,9 @@ export const DateRangePicker: React.FC<DateRangePickerProps> = ({
   const startDate = value.startDate ? new Date(value.startDate) : null;
   const endDate = value.endDate ? new Date(value.endDate) : null;
   const clearSelection = () => onChange({ startDate: null, endDate: null });
+
+  const isPartial = (value.startDate && !value.endDate) || (!value.startDate && value.endDate);
+  const displayError = error || (!open && isPartial ? t("Моля изберете и двете дати") : undefined);
 
   const rangeLabel =
     startDate && endDate
@@ -279,8 +284,8 @@ export const DateRangePicker: React.FC<DateRangePickerProps> = ({
           </label>
           <Popover.Trigger
             className={cn(
-              "peer w-full h-12 px-4 rounded-t-md border-b-2 border-transparent bg-card/80 focus:bg-card/90 transition-all duration-300 flex items-center justify-between text-sm outline-none placeholder-transparent focus:placeholder-gray-400 pr-8",
-              open ? "border-primary" : "border-transparent",
+              "relative peer w-full h-12 px-4 rounded-t-md border-b-2 bg-card/80 focus:bg-card/90 transition-all duration-300 flex items-center justify-between text-sm outline-none placeholder-transparent focus:placeholder-gray-400 pr-8",
+              displayError ? "border-red-500" : open ? "border-primary" : "border-transparent",
               className
             )}
           >
@@ -324,11 +329,17 @@ export const DateRangePicker: React.FC<DateRangePickerProps> = ({
             <CalendarIcon className="h-4 w-4 text-muted-foreground absolute right-2 top-1/2 -translate-y-1/2" />
             <span
               className={cn(
-                "absolute bottom-0 left-0 h-[2px] bg-primary transition-all duration-300",
+                "absolute bottom-0 left-0 h-[2px] transition-all duration-300",
+                displayError ? "bg-red-500" : "bg-primary",
                 open || startDate || endDate ? "w-full" : "w-0"
               )}
             />
           </Popover.Trigger>
+          {displayError && (
+            <span className="block text-red-500 text-[11px] font-medium mt-1 pl-1">
+              {typeof displayError === "string" ? displayError : t("Field Required")}
+            </span>
+          )}
         </div>
       )}
       <Popover.Portal>

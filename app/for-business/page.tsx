@@ -206,67 +206,72 @@ export default function BusinessLandingPage() {
             </div>
           </div>
 
-          {/* Team & services (split layout) */}
-          <div className="mt-12 grid lg:grid-cols-2 gap-8 items-center">
-            <div className="space-y-4">
-              <div className="flex items-start gap-3">
+          {/* Team & services (features grid) */}
+          <div className="mt-16 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6 mb-12">
+            <div className="space-y-3">
+              <div className="flex items-center gap-3">
                 <Users className="h-6 w-6 text-primary flex-shrink-0" />
-                <div>
-                  <h3 className="font-semibold">
-                    {t("Team Management")}
-                  </h3>
-                  <p className="text-base text-muted-foreground">
-                    {t("Organize your team effortlessly with custom schedules and breaks for everyone.")}
-                  </p>
-                </div>
+                <h3 className="font-semibold leading-tight">
+                  {t("Team Management")}
+                </h3>
               </div>
-              <div className="flex items-start gap-3">
+              <p className="text-sm text-muted-foreground">
+                {t("Organize your team effortlessly with custom schedules and breaks for everyone.")}
+              </p>
+            </div>
+            
+            <div className="space-y-3">
+              <div className="flex items-center gap-3">
                 <CheckCircle2 className="h-6 w-6 text-primary flex-shrink-0" />
-                <div>
-                  <h3 className="font-semibold">
-                    {t("Flexible Services")}
-                  </h3>
-                  <p className="text-base text-muted-foreground">
-                    {t("Set up your services and choose exactly which team members handle them.")}
-                  </p>
-                </div>
+                <h3 className="font-semibold leading-tight">
+                  {t("Flexible Services")}
+                </h3>
               </div>
-              <div className="flex items-start gap-3">
+              <p className="text-sm text-muted-foreground">
+                {t("Set up your services and choose exactly which team members handle them.")}
+              </p>
+            </div>
+            
+            <div className="space-y-3">
+              <div className="flex items-center gap-3">
                 <ListChecks className="h-6 w-6 text-primary flex-shrink-0" />
-                <div>
-                  <h3 className="font-semibold">
-                    {t("Everything in One Place")}
-                  </h3>
-                  <p className="text-base text-muted-foreground">
-                    {t("Keep your calendar organized. Review, approve, or move bookings with a few clicks.")}
-                  </p>
-                </div>
+                <h3 className="font-semibold leading-tight">
+                  {t("Everything in One Place")}
+                </h3>
               </div>
-              <div className="flex items-start gap-3">
+              <p className="text-sm text-muted-foreground">
+                {t("Keep your calendar organized. Review, approve, or move bookings with a few clicks.")}
+              </p>
+            </div>
+            
+            <div className="space-y-3">
+              <div className="flex items-center gap-3">
                 <Phone className="h-6 w-6 text-primary flex-shrink-0" />
-                <div>
-                  <h3 className="font-semibold">
-                    {t("Quick Manual Bookings")}
-                  </h3>
-                  <p className="text-base text-muted-foreground">
-                    {t("Take phone or walk-in bookings yourself and stay organized instantly.")}
-                  </p>
-                </div>
+                <h3 className="font-semibold leading-tight">
+                  {t("Quick Manual Bookings")}
+                </h3>
               </div>
-              <div className="flex items-start gap-3">
+              <p className="text-sm text-muted-foreground">
+                {t("Take phone or walk-in bookings yourself and stay organized instantly.")}
+              </p>
+            </div>
+            
+            <div className="space-y-3">
+              <div className="flex items-center gap-3">
                 <BarChart3 className="h-6 w-6 text-primary flex-shrink-0" />
-                <div>
-                  <h3 className="font-semibold">{t("Smart Insights")}</h3>
-                  <p className="text-base text-muted-foreground">
-                    {t("See what’s working and what’s not with simple, easy-to-read numbers.")}
-                  </p>
-                </div>
+                <h3 className="font-semibold leading-tight">
+                  {t("Smart Insights")}
+                </h3>
               </div>
+              <p className="text-sm text-muted-foreground">
+                {t("See what’s working and what’s not with simple, easy-to-read numbers.")}
+              </p>
             </div>
-            {/* Interactive Calendar Preview */}
-            <div className="mx-auto w-full">
-              <CalendarPreview />
-            </div>
+          </div>
+
+          {/* Interactive Calendar Preview (Full width) */}
+          <div className="mx-auto w-full">
+            <CalendarPreview />
           </div>
         </div>
       </section>

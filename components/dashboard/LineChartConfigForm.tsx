@@ -83,7 +83,7 @@ export function LineChartConfigForm({
 
   const getDataKeys = () => {
     if (config.dataSource === "appointments" && config.metric === "count") {
-      return ["count", "completed", "cancelled"];
+      return ["count", "completed", "cancelled", "upcoming"];
     }
     if (
       config.dataSource === "appointments" &&
@@ -92,7 +92,7 @@ export function LineChartConfigForm({
       return ["count"];
     }
     if (config.dataSource === "appointments" && config.metric === "by_staff") {
-      return ["count", "completed", "cancelled"];
+      return ["count", "completed", "cancelled", "upcoming"];
     }
     if (config.dataSource === "clients" && config.metric === "by_source") {
       return ["count"];

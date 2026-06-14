@@ -938,14 +938,16 @@ export function PerformanceChart({
             </div>
           </CardHeader>
         )}
-        <CardContent className={cn("flex-1 overflow-hidden", !title && "p-0")}>
-          <ReactECharts
-            option={option}
-            style={{ height: "100%", width: "100%" }}
-            opts={{ renderer: "canvas" }}
-            notMerge={true}
-            lazyUpdate={true}
-          />
+        <CardContent className={cn("flex-1 relative overflow-hidden", !title && "p-0")}>
+          <div className="absolute inset-0">
+            <ReactECharts
+              option={option}
+              style={{ height: "100%", width: "100%" }}
+              opts={{ renderer: "canvas" }}
+              notMerge={true}
+              lazyUpdate={true}
+            />
+          </div>
         </CardContent>
       </Card>
     </div>

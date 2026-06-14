@@ -49,6 +49,7 @@ export const ScheduleModal: React.FC<ScheduleModalProps> = ({
 }) => {
   const { t } = useTranslation();
   const [localSchedules, setLocalSchedules] = useState<EditableSchedule[]>([]);
+  const [invalidIndexes, setInvalidIndexes] = useState<number[]>([]);
 
   useEffect(() => {
     if (!isOpen) return;
@@ -84,6 +85,7 @@ export const ScheduleModal: React.FC<ScheduleModalProps> = ({
       if (prev.length <= 1) return prev;
       return prev.filter((_, i) => i !== index);
     });
+    setInvalidIndexes([]);
   };
 
   // ─── Breaks ───────────────────────────────────────────
@@ -108,6 +110,18 @@ export const ScheduleModal: React.FC<ScheduleModalProps> = ({
     setIsSaving(true);
     setSaveError(null);
     try {
+      // Validate that all schedules have a start and end date
+      const invalid = localSchedules
+        .map((s, i) => (!s.startDate || !s.endDate ? i : -1))
+        .filter((i) => i !== -1);
+      
+      if (invalid.length > 0) {
+        setInvalidIndexes(invalid);
+        setIsSaving(false);
+        return;
+      }
+      setInvalidIndexes([]);
+
       const cleaned = localSchedules.map((schedule) => {
         const wwh = { ...schedule.weeklyWorkingHours };
         dayKeys.forEach((day) => {
@@ -170,13 +184,15 @@ export const ScheduleModal: React.FC<ScheduleModalProps> = ({
                         startDate: schedule.startDate,
                         endDate: schedule.endDate,
                       }}
-                      onChange={({ startDate, endDate }) =>
+                      error={invalidIndexes.includes(scheduleIndex) ? t("Field Required") : undefined}
+                      onChange={({ startDate, endDate }) => {
+                        setInvalidIndexes((prev) => prev.filter((i) => i !== scheduleIndex));
                         updateScheduleAt(scheduleIndex, (prev) => ({
                           ...prev,
                           startDate: startDate || "",
                           endDate: endDate || "",
-                        }))
-                      }
+                        }));
+                      }}
                     />
                   </div>
                   <div className="flex gap-1 items-center mt-1">

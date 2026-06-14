@@ -77,8 +77,9 @@ export function transformPreviewData(
         count: Number(r.total ?? 0),
         completed: Number((r as Record<string, unknown>).completed ?? 0),
         cancelled: Number((r as Record<string, unknown>).cancelled ?? 0),
+        upcoming: Number((r as Record<string, unknown>).upcoming ?? 0),
       }));
-      dataKeys = ["count", "completed", "cancelled"];
+      dataKeys = ["count", "completed", "cancelled", "upcoming"];
     } else if (dimension === "by_service" || dimension === "by_category") {
       data = rows.map((r) => ({
         name: (r.name as string) || (r._id as string) || "",
@@ -97,8 +98,9 @@ export function transformPreviewData(
         count: Number((r.total as number) ?? 0),
         completed: Number((r.completed as number) ?? 0),
         cancelled: Number((r.cancelled as number) ?? 0),
+        upcoming: Number((r.upcoming as number) ?? 0),
       }));
-      dataKeys = ["count", "completed", "cancelled"];
+      dataKeys = ["count", "completed", "cancelled", "upcoming"];
     } else if (dimension === "by_location") {
       data = rows.map((r) => ({
         name: (r.name as string) || (r._id as string) || "Default / Unassigned",
@@ -113,8 +115,9 @@ export function transformPreviewData(
         count: Number((r.total as number) ?? 0),
         completed: Number((r.completed as number) ?? 0),
         cancelled: Number((r.cancelled as number) ?? 0),
+        upcoming: Number((r.upcoming as number) ?? 0),
       }));
-      dataKeys = ["count", "completed", "cancelled"];
+      dataKeys = ["count", "completed", "cancelled", "upcoming"];
     }
   } else if (source === "revenue") {
     if (dimension === "time_series") {
@@ -235,14 +238,18 @@ export async function fetchPreviewData(
           name: formatDateAndTime((curr.name as string) || "", "date"),
           count: Number(curr.total ?? 0),
           completed: Number(curr.completed ?? 0),
+          cancelled: Number(curr.cancelled ?? 0),
+          upcoming: Number(curr.upcoming ?? 0),
           prevCount: Number(prev?.total ?? 0),
           prevCompleted: Number(prev?.completed ?? 0),
+          prevCancelled: Number(prev?.cancelled ?? 0),
+          prevUpcoming: Number(prev?.upcoming ?? 0),
         });
       });
-      dataKeys = ["count", "completed", "prevCount", "prevCompleted"];
+      dataKeys = ["count", "completed", "cancelled", "upcoming", "prevCount", "prevCompleted", "prevCancelled", "prevUpcoming"];
       seriesConfig = {
-        barSeries: ["count", "completed"],
-        lineSeries: ["prevCount", "prevCompleted"],
+        barSeries: ["count", "completed", "cancelled", "upcoming"],
+        lineSeries: ["prevCount", "prevCompleted", "prevCancelled", "prevUpcoming"],
       };
     } else if (apiSource === "revenue") {
       currentRows.forEach((curr, idx) => {

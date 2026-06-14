@@ -125,7 +125,7 @@ export function BarChartConfigForm({
 
   const getDataKeys = () => {
     if (config.dataSource === "appointments" && config.metric === "count") {
-      return ["count", "completed", "cancelled"];
+      return ["count", "completed", "cancelled", "upcoming"];
     }
     if (
       config.dataSource === "appointments" &&
@@ -149,7 +149,7 @@ export function BarChartConfigForm({
       config.dataSource === "staff" &&
       config.metric === "appointments_count"
     ) {
-      return ["count", "completed", "cancelled"];
+      return ["count", "completed", "cancelled", "upcoming"];
     }
     if (config.metric === "by_location") {
       return config.dataSource === "revenue" ? ["revenue"] : ["count"];
