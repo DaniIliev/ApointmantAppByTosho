@@ -199,8 +199,13 @@ export function HorizontalBarChartConfigForm({
               })
             }
             options={[
-              { id: "all", name: "All staff" },
-              ...staffOptions.map((s) => ({
+              { id: "all", name: t("All staff") },
+              ...staffOptions
+                .filter(s => {
+                  const locId = (config.configuration as any)?.locationId;
+                  return !locId || locId === "all" || s.locationIds?.includes(locId);
+                })
+                .map((s) => ({
                 id: s._id as string,
                 name:
                   `${s.firstName} ${s.lastName}`.trim() || (s._id as string),
@@ -219,6 +224,7 @@ export function HorizontalBarChartConfigForm({
                 configuration: {
                   ...config.configuration,
                   locationId: value === "all" ? "" : value,
+                  staffId: "",
                 } as ChartConfig["configuration"],
               })
             }

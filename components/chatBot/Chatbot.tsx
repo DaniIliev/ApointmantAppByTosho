@@ -65,7 +65,7 @@ const TypingIndicator = () => (
         {[0, 1, 2].map((i) => (
           <span
             key={i}
-            className="w-2 h-2 rounded-full bg-blue-400 dark:bg-blue-300"
+            className="w-2 h-2 rounded-full bg-primary"
             style={{
               animation: `chatbotBounce 1.2s ease-in-out ${i * 0.15}s infinite`,
             }}
@@ -87,14 +87,14 @@ const ChatMessage = ({ message, isUser, timestamp }: ChatMessageProps) => (
   <div className={`flex flex-col ${isUser ? "items-end" : "items-start"} mb-3 animate-chatbotSlideIn`}>
     <div className="flex items-end gap-2 max-w-[85%]">
       {!isUser && (
-        <div className="shrink-0 w-7 h-7 rounded-full bg-gradient-to-br from-blue-500/20 to-indigo-500/20 flex items-center justify-center">
+        <div className="shrink-0 w-7 h-7 rounded-full bg-primary/20 flex items-center justify-center">
           <AiRobotIcon size={16} />
         </div>
       )}
       <div
         className={`px-4 py-2.5 rounded-2xl text-sm leading-relaxed whitespace-pre-wrap break-words ${
           isUser
-            ? "bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-br-md shadow-lg shadow-blue-500/20"
+            ? "bg-primary text-primary-foreground rounded-br-md shadow-lg shadow-primary/20"
             : "bg-gradient-to-r from-slate-100 to-slate-50 dark:from-slate-800 dark:to-slate-700 text-slate-800 dark:text-slate-100 rounded-bl-md shadow-sm"
         }`}
       >
@@ -269,8 +269,8 @@ export default function Chatbot({
           animation: chatbotSlideIn 0.25s ease-out;
         }
         @keyframes chatbotPulseGlow {
-          0%, 100% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.4); }
-          50% { box-shadow: 0 0 0 10px rgba(59, 130, 246, 0); }
+          0%, 100% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--primary) 40%, transparent); }
+          50% { box-shadow: 0 0 0 10px transparent; }
         }
         .chatbot-glow {
           animation: chatbotPulseGlow 2.5s ease-in-out infinite;
@@ -288,7 +288,7 @@ export default function Chatbot({
         {isOpen ? (
           <div className="chatbot-window-enter w-[380px] h-[540px] rounded-2xl shadow-2xl shadow-black/20 dark:shadow-black/50 flex flex-col overflow-hidden border border-slate-200/60 dark:border-slate-700/60 backdrop-blur-sm bg-white/95 dark:bg-slate-900/95">
             {/* Header */}
-            <div className="flex items-center gap-3 px-4 py-3 bg-gradient-to-r from-blue-600 via-indigo-600 to-blue-700 text-white relative overflow-hidden">
+            <div className="flex items-center gap-3 px-4 py-3 bg-primary text-primary-foreground relative overflow-hidden">
               {/* Decorative circles */}
               <div className="absolute -top-6 -right-6 w-24 h-24 bg-white/5 rounded-full" />
               <div className="absolute -bottom-4 -left-4 w-16 h-16 bg-white/5 rounded-full" />
@@ -300,7 +300,7 @@ export default function Chatbot({
                 <h3 className="font-bold text-sm tracking-tight">AI {isBg ? "Асистент" : "Assistant"}</h3>
                 <div className="flex items-center gap-1.5">
                   <span className="w-2 h-2 rounded-full bg-emerald-400 shadow-sm shadow-emerald-400/50" />
-                  <span className="text-xs text-blue-100">Online</span>
+                  <span className="text-xs text-primary-foreground/80">Online</span>
                 </div>
               </div>
               <button
@@ -334,7 +334,7 @@ export default function Chatbot({
               {showScrollBtn && (
                 <button
                   onClick={scrollToBottom}
-                  className="sticky bottom-2 left-1/2 -translate-x-1/2 z-10 w-8 h-8 rounded-full bg-blue-600 text-white shadow-lg flex items-center justify-center hover:bg-blue-700 transition-all"
+                  className="sticky bottom-2 left-1/2 -translate-x-1/2 z-10 w-8 h-8 rounded-full bg-primary text-primary-foreground shadow-lg flex items-center justify-center hover:opacity-90 transition-all"
                 >
                   <ChevronDown className="w-4 h-4" />
                 </button>
@@ -370,7 +370,7 @@ export default function Chatbot({
                       : "Type a message..."
                   }
                   rows={1}
-                  className="flex-1 resize-none rounded-xl border border-slate-200 dark:border-slate-600 px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/40 focus:border-blue-400 dark:focus:border-blue-500 bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 min-h-[40px] max-h-28 transition-all"
+                  className="flex-1 resize-none rounded-xl border border-slate-200 dark:border-slate-600 px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 min-h-[40px] max-h-28 transition-all"
                   style={{ lineHeight: "1.4" }}
                 />
 
@@ -397,7 +397,7 @@ export default function Chatbot({
                 <button
                   onClick={handleSendMessage}
                   disabled={loading || !input.trim()}
-                  className="shrink-0 w-10 h-10 flex items-center justify-center rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-lg shadow-blue-500/25 hover:shadow-blue-500/40 hover:from-blue-700 hover:to-indigo-700 disabled:opacity-40 disabled:shadow-none disabled:cursor-not-allowed transition-all duration-200"
+                  className="shrink-0 w-10 h-10 flex items-center justify-center rounded-xl bg-primary text-primary-foreground shadow-lg shadow-primary/25 hover:shadow-primary/40 hover:opacity-90 disabled:opacity-40 disabled:shadow-none disabled:cursor-not-allowed transition-all duration-200"
                   aria-label="Send"
                 >
                   <Send className="w-5 h-5" />
@@ -412,7 +412,7 @@ export default function Chatbot({
           /* ─── Floating AI Robot Button ───────────────────────────── */
           <button
             onClick={() => setIsOpen(true)}
-            className="chatbot-glow group relative w-14 h-14 rounded-2xl bg-gradient-to-br from-blue-600 via-indigo-600 to-blue-700 shadow-xl shadow-blue-500/30 hover:shadow-blue-500/50 hover:scale-105 active:scale-95 transition-all duration-300 flex items-center justify-center border border-blue-400/30"
+            className="chatbot-glow group relative w-14 h-14 rounded-2xl bg-primary shadow-xl shadow-primary/30 hover:shadow-primary/50 hover:scale-105 active:scale-95 transition-all duration-300 flex items-center justify-center border border-primary-foreground/10"
             aria-label="Open AI Chat"
           >
             <AiRobotIcon size={30} />

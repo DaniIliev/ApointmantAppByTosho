@@ -248,8 +248,10 @@ export function BarChartConfigForm({
               })
             }
             options={[
-              { id: "all", name: "All staff" },
-              ...staffOptions.map((s) => ({
+              { id: "all", name: t("All staff") },
+              ...staffOptions
+                .filter(s => !config.locationId || config.locationId === "all" || s.locationIds?.includes(config.locationId))
+                .map((s) => ({
                 id: s._id as string,
                 name:
                   `${s.firstName} ${s.lastName}`.trim() || (s._id as string),
@@ -266,6 +268,7 @@ export function BarChartConfigForm({
               setConfig({
                 ...config,
                 locationId: value === "all" ? "" : value,
+                staffId: "",
               })
             }
             options={[

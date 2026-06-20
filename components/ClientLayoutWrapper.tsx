@@ -66,6 +66,20 @@ export default function ClientLayoutWrapper({
     );
   const hideLeftNav = isOnboarding || hasNoRole;
 
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  if (!mounted) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-white dark:bg-gray-950">
+         <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
+      </div>
+    );
+  }
+
   return (
     <I18nextProvider i18n={i18n}>
       <PageTitleProvider>

@@ -82,10 +82,10 @@ export function SignInForm({ onSuccess }: SignInFormProps) {
           <div className="flex flex-col items-center mb-8">
             <span className="theme-logo-mask" aria-hidden="true" />
             <div className="text-center">
-              <h1 className="text-xl font-extrabold tracking-tight theme-text-gradient mb-1">
+              <h1 className="text-xl font-extrabold tracking-tight theme-text-gradient mb-1" suppressHydrationWarning>
                 {t("AppointDI®")}
               </h1>
-              <p className="text-sm text-muted-foreground font-medium">
+              <p className="text-sm text-muted-foreground font-medium" suppressHydrationWarning>
                 {t("Sign in to your account")}
               </p>
             </div>

@@ -45,7 +45,7 @@ function PublicLocationPageContent() {
   }, [locationId, resolvedBusinessId, t]);
 
   if (isLoading) {
-    return <div className="p-8 text-center text-lg">{t("Loading location details...")}</div>;
+    return <div className="p-8 text-center text-lg" suppressHydrationWarning>{t("Loading location details...")}</div>;
   }
 
   if (error || !location) {

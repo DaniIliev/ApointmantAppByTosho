@@ -29,6 +29,7 @@ import { KanbanPreview } from "@/components/for-business/KanbanPreview";
 import { CalendarPreview } from "@/components/for-business/CalendarPreview";
 import { ChatPreview } from "@/components/for-business/ChatPreview";
 import { LocationCard } from "@/components/business/LocationCard";
+import { AiAssistantPreview } from "@/components/for-business/AiAssistantPreview";
 
 export default function BusinessLandingPage() {
   const { t } = useTranslation();
@@ -394,6 +395,61 @@ export default function BusinessLandingPage() {
                   {t("Work together with your team. Assign tasks and keep everyone on the same page.")}
                 </p>
               </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* AI Assistant Section */}
+      <section className="bg-primary/5 dark:bg-primary/10 py-16">
+        <div className="container mx-auto px-4">
+          <div className="grid lg:grid-cols-2 gap-12 items-center max-w-6xl mx-auto">
+            <div className="space-y-6 text-center lg:text-left">
+              <div className="inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/10 px-4 py-2 text-primary">
+                <MessageCircle className="h-4 w-4" />
+                <span className="text-sm font-semibold">{t("AI Powered")}</span>
+              </div>
+              <h2 className="text-4xl sm:text-5xl font-bold text-balance">
+                {t("Your 24/7 AI Assistant")}
+              </h2>
+              <p className="text-lg text-muted-foreground">
+                {t("Let our intelligent AI assistant handle your bookings, answer client questions, and manage your schedule around the clock. It speaks multiple languages and never takes a break.")}
+              </p>
+              
+              <div className="space-y-4 pt-4 text-left">
+                <div className="flex items-start gap-3">
+                  <div className="h-6 w-6 rounded-full bg-primary/20 flex items-center justify-center shrink-0 mt-0.5">
+                    <Check className="h-4 w-4 text-primary" />
+                  </div>
+                  <div>
+                    <h4 className="font-semibold">{t("Automated Bookings")}</h4>
+                    <p className="text-muted-foreground text-sm">{t("Guides clients step-by-step to pick the right service, staff, and time.")}</p>
+                  </div>
+                </div>
+                <div className="flex items-start gap-3">
+                  <div className="h-6 w-6 rounded-full bg-primary/20 flex items-center justify-center shrink-0 mt-0.5">
+                    <Check className="h-4 w-4 text-primary" />
+                  </div>
+                  <div>
+                    <h4 className="font-semibold">{t("Smart Q&A")}</h4>
+                    <p className="text-muted-foreground text-sm">{t("Instantly answers questions about your services, prices, and location.")}</p>
+                  </div>
+                </div>
+                <div className="flex items-start gap-3">
+                  <div className="h-6 w-6 rounded-full bg-primary/20 flex items-center justify-center shrink-0 mt-0.5">
+                    <Check className="h-4 w-4 text-primary" />
+                  </div>
+                  <div>
+                    <h4 className="font-semibold">{t("Voice Support")}</h4>
+                    <p className="text-muted-foreground text-sm">{t("Clients can speak to the bot using their microphone for effortless interaction.")}</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div className="flex justify-center relative">
+              {/* Decorative background glow */}
+              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[120%] h-[120%] bg-primary/10 rounded-full blur-3xl -z-10" />
+              <AiAssistantPreview />
             </div>
           </div>
         </div>

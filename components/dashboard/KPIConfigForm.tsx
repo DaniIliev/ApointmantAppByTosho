@@ -108,7 +108,7 @@ export function KPIConfigForm({
     }
     const change = ((current - previous) / previous) * 100;
     return {
-      value: Math.abs(change),
+      value: Math.round(Math.abs(change)),
       type: change > 0.1 ? "increase" : change < -0.1 ? "decrease" : "neutral",
     };
   };
@@ -359,8 +359,10 @@ export function KPIConfigForm({
             value={staffId || "all"}
             onValueChange={(value) => setStaffId(value === "all" ? "" : value)}
             options={[
-              { id: "all", name: "All staff" },
-              ...staffOptions.map((s) => ({
+              { id: "all", name: t("All staff") },
+              ...staffOptions
+                .filter(s => !locationIdFilter || locationIdFilter === "all" || s.locationIds?.includes(locationIdFilter))
+                .map((s) => ({
                 id: s._id as string,
                 name:
                   `${s.firstName} ${s.lastName}`.trim() || (s._id as string),
@@ -373,9 +375,10 @@ export function KPIConfigForm({
             label={t("Location (optional)")}
             placeholder={loadingLocations ? "Loading..." : "All locations"}
             value={locationIdFilter || "all"}
-            onValueChange={(value) =>
-              setLocationIdFilter(value === "all" ? "" : value)
-            }
+            onValueChange={(value) => {
+              setLocationIdFilter(value === "all" ? "" : value);
+              setStaffId("");
+            }}
             options={[
               { id: "all", name: "All locations" },
               ...locationOptions.map((l) => ({

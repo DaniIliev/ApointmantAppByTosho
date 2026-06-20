@@ -144,7 +144,7 @@ export const calculatePercentageChange = (
   }
   const change = ((current - previous) / previous) * 100;
   return {
-    value: Math.abs(change),
+    value: Math.round(Math.abs(change)),
     type: change > 0.1 ? "increase" : change < -0.1 ? "decrease" : "neutral",
   };
 };

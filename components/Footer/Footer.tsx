@@ -3,7 +3,7 @@
 import React from "react";
 import Link from "next/link";
 import { useTranslation } from "react-i18next";
-import { Mail, Phone, MapPin, Facebook, Instagram, Twitter } from "lucide-react";
+import { Mail, Phone, MapPin, Facebook, Instagram, Music } from "lucide-react";
 
 const Footer = () => {
   const { t } = useTranslation();
@@ -23,14 +23,14 @@ const Footer = () => {
               {t("AppointDI is an easy tool to manage your bookings. It helps you stay organized and gives your clients a better way to book their spots.")}
             </p>
             <div className="flex items-center gap-4">
-              <a href="#" className="p-2 bg-background rounded-full border border-border hover:border-primary hover:text-primary transition-all duration-300">
+              <a href="https://www.facebook.com/profile.php?id=61590748186177&mibextid=wwXIfr&rdid=nnP0OlPvsW3wlXws&share_url=https%3A%2F%2Fwww.facebook.com%2Fshare%2F1F46B7ZjX4%2F%3Fmibextid%3DwwXIfr#" className="p-2 bg-background rounded-full border border-border hover:border-primary hover:text-primary transition-all duration-300">
                 <Facebook size={18} />
               </a>
-              <a href="#" className="p-2 bg-background rounded-full border border-border hover:border-primary hover:text-primary transition-all duration-300">
+              <a href="https://www.instagram.com/appointdi.official?utm_source=qr" className="p-2 bg-background rounded-full border border-border hover:border-primary hover:text-primary transition-all duration-300">
                 <Instagram size={18} />
               </a>
-              <a href="#" className="p-2 bg-background rounded-full border border-border hover:border-primary hover:text-primary transition-all duration-300">
-                <Twitter size={18} />
+              <a href="https://www.tiktok.com/@appointdi.official?_r=1&_t=ZN-97Mi1elPu3K" className="p-2 bg-background rounded-full border border-border hover:border-primary hover:text-primary transition-all duration-300">
+                <Music size={18} />
               </a>
             </div>
           </div>
