@@ -447,7 +447,7 @@ export default function ChatInput({
               placeholder={t("Write a new message...")}
               rows={1}
               className="w-full px-4 py-2.5 rounded-2xl bg-gray-100 dark:bg-white/5 border border-gray-200 dark:border-white/10 text-text-primary placeholder:text-text-secondary text-sm resize-none focus:outline-none focus:border-primary transition-colors max-h-[120px]"
-              style={{ minHeight: "40px" }}
+              style={{ minHeight: "40px", marginBottom: "-5px" }}
             />
           </div>
 

@@ -44,7 +44,7 @@ export default function ChatLayout() {
   };
 
   return (
-    <div className="flex h-full rounded-2xl overflow-hidden border border-gray-200 dark:border-white/10 bg-primary-foreground shadow-lg">
+    <div className="flex h-full rounded-2xl border border-gray-200 dark:border-white/10 bg-primary-foreground shadow-lg">
       {/* Sidebar — Always visible on desktop, toggleable on mobile */}
       <div
         className={`${
