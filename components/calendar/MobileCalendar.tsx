@@ -452,12 +452,12 @@ const MobileCalendar = ({
     const dateKey: string = format(date, "dd MMMM yyyy г.", { locale: bg });
     const element: HTMLDivElement | null = appointmentRefs.current[dateKey];
     if (element) {
-      // scroll to the top of the container rather than 'nearest' for consistent behavior
-      element.scrollIntoView({
-        behavior: smoothScroll ? "smooth" : "auto",
-        block: "start",
-        inline: "nearest",
-      });
+      if (containerRef.current) {
+        containerRef.current.scrollTo({
+          top: element.offsetTop,
+          behavior: smoothScroll ? "smooth" : "auto",
+        });
+      }
       // Allow enough time for smooth scroll to finish before listening to intersection observer again
       setTimeout(() => {
         isUserScrolling.current = false;
@@ -592,7 +592,7 @@ const MobileCalendar = ({
       </div>
       {/* Appointments List */}
       <div
-        className="flex-1 overflow-y-auto px-4 scrolling-container"
+        className="flex-1 overflow-y-auto px-4 scrolling-container relative"
         ref={containerRef}
       >
         {allDatesInYear.length > 0 ? (

@@ -71,7 +71,7 @@ export function AiAssistantPreview() {
   const isBg = i18n.language?.startsWith("bg");
 
   return (
-    <div className="w-[380px] h-[540px] max-w-full mx-auto rounded-2xl shadow-2xl shadow-black/20 dark:shadow-black/50 flex flex-col overflow-hidden border border-slate-200/60 dark:border-slate-700/60 bg-white/95 dark:bg-slate-900/95 text-left relative transform hover:scale-[1.02] transition-transform duration-500">
+    <div className="w-full max-w-[380px] sm:w-[380px] h-[540px] mx-auto rounded-2xl shadow-2xl shadow-black/20 dark:shadow-black/50 flex flex-col overflow-hidden border border-slate-200/60 dark:border-slate-700/60 bg-white/95 dark:bg-slate-900/95 text-left relative transform hover:scale-[1.02] transition-transform duration-500">
       {/* Header */}
       <div className="flex items-center gap-3 px-4 py-3 bg-primary text-primary-foreground relative overflow-hidden">
         <div className="absolute -top-6 -right-6 w-24 h-24 bg-white/5 rounded-full" />
