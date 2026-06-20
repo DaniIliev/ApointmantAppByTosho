@@ -30,6 +30,7 @@ import { CalendarPreview } from "@/components/for-business/CalendarPreview";
 import { ChatPreview } from "@/components/for-business/ChatPreview";
 import { LocationCard } from "@/components/business/LocationCard";
 import { AiAssistantPreview } from "@/components/for-business/AiAssistantPreview";
+import InstallPWAButton from "@/components/InstallPWAButton";
 
 export default function BusinessLandingPage() {
   const { t } = useTranslation();
@@ -74,6 +75,7 @@ export default function BusinessLandingPage() {
               <Button size="default" onClick={() => router.push("/register")}>
                 {t("Get started")}
               </Button>
+              <InstallPWAButton />
             </div>
           </div>
         </div>
