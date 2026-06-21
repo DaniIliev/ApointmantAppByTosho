@@ -337,10 +337,10 @@ export default function LeftNav({ isOpen, onClose }: LeftNavProps) {
       onTouchEnd={handleTouchEnd}
     >
       <div className={`h-full flex flex-col relative`}>
-        <div className="pt-2 px-3">
+        <div className="pt-5 px-3">
           <LocationSelector isOpen={isOpen} />
         </div>
-        <div className="space-y-2 flex-1 overflow-y-auto pt-2pb-20 px-3">
+        <div className="space-y-2 flex-1 overflow-y-auto pt-2 pb-24 px-3">
           {navItems.map((item) => (
             <SubMenu
               key={item.label}
@@ -351,7 +351,7 @@ export default function LeftNav({ isOpen, onClose }: LeftNavProps) {
           ))}
         </div>
         {user && (
-          <div className="md:hidden absolute left-0 right-0 bottom-0 p-3 border-t border-white/10 bg-primary-foreground">
+          <div className="lg:hidden absolute left-0 right-0 bottom-0 p-3 border-t border-white/10 bg-primary-foreground">
             <div className="flex items-center justify-around">
               {/* Profile */}
               <Link

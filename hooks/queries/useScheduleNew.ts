@@ -189,3 +189,32 @@ export const useApplyScheduleToAll = () => {
     },
   });
 };
+
+// ─── GET: affected appointments ───────────────────────────
+
+export const useGetAffectedAppointments = (staffId?: string, scheduleId?: string, date?: string) => {
+  return useQuery<any[]>({
+    queryKey: ["sn-affected-appointments", staffId, scheduleId, date],
+    queryFn: async (): Promise<any[]> => {
+      if ((!staffId && !scheduleId) || !date) return [];
+      return await callApi(
+        `/api/staff-schedules/appointments/affected?staffId=${staffId || ""}&scheduleId=${scheduleId || ""}&date=${date}`,
+        "GET"
+      );
+    },
+    enabled: (!!staffId || !!scheduleId) && !!date,
+  });
+};
+
+// ─── POST: notify day off ─────────────────────────────────
+
+export const useNotifyDayOff = () => {
+  return useMutation<{ message: string }, Error, { appointmentIds: string[], customMessage?: string }>({
+    mutationFn: async ({ appointmentIds, customMessage }) => {
+      return await callApi("/api/staff-schedules/appointments/notify-day-off", "POST", {
+        appointmentIds,
+        customMessage,
+      });
+    },
+  });
+};

@@ -34,10 +34,10 @@ export default function ClientLayout({
           <LeftNav isOpen={isLeftNavOpen} onClose={() => setIsLeftNavOpen(false)} />
         )}
 
-        {/* Mobile Backdrop */}
+        {/* Mobile & Tablet Backdrop */}
         {isLeftNavOpen && !hideLeftNav && (
           <div
-            className="fixed inset-0 bg-black/40 backdrop-blur-sm z-30 md:hidden transition-opacity duration-300"
+            className="fixed inset-0 bg-black/40 backdrop-blur-sm z-30 lg:hidden transition-opacity duration-300"
             onClick={() => setIsLeftNavOpen(false)}
             aria-hidden="true"
           />

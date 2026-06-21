@@ -429,7 +429,7 @@ export default function TopNav({
               )}
             </div>
 
-            <div className="relative hidden md:block" ref={helpRef}>
+            <div className="relative hidden lg:block" ref={helpRef}>
               <Link
                 href="/help/contact"
                 className="flex flex-col items-center justify-center p-2 rounded-lg hover:bg-white/10 transition-colors duration-200"
@@ -445,7 +445,7 @@ export default function TopNav({
             </div>
 
             {/* Profile Button with Text (hidden on mobile) */}
-            <div className="relative hidden md:block" ref={profileRef}>
+            <div className="relative hidden lg:block" ref={profileRef}>
               {user?.profilePictureUrl ? (
                 <button
                   onClick={toggleProfile}

@@ -5,6 +5,7 @@ import { Clock, Eye, Pencil, Plus } from "lucide-react";
 import type { DailyViewData, DayViewEntry, Schedule, StaffMember } from "../types";
 import { getFullName, getStaffInitials } from "../utils";
 import { CustomTooltip } from "@/components/customUIComponents/CustomTooltip";
+import { useAuthContext } from "@/context/AuthContext";
 
 // ─── Props ────────────────────────────────────────────────
 
@@ -40,6 +41,8 @@ export function DesktopScheduleBoard({
   onCreateScheduleForStaff,
   t,
 }: DesktopScheduleBoardProps) {
+  const { user } = useAuthContext();
+  
   return (
     <div className="hidden overflow-auto md:block">
       <table className="w-full min-w-[1080px] text-sm ">
@@ -186,31 +189,59 @@ export function DesktopScheduleBoard({
                 {/* Actions cell */}
                 <td className="p-3">
                   <div className="flex items-center justify-center gap-1">
-                    {mainSchedule ? (
-                      <>
-                        <CustomTooltip
-                          onClick={() =>
-                            onOpenStaffCalendar(
-                              mainSchedule._id,
-                              staffMember._id,
-                            )
-                          }
-                          tooltipText={t("View")}
-                          icon={<Eye />}
-                        />
-                        <CustomTooltip
-                          onClick={() => onOpenStaffScheduleEdit(staffMember)}
-                          tooltipText={t("Edit")}
-                          icon={<Pencil />}
-                        />
-                      </>
-                    ) : (
-                      <CustomTooltip
-                        onClick={() => onCreateScheduleForStaff(staffMember)}
-                        tooltipText={t("Create")}
-                        icon={<Plus />}
-                      />
-                    )}
+                    {(() => {
+                      const isOwner = user?._id === staffMember._id || user?._id === staffMember._id;
+                      const hasAdminRole = user?.role === "business" || user?.role === "manager";
+                      const canEdit = isOwner || hasAdminRole;
+
+                      if (mainSchedule) {
+                        return (
+                          <>
+                            <CustomTooltip
+                              onClick={() =>
+                                onOpenStaffCalendar(
+                                  mainSchedule._id,
+                                  staffMember._id,
+                                )
+                              }
+                              tooltipText={t("View")}
+                              icon={<Eye />}
+                            />
+                            {canEdit ? (
+                              <CustomTooltip
+                                onClick={() => onOpenStaffScheduleEdit(staffMember)}
+                                tooltipText={t("Edit")}
+                                icon={<Pencil />}
+                              />
+                            ) : (
+                              <CustomTooltip
+                                onClick={() => {}}
+                                tooltipText={t("No permissions")}
+                                icon={<Pencil className="opacity-50" />}
+                              />
+                            )}
+                          </>
+                        );
+                      } else {
+                         if (canEdit) {
+                           return (
+                              <CustomTooltip
+                                onClick={() => onCreateScheduleForStaff(staffMember)}
+                                tooltipText={t("Create")}
+                                icon={<Plus />}
+                              />
+                           );
+                         } else {
+                           return (
+                              <CustomTooltip
+                                onClick={() => {}}
+                                tooltipText={t("No permissions")}
+                                icon={<Plus className="opacity-50" />}
+                              />
+                           );
+                         }
+                      }
+                    })()}
                   </div>
                 </td>
               </tr>

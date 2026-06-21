@@ -69,11 +69,25 @@ export default function ScheduleDetailPage() {
             : updatedDayData.date,
       };
 
-      await callApi(
+      const response = await callApi(
         `/api/staff-schedules/${targetScheduleId}/details`,
         "PUT",
         { workHour: dataToSend },
       );
+
+      // The backend returns the updated dailySchedule with the new history/lastUpdated
+      if (response && response.data && response.data.workHours) {
+        const updatedServerDay = response.data.workHours.find(
+          (d: any) => d._id === updatedDayData._id
+        );
+        if (updatedServerDay) {
+          newDailyData[index] = {
+            ...updatedServerDay,
+            date: new Date(updatedServerDay.date),
+            scheduleId: targetScheduleId
+          };
+        }
+      }
 
       setDailyData(newDailyData);
       closeModal();

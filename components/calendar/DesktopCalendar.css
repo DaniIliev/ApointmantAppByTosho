@@ -188,6 +188,7 @@
 /* ─── Grid: Day name headers ─── */
 .desktop-calendar__grid {
   padding: 8px 12px 12px;
+  overflow-x: auto;
 }
 
 .desktop-calendar__day-headers {
@@ -195,6 +196,7 @@
   grid-template-columns: repeat(7, 1fr);
   gap: var(--cal-gap);
   margin-bottom: 6px;
+  min-width: 800px;
 }
 
 .desktop-calendar__day-header {
@@ -213,6 +215,7 @@
   display: grid;
   grid-template-columns: repeat(7, 1fr);
   gap: var(--cal-gap);
+  min-width: 800px;
 }
 
 .desktop-calendar__week-col {
@@ -286,6 +289,7 @@
   display: grid;
   grid-template-columns: repeat(7, 1fr);
   gap: var(--cal-gap);
+  min-width: 800px;
 }
 
 .desktop-calendar__month-cell {

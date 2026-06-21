@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import type { DailyViewData, DayViewEntry, Schedule, StaffMember } from "../types";
 import { getFullName, getStaffInitials } from "../utils";
 import { CustomTooltip } from "@/components/customUIComponents/CustomTooltip";
+import { useAuthContext } from "@/context/AuthContext";
 
 // ─── Props ────────────────────────────────────────────────
 
@@ -43,6 +44,8 @@ export function MobileScheduleBoard({
   onCreateScheduleForStaff,
   t,
 }: MobileScheduleBoardProps) {
+  const { user } = useAuthContext();
+
   return (
     <div className="space-y-4 md:hidden">
       {visibleStaff.map((staffMember) => {
@@ -82,26 +85,54 @@ export function MobileScheduleBoard({
                 </div>
               </div>
 
-              {mainSchedule ? (
-                <div className="flex shrink-0 items-center gap-1.5">
-                  <CustomTooltip
-                    onClick={() => onOpenStaffScheduleEdit(staffMember)}
-                    tooltipText={t("Edit")}
-                    icon={<Pencil />}
-                  />
-                  <CustomTooltip
-                    onClick={() => onOpenStaffCalendar(mainSchedule._id, staffMember._id)}
-                    tooltipText={t("View")}
-                    icon={<Eye />}
-                  />
-                </div>
-              ) : (
-                <CustomTooltip
-                  onClick={() => onCreateScheduleForStaff(staffMember)}
-                  tooltipText={t("Create")}
-                  icon={<Plus />}
-                />
-              )}
+              {(() => {
+                const isOwner = user?._id === staffMember._id || user?._id === staffMember._id;
+                const hasAdminRole = user?.role === "business" || user?.role === "manager";
+                const canEdit = isOwner || hasAdminRole;
+
+                if (mainSchedule) {
+                  return (
+                    <div className="flex shrink-0 items-center gap-1.5">
+                      {canEdit ? (
+                        <CustomTooltip
+                          onClick={() => onOpenStaffScheduleEdit(staffMember)}
+                          tooltipText={t("Edit")}
+                          icon={<Pencil />}
+                        />
+                      ) : (
+                        <CustomTooltip
+                          onClick={() => {}}
+                          tooltipText={t("No permissions")}
+                          icon={<Pencil className="opacity-50" />}
+                        />
+                      )}
+                      <CustomTooltip
+                        onClick={() => onOpenStaffCalendar(mainSchedule._id, staffMember._id)}
+                        tooltipText={t("View")}
+                        icon={<Eye />}
+                      />
+                    </div>
+                  );
+                } else {
+                  if (canEdit) {
+                    return (
+                      <CustomTooltip
+                        onClick={() => onCreateScheduleForStaff(staffMember)}
+                        tooltipText={t("Create")}
+                        icon={<Plus />}
+                      />
+                    );
+                  } else {
+                    return (
+                      <CustomTooltip
+                        onClick={() => {}}
+                        tooltipText={t("No permissions")}
+                        icon={<Plus className="opacity-50" />}
+                      />
+                    );
+                  }
+                }
+              })()}
             </div>
 
             {/* Day chips */}
