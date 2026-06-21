@@ -469,7 +469,7 @@ function HomePageContent() {
                       type: "value", 
                       show: false,
                       min: "dataMin",
-                      max: (val) => val.max === 0 ? 10 : "dataMax"
+                      max: (val: any) => val.max === 0 ? 10 : "dataMax"
                     },
                     series: [
                       {
@@ -531,7 +531,7 @@ function HomePageContent() {
                       type: "value", 
                       show: false,
                       min: "dataMin",
-                      max: (val) => val.max === 0 ? 10 : "dataMax"
+                      max: (val:any) => val.max === 0 ? 10 : "dataMax"
                     },
                     series: [
                       {
