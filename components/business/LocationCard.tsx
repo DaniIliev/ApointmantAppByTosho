@@ -90,17 +90,17 @@ export function LocationCard({
           </div>
         )}
       </div>
-      <div className="absolute bottom-5 left-5 right-5 z-20">
-        <div className="flex items-center justify-between gap-3 rounded-3xl bg-black/85 p-4 text-white backdrop-blur-sm">
+      <div className="absolute bottom-3 left-3 right-3 z-20">
+        <div className="flex items-center justify-between gap-3 rounded-2xl bg-black/85 p-3 text-white backdrop-blur-sm">
           <div className="min-w-0">
-            <h3 className="truncate text-2xl font-bold tracking-tight">
+            <h3 className="truncate text-lg font-bold tracking-tight">
               {location.name}
             </h3>
-            <p className="truncate text-lg text-white/85">
+            <p className="truncate text-sm text-white/85">
               {composedAddress || t("No address available")}
             </p>
           </div>
-          <div className="h-24 w-24 shrink-0 overflow-hidden rounded-2xl border-2 border-white/80 bg-muted">
+          <div className="h-14 w-14 shrink-0 overflow-hidden rounded-xl border-2 border-white/80 bg-muted">
             <img
               src={imageUrl || fallbackImage}
               alt={location.name}

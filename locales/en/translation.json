@@ -1787,5 +1787,20 @@
   "John, did you see the application for the new nail technician?": "John, did you see the application for the new nail technician?",
   "Select a conversation from the sidebar or start a new one to begin chatting": "Select a conversation from the sidebar or start a new one to begin chatting",
   "Admin Dashboard": "Admin Dashboard",
-  "Chat": "Chat"
+  "Chat": "Chat",
+  "Clients notified and appointments cancelled.": "Clients notified and appointments cancelled.",
+  "Failed to notify clients.": "Failed to notify clients.",
+  "Review Affected Appointments": "Review Affected Appointments",
+  "You must notify the affected clients before saving these changes.": "You must notify the affected clients before saving these changes.",
+  "Message to clients (optional)": "Message to clients (optional)",
+  "Enter custom reason for cancellation...": "Enter custom reason for cancellation...",
+  "Processing...": "Processing...",
+  "Notify Clients & Save": "Notify Clients & Save",
+  "History": "History",
+  "Last Updated:": "Last Updated:",
+  "No permissions": "No permissions",
+  "Install App": "Install App",
+  "All staff": "All staff",
+  "Booking Dynamics": "",
+  "vs": ""
 }

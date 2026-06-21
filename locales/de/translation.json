@@ -1762,5 +1762,21 @@
   "John, did you see the application for the new nail technician?": "John, hast du die Bewerbung für den neuen Nageltechniker gesehen?",
   "Select a conversation from the sidebar or start a new one to begin chatting": "Wählen Sie eine Unterhaltung aus der Seitenleiste oder starten Sie eine neue, um mit dem Chatten zu beginnen",
   "Admin Dashboard": "Admin-Dashboard",
-  "Chat": "Chat"
+  "Chat": "Chat",
+  "Clients notified and appointments cancelled.": "Kunden benachrichtigt und Termine storniert.",
+  "Failed to notify clients.": "Kunden konnten nicht benachrichtigt werden.",
+  "Review Affected Appointments": "Betroffene Termine überprüfen",
+  "You must notify the affected clients before saving these changes.": "Sie müssen die betroffenen Kunden benachrichtigen, bevor Sie diese Änderungen speichern.",
+  "Message to clients (optional)": "Nachricht an Kunden (optional)",
+  "Enter custom reason for cancellation...": "Benutzerdefinierten Grund für die Stornierung eingeben...",
+  "Processing...": "Wird verarbeitet...",
+  "Notify Clients & Save": "Kunden benachrichtigen & Speichern",
+  "History": "Verlauf",
+  "Last Updated:": "Zuletzt aktualisiert:",
+  "No permissions": "Keine Berechtigungen",
+  "Install App": "App installieren",
+  "All staff": "Gesamtes Personal",
+  "Booking Dynamics": "Buchungsdynamik",
+  "vs": "vs",
+  "Here you see the most important information for the day: quick actions, upcoming appointments and current progress.": "Hier sehen Sie die wichtigsten Informationen des Tages: Schnellaktionen, anstehende Termine und aktueller Fortschritt."
 }

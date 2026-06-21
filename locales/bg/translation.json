@@ -1793,5 +1793,21 @@
   "John, did you see the application for the new nail technician?": "Джон, видя ли кандидатурата за новия маникюрист?",
   "Select a conversation from the sidebar or start a new one to begin chatting": "Изберете разговор от страничната лента или започнете нов, за да започнете чат.",
   "Admin Dashboard": "Административно табло",
-  "Chat": "Чат"
+  "Chat": "Чат",
+  "Clients notified and appointments cancelled.": "Клиентите са уведомени, а срещите са отменени.",
+  "Failed to notify clients.": "Неуспешно уведомяване на клиентите.",
+  "Review Affected Appointments": "Преглед на засегнатите срещи",
+  "You must notify the affected clients before saving these changes.": "Трябва да уведомите засегнатите клиенти, преди да запишете тези промени.",
+  "Message to clients (optional)": "Съобщение до клиентите (незадължително)",
+  "Enter custom reason for cancellation...": "Въведете конкретна причина за отмяната...",
+  "Processing...": "Обработка...",
+  "Notify Clients & Save": "Уведоми клиентите и запази",
+  "History": "История",
+  "Last Updated:": "Последна актуализация:",
+  "No permissions": "Нямате права",
+  "Install App": "Инсталирай приложението",
+  "All staff": "Целият персонал",
+  "Booking Dynamics": "Динамика на резервациите",
+  "vs": "спрямо",
+  "Here you see the most important information for the day: quick actions, upcoming appointments and current progress.": "Тук виждате най-важната информация за деня: бързи действия, предстоящи срещи и текущ напредък."
 }
