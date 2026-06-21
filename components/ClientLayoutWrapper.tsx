@@ -12,6 +12,7 @@ import { Toaster } from "sonner";
 import { PaddingProvider } from "@/context/PaddingContext";
 import AutoCompletePastAppointments from "@/components/Global/AutoCompletePastAppointments";
 import { usePathname } from "next/navigation";
+import Chatbot from "@/components/chatBot/Chatbot";
 
 export default function ClientLayoutWrapper({
   children,
@@ -66,6 +67,11 @@ export default function ClientLayoutWrapper({
     );
   const hideLeftNav = isOnboarding || hasNoRole;
 
+  // Show business-help chatbot for business/manager/staff users on internal pages
+  const isBusinessRole = user?.role && ["business", "manager", "staff"].includes(user.role as string);
+  const isPublicBusinessPage = pathname.startsWith("/business/") && !pathname.includes("/business/business-information") && !pathname.includes("/business/locations") && !pathname.includes("/business/qr-code");
+  const showBusinessHelper = isBusinessRole && !isOnboarding && !isPublicBusinessPage;
+
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
@@ -94,6 +100,7 @@ export default function ClientLayoutWrapper({
                   open={showChangePassword}
                   onClose={() => setShowChangePassword(false)}
                 />
+                {showBusinessHelper && <Chatbot mode="business-help" />}
               </ClientLayout>
             ) : (
               <GuestLayout>{children}</GuestLayout>

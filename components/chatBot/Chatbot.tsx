@@ -113,19 +113,26 @@ const ChatMessage = ({ message, isUser, timestamp }: ChatMessageProps) => (
 export default function Chatbot({
   businessId,
   locationId,
+  mode = "customer",
 }: {
   businessId?: string;
   locationId?: string;
+  mode?: "customer" | "business-help";
 }) {
+  const isHelpMode = mode === "business-help";
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const { t, i18n } = useTranslation();
   const isBg = i18n.language?.startsWith("bg");
 
   const [messages, setMessages] = useState<ChatMessageProps[]>([
     {
-      message: isBg
-        ? "Здравейте! 👋 Аз съм вашият AI асистент. Мога да ви помогна с информация за услуги, работно време, свободни часове и запазване на час. Как мога да ви бъда полезен?"
-        : "Hello! 👋 I'm your AI assistant. I can help you with services info, working hours, availability and booking appointments. How can I help you?",
+      message: isHelpMode
+        ? (isBg
+          ? "Здравейте! 💡 Аз съм вашият AI помощник за AppointDI. Мога да ви помогна с въпроси като:\n\n• Как да създам нова услуга?\n• Как да настроя график?\n• Как да добавя служител?\n• Как да управлявам локации?\n\nПитайте ме каквото и да е!"
+          : "Hello! 💡 I'm your AppointDI AI helper. I can assist you with questions like:\n\n• How to create a new service?\n• How to set up a schedule?\n• How to add staff members?\n• How to manage locations?\n\nAsk me anything!")
+        : (isBg
+          ? "Здравейте! 👋 Аз съм вашият AI асистент. Мога да ви помогна с информация за услуги, работно време, свободни часове и запазване на час. Как мога да ви бъда полезен?"
+          : "Hello! 👋 I'm your AI assistant. I can help you with services info, working hours, availability and booking appointments. How can I help you?"),
       isUser: false,
       timestamp: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
     },
@@ -216,14 +223,19 @@ export default function Chatbot({
 
     try {
       const response: { response: string } = await callApi(
-        "/api/chatbot",
+        isHelpMode ? "/api/chatbot/business-help" : "/api/chatbot",
         "POST",
-        {
-          message: trimmed,
-          userId: user?._id || "guest",
-          businessId,
-          locationId,
-        }
+        isHelpMode
+          ? {
+              message: trimmed,
+              userId: user?._id || "guest",
+            }
+          : {
+              message: trimmed,
+              userId: user?._id || "guest",
+              businessId,
+              locationId,
+            }
       );
 
       const aiTime = new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
@@ -297,7 +309,7 @@ export default function Chatbot({
                 <AiRobotIcon size={24} />
               </div>
               <div className="flex-1 relative">
-                <h3 className="font-bold text-sm tracking-tight">AI {isBg ? "Асистент" : "Assistant"}</h3>
+                <h3 className="font-bold text-sm tracking-tight">{isHelpMode ? (isBg ? "💡 AI Помощник" : "💡 AI Helper") : `AI ${isBg ? "Асистент" : "Assistant"}`}</h3>
                 <div className="flex items-center gap-1.5">
                   <span className="w-2 h-2 rounded-full bg-emerald-400 shadow-sm shadow-emerald-400/50" />
                   <span className="text-xs text-primary-foreground/80">Online</span>
@@ -404,7 +416,9 @@ export default function Chatbot({
                 </button>
               </div>
               <p className="text-[10px] text-center text-slate-400 dark:text-slate-500 mt-2 select-none">
-                AI {isBg ? "асистент" : "assistant"} • {isBg ? "Поддържа БГ и EN" : "Supports BG & EN"}
+                {isHelpMode
+                  ? (isBg ? "💡 Помощник за AppointDI • БГ & EN" : "💡 AppointDI Helper • BG & EN")
+                  : `AI ${isBg ? "асистент" : "assistant"} • ${isBg ? "Поддържа БГ и EN" : "Supports BG & EN"}`}
               </p>
             </div>
           </div>

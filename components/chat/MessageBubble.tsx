@@ -134,7 +134,6 @@ export default function MessageBubble({
   const { t } = useTranslation();
   const { user } = useAuthContext();
   const { theme } = useTheme();
-  const [showActions, setShowActions] = useState(false);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const [emojiData, setEmojiData] = useState<any>(null);
@@ -206,8 +205,6 @@ export default function MessageBubble({
 
       <div
         className={`group flex ${isOwn ? "justify-end" : "justify-start"} px-4 ${isConsecutive ? "py-0.5" : "pt-2 pb-0.5"}`}
-        onMouseEnter={() => setShowActions(true)}
-        onMouseLeave={() => setShowActions(false)}
       >
         <div className={`flex gap-2 max-w-[75%] ${isOwn ? "flex-row-reverse" : ""}`}>
           {/* Avatar (only for first message in group) */}
@@ -359,74 +356,72 @@ export default function MessageBubble({
           </div>
 
           {/* Action buttons */}
-          {showActions && (
-            <div
-              className={`flex items-center gap-0.5 self-center transition-opacity ${isOwn ? "flex-row-reverse" : ""} relative`}
-            >
-              <div ref={emojiRef} className="relative">
-                <button
-                  onClick={() => {
-                    if (!emojiData) {
-                      import("@emoji-mart/data").then((mod) => setEmojiData(mod.default));
-                    }
-                    setShowEmojiPicker(!showEmojiPicker);
-                  }}
-                  className="p-1 rounded hover:bg-white/10 transition-colors"
-                  title={t("React")}
-                >
-                  <SmilePlus className="w-3.5 h-3.5 text-text-secondary" />
-                </button>
-                {showEmojiPicker && emojiData && (
-                  <div 
-                    className="fixed inset-0 z-[100] flex items-center justify-center bg-black/10 backdrop-blur-[1px]"
-                    onClick={() => setShowEmojiPicker(false)}
-                  >
-                    <div 
-                      className="shadow-2xl rounded-lg overflow-hidden animate-in fade-in zoom-in-95 duration-200"
-                      onClick={(e) => e.stopPropagation()}
-                    >
-                      <EmojiPickerComponent
-                        data={emojiData}
-                        onEmojiSelect={(emoji: any) => {
-                          chatService.toggleReaction(message._id, emoji.native);
-                          setShowEmojiPicker(false);
-                        }}
-                        theme={theme === "dark" ? "dark" : "light"}
-                        previewPosition="none"
-                        skinTonePosition="search"
-                        maxFrequentRows={1}
-                      />
-                    </div>
-                  </div>
-                )}
-              </div>
+          <div
+            className={`flex items-center gap-0.5 self-center transition-opacity opacity-70 hover:opacity-100 ${isOwn ? "flex-row-reverse" : ""} relative`}
+          >
+            <div ref={emojiRef} className="relative">
               <button
-                onClick={() => onReply(message)}
+                onClick={() => {
+                  if (!emojiData) {
+                    import("@emoji-mart/data").then((mod) => setEmojiData(mod.default));
+                  }
+                  setShowEmojiPicker(!showEmojiPicker);
+                }}
                 className="p-1 rounded hover:bg-white/10 transition-colors"
-                title={t("Reply")}
+                title={t("React")}
               >
-                <Reply className="w-3.5 h-3.5 text-text-secondary" />
+                <SmilePlus className="w-3.5 h-3.5 text-text-secondary" />
               </button>
-              {isOwn && (
-                <>
-                  <button
-                    onClick={() => onEdit(message)}
-                    className="p-1 rounded hover:bg-white/10 transition-colors"
-                    title={t("Edit")}
+              {showEmojiPicker && emojiData && (
+                <div 
+                  className="fixed inset-0 z-[100] flex items-center justify-center bg-black/10 backdrop-blur-[1px]"
+                  onClick={() => setShowEmojiPicker(false)}
+                >
+                  <div 
+                    className="shadow-2xl rounded-lg overflow-hidden animate-in fade-in zoom-in-95 duration-200"
+                    onClick={(e) => e.stopPropagation()}
                   >
-                    <Pencil className="w-3.5 h-3.5 text-text-secondary" />
-                  </button>
-                  <button
-                    onClick={() => onDelete(message._id)}
-                    className="p-1 rounded hover:bg-red-500/20 transition-colors group/delete"
-                    title={t("Delete")}
-                  >
-                    <Trash2 className="w-3.5 h-3.5 text-red-500 group-hover/delete:text-red-400" />
-                  </button>
-                </>
+                    <EmojiPickerComponent
+                      data={emojiData}
+                      onEmojiSelect={(emoji: any) => {
+                        chatService.toggleReaction(message._id, emoji.native);
+                        setShowEmojiPicker(false);
+                      }}
+                      theme={theme === "dark" ? "dark" : "light"}
+                      previewPosition="none"
+                      skinTonePosition="search"
+                      maxFrequentRows={1}
+                    />
+                  </div>
+                </div>
               )}
             </div>
-          )}
+            <button
+              onClick={() => onReply(message)}
+              className="p-1 rounded hover:bg-white/10 transition-colors"
+              title={t("Reply")}
+            >
+              <Reply className="w-3.5 h-3.5 text-text-secondary" />
+            </button>
+            {isOwn && (
+              <>
+                <button
+                  onClick={() => onEdit(message)}
+                  className="p-1 rounded hover:bg-white/10 transition-colors"
+                  title={t("Edit")}
+                >
+                  <Pencil className="w-3.5 h-3.5 text-text-secondary" />
+                </button>
+                <button
+                  onClick={() => onDelete(message._id)}
+                  className="p-1 rounded hover:bg-red-500/20 transition-colors group/delete"
+                  title={t("Delete")}
+                >
+                  <Trash2 className="w-3.5 h-3.5 text-red-500 group-hover/delete:text-red-400" />
+                </button>
+              </>
+            )}
+          </div>
         </div>
       </div>
 
