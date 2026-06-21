@@ -298,7 +298,7 @@ export default function Chatbot({
 
       <div className="fixed bottom-5 right-5 z-50">
         {isOpen ? (
-          <div className="chatbot-window-enter w-[380px] h-[540px] rounded-2xl shadow-2xl shadow-black/20 dark:shadow-black/50 flex flex-col overflow-hidden border border-slate-200/60 dark:border-slate-700/60 backdrop-blur-sm bg-white/95 dark:bg-slate-900/95">
+          <div className="chatbot-window-enter w-[calc(100vw-40px)] sm:w-[380px] h-[500px] sm:h-[540px] max-h-[calc(100vh-100px)] rounded-2xl shadow-2xl shadow-black/20 dark:shadow-black/50 flex flex-col overflow-hidden border border-slate-200/60 dark:border-slate-700/60 backdrop-blur-sm bg-white/95 dark:bg-slate-900/95">
             {/* Header */}
             <div className="flex items-center gap-3 px-4 py-3 bg-primary text-primary-foreground relative overflow-hidden">
               {/* Decorative circles */}
