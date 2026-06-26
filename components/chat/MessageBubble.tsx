@@ -357,7 +357,7 @@ export default function MessageBubble({
 
           {/* Action buttons */}
           <div
-            className={`flex items-center gap-0.5 self-center transition-opacity opacity-70 hover:opacity-100 ${isOwn ? "flex-row-reverse" : ""} relative`}
+            className={`flex items-center gap-0.5 self-center transition-opacity opacity-0 group-hover:opacity-100 ${isOwn ? "flex-row-reverse" : ""} relative`}
           >
             <div ref={emojiRef} className="relative">
               <button

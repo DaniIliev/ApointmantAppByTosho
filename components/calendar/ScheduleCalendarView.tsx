@@ -213,7 +213,7 @@ export default function ScheduleCalendarView({
       {/* Desktop View */}
       <div className="hidden md:block">
         {/* Header: Име на месеца и Навигация */}
-        <div className="flex justify-between items-center p-2 mb-2 border-b">
+        <div className="flex justify-between items-center border-b">
           {/* Лява Стрелка */}
           <button
             onClick={handlePrevMonth}
@@ -250,7 +250,7 @@ export default function ScheduleCalendarView({
         </div>
 
         {/* Заглавие на дните от седмицата */}
-        <div className="grid grid-cols-7 gap-2 bg-background p-2 border-b">
+        <div className="grid grid-cols-7 gap-2 bg-background border-b">
           {daysOfWeek.map((day, index) => (
             <div key={index} className="text-center">
               <div className="text-sm font-semibold text-muted-foreground">

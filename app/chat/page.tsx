@@ -15,7 +15,7 @@ export default function ChatPage() {
   }, [setPageTitle]);
 
   return (
-    <div className="absolute inset-2 md:inset-7">
+    <div className="h-full w-full">
       <ChatLayout />
     </div>
   );
