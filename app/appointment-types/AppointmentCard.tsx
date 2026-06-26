@@ -46,10 +46,7 @@ const AppointmentCard = ({
     >
       <div className="absolute inset-0">
         <img
-          src={
-            imageUrl ||
-            "https://images.unsplash.com/photo-1516549655169-df83a0774514?auto=format&fit=crop&w=800&q=80"
-          }
+          src={imageUrl}
           alt={type.name}
           className="h-full w-full object-cover object-center transition-transform duration-700 group-hover:scale-105"
         />

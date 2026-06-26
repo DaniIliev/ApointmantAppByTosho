@@ -13,6 +13,8 @@ interface CustomTooltipProps {
   tooltipText?: string;
   icon: IconElement;
   iconClassName?: string;
+  type?: "button" | "submit" | "reset";
+  stopPropagation?: boolean;
 }
 
 export function CustomTooltip({
@@ -20,6 +22,8 @@ export function CustomTooltip({
   tooltipText,
   icon,
   iconClassName = "h-5 w-5",
+  type = "button",
+  stopPropagation = false,
 }: CustomTooltipProps) {
   const iconWithClassName = React.cloneElement(icon, {
     className: `${icon.props.className || ""} ${iconClassName}`.trim(),
@@ -31,7 +35,13 @@ export function CustomTooltip({
       <Tooltip>
         <TooltipTrigger asChild>
           <button
-            onClick={onClick}
+            type={type}
+            onClick={(event) => {
+              if (stopPropagation) {
+                event.stopPropagation();
+              }
+              onClick();
+            }}
             className="p-2 rounded-full text-text-primary hover:bg-gray-200 dark:hover:bg-primary/20 transition-colors cursor-pointer"
           >
             {iconWithClassName}

@@ -15,39 +15,10 @@ import {
   Phone,
   FileText,
   AlertCircle,
+  MapPinCheckInside,
+  MapPinHouse,
 } from "lucide-react";
-
-// Type for backend response
-interface BackendAppointment {
-  _id: string;
-  business: {
-    _id: string;
-    businessName: string;
-    phone?: string;
-  };
-  service: {
-    _id: string;
-    name: string;
-    duration: number;
-    price: number;
-  };
-  clientName: string;
-  clientPhone?: string;
-  email: string;
-  appointmentTime: {
-    start: string;
-    end: string;
-  };
-  status: string;
-  staff: {
-    _id: string;
-    firstName: string;
-    lastName: string;
-    email: string;
-  };
-  createdAt: string;
-  updatedAt: string;
-}
+import { Appointment } from "@/Global/Types/types";
 
 function CancelAppointmentPageContent() {
   const { t } = useTranslation();
@@ -56,9 +27,7 @@ function CancelAppointmentPageContent() {
   const { setPageTitle } = usePageTitle();
   const appointmentId = params.id as string;
 
-  const [appointment, setAppointment] = useState<BackendAppointment | null>(
-    null
-  );
+  const [appointment, setAppointment] = useState<Appointment | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isCancelling, setIsCancelling] = useState(false);
 
@@ -71,9 +40,9 @@ function CancelAppointmentPageContent() {
     const fetchAppointment = async () => {
       try {
         setIsLoading(true);
-        const data: BackendAppointment = await callApi(
+        const data: Appointment = await callApi(
           `/api/appointment/${appointmentId}`,
-          "GET"
+          "GET",
         );
         setAppointment(data);
       } catch {
@@ -98,11 +67,9 @@ function CancelAppointmentPageContent() {
       await callApi(`/api/appointment/${appointment._id}/status`, "PUT", {
         status: "cancelled",
       });
-      toast.success(t("Appointment cancelled successfully!"));
       router.push("/dashboard");
     } catch (error) {
       console.error("Failed to cancel appointment:", error);
-      toast.error(t("Failed to cancel appointment. Please try again."));
     } finally {
       setIsCancelling(false);
     }
@@ -215,7 +182,7 @@ function CancelAppointmentPageContent() {
             <div>
               <p className="text-sm text-muted-foreground">{t("Service")}</p>
               <p className="font-medium text-foreground">
-                {appointment.service.name}
+                {appointment.serviceName}
               </p>
             </div>
           </div>
@@ -237,7 +204,27 @@ function CancelAppointmentPageContent() {
             <div>
               <p className="text-sm text-muted-foreground">{t("Business")}</p>
               <p className="font-medium text-foreground">
-                {appointment.business.businessName}
+                {appointment.businessName}
+              </p>
+            </div>
+          </div>
+          <div className="flex items-start gap-3">
+            <MapPinHouse className="h-5 w-5 mt-0.5 text-primary flex-shrink-0" />
+            <div>
+              <p className="text-sm text-muted-foreground">{t("Location")}</p>
+              <p className="font-medium text-foreground">
+                {appointment.location?.name || t("N/A")}
+              </p>
+            </div>
+          </div>
+          <div className="flex items-start gap-3">
+            <MapPinCheckInside className="h-5 w-5 mt-0.5 text-primary flex-shrink-0" />
+            <div>
+              <p className="text-sm text-muted-foreground">
+                {t("Location Address")}
+              </p>
+              <p className="font-medium text-foreground">
+                {appointment.location?.address || t("N/A")}
               </p>
             </div>
           </div>

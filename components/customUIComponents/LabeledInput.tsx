@@ -5,7 +5,7 @@ import React, {
   useRef,
   useCallback,
 } from "react";
-import { Eye, EyeOff } from "lucide-react";
+import { Eye, EyeOff, Lock } from "lucide-react";
 
 const cn = (...classes: (string | boolean | undefined | null)[]): string => {
   return classes.filter(Boolean).join(" ");
@@ -29,6 +29,8 @@ interface LabeledInputProps {
   showError?: boolean;
   min?: string | number;
   max?: string | number;
+  disabled?: boolean;
+  icon?: React.ReactNode;
 }
 
 export const LabeledInput = forwardRef<
@@ -50,6 +52,8 @@ export const LabeledInput = forwardRef<
       required,
       errorText,
       showError,
+      disabled,
+      icon,
       ...props
     },
     ref,
@@ -79,12 +83,16 @@ export const LabeledInput = forwardRef<
     const inputType = isPassword ? (showPassword ? "text" : "password") : type;
 
     const baseClasses = cn(
-      "peer w-full bg-gray-100 dark:bg-card/80 focus:bg-gray-200 dark:focus:bg-card/90 text-text-primary/75 focus:text-text-primary rounded-t-md transition-all duration-300 px-4 pt-4 pb-1",
+      "peer w-full rounded-t-md transition-all duration-300 pt-4 pb-1",
+      icon ? "pl-10 pr-4" : "px-4",
+      disabled
+        ? "bg-gray-200/50 dark:bg-muted/20 text-muted-foreground cursor-not-allowed"
+        : "bg-gray-100 dark:bg-card/80 focus:bg-gray-200 dark:focus:bg-card/90 text-text-primary/75 focus:text-text-primary",
       "border-b-2",
       isErroredEmpty ? "border-red-500" : "border-transparent",
       "outline-none",
-      isFocused ? "placeholder-gray-400" : "placeholder-transparent",
-      isClearable ? "pr-8" : "pr-4",
+      isFocused && !disabled ? "placeholder-gray-400" : "placeholder-transparent",
+      isClearable && !disabled || disabled ? "pr-10" : "",
       className,
     );
 
@@ -110,14 +118,20 @@ export const LabeledInput = forwardRef<
     const finalLabelPosition = isErroredEmpty
       ? "text-red-500"
       : isFocused || hasValue
-        ? "-top-0.5 text-xs left-3"
-        : isErroredEmpty
-          ? "text-red-500"
-          : isTextarea
-            ? "top-3 text-sm left-4"
-            : "top-1/2 -translate-y-1/2 text-sm left-4";
+        ? `-top-0.5 text-xs ${icon ? 'left-10' : 'left-3'}`
+        : isTextarea
+          ? `top-3 text-sm ${icon ? 'left-10' : 'left-4'}`
+          : `top-1/2 -translate-y-1/2 text-sm ${icon ? 'left-10' : 'left-4'}`;
 
     const hideLabelForDate = type === "date" && !isFocused && !hasValue;
+
+    const labelClasses = cn(
+      "absolute transition-all duration-300 transform pointer-events-none z-10 select-none",
+      finalLabelPosition,
+      isErroredEmpty ? "text-red-500" : (disabled ? "text-muted-foreground/60" : "text-gray-500"),
+      !disabled && "group-focus-within/labeled-input:text-primary",
+      hideLabelForDate && "opacity-0",
+    );
 
     return (
       <>
@@ -152,16 +166,16 @@ export const LabeledInput = forwardRef<
 
           <label
             htmlFor={id}
-            className={cn(
-              "absolute transition-all duration-300 transform pointer-events-none z-10",
-              isErroredEmpty ? "text-red-500" : "text-gray-500",
-              "group-focus-within/labeled-input:text-primary",
-              finalLabelPosition,
-              hideLabelForDate && "opacity-0",
-            )}
+            className={labelClasses}
           >
             {label}
           </label>
+
+          {icon && (
+            <div className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground z-20 pointer-events-none">
+              {icon}
+            </div>
+          )}
 
           {isTextarea ? (
             <textarea
@@ -185,6 +199,7 @@ export const LabeledInput = forwardRef<
                 resizeTextarea(e.currentTarget);
                 onChange(e);
               }}
+              disabled={disabled}
               onFocus={() => setIsFocused(true)}
               onBlur={() => setIsFocused(false)}
               className={elementClasses}
@@ -203,6 +218,7 @@ export const LabeledInput = forwardRef<
                 onChange={
                   onChange as React.ChangeEventHandler<HTMLInputElement>
                 }
+                disabled={disabled}
                 onFocus={() => setIsFocused(true)}
                 onBlur={() => setIsFocused(false)}
                 className={elementClasses}
@@ -219,7 +235,7 @@ export const LabeledInput = forwardRef<
                 aria-invalid={isErroredEmpty}
                 {...props}
               />
-              {isPassword && (
+              {isPassword && !disabled && (
                 <button
                   type="button"
                   tabIndex={-1}
@@ -229,6 +245,11 @@ export const LabeledInput = forwardRef<
                 >
                   {showPassword ? <Eye size={18} /> : <EyeOff size={18} />}
                 </button>
+              )}
+              {disabled && (
+                <div className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground/40 z-20">
+                  <Lock size={16} />
+                </div>
               )}
             </div>
           )}
@@ -263,7 +284,9 @@ export const LabeledInput = forwardRef<
           <div
             className={cn(
               "absolute bottom-0 left-0 h-[2px] bg-primary transition-all duration-300",
-              (isFocused || hasValue) && !isErroredEmpty ? "w-full" : "w-0",
+              disabled || (isFocused || hasValue) && !isErroredEmpty
+                ? "w-full"
+                : "w-0",
             )}
           />
           {isErroredEmpty && errorText && (

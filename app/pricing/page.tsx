@@ -19,7 +19,7 @@ function PricingPageContent() {
   }, [onboarding]);
 
   return (
-    <div className="min-h-screen bg-background" aria-label={t("Pricing Page")}>
+    <div className="bg-background" aria-label={t("Pricing Page")}>
       <PricingSection />
       <BusinessSetupModal
         open={openSetup}

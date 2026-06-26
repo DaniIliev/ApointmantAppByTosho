@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import dynamic from "next/dynamic";
+const ReactECharts = dynamic(() => import("echarts-for-react"), { ssr: false });
 import { useEffect, useMemo, useState } from "react";
 import {
   ArrowRight,
@@ -10,8 +11,6 @@ import {
   BarChart3,
   Briefcase,
   CalendarDays,
-  CheckCircle2,
-  Clock3,
   Sparkles,
   TrendingUp,
   UserRound,
@@ -37,9 +36,6 @@ import { formatDateAndTime } from "@/Global/Utils/commonFn";
 import { useTranslation } from "react-i18next";
 import { StatusChip } from "@/components/customUIComponents/StatusChip";
 
-const ReactECharts = dynamic(() => import("echarts-for-react"), {
-  ssr: false,
-});
 
 type QuickAction = {
   label: string;
@@ -245,12 +241,17 @@ function HomePageContent() {
         (item) => item.status === "cancelled",
       ).length;
 
+      const dayRevenue = dayItems
+        .filter((item) => item.status === "completed")
+        .reduce((sum, item) => sum + getAppointmentRevenue(item), 0);
+
       return {
         label,
         all: dayItems.length,
         completed: dayCompleted,
         pending: dayPending,
         cancelled: dayCancelled,
+        revenue: dayRevenue,
       };
     });
 
@@ -308,6 +309,8 @@ function HomePageContent() {
       nextItems: upcoming.slice(0, 3),
       nextItem: upcoming[0] ?? null,
       chartData,
+      bookingTrend: chartData.map((d) => d.all),
+      revenueTrend: chartData.map((d) => d.revenue),
       maxDayTotal: Math.max(
         1,
         ...chartData.flatMap((item) => [
@@ -426,119 +429,125 @@ function HomePageContent() {
       </Card>
 
       <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
-        <Card>
-          <CardHeader className="pb-3">
-            <div className="flex items-start justify-between gap-3">
-              <div>
+        <Card className="flex flex-col">
+          <CardContent className="p-3 flex flex-col justify-between h-full min-h-[100px]">
+            <div>
+              <div className="flex items-start justify-between">
                 <CardTitle className="text-foreground text-sm font-semibold">
-                  {t("Appointments Momentum")}
+                  {t("Booking Dynamics")}
                 </CardTitle>
-                <CardDescription className="text-xs">
-                  {t("This week vs last week")}
-                </CardDescription>
               </div>
-              <div className="flex justify-center gap-1">
-                <div
-                  className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-semibold ${stats.appointmentsDeltaPercent >= 0 ? "bg-emerald-500/5 text-emerald-600" : "bg-rose-500/15 text-rose-600"}`}
-                >
-                  {stats.appointmentsDeltaPercent >= 0 ? (
-                    <ArrowUpRight className="h-3.5 w-3.5" />
-                  ) : (
-                    <ArrowDownRight className="h-3.5 w-3.5" />
-                  )}
-                  {stats.appointmentsDeltaPercent >= 0 ? "+" : ""}
-                  {stats.appointmentsDeltaPercent}%
+              <CardDescription className="text-xs mt-1">
+                {t("This week vs last week")}
+                <div className="mt-0.5 font-medium text-foreground">
+                  {stats.thisWeekAppointments} {t("vs")} {stats.previousWeekAppointments}
                 </div>
-                <div className="rounded-lg bg-background/80 p-2">
-                  <BarChart3 className="h-4 w-4 text-primary" />
-                </div>
-              </div>
+              </CardDescription>
             </div>
-          </CardHeader>
-          <CardContent className="pt-0 pb-6">
-            <div className="space-y-2">
-              <div>
-                <div className="mb-1 flex items-center justify-between text-xs text-muted-foreground">
-                  <span>{t("This week")}</span>
-                  <span>{stats.thisWeekAppointments}</span>
-                </div>
-                <div className="h-2 rounded-full bg-accent/40">
-                  <div
-                    className="h-2 rounded-full bg-primary shadow-[0_0_12px_rgba(99,102,241,0.45)]"
-                    style={{ width: `${stats.thisWeekAppointmentsWidth}%` }}
-                  />
-                </div>
+            <div className="flex items-end justify-between mt-2">
+              <div
+                className={`inline-flex items-center gap-1 font-bold text-lg ${
+                  stats.appointmentsDeltaPercent >= 0
+                    ? "text-emerald-600"
+                    : "text-rose-600"
+                }`}
+              >
+                {stats.appointmentsDeltaPercent >= 0 ? (
+                  <ArrowUpRight className="h-5 w-5" />
+                ) : (
+                  <ArrowDownRight className="h-5 w-5" />
+                )}
+                {stats.appointmentsDeltaPercent >= 0 ? "+" : ""}
+                {stats.appointmentsDeltaPercent}%
               </div>
-              <div>
-                <div className="mb-1 flex items-center justify-between text-xs text-muted-foreground">
-                  <span>{t("Last week")}</span>
-                  <span>{stats.previousWeekAppointments}</span>
-                </div>
-                <div className="h-2 rounded-full bg-accent/40">
-                  <div
-                    className="h-2 rounded-full bg-muted-foreground/60"
-                    style={{ width: `${stats.previousWeekAppointmentsWidth}%` }}
-                  />
-                </div>
+              <div className="w-24 h-10 -mb-1 -mr-1">
+                <ReactECharts
+                  option={{
+                    grid: { left: 0, right: 0, top: 5, bottom: 5 },
+                    xAxis: { type: "category", show: false, data: WEEKDAY_LABELS },
+                    yAxis: { 
+                      type: "value", 
+                      show: false,
+                      min: "dataMin",
+                      max: (val: any) => val.max === 0 ? 10 : "dataMax"
+                    },
+                    series: [
+                      {
+                        data: stats.bookingTrend,
+                        type: "line",
+                        smooth: false,
+                        symbol: "emptyCircle",
+                        symbolSize: 4,
+                        itemStyle: { color: stats.appointmentsDeltaPercent >= 0 ? "#10b981" : "#f43f5e" },
+                        lineStyle: { width: 2, color: stats.appointmentsDeltaPercent >= 0 ? "#10b981" : "#f43f5e" },
+                      },
+                    ],
+                    tooltip: { show: false },
+                  }}
+                  style={{ height: "100%", width: "100%" }}
+                />
               </div>
             </div>
           </CardContent>
         </Card>
 
-        <Card>
-          <CardHeader className="pb-3">
-            <div className="flex items-start justify-between gap-3">
-              <div>
+        <Card className="flex flex-col">
+          <CardContent className="p-3 flex flex-col justify-between h-full min-h-[100px]">
+            <div>
+              <div className="flex items-start justify-between">
                 <CardTitle className="text-foreground text-sm font-semibold">
                   {t("Revenue Momentum")}
                 </CardTitle>
-                <CardDescription className="text-xs">
-                  {t("Completed appointments only")}
-                </CardDescription>
               </div>
-              <div className="flex justify-center gap-1">
-                <div
-                  className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-semibold ${stats.revenueDeltaPercent >= 0 ? "bg-emerald-500/5 text-emerald-600" : "bg-rose-500/15 text-rose-600"}`}
-                >
-                  {stats.revenueDeltaPercent >= 0 ? (
-                    <ArrowUpRight className="h-3.5 w-3.5" />
-                  ) : (
-                    <ArrowDownRight className="h-3.5 w-3.5" />
-                  )}
-                  {stats.revenueDeltaPercent >= 0 ? "+" : ""}
-                  {stats.revenueDeltaPercent}%
+              <CardDescription className="text-xs mt-1">
+                {t("This week vs last week")}
+                <div className="mt-0.5 font-medium text-foreground">
+                  {formatCurrency(stats.thisWeekRevenue)} {t("vs")} {formatCurrency(stats.previousWeekRevenue)}
                 </div>
-                <div className="rounded-lg bg-background/80 p-2">
-                  <Wallet className="h-4 w-4 text-primary" />
-                </div>
-              </div>
+              </CardDescription>
             </div>
-          </CardHeader>
-          <CardContent className="pt-0 pb-6">
-            <div className="space-y-2">
-              <div>
-                <div className="mb-1 flex items-center justify-between text-xs text-muted-foreground">
-                  <span>{t("This week")}</span>
-                  <span>{formatCurrency(stats.thisWeekRevenue)}</span>
-                </div>
-                <div className="h-2 rounded-full bg-accent/40">
-                  <div
-                    className="h-2 rounded-full bg-primary shadow-[0_0_12px_rgba(16,185,129,0.4)]"
-                    style={{ width: `${stats.thisWeekRevenueWidth}%` }}
-                  />
-                </div>
+            <div className="flex items-end justify-between mt-2">
+              <div
+                className={`inline-flex items-center gap-1 font-bold text-lg ${
+                  stats.revenueDeltaPercent >= 0
+                    ? "text-emerald-600"
+                    : "text-rose-600"
+                }`}
+              >
+                {stats.revenueDeltaPercent >= 0 ? (
+                  <ArrowUpRight className="h-5 w-5" />
+                ) : (
+                  <ArrowDownRight className="h-5 w-5" />
+                )}
+                {stats.revenueDeltaPercent >= 0 ? "+" : ""}
+                {stats.revenueDeltaPercent}%
               </div>
-              <div>
-                <div className="mb-1 flex items-center justify-between text-xs text-muted-foreground">
-                  <span>{t("Last week")}</span>
-                  <span>{formatCurrency(stats.previousWeekRevenue)}</span>
-                </div>
-                <div className="h-2 rounded-full bg-accent/40">
-                  <div
-                    className="h-2 rounded-full bg-muted-foreground/60"
-                    style={{ width: `${stats.previousWeekRevenueWidth}%` }}
-                  />
-                </div>
+              <div className="w-24 h-10 -mb-1 -mr-1">
+                <ReactECharts
+                  option={{
+                    grid: { left: 0, right: 0, top: 5, bottom: 5 },
+                    xAxis: { type: "category", show: false, data: WEEKDAY_LABELS },
+                    yAxis: { 
+                      type: "value", 
+                      show: false,
+                      min: "dataMin",
+                      max: (val:any) => val.max === 0 ? 10 : "dataMax"
+                    },
+                    series: [
+                      {
+                        data: stats.revenueTrend,
+                        type: "line",
+                        smooth: false,
+                        symbol: "emptyCircle",
+                        symbolSize: 4,
+                        itemStyle: { color: stats.revenueDeltaPercent >= 0 ? "#10b981" : "#f43f5e" },
+                        lineStyle: { width: 2, color: stats.revenueDeltaPercent >= 0 ? "#10b981" : "#f43f5e" },
+                      },
+                    ],
+                    tooltip: { show: false },
+                  }}
+                  style={{ height: "100%", width: "100%" }}
+                />
               </div>
             </div>
           </CardContent>
@@ -626,8 +635,8 @@ function HomePageContent() {
               })
             ) : (
               <div className="rounded-xl border border-dashed p-6 text-center">
-                <p className="font-semibold">
-                  {t("Your schedule is clear")} ✨
+                <p className="font-semibold text-foreground">
+                  {t("Your schedule is clear")} 
                 </p>
                 <p className="text-sm text-muted-foreground">
                   {t("Add a new appointment from Dashboard to get started.")}

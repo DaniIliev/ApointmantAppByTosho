@@ -1,34 +1,14 @@
 "use client";
 import React, { useState } from "react";
 import { useTranslation } from "react-i18next";
-import { Check, X, Trash2 } from "lucide-react";
+import { Check, X, Trash2, CreditCard } from "lucide-react";
+
 import callApi from "@/app/Api/callApi";
-import { toast } from "sonner";
 import { Button } from "../ui/button";
 import { CustomTooltip } from "../customUIComponents/CustomTooltip";
 import { formatDateAndTime } from "@/Global/Utils/commonFn";
+import { Alert } from "@/Global/Types/types";
 
-// Interfaces
-interface AppointmentInfo {
-  _id: string;
-  clientName: string;
-  clientPhone?: string;
-  email?: string;
-  appointmentTime: { start: string; end: string };
-  service?: { _id: string; name: string } | string;
-  status?: string;
-  staff?: string;
-}
-
-interface Alert {
-  _id: string;
-  isRead: boolean;
-  message: string;
-  createdAt?: string;
-  updatedAt?: string;
-  type: string;
-  appointment?: AppointmentInfo;
-}
 
 interface NotificationsPanelProps {
   isOpen: boolean;
@@ -47,6 +27,12 @@ export default function NotificationsPanel({
   const formatTime = (value?: string) => {
     if (!value) return "N/A";
     const formatted = formatDateAndTime(value, "time");
+    return formatted === value ? "N/A" : formatted;
+  };
+
+  const formatDate = (value?: string) => {
+    if (!value) return "N/A";
+    const formatted = formatDateAndTime(value, "date");
     return formatted === value ? "N/A" : formatted;
   };
 
@@ -75,7 +61,6 @@ export default function NotificationsPanel({
       const alertId = alert._id;
 
       if (!appointmentId) {
-        toast.error(t("This alert has no appointment to confirm."));
         return;
       }
 
@@ -88,11 +73,9 @@ export default function NotificationsPanel({
       if (confirmedAppointment) {
         await callApi(`/api/alerts/${alertId}`, "DELETE");
         onAlertsChange(alerts.filter((a) => a._id !== alert._id));
-        toast.success(t("Appointment confirmed successfully!"));
       }
     } catch (error) {
       console.error("Failed to confirm appointment:", error);
-      toast.error(t("Failed to confirm appointment. Please try again."));
     }
   };
 
@@ -102,7 +85,6 @@ export default function NotificationsPanel({
       const alertId = alert._id;
 
       if (!appointmentId) {
-        toast.error(t("This alert has no appointment to cancel."));
         return;
       }
 
@@ -115,11 +97,9 @@ export default function NotificationsPanel({
       if (cancelledAppointment) {
         await callApi(`/api/alerts/${alertId}`, "DELETE");
         onAlertsChange(alerts.filter((a) => a._id !== alert._id));
-        toast.success(t("Appointment cancelled successfully!"));
       }
     } catch (error) {
       console.error("Failed to cancel appointment:", error);
-      toast.error(t("Failed to cancel appointment. Please try again."));
     }
   };
 
@@ -127,21 +107,13 @@ export default function NotificationsPanel({
     try {
       await callApi(`/api/alerts/${alertId}`, "DELETE");
       onAlertsChange(alerts.filter((a) => a._id !== alertId));
-      toast.success(t("Notification deleted successfully!"));
     } catch (error) {
       console.error("Failed to delete notification:", error);
-      toast.error(t("Failed to delete notification. Please try again."));
     }
   };
 
   const handleConfirmAllAppointments = async () => {
     const appointmentAlerts = alerts.filter((alert) => alert.appointment?._id);
-
-    if (appointmentAlerts.length === 0) {
-      toast.info(t("No appointments to confirm."));
-      return;
-    }
-
     setIsConfirmingAll(true);
     let successCount = 0;
     let errorCount = 0;
@@ -180,18 +152,6 @@ export default function NotificationsPanel({
             ),
         ),
       );
-
-      if (successCount > 0 && errorCount === 0) {
-        toast.success(
-          t(`${successCount} appointment(s) confirmed successfully!`),
-        );
-      } else if (successCount > 0 && errorCount > 0) {
-        toast.warning(
-          t(`${successCount} appointment(s) confirmed, ${errorCount} failed.`),
-        );
-      } else {
-        toast.error(t("Failed to confirm all appointments."));
-      }
     } finally {
       setIsConfirmingAll(false);
     }
@@ -203,7 +163,7 @@ export default function NotificationsPanel({
     <div className="absolute right-0 mt-2 w-72 md:w-80 bg-slate-900/90 backdrop-blur-xl border border-white/20 rounded-xl shadow-2xl p-3 max-h-96 overflow-y-auto">
       <div className="flex items-center justify-between mb-2">
         <h3 className="text-white font-bold">{t("Notifications")}</h3>
-        {alerts.filter((a) => a.appointment?._id).length > 0 && (
+        {alerts?.filter((a) => a.appointment?._id).length > 0 && (
           <Button
             onClick={handleConfirmAllAppointments}
             disabled={isConfirmingAll}
@@ -217,7 +177,7 @@ export default function NotificationsPanel({
         )}
       </div>
 
-      {alerts.length > 0 ? (
+      {alerts?.length > 0 ? (
         alerts.map((alert) => {
           const appt = alert.appointment;
           const hasAppt = !!appt && !!appt._id;
@@ -233,12 +193,15 @@ export default function NotificationsPanel({
               } hover:bg-primary/15`}
             >
               <p className="text-sm font-semibold text-white/90">
-                {alert.message}
+                {t(alert.messageKey, alert.params || {}) as string}
               </p>
               {hasAppt ? (
                 <>
                   <p className="text-xs text-white/60 mt-1">
                     {t("Appointment from")}: {appt?.clientName ?? t("Unknown")}
+                  </p>
+                  <p className="text-xs text-white/60">
+                    {t("Date")}: {formatDate(appt?.appointmentTime?.start)}
                   </p>
                   <p className="text-xs text-white/60">
                     {t("Time")}: {formatTime(appt?.appointmentTime?.start)}-
@@ -275,8 +238,22 @@ export default function NotificationsPanel({
                   <p className="text-xs text-white/60 mt-1">
                     {formatDateTime(alert.createdAt)}
                   </p>
-                  <div className="flex justify-end mt-2">
+                  <div className="flex justify-end mt-2 gap-2">
+                    {alert.type === "subscription_expiring" && (
+                      <Button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          window.location.href = "/dashboard/subscription";
+                        }}
+                        size="sm"
+                        className="h-7 px-2 text-xs font-semibold text-white bg-primary/80 rounded-md border border-white/10 flex items-center gap-1"
+                      >
+                        <CreditCard className="w-3 h-3" />
+                        {t("Manage")}
+                      </Button>
+                    )}
                     <CustomTooltip
+                      stopPropagation
                       onClick={() => {
                         handleDeleteNotification(alert._id);
                       }}
@@ -286,6 +263,7 @@ export default function NotificationsPanel({
                   </div>
                 </>
               )}
+
             </div>
           );
         })

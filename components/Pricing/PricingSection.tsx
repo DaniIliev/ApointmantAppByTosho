@@ -14,6 +14,9 @@ import { Button } from "../ui/button";
 import { ScrollReveal } from "../scroll-reveal";
 import { Card, CardContent } from "../ui/card";
 import { usePaddingControl } from "@/context/PaddingContext";
+import { useGetStaff } from "@/hooks/queries/useStaff";
+import { useGetLocations } from "@/hooks/queries/useLocation";
+import { PLAN_LIMITS, PlanType } from "@/lib/permissions";
 
 // 1. Дефиниране на TypeScript интерфейси за по-добра структура на данните
 
@@ -40,9 +43,15 @@ const PricingSection = () => {
   const { t } = useTranslation();
   const [loadingPlan, setLoadingPlan] = useState<string | null>(null);
   const [billingCycle, setBillingCycle] = useState<"monthly" | "annual">(
-    "monthly"
+    "monthly",
   ); // Ограничаваме възможните стойности
   const { setRemovePadding } = usePaddingControl();
+
+  const { data: staffData } = useGetStaff(user?.businessId);
+  const { data: locationsData } = useGetLocations(user?.businessId);
+
+  const staffCount = staffData?.length || 0;
+  const locationCount = locationsData?.length || 0;
 
   useEffect(() => {
     setRemovePadding(true);
@@ -69,7 +78,7 @@ const PricingSection = () => {
         const data = await callApi(
           "/api/stripe/checkout-session",
           "POST",
-          payload
+          payload,
         );
 
         if (data.url) {
@@ -83,24 +92,56 @@ const PricingSection = () => {
         setLoadingPlan(null); // Деактивира зареждащия индикатор
       }
     },
-    [user?.businessId]
+    [user?.businessId, t],
+  );
+
+  const handleCustomerPortal = useCallback(
+    async (checkoutPlanName: string) => {
+      setLoadingPlan(checkoutPlanName);
+      try {
+        const data = await callApi("/api/stripe/customer-portal", "POST", {});
+        if (data.url) {
+          window.location.href = data.url;
+        } else {
+          console.error(t("Portal URL missing."));
+        }
+      } catch (error) {
+        console.error("Error opening customer portal:", error);
+      } finally {
+        setLoadingPlan(null);
+      }
+    },
+    [t],
   );
 
   // Хелпер функция за рендиране на бутона (с TS типове)
   const renderPlanButton = (
-    checkoutPlanName: string
-    // isPrimary: boolean = false
+    checkoutPlanName: string,
   ): ReactNode => {
     const isLoading = loadingPlan === checkoutPlanName;
+    const activePlan = user?.subscriptionPlan || user?.plan;
+    const hasActiveSubscription = user?.subscriptionStatus === "active" && activePlan && activePlan !== "none";
+    const isCurrentPlan = hasActiveSubscription && activePlan === checkoutPlanName;
 
-    // Определяне на стиловете
+    let buttonText = t("Purchase Plan / Start Trial");
+    let onClickAction = () => handleCheckout(checkoutPlanName);
+    let isDisabled = isLoading;
+    let buttonVariantClasses = "bg-primary hover:bg-primary-dark text-white";
+
+    if (isCurrentPlan) {
+      buttonText = t("Current Plan");
+      isDisabled = true;
+      buttonVariantClasses = "bg-gray-400 text-white opacity-80 cursor-not-allowed";
+    } else if (hasActiveSubscription) {
+      buttonText = t("Switch Plan");
+      onClickAction = () => handleCustomerPortal(checkoutPlanName);
+    }
 
     return (
       <Button
-        className={`w-full bg-primary hover:bg-primary-dark mt-6 text-white`}
-        // variant={isPrimary ? "default" : "outline"}
-        onClick={() => handleCheckout(checkoutPlanName)}
-        disabled={isLoading}
+        className={`w-full mt-6 ${buttonVariantClasses}`}
+        onClick={onClickAction}
+        disabled={isDisabled}
       >
         {isLoading ? (
           <span className="flex items-center justify-center">
@@ -108,7 +149,7 @@ const PricingSection = () => {
             {t("Loading...")}
           </span>
         ) : (
-          t("Purchase Plan / Start Trial")
+          buttonText
         )}
       </Button>
     );
@@ -118,47 +159,68 @@ const PricingSection = () => {
     () => [
       {
         name: "Starter",
-        monthlyPrice: 10,
-        annualPrice: 110, // €10 * 11 месеца
+        monthlyPrice: 12,
+        annualPrice: 132,
         description: t("Ideal for small and emerging businesses."),
         features: [
-          t("Up to 2 staff"),
+          t("1 Staff member"),
+          t("1 Location"),
+          t("Full access to all features"),
           t("Unlimited appointments"),
           t("SMS & email notifications"),
           t("Support 24/7 via chat and email"),
-          // t("Basic analytics"),
         ],
         isPopular: false,
       },
       {
         name: "Professional",
-        monthlyPrice: 15,
-        annualPrice: 165, // €15 * 11 месеца
+        monthlyPrice: 30,
+        annualPrice: 330, // €15 * 11 месеца
         description: t("For growing businesses needing more tools."),
         features: [
-          t("Up to 5 staff"),
-          t("All Starter features"),
-          t("Performance & Analytics"),
+          t("Up to 5 staff members"),
+          t("Up to 3 locations"),
+          t("Full access to all features"),
+          t("Unlimited appointments"),
+          t("SMS & email notifications"),
+          t("Support 24/7 via chat and email"),
         ],
         isPopular: true,
       },
       {
         name: "Enterprise",
-        monthlyPrice: 20,
-        annualPrice: 220, // €20 * 11 месеца
+        monthlyPrice: 60,
+        annualPrice: 660, // €20 * 11 месеца
         description: t("For large organizations requiring scalability."),
         features: [
-          t("Unlimited staff"),
-          t("All Professional features"),
-          t("Multi-location support"),
-          t("Full API access"),
-          t("Custom integrations"),
+          t("Unlimited staff members"),
+          t("Unlimited locations"),
+          t("Full access to all features"),
+          t("Custom Branding + Domain"),
+          t("Unlimited appointments"),
+          t("SMS & email notifications"),
+          t("Support 24/7 via chat and email"),
         ],
         isPopular: false,
       },
     ],
-    []
+    [t],
   );
+
+  const filteredPlans = useMemo(() => {
+    if (!user?.businessId) return plans;
+
+    return plans.filter((plan) => {
+      const planType = plan.name.toLowerCase() as PlanType;
+      const limits = PLAN_LIMITS[planType];
+
+      const staffOk = limits.maxStaff === -1 || staffCount <= limits.maxStaff;
+      const locationOk =
+        limits.maxLocations === -1 || locationCount <= limits.maxLocations;
+
+      return staffOk && locationOk;
+    });
+  }, [plans, user?.businessId, staffCount, locationCount]);
 
   // Изчисляване на текущата цена и цикъл за показване (с TS типове)
   const getPriceData = (plan: Plan): PriceData => {
@@ -194,11 +256,38 @@ const PricingSection = () => {
               </h2>
               <p className="text-xl sm:text-lg text-text-primary text-balance max-w-3xl mx-auto pt-2">
                 {t(
-                  "Choose the perfect plan for your business. Annual plans give you 1 month free!"
+                  "Choose the perfect plan for your business. Annual plans give you 1 month free!",
                 )}
               </p>
             </ScrollReveal>
           </div>
+
+          {user?.businessId && (
+            <ScrollReveal delay={100}>
+              <div className="bg-primary/5 border border-primary/20 rounded-2xl p-6 mt-8 mb-4 max-w-2xl mx-auto text-center">
+                <p className="text-lg font-medium text-primary">
+                  {t("Your business status:")}
+                </p>
+                <div className="flex justify-center  gap-8 mt-2 text-text-primary">
+                  <div className="flex gap-1 items-center justify-center">
+                    <span className="text-sm opacity-70">
+                      {t("Staff members: ")}
+                    </span>
+                    <span className="text-xl font-bold">{staffCount}</span>
+                  </div>
+                  <div className="flex gap-1 items-center justify-center">
+                    <span className="text-sm opacity-70">
+                      {t("Locations: ")}
+                    </span>
+                    <span className="text-xl font-bold">{locationCount}</span>
+                  </div>
+                </div>
+                <p className="text-sm text-text-primary/60 mt-4 italic">
+                  {t("Showing plans suitable for your current usage.")}
+                </p>
+              </div>
+            </ScrollReveal>
+          )}
 
           {/* Превключвател за Цикъла на Плащане */}
           <div className="flex justify-center mt-4 mb-6">
@@ -230,14 +319,18 @@ const PricingSection = () => {
           </div>
 
           {/* Картите с планове */}
-          <div className="grid md:grid-cols-3 gap-8 mt-8 md:mt-12">
-            {plans.map((plan, index) => {
+          <div className="flex flex-wrap lg:flex-nowrap justify-center gap-6 mt-8 md:mt-12">
+            {filteredPlans.map((plan, index) => {
               const planData = getPriceData(plan);
               const { price, cycleDisplay, checkoutName, discountNote } =
                 planData;
 
               return (
-                <ScrollReveal key={plan.name} delay={100 * (index + 1)}>
+                <ScrollReveal
+                  key={plan.name}
+                  delay={100 * (index + 1)}
+                  className="w-full max-w-[400px] lg:flex-1 lg:max-w-[380px]"
+                >
                   <Card
                     className={`h-full flex flex-col transition-all duration-300 hover:-translate-y-2 
                             ${
@@ -304,7 +397,7 @@ const PricingSection = () => {
           <div className="text-center mt-12 text-sm text-gray-500">
             <p className="mt-2 text-red-500 font-semibold">
               {t(
-                "IMPORTANT: The first time you will see a 50% discount on the Stripe Checkout page."
+                "IMPORTANT: The first time you will see a 50% discount on the Stripe Checkout page.",
               )}
             </p>
           </div>

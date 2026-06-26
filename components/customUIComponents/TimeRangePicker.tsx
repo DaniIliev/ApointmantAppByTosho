@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import * as Popover from "@radix-ui/react-popover";
 import { Clock } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useTranslation } from "react-i18next";
 
 interface TimeRangeValue {
   startTime: string | null;
@@ -15,6 +16,7 @@ interface TimeRangePickerProps {
   onChange: (val: TimeRangeValue) => void;
   className?: string;
   label?: string;
+  error?: boolean | string;
 }
 
 const hours24 = Array.from({ length: 24 }, (_, i) =>
@@ -36,7 +38,9 @@ export const TimeRangePicker: React.FC<TimeRangePickerProps> = ({
   onChange,
   className,
   label = "Select time range",
+  error,
 }) => {
+  const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const [selecting, setSelecting] = useState<"start" | "end">("start");
   // Local state for pickers
@@ -50,6 +54,9 @@ export const TimeRangePicker: React.FC<TimeRangePickerProps> = ({
       setSelecting("start");
     }
   }, [open, value.startTime, value.endTime]);
+
+  const isPartial = (value.startTime && !value.endTime) || (!value.startTime && value.endTime);
+  const displayError = error || (!open && isPartial ? t("Моля изберете и двата часа") : undefined);
 
   const formatLabel = (start: typeof tempStart, end: typeof tempEnd) => {
     const s = `${start.hour}:${start.minute}`;
@@ -127,8 +134,8 @@ export const TimeRangePicker: React.FC<TimeRangePickerProps> = ({
           <button
             type="button"
             className={cn(
-              "peer w-full h-14 sm:h-12 px-4 rounded-t-md border-b-2 border-transparent bg-card/80 focus:bg-card/90 transition-all duration-300 flex items-center justify-between text-base sm:text-sm outline-none placeholder-transparent focus:placeholder-gray-400 pr-8",
-              open ? "border-primary" : "border-transparent",
+              "peer w-full h-14 sm:h-12 px-4 rounded-t-md border-b-2 bg-card/80 focus:bg-card/90 transition-all duration-300 flex items-center justify-between text-base sm:text-sm outline-none placeholder-transparent focus:placeholder-gray-400 pr-8",
+              displayError ? "border-red-500" : open ? "border-primary" : "border-transparent",
               className
             )}
             tabIndex={0}
@@ -188,12 +195,18 @@ export const TimeRangePicker: React.FC<TimeRangePickerProps> = ({
             <Clock className="h-5 w-5 sm:h-4 sm:w-4 text-muted-foreground absolute right-2 top-1/2 -translate-y-1/2" />
             <span
               className={cn(
-                "absolute bottom-0 left-0 h-[2px] bg-primary transition-all duration-300",
+                "absolute bottom-0 left-0 h-[2px] transition-all duration-300",
+                displayError ? "bg-red-500" : "bg-primary",
                 open || value.startTime || value.endTime ? "w-full" : "w-0"
               )}
             />
           </button>
         </Popover.Trigger>
+        {displayError && (
+          <span className="block text-red-500 text-[11px] font-medium mt-1 pl-1">
+            {typeof displayError === "string" ? displayError : t("Field Required")}
+          </span>
+        )}
       </div>
       <Popover.Content
         sideOffset={8}

@@ -73,7 +73,7 @@ export function LocationDetailedView({
             </div>
 
             <div className="bg-muted/10 p-2 lg:p-3">
-              <h2 className="mb-3 text-xl font-bold leading-tight lg:text-2xl">
+              <h2 className="mb-3 text-xl font-bold leading-tight lg:text-2xl text-text-primary">
                 {location.name}
               </h2>
               <div className="flex flex-col gap-3 text-muted-foreground">
@@ -95,7 +95,7 @@ export function LocationDetailedView({
             </div>
 
             <div className="h-full bg-muted/10 p-2 lg:p-3">
-              <h3 className="flex items-center gap-2 text-xl font-semibold">
+              <h3 className="flex items-center gap-2 text-xl font-semibold text-text-primary">
                 {t("Working Hours")}
               </h3>
               <div className="grid grid-cols-1 gap-0.5">
@@ -106,16 +106,16 @@ export function LocationDetailedView({
                   const isToday = dayKey === getTodayDayName();
 
                   const isDayOff =
-                    dayHours === t("Почивен Ден") ||
-                    dayHours === t("Затворено") ||
-                    dayHours === "Почивен Ден" ||
-                    dayHours === "Затворено";
+                    dayHours === "Day Off" ||
+                    dayHours === "Closed" ||
+                    dayHours === t("Day Off") ||
+                    dayHours === t("Closed");
 
                   const isNotSet =
-                    dayHours === t("Не е зададено") ||
-                    dayHours === "Не е зададено";
+                    dayHours === "Not Set" ||
+                    dayHours === t("Not Set");
 
-                  let displayStatus = isDayOff
+                  const displayStatus = isDayOff
                     ? t("Day Off")
                     : isNotSet
                       ? t("Not Set")

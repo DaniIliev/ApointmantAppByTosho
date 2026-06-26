@@ -35,8 +35,9 @@ import {
 import { useTranslation } from "react-i18next";
 import { formatDateAndTime } from "@/Global/Utils/commonFn";
 import { CustomTooltip } from "../customUIComponents/CustomTooltip";
-import { LabeledInput } from "../customUIComponents/LabeledInput";
 import { getStatusProps, StatusChip } from "../customUIComponents/StatusChip";
+import { dayTitles } from "@/app/schedule/utils";
+import { LabeledInput } from "../customUIComponents/LabeledInput";
 
 const cn = (...classes: (string | boolean | undefined | null)[]): string =>
   classes.filter(Boolean).join(" ");
@@ -138,11 +139,18 @@ const GroupedAppointmentAccordion: React.FC<
           </div>
         </div>
         <div className="flex-shrink-0 ml-2">
-          {isExpanded ? (
-            <ChevronUp className="h-4 w-4 text-gray-400" />
-          ) : (
-            <ChevronDown className="h-4 w-4 text-gray-400" />
-          )}
+          <div className="flex items-center">
+            <div
+              className={`${
+                getStatusProps("confirmed").className
+              } rounded-full h-2 w-2 border mr-2 shadow-sm`}
+            ></div>
+            {isExpanded ? (
+              <ChevronUp className="h-4 w-4 text-gray-400" />
+            ) : (
+              <ChevronDown className="h-4 w-4 text-gray-400" />
+            )}
+          </div>
         </div>
       </div>
 
@@ -194,6 +202,7 @@ const WeeklyCalendar: React.FC<WeeklyCalendarProps> = ({
   onPreviousWeek,
   onNextWeek,
 }) => {
+  const { t } = useTranslation();
   const startOfTheWeek: Date = startOfWeek(selectedDate, { weekStartsOn: 1 });
   const weekDays: Date[] = [...Array(7)].map((_, i) =>
     addDays(startOfTheWeek, i),
@@ -204,6 +213,8 @@ const WeeklyCalendar: React.FC<WeeklyCalendarProps> = ({
   });
   const capitalizedMonth: string =
     monthYearTitle.charAt(0).toUpperCase() + monthYearTitle.slice(1);
+    
+  const today = new Date();
 
   return (
     <div className="flex flex-col w-full">
@@ -225,35 +236,46 @@ const WeeklyCalendar: React.FC<WeeklyCalendarProps> = ({
         </button>
       </div>
       <div className="flex justify-between items-center p-2 pb-3">
-        {weekDays.map((date: Date) => (
-          <button
-            key={date.toString()}
-            onClick={() => onSelectDate(date)}
-            className={cn(
-              "flex flex-col items-center p-2 rounded-full transition-colors w-1/7",
-              "hover:bg-gray-200 dark:hover:bg-gray-800",
-              isSameDay(date, selectedDate)
-                ? "font-bold text-primary dark:primary-light"
-                : uniqueDates[format(date, "yyyy-MM-dd")]
-                  ? "font-bold text-primary dark:primary-light"
-                  : "text-gray-600 dark:text-gray-400",
-            )}
-          >
-            <span className="text-xs">
-              {format(date, "EE", { locale: bg })}
-            </span>
-            <span
+        {weekDays.map((date: Date) => {
+          const isToday = isSameDay(date, today);
+          const isSelected = isSameDay(date, selectedDate);
+          const hasAppts = uniqueDates[format(date, "yyyy-MM-dd")];
+          const dayIndex = date.getDay() === 0 ? 6 : date.getDay() - 1;
+          const dayNameLabel = t(dayTitles[dayIndex]);
+          
+          return (
+            <button
+              key={date.toString()}
+              onClick={() => onSelectDate(date)}
               className={cn(
-                "text-lg font-semibold w-8 h-8 flex items-center justify-center rounded-full transition-colors",
-                isSameDay(date, selectedDate)
-                  ? "ring-2 ring-primary bg-primary/50 dark:bg-primary-dark"
-                  : "",
+                "flex flex-col items-center p-2 rounded-xl transition-colors w-1/7 relative",
+                "hover:bg-gray-100 dark:hover:bg-gray-800",
+                isSelected
+                  ? "font-bold text-primary dark:primary-light"
+                  : hasAppts
+                    ? "font-bold text-primary dark:primary-light"
+                    : "text-gray-600 dark:text-gray-400",
               )}
             >
-              {format(date, "d")}
-            </span>
-          </button>
-        ))}
+              <span className="text-xs uppercase tracking-wide opacity-80 mb-1">
+                {dayNameLabel}
+              </span>
+              <span
+                className={cn(
+                  "relative text-lg font-semibold w-8 h-8 flex items-center justify-center rounded-full transition-colors",
+                  isSelected
+                    ? "ring-2 ring-primary/30 bg-primary text-primary-foreground shadow-sm"
+                    : "",
+                )}
+              >
+                {format(date, "d")}
+                {isToday && (
+                  <span className="absolute bottom-0.5 w-1 h-1 rounded-full bg-red-500 shadow-sm" />
+                )}
+              </span>
+            </button>
+          );
+        })}
       </div>
     </div>
   );
@@ -274,12 +296,12 @@ const MonthlyCalendar: React.FC<MonthlyCalendarProps> = ({
   onPreviousMonth,
   onNextMonth,
 }) => {
+  const { t } = useTranslation();
   const start: Date = startOfMonth(selectedDate);
   const end: Date = endOfMonth(selectedDate);
   const allDates: Date[] = eachDayOfInterval({ start, end });
   const leadingEmptyDays: number = (start.getDay() + 6) % 7;
-
-  const daysOfWeek: string[] = ["Пн", "Вт", "Ср", "Чт", "Пт", "Сб", "Нд"];
+  const today = new Date();
 
   return (
     <div className="flex flex-col w-full p-2">
@@ -302,41 +324,50 @@ const MonthlyCalendar: React.FC<MonthlyCalendarProps> = ({
           <ChevronRight className="h-5 w-5" />
         </button>
       </div>
-      <div className="grid grid-cols-7 text-center text-xs font-semibold text-gray-500 dark:text-gray-400 mb-2">
-        {daysOfWeek.map((day) => (
-          <span key={day}>{day}</span>
+      <div className="grid grid-cols-7 text-center text-xs font-semibold text-gray-500 uppercase tracking-wide dark:text-gray-400 mb-2">
+        {dayTitles.map((dayTitle) => (
+          <span key={dayTitle}>{t(dayTitle)}</span>
         ))}
       </div>
       <div className="grid grid-cols-7 gap-1">
         {Array.from({ length: leadingEmptyDays }).map((_, index) => (
-          <div key={`empty-${index}`} className="h-12" aria-hidden="true" />
+          <div key={`empty-${index}`} className="h-10" aria-hidden="true" />
         ))}
-        {allDates.map((date: Date) => (
-          <button
-            key={date.toString()}
-            onClick={() => onSelectDate(date)}
-            className={cn(
-              "flex flex-col items-center p-2 rounded-lg transition-colors",
-              "hover:bg-gray-200 dark:hover:bg-gray-800",
-              isSameDay(date, selectedDate)
-                ? "font-bold text-primary dark:primary-light"
-                : uniqueDates[format(date, "yyyy-MM-dd")]
-                  ? "font-bold text-primary dark:primary-light"
-                  : "text-gray-600 dark:text-gray-400",
-            )}
-          >
-            <span
+        {allDates.map((date: Date) => {
+          const isToday = isSameDay(date, today);
+          const isSelected = isSameDay(date, selectedDate);
+          const hasAppts = uniqueDates[format(date, "yyyy-MM-dd")];
+
+          return (
+            <button
+              key={date.toString()}
+              onClick={() => onSelectDate(date)}
               className={cn(
-                "text-sm font-semibold w-8 h-8 flex items-center justify-center rounded-full transition-colors",
-                isSameDay(date, selectedDate)
-                  ? "ring-2 ring-primary bg-primary/20 dark:bg-primary-dark"
-                  : "",
+                "flex flex-col items-center p-2 rounded-xl transition-colors relative",
+                "hover:bg-gray-100 dark:hover:bg-gray-800",
+                isSelected
+                  ? "font-bold text-primary dark:primary-light"
+                  : hasAppts
+                    ? "font-bold text-primary dark:primary-light"
+                    : "text-gray-600 dark:text-gray-400",
               )}
             >
-              {format(date, "d")}
-            </span>
-          </button>
-        ))}
+              <span
+                className={cn(
+                  "relative text-[13px] font-semibold w-7 h-7 flex items-center justify-center rounded-full transition-colors",
+                  isSelected
+                    ? "ring-2 ring-primary/30 bg-primary text-primary-foreground shadow-sm"
+                    : "",
+                )}
+              >
+                {format(date, "d")}
+                {isToday && (
+                  <span className="absolute bottom-0.5 w-1 h-1 rounded-full bg-red-500 shadow-sm" />
+                )}
+              </span>
+            </button>
+          );
+        })}
       </div>
     </div>
   );
@@ -421,70 +452,49 @@ const MobileCalendar = ({
     const dateKey: string = format(date, "dd MMMM yyyy г.", { locale: bg });
     const element: HTMLDivElement | null = appointmentRefs.current[dateKey];
     if (element) {
-      element.scrollIntoView({
-        behavior: smoothScroll ? "smooth" : "auto",
-        block: "nearest",
-        inline: "nearest",
-      });
+      if (containerRef.current) {
+        containerRef.current.scrollTo({
+          top: element.offsetTop,
+          behavior: smoothScroll ? "smooth" : "auto",
+        });
+      }
+      // Allow enough time for smooth scroll to finish before listening to intersection observer again
       setTimeout(() => {
         isUserScrolling.current = false;
-      }, 500);
+      }, 700);
     } else {
       isUserScrolling.current = false;
     }
   };
 
-  const handlePreviousWeek = (): void => {
-    isUserScrolling.current = true;
-    setSelectedDate((prevDate) => addWeeks(prevDate, -1));
-    setTimeout(() => {
-      isUserScrolling.current = false;
-    }, 500);
-  };
-
-  const handleNextWeek = (): void => {
-    isUserScrolling.current = true;
-    setSelectedDate((prevDate) => addWeeks(prevDate, 1));
-    setTimeout(() => {
-      isUserScrolling.current = false;
-    }, 500);
-  };
-
-  const handlePreviousMonth = (): void => {
-    isUserScrolling.current = true;
-    setSelectedDate((prevDate) => subMonths(prevDate, 1));
-    setTimeout(() => {
-      isUserScrolling.current = false;
-    }, 500);
-  };
-
-  const handleNextMonth = (): void => {
-    isUserScrolling.current = true;
-    setSelectedDate((prevDate) => addMonths(prevDate, 1));
-    setTimeout(() => {
-      isUserScrolling.current = false;
-    }, 500);
-  };
+  const handlePreviousWeek = () => handleSelectDate(addWeeks(selectedDate, -1));
+  const handleNextWeek = () => handleSelectDate(addWeeks(selectedDate, 1));
+  const handlePreviousMonth = () => handleSelectDate(subMonths(selectedDate, 1));
+  const handleNextMonth = () => handleSelectDate(addMonths(selectedDate, 1));
 
   React.useEffect(() => {
     const observer = new IntersectionObserver(
       (entries) => {
         if (isUserScrolling.current) return;
 
-        const firstVisibleEntry = entries.find((entry) => entry.isIntersecting);
-        if (firstVisibleEntry) {
-          const dateKey = firstVisibleEntry.target.getAttribute("data-date");
+        const visibleEntry = entries.find((entry) => entry.isIntersecting);
+        if (visibleEntry) {
+          const dateKey = visibleEntry.target.getAttribute("data-date");
           if (dateKey) {
             const newDate: Date = parseISO(dateKey);
-            if (!isSameDay(newDate, selectedDate)) {
-              setSelectedDate(newDate);
-            }
+            setSelectedDate((prevDate) => {
+              if (!isSameDay(newDate, prevDate)) {
+                return newDate;
+              }
+              return prevDate;
+            });
           }
         }
       },
       {
         root: containerRef.current,
-        rootMargin: "0px",
+        // Wider band to capture fast scrolling reliably
+        rootMargin: "-10% 0px -70% 0px",
         threshold: 0,
       },
     );
@@ -496,13 +506,9 @@ const MobileCalendar = ({
     });
 
     return () => {
-      Object.values(appointmentRefs.current).forEach((ref) => {
-        if (ref) {
-          observer.unobserve(ref);
-        }
-      });
+      observer.disconnect();
     };
-  }, [selectedDate, groupedAppointments]);
+  }, [groupedAppointments]);
 
   React.useEffect(() => {
     setTimeout(() => {
@@ -511,7 +517,7 @@ const MobileCalendar = ({
   }, []);
 
   return (
-    <div className="flex flex-col h-full max-w-lg mx-auto bg-white dark:bg-black text-gray-900 dark:text-gray-100 font-sans">
+    <div className="flex flex-col h-full mx-auto bg-white dark:bg-black text-gray-900 dark:text-gray-100 font-sans">
       <style>
         {`
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
@@ -569,7 +575,7 @@ const MobileCalendar = ({
           className="w-full text-center p-2 mt-2 text-sm font-semibold text-primary dark:text-primary hover:underline"
           onClick={() => setIsMonthlyView(!isMonthlyView)}
         >
-          {isMonthlyView ? "Свий" : "Разшири"}
+          {isMonthlyView ? t("Collapse") : t("Expand")}
         </button>
       </div>
 
@@ -586,7 +592,7 @@ const MobileCalendar = ({
       </div>
       {/* Appointments List */}
       <div
-        className="flex-1 overflow-y-auto space-y-4 px-4 pb-4 scrolling-container"
+        className="flex-1 overflow-y-auto px-4 scrolling-container relative"
         ref={containerRef}
       >
         {allDatesInYear.length > 0 ? (

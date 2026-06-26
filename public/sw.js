@@ -1,6 +1,5 @@
-const CACHE_NAME = 'appointdi-v1';
+const CACHE_NAME = 'appointdi-v2';
 const ASSETS_TO_CACHE = [
-  '/',
   '/manifest.json',
   '/AppointmantPro.png'
 ];
@@ -31,13 +30,27 @@ self.addEventListener('activate', (event) => {
   self.clients.claim();
 });
 
-// Fetch Event (Caching)
+// Fetch Event
 self.addEventListener('fetch', (event) => {
-  event.respondWith(
-    caches.match(event.request).then((cachedResponse) => {
-      return cachedResponse || fetch(event.request);
-    })
-  );
+  // Skip API calls from service worker caching - always network
+  if (event.request.url.includes('/api/')) {
+    return;
+  }
+
+  // Strategy: Network First for Navigations, Cache First for others
+  if (event.request.mode === 'navigate') {
+    event.respondWith(
+      fetch(event.request).catch(() => {
+        return caches.match(event.request);
+      })
+    );
+  } else {
+    event.respondWith(
+      caches.match(event.request).then((cachedResponse) => {
+        return cachedResponse || fetch(event.request);
+      })
+    );
+  }
 });
 
 // Push Event (Notifications)

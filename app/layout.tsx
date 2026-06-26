@@ -1,5 +1,5 @@
 import type React from "react";
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { GeistSans } from "geist/font/sans";
 import { GeistMono } from "geist/font/mono";
 import "./globals.css";
@@ -7,18 +7,23 @@ import ClientLayoutWrapper from "@/components/ClientLayoutWrapper";
 import { AuthProvider } from "@/context/AuthContext";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import { ThemeProvider as NextThemesProvider } from "next-themes";
+import QueryProvider from "@/components/providers/QueryProvider";
+import CookieBanner from "@/components/Global/CookieBanner";
 
 export const metadata: Metadata = {
   title: "AppointDI",
   description: "AppointDI - Smart Appointment Scheduling",
   generator: "Next.js",
   manifest: "/manifest.json",
-  themeColor: "#000000",
   appleWebApp: {
     capable: true,
     statusBarStyle: "default",
     title: "AppointDI",
   },
+};
+
+export const viewport: Viewport = {
+  themeColor: "#000000",
 };
 
 import { LocationProvider } from "@/context/LocationContext";
@@ -57,8 +62,9 @@ html {
         />
       </head>
       <body>
-        <AuthProvider>
-          <LocationProvider>
+        <QueryProvider>
+          <AuthProvider>
+            <LocationProvider>
             <NextThemesProvider
               attribute="class"
               defaultTheme="light"
@@ -66,10 +72,12 @@ html {
             >
               <ThemeProvider>
                 <ClientLayoutWrapper>{children}</ClientLayoutWrapper>
+                <CookieBanner />
               </ThemeProvider>
             </NextThemesProvider>
-          </LocationProvider>
-        </AuthProvider>
+            </LocationProvider>
+          </AuthProvider>
+        </QueryProvider>
       </body>
     </html>
   );

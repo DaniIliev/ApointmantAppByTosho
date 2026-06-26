@@ -208,12 +208,10 @@ export default function CreateWorkBlock({
 
       onCreated(created);
       onOpenChange(false);
-      toast.success(t("Work block created successfully"));
       setFormData(initialFormData);
       setTimeRange({ startTime: null, endTime: null });
     } catch (error) {
       console.error("Failed to create work block:", error);
-      toast.error(t("Failed to create work block. Please try again."));
     } finally {
       setIsSubmitting(false);
     }

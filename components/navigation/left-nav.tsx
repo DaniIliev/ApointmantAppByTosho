@@ -14,6 +14,7 @@ import {
   Settings,
   Clock,
   UserCog,
+  CreditCard,
   // New Icons for better context
   Info, // For Business Information
   BarChart3, // For Performance
@@ -25,7 +26,10 @@ import {
   LayoutList,
   ShieldCheck, // For QR Code page
   MapPin,
+  Receipt,
+  MessageCircle,
 } from "lucide-react";
+
 
 import { useAuthContext } from "@/context/AuthContext";
 import useClickOutside from "@/Global/Hooks/useClickOutside";
@@ -177,9 +181,14 @@ export default function LeftNav({ isOpen, onClose }: LeftNavProps) {
   const router = useRouter();
   const { user, logout } = useAuthContext();
   const [isLangOpen, setIsLangOpen] = useState(false);
+  const [mounted, setMounted] = useState(false);
   const langRef = useRef<HTMLDivElement>(null);
   const touchStartX = useRef<number>(0);
   const touchCurrentX = useRef<number>(0);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   // ... (rest of the component logic)
 
@@ -209,10 +218,18 @@ export default function LeftNav({ isOpen, onClose }: LeftNavProps) {
   };
 
   const navItems: NavItem[] =
-    user?.role === "business" ||
-    user?.role === "manager" ||
-    user?.role === "staff" ||
     user?.role === "admin"
+      ? [
+          { href: "/admin/dashboard", label: t("Admin Dashboard"), icon: LayoutDashboard },
+          {
+            href: "/admin/grant-access",
+            label: t("Grant Access"),
+            icon: ShieldCheck,
+          },
+        ]
+      : user?.role === "business" ||
+        user?.role === "manager" ||
+        user?.role === "staff"
       ? [
           { href: "/home", label: t("Home"), icon: House },
 
@@ -262,24 +279,33 @@ export default function LeftNav({ isOpen, onClose }: LeftNavProps) {
                     label: t("Service Types"),
                     icon: CircleDollarSign,
                   },
+                  ...(user?.role === "business"
+                    ? [
+                        {
+                          href: "/settings/payments",
+                          label: t("Payments"),
+                          icon: CreditCard,
+                        },
+                        {
+                          href: "/dashboard/subscription",
+                          label: t("Subscription"),
+                          icon: Receipt,
+                        },
+                      ]
+                    : []),
                 ],
               },
             ],
           },
-          ...(user?.role === "admin"
-            ? [
-                // Array to be spread if true
-                {
-                  href: "/admin/grant-access",
-                  label: t("Grant Access"),
-                  icon: ShieldCheck,
-                },
-              ]
-            : []),
           {
             href: "/performance",
             label: t("Performance"),
             icon: BarChart3,
+          },
+          {
+            href: "/chat",
+            label: t("Messages"),
+            icon: MessageCircle,
           },
           {
             href: "/kanban",
@@ -292,6 +318,8 @@ export default function LeftNav({ isOpen, onClose }: LeftNavProps) {
           { href: "/for-business", label: t("For Business"), icon: Briefcase },
           { href: "/login", label: t("Sign in"), icon: LogIn },
         ];
+
+  if (!mounted) return null;
 
   return (
     <nav
@@ -308,9 +336,11 @@ export default function LeftNav({ isOpen, onClose }: LeftNavProps) {
       onTouchMove={handleTouchMove}
       onTouchEnd={handleTouchEnd}
     >
-      <div className={`p-4 h-full flex flex-col relative`}>
-        <LocationSelector isOpen={isOpen} />
-        <div className="space-y-2 flex-1 overflow-y-auto pb-20">
+      <div className={`h-full flex flex-col relative`}>
+        <div className="pt-5 px-3">
+          <LocationSelector isOpen={isOpen} />
+        </div>
+        <div className="space-y-2 flex-1 overflow-y-auto pt-2 pb-24 px-3">
           {navItems.map((item) => (
             <SubMenu
               key={item.label}
@@ -321,7 +351,7 @@ export default function LeftNav({ isOpen, onClose }: LeftNavProps) {
           ))}
         </div>
         {user && (
-          <div className="md:hidden absolute left-0 right-0 bottom-0 p-3 border-t border-white/10 bg-primary-foreground">
+          <div className="lg:hidden absolute left-0 right-0 bottom-0 p-3 border-t border-white/10 bg-primary-foreground">
             <div className="flex items-center justify-around">
               {/* Profile */}
               <Link

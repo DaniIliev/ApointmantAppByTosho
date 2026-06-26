@@ -12,6 +12,7 @@ import { Toaster } from "sonner";
 import { PaddingProvider } from "@/context/PaddingContext";
 import AutoCompletePastAppointments from "@/components/Global/AutoCompletePastAppointments";
 import { usePathname } from "next/navigation";
+import Chatbot from "@/components/chatBot/Chatbot";
 
 export default function ClientLayoutWrapper({
   children,
@@ -66,20 +67,40 @@ export default function ClientLayoutWrapper({
     );
   const hideLeftNav = isOnboarding || hasNoRole;
 
+  // Show business-help chatbot for business/manager/staff users on internal pages
+  const isBusinessRole = user?.role && ["business", "manager", "staff"].includes(user.role as string);
+  const isPublicBusinessPage = pathname.startsWith("/business/") && !pathname.includes("/business/business-information") && !pathname.includes("/business/locations") && !pathname.includes("/business/qr-code");
+  const showBusinessHelper = isBusinessRole && !isOnboarding && !isPublicBusinessPage;
+
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  if (!mounted) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-white dark:bg-gray-950">
+         <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
+      </div>
+    );
+  }
+
   return (
     <I18nextProvider i18n={i18n}>
       <PageTitleProvider>
         <PaddingProvider>
           <RightNavProvider>
+            <Toaster expand={false} visibleToasts={3} />
             {user ? (
               <ClientLayout hideLeftNav={hideLeftNav}>
-                <Toaster />
-                <AutoCompletePastAppointments />
+                <AutoCompletePastAppointments disabled={isOnboarding} />
                 {children}
                 <ChangePasswordModal
                   open={showChangePassword}
                   onClose={() => setShowChangePassword(false)}
                 />
+                {showBusinessHelper && <Chatbot mode="business-help" />}
               </ClientLayout>
             ) : (
               <GuestLayout>{children}</GuestLayout>

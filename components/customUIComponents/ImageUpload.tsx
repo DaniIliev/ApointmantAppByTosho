@@ -5,6 +5,8 @@ import { Upload } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { cn } from "@/lib/utils";
 import { HoverImagePreview } from "@/components/customUIComponents/HoverImagePreview";
+import { compressImage } from "@/lib/imageCompression";
+import { Loader2 } from "lucide-react";
 
 interface ImageUploadProps {
   value?: string | File | null;
@@ -25,6 +27,30 @@ export function ImageUpload({
 }: ImageUploadProps) {
   const { t } = useTranslation();
   const [preview, setPreview] = useState<string | null>(null);
+  const [isCompressing, setIsCompressing] = useState(false);
+
+  const handleFileChange = async (file: File | null) => {
+    if (!file) {
+      onChange(null);
+      return;
+    }
+
+    // Only compress if it's an image
+    if (file.type.startsWith("image/")) {
+      try {
+        setIsCompressing(true);
+        const compressedFile = await compressImage(file);
+        onChange(compressedFile);
+      } catch (error) {
+        console.error("Compression error:", error);
+        onChange(file); // Fallback to original if compression fails
+      } finally {
+        setIsCompressing(false);
+      }
+    } else {
+      onChange(file);
+    }
+  };
 
   useEffect(() => {
     if (!value) {
@@ -57,7 +83,7 @@ export function ImageUpload({
             alt={label || t("Image preview")}
             previewTitle={label || t("Image preview")}
             onDelete={onRemove}
-            onChangeImage={onChange}
+            onChangeImage={handleFileChange}
             className={cn(
               "w-full aspect-[4/3]",
               fullWidth ? "max-w-none" : "max-w-[220px]",
@@ -72,20 +98,30 @@ export function ImageUpload({
             fullWidth ? "max-w-none" : "max-w-[220px]",
           )}
         >
-          <div className="p-4 rounded-full bg-primary/10 mb-2 group-hover:scale-110 transition-transform">
-            <Upload className="h-8 w-8 text-primary" />
-          </div>
-          <span className="text-sm font-medium text-muted-foreground">
-            {t("Upload Image")}
-          </span>
+          {isCompressing ? (
+            <div className="flex flex-col items-center gap-2">
+              <Loader2 className="h-8 w-8 text-primary animate-spin" />
+              <span className="text-xs text-muted-foreground">{t("Compressing...")}</span>
+            </div>
+          ) : (
+            <>
+              <div className="p-4 rounded-full bg-primary/10 mb-2 group-hover:scale-110 transition-transform">
+                <Upload className="h-8 w-8 text-primary" />
+              </div>
+              <span className="text-sm font-medium text-muted-foreground">
+                {t("Upload Image")}
+              </span>
+            </>
+          )}
           <input
             type="file"
             className="hidden"
             accept="image/*"
+            disabled={isCompressing}
             onChange={(e) => {
               const file = e.target.files?.[0];
               if (file) {
-                onChange(file);
+                handleFileChange(file);
               }
             }}
           />

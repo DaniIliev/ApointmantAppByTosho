@@ -1,113 +1,160 @@
 "use client";
+
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { useParams, useRouter } from "next/navigation";
+import { useParams, useSearchParams } from "next/navigation";
+import { format } from "date-fns";
+import { toast } from "sonner";
+
 import { usePageTitle } from "@/context/PageTitleContext";
 import callApi from "@/app/Api/callApi";
-import { toast } from "sonner";
-import { format } from "date-fns";
-import { ArrowLeft } from "lucide-react"; // Добавени икони за табовете
-import { Button } from "@/components/ui/button";
-import { CustomTooltip } from "@/components/customUIComponents/CustomTooltip";
 import ScheduleCalendarView from "@/components/calendar/ScheduleCalendarView";
-import { DailyScheduleEditModal } from "./DayleScheduleEditModal";
-// ИМПОРТ ЗА НОВИЯ КАЛЕНДАРЕН ИЗГЛЕД
 
-// Актуализирани типове за да отговарят на бекенд схемата
-type TimeRange = {
-  start: string;
-  end: string;
-};
+import type { WorkHourEntry } from "../types";
+import { DailyScheduleEditModal } from "./DailyScheduleEditModal";
 
-type WorkHours = {
-  _id: string;
-  day: string;
-  date: Date;
-  isDayOff: boolean;
-  workTime: TimeRange | null; // Променено на workTime обект
-  breaks: TimeRange[]; // Променено на TimeRange[]
-};
-export default function StaffDailySchedulePage() {
+
+// ─── Page component ──────────────────────────────────────
+
+export default function ScheduleDetailPage() {
   const params = useParams();
+  const searchParams = useSearchParams();
   const { t } = useTranslation();
 
-  const scheduleId = params.id;
-  const [dailyData, setDailyData] = useState<WorkHours[]>([]);
+  const routeId = String(params.id || "");
+  const isStaffCalendarMode = routeId.startsWith("staff-");
+  const staffId = isStaffCalendarMode ? routeId.replace("staff-", "") : null;
+  const locationId = searchParams.get("locationId");
+
+  const [dailyData, setDailyData] = useState<WorkHourEntry[]>([]);
   const { setPageTitle } = usePageTitle();
 
-  // =======================================================
-  // НОВО СЪСТОЯНИЕ ЗА МОДАЛА
-  // =======================================================
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [dayToEdit, setDayToEdit] = useState<WorkHours | null>(null);
+  const [dayToEdit, setDayToEdit] = useState<WorkHourEntry | null>(null);
 
-  // Функция за редактиране на един ден, която ще се подаде на календара
-  const handleEditDay = (dayData: WorkHours) => {
+  // ── Handlers ────────────────────────────────────────
+
+  const handleEditDay = (dayData: WorkHourEntry) => {
     setDayToEdit(dayData);
     setIsModalOpen(true);
   };
 
   const closeModal = () => {
     setIsModalOpen(false);
-    setDayToEdit(null); // Изчистваме данните
+    setDayToEdit(null);
   };
 
-  // Обновена функция за запазване (сега приема само един обновен ден)
-  const handleSaveDay = async (updatedDayData: WorkHours) => {
+  const handleSaveDay = async (updatedDayData: WorkHourEntry) => {
     try {
-      // 1. Намираме индекса на обновения ден
-      const index = dailyData.findIndex((d) => d._id === updatedDayData._id);
+      const targetScheduleId = updatedDayData.scheduleId || routeId;
+      if (!targetScheduleId) {
+        toast.error(t("Error: Schedule is missing for this day."));
+        return;
+      }
 
+      const index = dailyData.findIndex((d) => d._id === updatedDayData._id);
       if (index === -1) {
         toast.error(t("Error: Day not found for editing."));
         return;
       }
 
-      // 2. Създаваме нов масив с обновените данни
       const newDailyData = [...dailyData];
       newDailyData[index] = updatedDayData;
+
       const dataToSend = {
         ...updatedDayData,
-        date: updatedDayData.date.toISOString(),
+        date:
+          updatedDayData.date instanceof Date
+            ? updatedDayData.date.toISOString()
+            : updatedDayData.date,
       };
 
-      await callApi(`/api/staff-schedules/${scheduleId}/details`, "PUT", {
-        workHour: dataToSend,
-      });
+      const response = await callApi(
+        `/api/staff-schedules/${targetScheduleId}/details`,
+        "PUT",
+        { workHour: dataToSend },
+      );
+
+      // The backend returns the updated dailySchedule with the new history/lastUpdated
+      if (response && response.data && response.data.workHours) {
+        const updatedServerDay = response.data.workHours.find(
+          (d: any) => d._id === updatedDayData._id
+        );
+        if (updatedServerDay) {
+          newDailyData[index] = {
+            ...updatedServerDay,
+            date: new Date(updatedServerDay.date),
+            scheduleId: targetScheduleId
+          };
+        }
+      }
+
       setDailyData(newDailyData);
       closeModal();
       toast.success(t("Schedule day saved successfully!"));
     } catch (error) {
       toast.error(t("Failed to save schedule day."));
+      throw error;
     }
   };
+
+  // ── Data fetching ───────────────────────────────────
 
   useEffect(() => {
     const fetchDailySchedule = async () => {
       try {
-        const data = await callApi(
-          `/api/staff-schedules/${scheduleId}/details`,
-          "GET",
-        );
-        // Обработка на данните, за да се гарантира, че workTime е обект
-        const formattedData = data.map((item: any) => ({
-          ...item,
-          // Преобразуваме датата в Date обект за по-лесно форматиране във външните компоненти
-          date: new Date(item.date),
-          workTime: item.workTime || { start: "", end: "" },
-          breaks: item.breaks || [],
-        }));
+        let formattedData: WorkHourEntry[] = [];
+
+        if (isStaffCalendarMode && staffId) {
+          const query = new URLSearchParams();
+          if (locationId) query.set("locationId", locationId);
+
+          const data = await callApi(
+            `/api/staff-schedules/details/by-staff/${staffId}${query.toString() ? `?${query.toString()}` : ""}`,
+            "GET",
+          );
+
+          formattedData = (Array.isArray(data) ? data : [])
+            .map((item: any) => ({
+              ...item,
+              date: new Date(item.date),
+              workTime: item.workTime || { start: null, end: null },
+              breaks: Array.isArray(item.breaks) ? item.breaks : [],
+              scheduleId: item.scheduleId,
+            }))
+            .sort(
+              (a: WorkHourEntry, b: WorkHourEntry) =>
+                new Date(a.date).getTime() - new Date(b.date).getTime(),
+            );
+        } else {
+          const data = await callApi(
+            `/api/staff-schedules/${routeId}/details`,
+            "GET",
+          );
+          formattedData = (Array.isArray(data) ? data : []).map(
+            (item: any) => ({
+              ...item,
+              date: new Date(item.date),
+              workTime: item.workTime || { start: null, end: null },
+              breaks: Array.isArray(item.breaks) ? item.breaks : [],
+              scheduleId: routeId,
+            }),
+          );
+        }
+
         setDailyData(formattedData);
 
         if (formattedData.length > 0) {
-          // Уверете се, че датите са сортирани за да получите правилните начална и крайна дата
           const sortedData = [...formattedData].sort(
-            (a, b) => a.date.getTime() - b.date.getTime(),
+            (a, b) =>
+              new Date(a.date).getTime() - new Date(b.date).getTime(),
           );
-
-          const startDate = format(sortedData[0].date, "dd.MM.yyyy");
+          const startDate = format(
+            new Date(sortedData[0].date),
+            "dd.MM.yyyy",
+          );
           const endDate = format(
-            sortedData[sortedData.length - 1].date,
+            new Date(sortedData[sortedData.length - 1].date),
             "dd.MM.yyyy",
           );
           setPageTitle(
@@ -119,18 +166,24 @@ export default function StaffDailySchedulePage() {
         } else {
           setPageTitle(t("Schedule"));
         }
-      } catch (error) {
+      } catch {
         toast.error(t("Failed to load detailed schedule."));
       }
     };
-    if (scheduleId) {
+
+    if (routeId) {
       fetchDailySchedule();
     }
-  }, [setPageTitle, scheduleId]);
+  }, [setPageTitle, routeId, isStaffCalendarMode, staffId, locationId, t]);
+
+  // ── Render ──────────────────────────────────────────
 
   return (
     <div>
-      <ScheduleCalendarView dailyData={dailyData} onEditDay={handleEditDay} />
+      <ScheduleCalendarView
+        dailyData={dailyData as any}
+        onEditDay={handleEditDay as any}
+      />
       {dayToEdit && (
         <DailyScheduleEditModal
           dayData={dayToEdit}

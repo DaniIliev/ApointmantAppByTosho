@@ -8,7 +8,6 @@ import { cn } from "@/lib/utils";
 
 interface LocationCardProps {
   location: any;
-  isSelected?: boolean;
   onEdit?: () => void;
   onDelete?: () => void;
   onClick?: () => void;
@@ -18,7 +17,6 @@ interface LocationCardProps {
 
 export function LocationCard({
   location,
-  isSelected,
   onEdit,
   onDelete,
   onClick,
@@ -47,7 +45,6 @@ export function LocationCard({
     <Card
       className={cn(
         "group relative h-[350px] overflow-hidden rounded-3xl border-2 border-primary/40 bg-background shadow-xl transition-all duration-300 hover:shadow-2xl cursor-pointer",
-        isSelected && "ring-2 ring-primary/40",
         className,
       )}
       onClick={onClick}
@@ -60,7 +57,7 @@ export function LocationCard({
           title={`${location.name} map`}
           loading="lazy"
           referrerPolicy="no-referrer-when-downgrade"
-          className="absolute inset-0 h-full w-full border-0"
+          className="absolute inset-0 h-full w-full border-0 dark:invert-[0.9] dark:hue-rotate-180 dark:saturate-200 dark:contrast-85 transition-all duration-300"
         />
       ) : (
         <div className="absolute inset-0 flex items-center justify-center bg-muted/40 text-sm text-muted-foreground">
@@ -93,25 +90,17 @@ export function LocationCard({
           </div>
         )}
       </div>
-
-      {isSelected && (
-        <div className="absolute right-4 top-4 z-20 inline-flex items-center gap-2 rounded-full bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground shadow-lg">
-          <CheckCircle2 className="h-4 w-4" />
-          {t("Selected")}
-        </div>
-      )}
-
-      <div className="absolute bottom-5 left-5 right-5 z-20">
-        <div className="flex items-center justify-between gap-3 rounded-3xl bg-black/85 p-4 text-white backdrop-blur-sm">
+      <div className="absolute bottom-3 left-3 right-3 z-20">
+        <div className="flex items-center justify-between gap-3 rounded-2xl bg-black/85 p-3 text-white backdrop-blur-sm">
           <div className="min-w-0">
-            <h3 className="truncate text-2xl font-bold tracking-tight">
+            <h3 className="truncate text-lg font-bold tracking-tight">
               {location.name}
             </h3>
-            <p className="truncate text-lg text-white/85">
+            <p className="truncate text-sm text-white/85">
               {composedAddress || t("No address available")}
             </p>
           </div>
-          <div className="h-24 w-24 shrink-0 overflow-hidden rounded-2xl border-2 border-white/80 bg-muted">
+          <div className="h-14 w-14 shrink-0 overflow-hidden rounded-xl border-2 border-white/80 bg-muted">
             <img
               src={imageUrl || fallbackImage}
               alt={location.name}
@@ -120,12 +109,6 @@ export function LocationCard({
           </div>
         </div>
       </div>
-
-      {!isSelected && (
-        <div className="absolute inset-0 z-0 opacity-0 transition-opacity group-hover:opacity-100">
-          <div className="h-full w-full bg-primary/5" />
-        </div>
-      )}
     </Card>
   );
 }

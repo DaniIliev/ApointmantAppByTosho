@@ -6,6 +6,7 @@ export type StaffMember = {
   _id: string;
   firstName: string;
   lastName: string;
+  locationIds?: string[];
 };
 
 export function useStaffOptions() {
@@ -19,7 +20,7 @@ export function useStaffOptions() {
       try {
         setLoadingStaff(true);
         const staffList = await callApi(
-          `/api/staff/staff-list?businessId=${user.businessId}`,
+          `/api/staff/staff-list?businessId=${user.businessId}&ignoreLocation=true`,
           "GET"
         );
         if (Array.isArray(staffList)) {

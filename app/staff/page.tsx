@@ -4,19 +4,17 @@ import { useEffect, useState } from "react";
 import { usePageTitle } from "@/context/PageTitleContext";
 import ProtectedRoute from "@/components/guards/ProtectedRoute";
 import { useRightNav } from "@/context/RightNavContext";
-import { Button } from "@/components/ui/button";
 import { Plus, Eye, Pencil, Trash2 } from "lucide-react";
-import { toast } from "sonner";
 import { GenericTable, Column } from "@/components/GenericTable/GenericTable";
-import { LabeledInput } from "@/components/customUIComponents/LabeledInput";
 import { useTranslation } from "react-i18next";
 import { CustomTooltip } from "@/components/customUIComponents/CustomTooltip";
-import { Modal } from "@/components/customUIComponents/Modal";
-import { MultiSelectCombobox } from "@/components/customUIComponents/MultiSelectCombobox";
-import callApi from "../Api/callApi";
 import { StaffMember } from "./types";
 import { StaffModal } from "./StaffModal";
 import { useAuthContext } from "@/context/AuthContext";
+import { useGetStaff, useDeleteStaff } from "@/hooks/queries/useStaff";
+import { useGetLocations } from "@/hooks/queries/useLocation";
+import { canAddStaff, getPlanFromName } from "@/lib/permissions";
+import { UpgradeModal } from "@/components/customUIComponents/UpgradeModal";
 
 import { Skeleton } from "@/components/ui/skeleton";
 import { LabeledSelect } from "@/components/customUIComponents/LabeledSelect";
@@ -44,14 +42,19 @@ function StaffPageContent() {
   const { setExtraRightNavMenu, setIsRightNavVisible } = useRightNav();
   const { user } = useAuthContext();
   const { selectedLocation } = useLocationContext();
-  const [staff, setStaff] = useState<StaffMember[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [modalMode, setModalMode] = useState<"view" | "edit" | "create">(
-    "create",
-  );
+  const [modalMode, setModalMode] = useState<"view" | "edit" | "create">("create");
   const [selectedStaff, setSelectedStaff] = useState<StaffMember | null>(null);
-  const [locations, setLocations] = useState<any[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const [showUpgradeModal, setShowUpgradeModal] = useState(false);
+
+  const { data: staffData, isLoading: isStaffLoading } = useGetStaff(user?.businessId, selectedLocation?._id);
+  const { data: locationsData, isLoading: isLocationsLoading } = useGetLocations(user?.businessId);
+  
+  const staff = staffData || [];
+  const locations = locationsData || [];
+  const isLoading = isStaffLoading || isLocationsLoading;
+
+  const deleteStaffMutation = useDeleteStaff();
 
   useEffect(() => {
     setPageTitle(t("Staff Management"));
@@ -64,27 +67,6 @@ function StaffPageContent() {
     };
   }, [setPageTitle, setExtraRightNavMenu, setIsRightNavVisible, t]);
 
-  useEffect(() => {
-    const loadData = async () => {
-      if (!user?.businessId) return;
-      setIsLoading(true);
-      try {
-        const [staffData, locationsData] = await Promise.all([
-          callApi(`/api/staff/staff-list?businessId=${user.businessId}`, "GET"),
-          callApi(`/api/locations?businessId=${user.businessId}`, "GET"),
-        ]);
-        setStaff(staffData);
-        setLocations(locationsData);
-      } catch (error) {
-        toast.error(t("Failed to load staff data"));
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    loadData();
-  }, [user?.businessId, t, selectedLocation?._id]);
-
   const openStaffModal = (staffId: string, mode: "view" | "edit") => {
     const foundStaff = findStaffById(staffId);
     if (foundStaff) {
@@ -95,6 +77,11 @@ function StaffPageContent() {
   };
 
   const openCreateModal = () => {
+    const userPlan = getPlanFromName(user?.subscriptionPlan || user?.plan);
+    if (!canAddStaff(staff.length, userPlan)) {
+      setShowUpgradeModal(true);
+      return;
+    }
     setSelectedStaff(null);
     setModalMode("create");
     setIsModalOpen(true);
@@ -105,24 +92,15 @@ function StaffPageContent() {
     return staff.find((s) => s._id === staffId);
   };
 
-  // Handle staff update/create
-  const handleStaffUpdated = (updatedStaff: StaffMember) => {
-    setStaff((prev) =>
-      prev.map((s) => (s._id === updatedStaff._id ? updatedStaff : s)),
-    );
-  };
-
-  const handleStaffCreated = (newStaff: StaffMember) => {
-    setStaff((prev) => [...prev, newStaff]);
-  };
+  // Handle staff update/create (now handled by React Query invalidation)
+  const handleStaffUpdated = () => {};
+  const handleStaffCreated = () => {};
 
   const removeStaff = async (staffId: string) => {
     try {
-      await callApi(`/api/staff/${staffId}`, "DELETE");
-      setStaff((prev) => prev.filter((s) => s._id !== staffId));
-      toast.success(t("Staff member removed successfully") as string);
+      await deleteStaffMutation.mutateAsync(staffId);
     } catch (error) {
-      toast.error(t("Failed to remove staff member") as string);
+      console.error("Failed to remove staff member:", error);
     }
   };
 
@@ -217,6 +195,15 @@ function StaffPageContent() {
         onStaffUpdated={handleStaffUpdated}
         onStaffCreated={handleStaffCreated}
         locations={locations}
+      />
+
+      <UpgradeModal
+        open={showUpgradeModal}
+        onOpenChange={setShowUpgradeModal}
+        title={t("Staff Limit Reached")}
+        description={t(
+          "You have reached the maximum number of staff members allowed by your current plan. Please upgrade to add more staff.",
+        )}
       />
     </>
   );

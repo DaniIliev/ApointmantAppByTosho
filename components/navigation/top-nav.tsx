@@ -3,34 +3,15 @@ import { useState, useRef, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useTranslation } from "react-i18next";
-import { User, Menu, X, Info, Bell, Globe } from "lucide-react";
+import { User, Menu, X, Info, Bell, Globe, MessageCircle } from "lucide-react";
 import { usePageTitle } from "@/context/PageTitleContext";
 import useClickOutside from "@/Global/Hooks/useClickOutside";
 import { useAuthContext } from "@/context/AuthContext";
 import io from "socket.io-client";
 import callApi from "@/app/Api/callApi";
 import NotificationsPanel from "./NotificationsPanel";
+import { Alert } from "@/Global/Types/types";
 
-interface AppointmentInfo {
-  _id: string;
-  clientName: string;
-  clientPhone?: string;
-  email?: string;
-  appointmentTime: { start: string; end: string };
-  service?: { _id: string; name: string } | string;
-  status?: string;
-  staff?: string;
-}
-
-interface Alert {
-  _id: string;
-  isRead: boolean;
-  message: string;
-  createdAt?: string;
-  updatedAt?: string;
-  type: string;
-  appointment?: AppointmentInfo;
-}
 
 interface TopNavProps {
   onToggleLeftNav: () => void;
@@ -46,13 +27,14 @@ export default function TopNav({
   const { t, i18n } = useTranslation();
   const { pageTitle } = usePageTitle();
   const { logout, user } = useAuthContext();
-
+  const { setPageTitle } = usePageTitle();
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [isHelpOpen, setIsHelpOpen] = useState(false);
   const [isAlertsOpen, setIsAlertsOpen] = useState(false);
   const [isLanguagesOpen, setIsLanguagesOpen] = useState(false);
   const [alerts, setAlerts] = useState<Alert[]>([]);
   const hasUnreadAlerts = alerts.some((alert) => !alert.isRead);
+  const [unreadChatCount, setUnreadChatCount] = useState(0);
 
   const profileRef = useRef<HTMLDivElement>(null);
   const helpRef = useRef<HTMLDivElement>(null);
@@ -65,6 +47,7 @@ export default function TopNav({
   useClickOutside(languagesRef, () => setIsLanguagesOpen(false));
 
   const handleSignOut = () => {
+    setPageTitle(null);
     logout();
     setIsProfileOpen(false);
   };
@@ -189,10 +172,8 @@ export default function TopNav({
     return {
       _id: typeof source._id === "string" ? source._id : crypto.randomUUID(),
       isRead: typeof source.isRead === "boolean" ? source.isRead : false,
-      message:
-        typeof source.message === "string"
-          ? source.message
-          : "New notification",
+      messageKey: source.messageKey as string,
+      params: source.params,
       createdAt:
         typeof source.createdAt === "string"
           ? source.createdAt
@@ -205,32 +186,42 @@ export default function TopNav({
   };
 
   useEffect(() => {
-    console.log("user", user);
     if (user && (user.role === "staff" || user.role === "business")) {
       const socket = io(
         process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080",
       );
 
       socket.on("connect", () => {
-        console.log("Connected to Socket.IO server:", socket.id);
         if (user && user._id) {
           socket.emit("joinRoom", user._id);
         }
       });
 
       socket.on("newAppointment", (newAlert) => {
-        console.log("Received new alert:", newAlert);
         const normalized = normalizeAlert(newAlert);
         if (!normalized) return;
         setAlerts((prevAlerts) => [normalized, ...prevAlerts]);
       });
 
+      socket.on("newAlert", (newAlert) => {
+        const normalized = normalizeAlert(newAlert);
+        if (!normalized) return;
+        setAlerts((prevAlerts) => [normalized, ...prevAlerts]);
+      });
+
+      socket.on("chatNotification", () => {
+        setUnreadChatCount((prev) => prev + 1);
+      });
+
+      socket.on("chatReadGlobal", () => {
+        fetchChatUnread();
+      });
+
       socket.on("disconnect", (reason) => {
-        console.log("Socket.IO disconnected:", reason);
+        console.log("Socket disconnected:", reason);
       });
 
       const fetchAlerts = async () => {
-        console.log("Fetching alerts from API...");
         try {
           const fetchedAlerts = await callApi("/api/alerts", "GET");
           if (Array.isArray(fetchedAlerts)) {
@@ -244,6 +235,19 @@ export default function TopNav({
         }
       };
       fetchAlerts();
+
+      // Fetch chat unread counts
+      const fetchChatUnread = async () => {
+        try {
+          const data = await callApi("/api/chat/unread", "GET");
+          if (data && typeof data.total === "number") {
+            setUnreadChatCount(data.total);
+          }
+        } catch (error) {
+          // Chat may not be available yet, silently ignore
+        }
+      };
+      fetchChatUnread();
 
       return () => {
         console.log("Cleaning up Socket.IO connection...");
@@ -276,24 +280,31 @@ export default function TopNav({
           )}
           <h1 className="flex items-end gap-1 text-l font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
             <span className="theme-logo-mask" aria-hidden="true" />
-            <span className="sr-only">{t("AppointDI")}</span>
-            <span className="hidden sm:inline">{t("AppointDI ")}</span>
+            <span className="sr-only" suppressHydrationWarning>
+              {t("AppointDI")}
+            </span>
+            <span className=" sm:inline" suppressHydrationWarning>
+              {t("AppointDI ")}
+            </span>
           </h1>
         </div>
 
-        {pageTitle && (
+        {/* {pageTitle && (
           <div className="pointer-events-none absolute left-1/2 -translate-x-1/2 md:hidden max-w-[44vw]">
             <h2 className="truncate text-sm font-semibold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent tracking-tight text-center">
               {t(pageTitle)}
             </h2>
           </div>
-        )}
+        )} */}
 
         <div
           className={`hidden md:flex justify-center min-w-0 transition-transform duration-300 ${titleOffsetClass}`}
         >
           {pageTitle && (
-            <h2 className="text-xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent tracking-tight">
+            <h2
+              className="text-xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent tracking-tight"
+              suppressHydrationWarning
+            >
               {t(pageTitle)}
             </h2>
           )}
@@ -318,7 +329,12 @@ export default function TopNav({
                 {hasUnreadAlerts && (
                   <span className="absolute top-0 right-0 h-2 w-2 bg-red-500 rounded-full animate-ping-once" />
                 )}
-                <span className="text-xs text-primary mt-1">{t("Alerts")}</span>
+                <span
+                  className="text-xs text-primary mt-1"
+                  suppressHydrationWarning
+                >
+                  {t("Alerts")}
+                </span>
               </button>
               {isAlertsOpen && (
                 <NotificationsPanel
@@ -329,6 +345,31 @@ export default function TopNav({
               )}
             </div>
 
+            {/* Chat Messages Button */}
+            <div className="relative">
+              <Link
+                href="/chat"
+                className="flex flex-col items-center justify-center p-2 rounded-lg hover:bg-white/10 transition-colors duration-200 relative"
+              >
+                <MessageCircle
+                  className={`w-5 h-5 transition-colors duration-200 ${
+                    unreadChatCount > 0 ? "text-primary" : "text-primary"
+                  }`}
+                />
+                {unreadChatCount > 0 && (
+                  <span className="absolute -top-0.5 -right-0.5 min-w-[18px] h-[18px] px-1 rounded-full bg-red-500 text-white text-[10px] font-bold flex items-center justify-center">
+                    {unreadChatCount > 99 ? "99+" : unreadChatCount}
+                  </span>
+                )}
+                <span
+                  className="text-xs text-primary mt-1"
+                  suppressHydrationWarning
+                >
+                  {t("Chat")}
+                </span>
+              </Link>
+            </div>
+
             {/* Language Button: show only on md+ when authorized */}
             <div className="relative block" ref={languagesRef}>
               <button
@@ -336,7 +377,10 @@ export default function TopNav({
                 className="flex flex-col items-center justify-center p-2 rounded-lg hover:bg-white/10 transition-colors duration-200"
               >
                 <Globe className="w-5 h-5 text-primary" />
-                <span className="text-xs text-primary mt-1">
+                <span
+                  className="text-xs text-primary mt-1"
+                  suppressHydrationWarning
+                >
                   {t("Language")}
                 </span>
               </button>
@@ -385,18 +429,23 @@ export default function TopNav({
               )}
             </div>
 
-            <div className="relative hidden md:block" ref={helpRef}>
+            <div className="relative hidden lg:block" ref={helpRef}>
               <Link
                 href="/help/contact"
                 className="flex flex-col items-center justify-center p-2 rounded-lg hover:bg-white/10 transition-colors duration-200"
               >
                 <Info className="w-5 h-5 text-primary" />
-                <span className="text-xs text-primary mt-1">{t("Help")}</span>
+                <span
+                  className="text-xs text-primary mt-1"
+                  suppressHydrationWarning
+                >
+                  {t("Help")}
+                </span>
               </Link>
             </div>
 
             {/* Profile Button with Text (hidden on mobile) */}
-            <div className="relative hidden md:block" ref={profileRef}>
+            <div className="relative hidden lg:block" ref={profileRef}>
               {user?.profilePictureUrl ? (
                 <button
                   onClick={toggleProfile}
@@ -447,7 +496,10 @@ export default function TopNav({
                 className="flex flex-col items-center justify-center p-2 rounded-lg hover:bg-white/10 transition-colors duration-200"
               >
                 <Globe className="w-5 h-5 text-primary" />
-                <span className="text-xs text-primary mt-1">
+                <span
+                  className="text-xs text-primary mt-1"
+                  suppressHydrationWarning
+                >
                   {t("Language")}
                 </span>
               </button>

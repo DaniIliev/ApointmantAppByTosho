@@ -11,18 +11,10 @@ import { KanbanBoard as KanbanBoardComponent } from "./components/KanbanBoard";
 import { CardModal } from "./components/CardModal";
 import { ColumnModal } from "./components/ColumnModal";
 import { KanbanColumn, KanbanCard, User, KanbanBoard } from "./types";
-import { toast } from "sonner";
 import callApi from "@/app/Api/callApi";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
 import { Plus, Pencil, Trash2, MoreVertical } from "lucide-react";
-import {
-  DropdownMenu,
-  DropdownMenuTrigger,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-} from "@/components/ui/dropdown-menu";
 import { LabeledSelect } from "@/components/customUIComponents/LabeledSelect";
 import { LabeledInput } from "@/components/customUIComponents/LabeledInput";
 import { Modal } from "@/components/customUIComponents/Modal";
@@ -32,6 +24,8 @@ import {
   GenericFiltersData,
   FilterConfig,
 } from "@/components/customUIComponents/GenericFilters";
+import { toast } from "sonner";
+import { CustomTooltip } from "@/components/customUIComponents/CustomTooltip";
 
 interface KanbanFiltersData extends GenericFiltersData {
   searchText: string;
@@ -98,7 +92,6 @@ function KanbanPageContent() {
 
   const loadKanbanData = async () => {
     if (!user?.businessId) {
-      toast.error(t("Business context not found"));
       setLoading(false);
       return;
     }
@@ -132,7 +125,6 @@ function KanbanPageContent() {
       setAvailableUsers(members);
     } catch (error) {
       console.error("Failed to load kanban data:", error);
-      toast.error(t("Failed to load kanban board"));
     } finally {
       setLoading(false);
     }
@@ -168,41 +160,30 @@ function KanbanPageContent() {
             setSelectedBoardId(null);
             setColumns([]);
           }
-          toast.success(t("Board deleted"));
         } catch (e) {
-          toast.error(t("Failed to delete board"));
+          console.error("Failed to delete board:", e);
         }
       }
     };
 
     setExtraRightNavMenu([
-      <Button
-        key="create"
-        variant="ghost"
+      <CustomTooltip
         onClick={handleCreateClick}
-        className="w-full justify-start gap-3 px-3 py-2 h-9 font-medium hover:bg-accent rounded-lg"
-      >
-        <Plus className="w-4 h-4 text-muted-foreground" /> {t("Create Board")}
-      </Button>,
+        tooltipText={t("Create Board")}
+        icon={<Plus />}
+      />,
       ...(selectedBoardId
         ? [
-            <Button
-              key="edit"
-              variant="ghost"
+            <CustomTooltip
               onClick={handleEditClick}
-              className="w-full justify-start gap-3 px-3 py-2 h-9 font-medium hover:bg-accent rounded-lg"
-            >
-              <Pencil className="w-4 h-4 text-muted-foreground" />{" "}
-              {t("Rename Board")}
-            </Button>,
-            <Button
-              key="delete"
-              variant="ghost"
+              tooltipText={t("Rename Board")}
+              icon={<Pencil />}
+            />,
+            <CustomTooltip
               onClick={handleDeleteClick}
-              className="w-full justify-start gap-3 px-3 py-2 h-9 font-medium text-destructive hover:text-destructive hover:bg-destructive/15 rounded-lg"
-            >
-              <Trash2 className="w-4 h-4" /> {t("Delete Board")}
-            </Button>,
+              tooltipText={t("Delete Board")}
+              icon={<Trash2 />}
+            />,
           ]
         : []),
     ]);
@@ -225,7 +206,6 @@ function KanbanPageContent() {
         });
         setBoards((prev) => [...prev, newBoard]);
         handleSelectBoard(newBoard._id);
-        toast.success(t("Board created"));
       } else {
         const upBoard = await callApi(
           `/api/kanban/boards/${selectedBoardId}`,
@@ -237,11 +217,10 @@ function KanbanPageContent() {
             b._id === selectedBoardId ? { ...b, title: upBoard.title } : b,
           ),
         );
-        toast.success(t("Board renamed"));
       }
       setBoardModalOpen(false);
     } catch (e) {
-      toast.error(t("Failed to save board"));
+      console.error("Failed to save board:", e);
     }
   };
 
@@ -253,7 +232,6 @@ function KanbanPageContent() {
       setColumns(fullBoard.columns || []);
     } catch (error) {
       console.error("Failed to load board:", error);
-      toast.error(t("Failed to load board"));
       setColumns([]);
     } finally {
       setLoading(false);
@@ -392,7 +370,6 @@ function KanbanPageContent() {
           boardId: selectedBoardId,
         });
         setColumns((prev) => [...prev, { ...newColumn, cards: [] }]);
-        toast.success(t("Column created successfully"));
       } else {
         const updatedColumn = await callApi(
           `/api/kanban/columns/${columnData._id}`,
@@ -408,19 +385,17 @@ function KanbanPageContent() {
             col._id === updatedColumn._id ? { ...col, ...updatedColumn } : col,
           ),
         );
-        toast.success(t("Column updated successfully"));
       }
     } catch (error) {
-      toast.error(t("Failed to save column"));
+      console.error("Failed to save column:", error);
     }
   };
   const handleDeleteColumn = async (columnId: string) => {
     try {
       await callApi(`/api/kanban/columns/${columnId}`, "DELETE");
       setColumns((prev) => prev.filter((col) => col._id !== columnId));
-      toast.success(t("Column deleted successfully"));
     } catch (error) {
-      toast.error(t("Failed to delete column"));
+      console.error("Failed to delete column:", error);
     }
   };
 
@@ -431,12 +406,14 @@ function KanbanPageContent() {
     setSelectedColumnId(columnId);
     setCardModalOpen(true);
   };
+
   const handleEditCard = (card: KanbanCard) => {
     setCardModalMode("edit");
     setSelectedCard(card);
     setSelectedColumnId(undefined);
     setCardModalOpen(true);
   };
+
   const handleSaveCard = async (
     cardData: Partial<KanbanCard>,
     mode: "create" | "edit",
@@ -460,7 +437,6 @@ function KanbanPageContent() {
               : col,
           ),
         );
-        toast.success(t("Card created successfully"));
       } else {
         const updatedCard = await callApi(
           `/api/kanban/cards/${cardData._id}`,
@@ -478,12 +454,12 @@ function KanbanPageContent() {
             ),
           })),
         );
-        toast.success(t("Card updated successfully"));
       }
     } catch (error) {
-      toast.error(t("Failed to save card"));
+      console.error("Failed to save card:", error);
     }
   };
+
   const handleDeleteCard = async (cardId: string) => {
     try {
       await callApi(`/api/kanban/cards/${cardId}`, "DELETE");
@@ -493,9 +469,8 @@ function KanbanPageContent() {
           cards: col.cards.filter((card) => card._id !== cardId),
         })),
       );
-      toast.success(t("Card deleted successfully"));
     } catch (error) {
-      toast.error(t("Failed to delete card"));
+      console.error("Failed to delete card:", error);
     }
   };
 
@@ -572,6 +547,9 @@ function KanbanPageContent() {
       {boards.length === 0 ? (
         <div className="flex-1 flex items-center justify-center p-4">
           <div className="max-w-md w-full p-8 rounded-xl border border-border/40 bg-card shadow-sm text-center space-y-4">
+            <div className="mx-auto w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center">
+              <Plus className="w-8 h-8 text-primary" />
+            </div>  
             <h3 className="text-xl font-semibold">{t("No Boards Created")}</h3>
             <p className="text-muted-foreground">
               {t(

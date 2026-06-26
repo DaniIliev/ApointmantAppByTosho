@@ -6,7 +6,6 @@ import ProtectedRoute from "@/components/guards/ProtectedRoute";
 import { LabeledSelect } from "@/components/customUIComponents/LabeledSelect";
 import { useTranslation } from "react-i18next";
 import callApi from "@/app/Api/callApi";
-import { toast } from "sonner";
 import { SelectOption } from "@/Global/Types/types";
 
 const PLANS = [
@@ -35,7 +34,6 @@ export default function GrantAccessPage() {
         setBusinesses(backendData);
       } catch (e) {
         console.error("Failed to fetch business configuration:", e);
-        toast.error(t("Failed to fetch businesses"));
       }
     };
     fetchBusinesses();
@@ -49,9 +47,8 @@ export default function GrantAccessPage() {
         plan: selectedPlan,
         duration,
       });
-      toast.success(t("Access granted successfully!"));
     } catch {
-      toast.error(t("Failed to grant access"));
+      console.error("Failed to grant access");
     } finally {
       setLoading(false);
     }

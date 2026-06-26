@@ -33,7 +33,7 @@ export const DateRangeSelector: React.FC = () => {
     const newTo = new Date(dateRange.to || dateRange.from);
 
     const daysOffset = Math.ceil(
-      (newTo.getTime() - newFrom.getTime()) / (1000 * 60 * 60 * 24)
+      (newTo.getTime() - newFrom.getTime()) / (1000 * 60 * 60 * 24),
     );
 
     newFrom.setDate(newFrom.getDate() - daysOffset);
@@ -49,7 +49,7 @@ export const DateRangeSelector: React.FC = () => {
     const newTo = new Date(dateRange.to || dateRange.from);
 
     const daysOffset = Math.ceil(
-      (newTo.getTime() - newFrom.getTime()) / (1000 * 60 * 60 * 24)
+      (newTo.getTime() - newFrom.getTime()) / (1000 * 60 * 60 * 24),
     );
 
     newFrom.setDate(newFrom.getDate() + daysOffset);
@@ -153,7 +153,7 @@ export const DateRangeSelector: React.FC = () => {
     computeIsSelected();
 
   return (
-    <div className="relative flex flex-col gap-3 sm:flex-row sm:flex-nowrap sm:items-center bg-card p-4 rounded-lg border ">
+    <div className="relative flex flex-col gap-3 sm:flex-row sm:flex-nowrap sm:items-center bg-card p-4 rounded-lg border min-h-[56px]">
       <div className="flex w-full flex-wrap items-center gap-2 sm:flex-nowrap">
         <div className="flex-1 min-w-[220px] sm:flex-initial">
           <DateRangePicker

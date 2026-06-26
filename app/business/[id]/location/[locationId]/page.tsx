@@ -8,13 +8,13 @@ import { Button } from "@/components/ui/button";
 import callApi from "@/app/Api/callApi";
 import { Business, Location } from "@/Global/Types/types";
 import { LocationDetailedView } from "@/components/sections/location-detailed-view";
+import Chatbot from "@/components/chatBot/Chatbot";
 
 function PublicLocationPageContent() {
   const { id, locationId } = useParams();
   const { t } = useTranslation();
   const { setPageTitle } = usePageTitle();
   const [location, setLocation] = useState<Location | null>(null);
-  const [business, setBusiness] = useState<Business | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const resolvedBusinessId = (id as string) || "";
@@ -32,12 +32,8 @@ function PublicLocationPageContent() {
       setIsLoading(true);
       setError(null);
       try {
-        const [locationRes, businessRes] = await Promise.all([
-          callApi(`/api/locations/${locationId}`, "GET"),
-          callApi(`/api/business/${resolvedBusinessId}`, "GET")
-        ]);
+        const locationRes = await callApi(`/api/locations/${locationId}`, "GET");
         setLocation(locationRes);
-        setBusiness(businessRes);
       } catch (err) {
         console.error(err);
         setError(t("Failed to load details."));
@@ -49,7 +45,7 @@ function PublicLocationPageContent() {
   }, [locationId, resolvedBusinessId, t]);
 
   if (isLoading) {
-    return <div className="p-8 text-center text-lg">{t("Loading location details...")}</div>;
+    return <div className="p-8 text-center text-lg" suppressHydrationWarning>{t("Loading location details...")}</div>;
   }
 
   if (error || !location) {
@@ -65,12 +61,15 @@ function PublicLocationPageContent() {
   }
 
   return (
-    <LocationDetailedView
-      location={location}
-      businessId={resolvedBusinessId}
-      backUrl={`/business/${resolvedBusinessId}`}
-      backLabel={t("Back to Business")}
-    />
+    <>
+      <LocationDetailedView
+        location={location}
+        businessId={resolvedBusinessId}
+        backUrl={`/business/${resolvedBusinessId}`}
+        backLabel={t("Back to Business")}
+      />
+      <Chatbot businessId={resolvedBusinessId} locationId={locationId as string} />
+    </>
   );
 }
 

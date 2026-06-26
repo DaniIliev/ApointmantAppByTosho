@@ -83,7 +83,7 @@ export function LineChartConfigForm({
 
   const getDataKeys = () => {
     if (config.dataSource === "appointments" && config.metric === "count") {
-      return ["count", "completed", "cancelled"];
+      return ["count", "completed", "cancelled", "upcoming"];
     }
     if (
       config.dataSource === "appointments" &&
@@ -92,7 +92,7 @@ export function LineChartConfigForm({
       return ["count"];
     }
     if (config.dataSource === "appointments" && config.metric === "by_staff") {
-      return ["count", "completed", "cancelled"];
+      return ["count", "completed", "cancelled", "upcoming"];
     }
     if (config.dataSource === "clients" && config.metric === "by_source") {
       return ["count"];
@@ -260,8 +260,10 @@ export function LineChartConfigForm({
               })
             }
             options={[
-              { id: "all", name: "All staff" },
-              ...staffOptions.map((s) => ({
+              { id: "all", name: t("All staff") },
+              ...staffOptions
+                .filter(s => !config.locationId || config.locationId === "all" || s.locationIds?.includes(config.locationId))
+                .map((s) => ({
                 id: s._id as string,
                 name:
                   `${s.firstName} ${s.lastName}`.trim() || (s._id as string),
@@ -278,6 +280,7 @@ export function LineChartConfigForm({
               setConfig({
                 ...config,
                 locationId: value === "all" ? "" : value,
+                staffId: "",
               })
             }
             options={[

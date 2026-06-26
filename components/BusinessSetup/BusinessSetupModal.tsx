@@ -1055,7 +1055,6 @@ export default function BusinessSetupModal({
           addAppointmentType();
         }}
         isLoading={false}
-        colorOptions={["from-blue-500 to-cyan-500"]}
       />
     </Modal>
   );

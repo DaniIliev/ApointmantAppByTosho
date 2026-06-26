@@ -52,7 +52,6 @@ export function ColumnModal({
       const columnData: Partial<KanbanColumn> = {
         title: formData.title,
         color: formData.color,
-        limit: formData.limit ? parseInt(formData.limit) : undefined,
       };
 
       if (mode === "edit" && column) {
@@ -89,7 +88,6 @@ export function ColumnModal({
         />
 
         <div className="space-y-2">
-          <label className="text-sm font-medium">Column Color</label>
           <div className="grid grid-cols-8 gap-2">
             {predefinedColors.map((color) => (
               <button
@@ -106,20 +104,7 @@ export function ColumnModal({
           </div>
         </div>
 
-        <LabeledInput
-          id="limit"
-          label="Card Limit (Optional)"
-          type="number"
-          value={formData.limit}
-          onChange={(e) => setFormData({ ...formData, limit: e.target.value })}
-          placeholder="No limit"
-        />
-
-        <div className="text-xs text-muted-foreground">
-          💡 Setting a card limit helps prevent work overload in this column
-        </div>
-
-        <div className="flex items-center justify-center gap-4">
+        <div className="flex items-center justify-center gap-4 mt-6 mb-1">
           <Button variant="outline" onClick={() => onOpenChange(false)}>
             Cancel
           </Button>

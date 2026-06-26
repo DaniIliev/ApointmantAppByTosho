@@ -1,18 +1,27 @@
-// app/page.tsx
 "use client";
-import MobileCalendar from "@/components/calendar/MobileCalendar";
-import { CalendarAppointments } from "@/components/ResponsibleCalendarView/ResponsibleCalendarView";
-import { Appointment } from "@/Global/Types/types";
-import { redirect } from "next/navigation";
-import { useTranslation } from "react-i18next";
 
+import { useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { useAuthContext } from "@/context/AuthContext";
+import { Loader2 } from "lucide-react";
 
 export default function Home() {
-  const { t } = useTranslation();
-  redirect("/for-business");
+  const { user, isAuthLoading } = useAuthContext();
+  const router = useRouter();
+
+  useEffect(() => {
+    if (!isAuthLoading) {
+      if (user) {
+        router.replace("/home");
+      } else {
+        router.replace("/for-business");
+      }
+    }
+  }, [user, isAuthLoading, router]);
+
   return (
-    <div className="container mx-auto py-8">
-      <h1 className="text-3xl font-bold mb-6">{t("Appointment Schedule")}</h1>
+    <div className="flex h-screen w-full items-center justify-center bg-background">
+      <Loader2 className="h-8 w-8 animate-spin text-primary" />
     </div>
   );
 }

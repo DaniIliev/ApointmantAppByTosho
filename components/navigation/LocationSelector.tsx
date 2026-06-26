@@ -19,7 +19,7 @@ export const LocationSelector = ({ isOpen }: { isOpen: boolean }) => {
     if (locations.length === 1) {
       setSelectedLocation(locations[0]);
       return (
-        <div className={`mb-4 transition-all duration-300 p-0`}>
+        <div className={`transition-all duration-300 p-0`}>
           <div className={`flex items-center gap-2 py-3 rounded-xl bg-primary/5 border border-primary/10 text-text-primary ${!isOpen ? "justify-center" : "px-3"}`}>
             <MapPin className="w-5 h-5 text-primary flex-shrink-0" />
             {isOpen && (
@@ -35,7 +35,7 @@ export const LocationSelector = ({ isOpen }: { isOpen: boolean }) => {
   }
 
   return (
-    <div className={`mb-4 transition-all duration-300 p-0`}>
+    <div className={`transition-all duration-300 p-0`}>
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <Button
@@ -63,7 +63,7 @@ export const LocationSelector = ({ isOpen }: { isOpen: boolean }) => {
               className={`cursor-pointer ${selectedLocation?._id === loc._id ? "bg-primary/10 font-bold" : ""}`}
             >
               <div className="flex flex-col">
-                <span className="text-sm font-medium">{loc.name}</span>
+                <span className="text-sm text-text-primary font-medium">{loc.name}</span>
                 <span className="text-[10px] text-muted-foreground truncate">{loc.address}, {loc.city}</span>
               </div>
             </DropdownMenuItem>

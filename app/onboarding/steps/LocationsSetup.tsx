@@ -5,10 +5,12 @@ import { Button } from "@/components/ui/button";
 import { LabeledInput } from "@/components/customUIComponents/LabeledInput";
 import { useTranslation } from "react-i18next";
 import { ArrowLeft, ArrowRight, MapPin, Plus, Trash2 } from "lucide-react";
-import callApi from "@/app/Api/callApi";
 import { toast } from "sonner";
-
 import { Location } from "@/Global/Types/types";
+import {
+  useCreateLocation,
+  useUpdateLocation,
+} from "@/hooks/queries/useLocation";
 
 interface LocationsSetupProps {
   onNext: (locations: Location[]) => void;
@@ -24,8 +26,9 @@ export default function LocationsSetup({
   initialData,
 }: LocationsSetupProps) {
   const { t } = useTranslation();
-  const [loading, setLoading] = useState(false);
   const [submitted, setSubmitted] = useState(false);
+  const createLocationMutation = useCreateLocation({ showToast: false });
+  const updateLocationMutation = useUpdateLocation({ showToast: false });
 
   type LocationField =
     | "name"
@@ -44,7 +47,6 @@ export default function LocationsSetup({
     Record<number, LocationValidationErrors>
   >({});
 
-  const phoneRegex = /^\+?[0-9\s()\-]{6,20}$/;
   const [locations, setLocations] = useState<Location[]>(
     initialData && initialData.length > 0
       ? initialData
@@ -147,9 +149,7 @@ export default function LocationsSetup({
       return;
     }
 
-    setLoading(true);
     try {
-      // Save each location (POST for new, PUT for existing)
       const savedLocations = await Promise.all(
         locations.map(async (loc) => {
           const isNew = !loc._id;
@@ -170,25 +170,34 @@ export default function LocationsSetup({
                 loc.postalCode !== original.postalCode ||
                 loc.imageUrl instanceof File;
 
-              if (!hasChanged) return loc; // Return original if no changes
+              if (!hasChanged) return loc;
             }
           }
 
-          const method = isNew ? "POST" : "PUT";
-          const endpoint = isNew
-            ? "/api/locations"
-            : `/api/locations/${loc._id}`;
-          const useMultipart = (loc.imageUrl as any) instanceof File;
+          if (isNew) {
+            return await createLocationMutation.mutateAsync({
+              location: loc,
+              showToast: false,
+            });
+          }
 
-          return callApi(endpoint, method, loc, useMultipart);
+          return await updateLocationMutation.mutateAsync({
+            locationId: loc._id!,
+            location: loc,
+            showToast: false,
+          });
         }),
       );
+
+      toast.success(t("All locations were saved successfully."));
       onNext(savedLocations);
-    } catch (error) {
+    } catch (error: any) {
+      const message = error?.errorCode
+        ? t(`api_errors.${error.errorCode}`)
+        : error?.message || t("Failed to save locations");
+
+      toast.error(message);
       console.error("Failed to save locations:", error);
-      onNext(locations); // Fallback
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -346,8 +355,18 @@ export default function LocationsSetup({
           >
             {t("Back")}
           </Button>
-          <Button type="submit" disabled={loading} iconType="next">
-            {loading ? t("Saving...") : t("Next Step")}
+          <Button
+            type="submit"
+            disabled={
+              createLocationMutation.isPending ||
+              updateLocationMutation.isPending
+            }
+            iconType="next"
+          >
+            {createLocationMutation.isPending ||
+            updateLocationMutation.isPending
+              ? t("Saving...")
+              : t("Next Step")}
           </Button>
         </div>
       </form>

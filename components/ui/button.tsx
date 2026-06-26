@@ -174,8 +174,14 @@ function Button({
       className={cn(buttonVariants({ variant, size, tone, className }))}
       {...props}
     >
-      {!asChild && IconComponent && <IconComponent />}
-      {children}
+      {asChild ? (
+        children
+      ) : (
+        <>
+          {IconComponent && <IconComponent />}
+          {children}
+        </>
+      )}
     </Comp>
   );
 }

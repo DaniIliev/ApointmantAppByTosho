@@ -436,7 +436,7 @@ export const GenericTable = <T extends Record<string, any>>({
                             >
                               <div className="flex items-center gap-3">
                                 {colIndex === 0 && canExpandRow && (
-                                  <div className="cursor-pointer text-blue-500 hover:scale-110 transition-transform">
+                                  <div className="cursor-pointer text-primary hover:scale-110 transition-transform">
                                     {expandedRows[rowIndex] ? (
                                       <ChevronDown size={14} />
                                     ) : (

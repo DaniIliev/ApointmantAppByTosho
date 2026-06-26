@@ -72,11 +72,11 @@ const AppointmentForm = ({
         fetchedStaffForTypeRef.current = appointmentData.appointmentTypeId;
 
         const selectedService = appointmentTypes?.find(
-          (type) => type._id === appointmentData.appointmentTypeId
+          (type) => type._id === appointmentData.appointmentTypeId,
         );
         if (selectedService && selectedService.staffMembers) {
           const staffIdsArray = selectedService.staffMembers.map((s: any) =>
-            typeof s === "string" ? s : s._id || s
+            typeof s === "string" ? s : s._id || s,
           );
           const staffDetails = await callApi(`/api/staff/by-ids`, "POST", {
             staffIds: staffIdsArray,
@@ -100,7 +100,7 @@ const AppointmentForm = ({
       ) {
         const slots = await callApi(
           `/api/appointment/availability?staffId=${appointmentData.staff._id}&date=${appointmentData.date}&serviceId=${appointmentData.appointmentTypeId}&locationId=${locationId}`,
-          "GET"
+          "GET",
         );
         setAvailableSlots(slots.slots);
       } else {
@@ -151,26 +151,6 @@ const AppointmentForm = ({
     appointmentData.time,
   ]);
 
-  // 4. Функции за обработка на формите
-
-  const handleSaveClosestSlot = () => {
-    if (closestSlot) {
-      console.log("Saving closest slot:", closestSlot);
-
-      // Backend returns date in DD.MM.YYYY format, convert to YYYY-MM-DD
-      const dateParts = closestSlot.date.split(".");
-      const formattedDate = `${dateParts[2]}-${dateParts[1]}-${dateParts[0]}`;
-
-      const updatedAppointmentData = {
-        ...appointmentData,
-        date: formattedDate,
-        time: closestSlot.startTime,
-      };
-      handleSubmit(updatedAppointmentData);
-      setIsClosestSlotModalOpen(false);
-    }
-  };
-
   const handleUseClosestSlot = () => {
     if (closestSlot) {
       // Backend returns date in DD.MM.YYYY format, convert to YYYY-MM-DD
@@ -196,7 +176,7 @@ const AppointmentForm = ({
   };
 
   const selectedType = appointmentTypes?.find(
-    (type) => type._id === appointmentData.appointmentTypeId
+    (type) => type._id === appointmentData.appointmentTypeId,
   );
 
   const canSubmitBase =
@@ -205,13 +185,14 @@ const AppointmentForm = ({
     !!appointmentData.date &&
     !!appointmentData.time &&
     !!appointmentData.appointmentTypeId &&
-    !!appointmentData.staff._id;
+    !!appointmentData.staff._id &&
+    !!locationId;
 
   const handlePayOnline = async () => {
     if (!canSubmitBase || !selectedType || !businessId) return;
 
     const startISO = new Date(
-      `${appointmentData.date}T${appointmentData.time}`
+      `${appointmentData.date}T${appointmentData.time}`,
     );
     const endISO = new Date(startISO);
     endISO.setMinutes(endISO.getMinutes() + (selectedType.duration || 0));
@@ -227,7 +208,7 @@ const AppointmentForm = ({
         end: endISO.toISOString(),
       },
       notes: appointmentData.notes,
-      location: locationId,
+      locationId: locationId,
     };
 
     try {
@@ -367,7 +348,7 @@ const AppointmentForm = ({
         <div className="p-4 bg-primary/10 rounded-xl border border-primary/20">
           {(() => {
             const selectedType = appointmentTypes?.find(
-              (type) => type._id === appointmentData.appointmentTypeId
+              (type) => type._id === appointmentData.appointmentTypeId,
             );
             return selectedType ? (
               <div className="space-y-2">

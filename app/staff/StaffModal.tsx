@@ -7,10 +7,9 @@ import { LabeledInput } from "@/components/customUIComponents/LabeledInput";
 import { LabeledSelect } from "@/components/customUIComponents/LabeledSelect";
 import { StaffMember } from "./types";
 import { useTranslation } from "react-i18next";
-import { toast } from "sonner";
-import callApi from "../Api/callApi";
 import { MultiSelectCombobox } from "@/components/customUIComponents/MultiSelectCombobox";
 import { Eye, Edit2, Plus } from "lucide-react";
+import { useCreateStaff, useUpdateStaff } from "@/hooks/queries/useStaff";
 
 type StaffModalMode = "view" | "edit" | "create";
 
@@ -44,6 +43,9 @@ export const StaffModal: React.FC<StaffModalProps> = ({
     locationIds: [] as string[],
   });
 
+  const createStaffMutation = useCreateStaff();
+  const updateStaffMutation = useUpdateStaff();
+
   // Reset form when staff changes or modal opens
   useEffect(() => {
     if (open) {
@@ -73,32 +75,25 @@ export const StaffModal: React.FC<StaffModalProps> = ({
     if (mode === "create") {
       try {
         setIsSubmitting(true);
-        const result = await callApi("/api/staff/invite", "POST", formData);
-        onStaffCreated?.(result.staff);
+        const result = await createStaffMutation.mutateAsync(formData);
+        onStaffCreated?.(result.staff || result);
         onOpenChange(false);
-        toast.success(
-          t(
-            "Staff member invited successfully! An email with a temporary password has been sent",
-          ) as string,
-        );
       } catch (error) {
-        toast.error(t("Failed to invite staff member") as string);
+        console.error("Failed to invite staff member:", error);
       } finally {
         setIsSubmitting(false);
       }
     } else if (mode === "edit" && staff) {
       try {
         setIsSubmitting(true);
-        const updatedStaff = await callApi(
-          `/api/staff/${staff._id}`,
-          "PUT",
-          formData,
-        );
+        const updatedStaff = await updateStaffMutation.mutateAsync({
+          id: staff._id,
+          data: formData,
+        });
         onStaffUpdated?.(updatedStaff);
         onOpenChange(false);
-        toast.success(t("Staff member updated successfully") as string);
       } catch (error) {
-        toast.error(t("Failed to update staff member") as string);
+        console.error("Failed to update staff member:", error);
       } finally {
         setIsSubmitting(false);
       }
@@ -268,6 +263,7 @@ export const StaffModal: React.FC<StaffModalProps> = ({
                 }
                 label={t("Email") as string}
                 id="email"
+                disabled={mode !== "create"}
               />
 
               <LabeledInput

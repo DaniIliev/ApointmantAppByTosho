@@ -1,5 +1,8 @@
 "use client";
 
+import { useTranslation } from "react-i18next";
+import { dayKeys, dayLabels, DayKey } from "@/app/schedule/utils";
+
 import { useState, useMemo } from "react";
 import {
   format,
@@ -14,12 +17,10 @@ import {
 import {
   ChevronLeft,
   ChevronRight,
-  X,
   Clock,
   Coffee,
   Home,
   Sun,
-  Edit,
 } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -35,6 +36,7 @@ export default function MobileScheduleCalendar({
   dailyData,
   onEditDay,
 }: MobileScheduleCalendarProps) {
+  const { t } = useTranslation();
   const [currentDate, setCurrentDate] = useState(new Date());
   const [selectedDay, setSelectedDay] = useState<WorkHours | null>(null);
   const [isViewModalOpen, setIsViewModalOpen] = useState(false);
@@ -81,7 +83,8 @@ export default function MobileScheduleCalendar({
   const firstDayOfWeek = getDay(monthStart); // 0 = Sunday
   const paddingDays = Array(firstDayOfWeek).fill(null);
 
-  const daysOfWeek = ["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"];
+  const displayDayKeys = ["sunday", ...dayKeys.filter((k) => k !== "sunday")] as DayKey[];
+  const daysOfWeek = displayDayKeys.map((key) => t(dayLabels[key]));
 
   return (
     <div className="p-2 space-y-2">
@@ -183,7 +186,7 @@ export default function MobileScheduleCalendar({
         label={
           selectedDay
             ? format(selectedDay.date, "EEEE, MMMM d, yyyy")
-            : "Day Details"
+            : t("Day Details")
         }
         width="lg"
       >
@@ -201,12 +204,12 @@ export default function MobileScheduleCalendar({
                 {selectedDay.isDayOff ? (
                   <>
                     <Home className="h-5 w-5" />
-                    <span className="font-semibold">Day Off</span>
+                    <span className="font-semibold">{t("Day Off")}</span>
                   </>
                 ) : (
                   <>
                     <Clock className="h-5 w-5" />
-                    <span className="font-semibold">Working Day</span>
+                    <span className="font-semibold">{t("Working Day")}</span>
                   </>
                 )}
               </div>
@@ -220,7 +223,7 @@ export default function MobileScheduleCalendar({
                     <Clock className="h-5 w-5 text-primary" />
                   </div>
                   <div>
-                    <p className="text-lg text-primary">Work Hours</p>
+                    <p className="text-lg text-primary">{t("Work Hours")}</p>
                     <p className="text-text-primary/40 text-lg font-bold">
                       {selectedDay.workTime.start} - {selectedDay.workTime.end}
                     </p>
@@ -230,20 +233,20 @@ export default function MobileScheduleCalendar({
             )}
 
             {/* Breaks */}
-            {!selectedDay.isDayOff && selectedDay.breaks.length > 0 && (
+            {!selectedDay.isDayOff && (selectedDay.breaks || []).length > 0 && (
               <div className="space-y-2">
                 <div className="text-primary flex items-center gap-2 text-sm font-semibold">
                   <Coffee className="h-4 w-4" />
-                  <span>Breaks ({selectedDay.breaks.length})</span>
+                  <span>{t("Breaks")} ({(selectedDay.breaks || []).length})</span>
                 </div>
                 <div className="space-y-2">
-                  {selectedDay.breaks.map((breakTime, index) => (
+                  {(selectedDay.breaks || []).map((breakTime, index) => (
                     <Card
                       key={index}
                       className="p-3 text-text-primary/40 bg-white dark:bg-primary/10 border-primary/20"
                     >
                       <p className="text-sm font-medium">
-                        Break {index + 1}: {breakTime.start} - {breakTime.end}
+                        {t("Break")} {index + 1}: {breakTime.start} - {breakTime.end}
                       </p>
                     </Card>
                   ))}
@@ -257,10 +260,10 @@ export default function MobileScheduleCalendar({
                 <div className="flex flex-col items-center justify-center gap-3 text-center">
                   <Home className="h-12 w-12 text-red-500" />
                   <p className="text-lg font-semibold text-red-700 dark:text-red-400">
-                    This is a day off
+                    {t("This is a day off")}
                   </p>
                   <p className="text-sm text-muted-foreground">
-                    No work scheduled for this day
+                    {t("No work scheduled for this day")}
                   </p>
                 </div>
               </Card>
@@ -269,7 +272,7 @@ export default function MobileScheduleCalendar({
             {/* Edit Button */}
             <div className="flex justify-center">
               <Button onClick={handleEditFromModal} iconType="edit" size="lg">
-                Edit Schedule
+                {t("Edit Schedule")}
               </Button>
             </div>
           </div>

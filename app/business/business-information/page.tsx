@@ -13,7 +13,6 @@ import { getBusinessCategories } from "@/Global/Types/types";
 import { Upload, Info, Contact, MapPin } from "lucide-react";
 import React, { useEffect, useState, useMemo } from "react";
 import { useTranslation } from "react-i18next";
-import { toast } from "sonner";
 
 export interface BusinessInformation {
   category: string;
@@ -102,7 +101,6 @@ function BusinessInformationPageContent() {
         if (data.businessImageUrl) setImagePreview(data.businessImageUrl);
       } catch (error) {
         console.error("Error fetching business info:", error);
-        toast.error(t("Could not load business information."));
       } finally {
         setIsLoading(false);
       }
@@ -162,12 +160,8 @@ function BusinessInformationPageContent() {
       setImageFile(null);
       if (updatedData.businessImageUrl)
         setImagePreview(updatedData.businessImageUrl);
-      toast.success(t("Business information saved successfully!"));
     } catch (error: any) {
       console.error("Error saving business info:", error);
-      toast.error(
-        t(`Error: ${error.message || "Could not save information."}`),
-      );
     } finally {
       setIsSaving(false);
     }
@@ -257,6 +251,7 @@ function BusinessInformationPageContent() {
                   onChange={(e) => handleInputChange("aboutUs", e.target.value)}
                   placeholder={t("Tell customers about your business...")}
                   rows={3}
+                  max={6}
                 />
               </div>
             </Card>

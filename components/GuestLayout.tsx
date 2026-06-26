@@ -31,7 +31,16 @@ export default function GuestLayout({
         <TopNav onToggleLeftNav={toggleLeftNav} isLeftNavOpen={isLeftNavOpen} />
       </div>
       <div className="flex flex-1 pt-12.5 transition-all duration-300">
-        <LeftNav isOpen={isLeftNavOpen} />
+        <LeftNav isOpen={isLeftNavOpen} onClose={() => setIsLeftNavOpen(false)} />
+
+        {/* Mobile & Tablet Backdrop */}
+        {isLeftNavOpen && (
+          <div
+            className="fixed inset-0 bg-black/40 backdrop-blur-sm z-30 lg:hidden transition-opacity duration-300"
+            onClick={() => setIsLeftNavOpen(false)}
+            aria-hidden="true"
+          />
+        )}
 
         <main
           className={`
@@ -66,7 +75,9 @@ export default function GuestLayout({
                   ? RIGHT_NAV_OPEN_WIDTH_CLASS
                   : RIGHT_NAV_CLOSED_WIDTH_CLASS
               }`}
-      ></div>
+      >
+        <Footer />
+      </div>
     </div>
   );
 }

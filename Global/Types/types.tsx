@@ -5,6 +5,27 @@ export interface SelectOptionsAppointmentType {
   price?: number;
 }
 
+export interface Alert {
+  _id: string;
+  isRead: boolean;
+  messageKey: string;
+  params?: any;
+  createdAt?: string;
+  updatedAt?: string;
+  type: string;
+  appointment?: AppointmentInfo;
+}
+interface AppointmentInfo {
+  _id: string;
+  clientName: string;
+  clientPhone?: string;
+  email?: string;
+  appointmentTime: { start: string; end: string };
+  service?: { _id: string; name: string } | string;
+  status?: string;
+  staff?: string;
+}
+
 export type PaymentOption = "cash" | "card" | "cash_and_card";
 
 export type AppointmentStatus =
@@ -36,8 +57,15 @@ export interface Appointment {
   notes?: string;
   staff: {
     _id: string;
-    name: string;
+    firstName: string;
+    lastName: string;
   };
+  location?: {
+    _id: string;
+    name: string;
+    address: string;
+  };
+  businessName?: string; // Added for easier access in cancellation page
   paymentStatus?:
     | "not_required"
     | "pending"
@@ -188,23 +216,26 @@ export interface WorkHour {
   breaks?: TimeRange[];
 }
 
+export interface WeeklyWorkingDay {
+  isDayOff: boolean;
+  workTime: TimeRange;
+  breaks?: TimeRange[];
+}
+
+export interface WeeklyWorkingHours {
+  monday: WeeklyWorkingDay;
+  tuesday: WeeklyWorkingDay;
+  wednesday: WeeklyWorkingDay;
+  thursday: WeeklyWorkingDay;
+  friday: WeeklyWorkingDay;
+  saturday: WeeklyWorkingDay;
+  sunday: WeeklyWorkingDay;
+}
+
 export type LocationsOpeningHours = Record<string, LocationOpeningHours>;
 
-export interface LocationOpeningHours {
+export interface LocationOpeningHours extends WeeklyWorkingHours {
   _id?: string;
-  workTime: TimeRange;
-  isDayOff: {
-    monday: boolean;
-    tuesday: boolean;
-    wednesday: boolean;
-    thursday: boolean;
-    friday: boolean;
-    saturday: boolean;
-    sunday: boolean;
-  };
-  break1: TimeRange;
-  break2: TimeRange;
-  break3: TimeRange;
 }
 
 export interface DailySchedule {
@@ -216,19 +247,6 @@ export interface StaffSchedule {
   _id?: string;
   startDate: string;
   endDate: string;
-  workTime: TimeRange;
-  isDayOff: {
-    monday: boolean;
-    tuesday: boolean;
-    wednesday: boolean;
-    thursday: boolean;
-    friday: boolean;
-    saturday: boolean;
-    sunday: boolean;
-  };
-  break1?: TimeRange;
-  break2?: TimeRange;
-  break3?: TimeRange;
   staff?: string; // Optional for location schedules
   location: string;
   business: string;
@@ -452,3 +470,101 @@ export const getCategoryOptions = (
     parentCategory: "OTHER SERVICES",
   },
 ];
+
+// ─── Chat Types ───────────────────────────────────────────────────
+
+export type ChannelType =
+  | "admin_support"
+  | "location"
+  | "business"
+  | "direct"
+  | "group"
+  | "client_location";
+
+export interface ChatMember {
+  user: {
+    _id: string;
+    firstName: string;
+    lastName: string;
+    profilePictureUrl?: string;
+    email?: string;
+    role?: string;
+  };
+  role: "owner" | "admin" | "member";
+  isBlocked: boolean;
+  isMuted: boolean;
+  joinedAt?: string;
+  lastReadAt?: string;
+  blockedAt?: string;
+  blockedBy?: string;
+}
+
+export interface LastMessage {
+  text?: string;
+  sender?: string;
+  senderName?: string;
+  sentAt?: string;
+  type?: "text" | "image" | "file" | "voice" | "system";
+}
+
+export interface ChatChannel {
+  _id: string;
+  type: ChannelType;
+  name?: string;
+  description?: string;
+  avatar?: string;
+  businessId?: any;
+  locationId?: string;
+  members: ChatMember[];
+  createdBy?: string;
+  isArchived?: boolean;
+  lastMessage?: LastMessage;
+  unreadCount?: number;
+  isMuted?: boolean;
+  isBlocked?: boolean;
+  inviteCode?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface ChatAttachment {
+  url: string;
+  type: "image" | "file" | "voice";
+  name?: string;
+  size?: number;
+  duration?: number;
+  mimeType?: string;
+}
+
+export interface ChatReaction {
+  emoji: string;
+  user: string;
+}
+
+export interface ChatMessage {
+  _id: string;
+  channel: string;
+  sender: {
+    _id: string;
+    firstName: string;
+    lastName: string;
+    profilePictureUrl?: string;
+    email?: string;
+  };
+  type: "text" | "image" | "file" | "voice" | "system";
+  text?: string;
+  attachments?: ChatAttachment[];
+  replyTo?: ChatMessage;
+  isEdited?: boolean;
+  editedAt?: string;
+  isDeleted?: boolean;
+  reactions?: ChatReaction[];
+  createdAt: string;
+  updatedAt?: string;
+}
+
+export interface UnreadCounts {
+  total: number;
+  channels: Record<string, number>;
+}
+

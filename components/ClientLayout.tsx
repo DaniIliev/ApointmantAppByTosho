@@ -6,6 +6,7 @@ import TopNav from "@/components/navigation/top-nav";
 import LeftNav from "@/components/navigation/left-nav";
 import RightNavigation from "./navigation/right-nav";
 import { usePaddingControl } from "@/context/PaddingContext";
+import ProfilePicturePrompt from "@/components/auth/ProfilePicturePrompt";
 
 export const LEFT_NAV_OPEN_WIDTH_CLASS = "ml-0 lg:ml-64";
 export const LEFT_NAV_CLOSED_WIDTH_CLASS = "ml-0 lg:ml-20";
@@ -34,10 +35,10 @@ export default function ClientLayout({
           <LeftNav isOpen={isLeftNavOpen} onClose={() => setIsLeftNavOpen(false)} />
         )}
 
-        {/* Mobile Backdrop */}
+        {/* Mobile & Tablet Backdrop */}
         {isLeftNavOpen && !hideLeftNav && (
           <div
-            className="fixed inset-0 bg-black/40 backdrop-blur-sm z-30 md:hidden transition-opacity duration-300"
+            className="fixed inset-0 bg-black/40 backdrop-blur-sm z-30 lg:hidden transition-opacity duration-300"
             onClick={() => setIsLeftNavOpen(false)}
             aria-hidden="true"
           />
@@ -61,6 +62,7 @@ export default function ClientLayout({
         </main>
         {!hideLeftNav && <RightNavigation />}
       </div>
+      <ProfilePicturePrompt />
     </div>
   );
 }

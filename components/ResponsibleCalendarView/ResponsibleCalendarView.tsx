@@ -148,10 +148,12 @@ export function CalendarAppointments({
       const dateKey = format(selectedDate, "dd MMMM yyyy г.", { locale: bg });
       const element = appointmentRefs.current[dateKey];
       if (element) {
-        element.scrollIntoView({
-          behavior: "smooth",
-          block: "start",
-        });
+        if (containerRef.current) {
+          containerRef.current.scrollTo({
+            top: element.offsetTop,
+            behavior: "smooth",
+          });
+        }
       }
     }
   }, [selectedDate]);
@@ -301,7 +303,7 @@ export function CalendarAppointments({
 
       {/* Списък със срещи */}
       <div
-        className="flex-1 overflow-y-auto space-y-4 p-4 -mt-4"
+        className="flex-1 overflow-y-auto space-y-4 p-4 -mt-4 relative"
         ref={containerRef}
       >
         {Object.keys(groupedAppointments).length > 0 ? (
