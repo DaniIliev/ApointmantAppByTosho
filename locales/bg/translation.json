@@ -1809,5 +1809,12 @@
   "All staff": "Целият персонал",
   "Booking Dynamics": "Динамика на резервациите",
   "vs": "спрямо",
-  "Here you see the most important information for the day: quick actions, upcoming appointments and current progress.": "Тук виждате най-важната информация за деня: бързи действия, предстоящи срещи и текущ напредък."
+  "Here you see the most important information for the day: quick actions, upcoming appointments and current progress.": "Тук виждате най-важната информация за деня: бързи действия, предстоящи срещи и текущ напредък.",
+  "Profile Picture Found": "Намерена профилна снимка",
+  "We found your profile picture from your linked social account. Would you like to set it as your AppointDI profile picture?": "Открихме вашата профилна снимка от свързания социален акаунт. Искате ли да я зададете като ваша профилна снимка в AppointDI?",
+  "Not Now": "Не сега",
+  "Use Picture": "Използвай снимката",
+  "Updating...": "Запазване...",
+  "Profile picture updated successfully": "Профилната снимка е запазена успешно",
+  "Failed to update profile picture": "Възникна грешка при запазване на снимката"
 }

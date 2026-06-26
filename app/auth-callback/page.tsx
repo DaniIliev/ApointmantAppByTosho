@@ -22,6 +22,19 @@ function AuthCallbackPageContent() {
 
   useEffect(() => {
     const token = searchParams.get("token");
+    const userDataStr = searchParams.get("user");
+
+    // Extract oauthPicture if available
+    if (userDataStr) {
+      try {
+        const parsedData = JSON.parse(decodeURIComponent(userDataStr));
+        if (parsedData.oauthPicture) {
+          sessionStorage.setItem("pendingOauthPicture", parsedData.oauthPicture);
+        }
+      } catch (e) {
+        console.error("Failed to parse userData:", e);
+      }
+    }
 
     // Prevent duplicate processing using sessionStorage (survives React Strict Mode re-mounts)
     const cacheKey = `auth_processed_${token}`;

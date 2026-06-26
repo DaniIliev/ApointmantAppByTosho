@@ -1778,5 +1778,12 @@
   "All staff": "Gesamtes Personal",
   "Booking Dynamics": "Buchungsdynamik",
   "vs": "vs",
-  "Here you see the most important information for the day: quick actions, upcoming appointments and current progress.": "Hier sehen Sie die wichtigsten Informationen des Tages: Schnellaktionen, anstehende Termine und aktueller Fortschritt."
+  "Here you see the most important information for the day: quick actions, upcoming appointments and current progress.": "Hier sehen Sie die wichtigsten Informationen des Tages: Schnellaktionen, anstehende Termine und aktueller Fortschritt.",
+  "Profile Picture Found": "Profilbild gefunden",
+  "We found your profile picture from your linked social account. Would you like to set it as your AppointDI profile picture?": "Wir haben Ihr Profilbild von Ihrem verknüpften Social-Media-Konto gefunden. Möchten Sie es als Ihr AppointDI-Profilbild festlegen?",
+  "Not Now": "Jetzt nicht",
+  "Use Picture": "Bild verwenden",
+  "Updating...": "Wird aktualisiert...",
+  "Profile picture updated successfully": "Profilbild erfolgreich aktualisiert",
+  "Failed to update profile picture": "Profilbild konnte nicht aktualisiert werden"
 }

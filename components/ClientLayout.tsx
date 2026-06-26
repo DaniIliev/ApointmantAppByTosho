@@ -6,6 +6,7 @@ import TopNav from "@/components/navigation/top-nav";
 import LeftNav from "@/components/navigation/left-nav";
 import RightNavigation from "./navigation/right-nav";
 import { usePaddingControl } from "@/context/PaddingContext";
+import ProfilePicturePrompt from "@/components/auth/ProfilePicturePrompt";
 
 export const LEFT_NAV_OPEN_WIDTH_CLASS = "ml-0 lg:ml-64";
 export const LEFT_NAV_CLOSED_WIDTH_CLASS = "ml-0 lg:ml-20";
@@ -61,6 +62,7 @@ export default function ClientLayout({
         </main>
         {!hideLeftNav && <RightNavigation />}
       </div>
+      <ProfilePicturePrompt />
     </div>
   );
 }
