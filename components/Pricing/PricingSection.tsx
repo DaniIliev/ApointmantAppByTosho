@@ -10,6 +10,7 @@ import { useTranslation } from "react-i18next";
 import { Badge, Check, Loader2 } from "lucide-react";
 import { useAuthContext } from "@/context/AuthContext";
 import callApi from "@/app/Api/callApi";
+import { useRouter } from "next/navigation";
 import { Button } from "../ui/button";
 import { ScrollReveal } from "../scroll-reveal";
 import { Card, CardContent } from "../ui/card";
@@ -41,6 +42,7 @@ interface PriceData {
 const PricingSection = () => {
   const { user } = useAuthContext();
   const { t } = useTranslation();
+  const router = useRouter();
   const [loadingPlan, setLoadingPlan] = useState<string | null>(null);
   const [billingCycle, setBillingCycle] = useState<"monthly" | "annual">(
     "monthly",
@@ -65,6 +67,7 @@ const PricingSection = () => {
       console.log("user", user);
       if (!user?.businessId) {
         console.error(t("Error: businessId missing. Please log in."));
+        router.push("/login?redirect=/for-business");
         return;
       }
 
