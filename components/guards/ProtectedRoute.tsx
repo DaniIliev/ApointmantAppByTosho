@@ -72,11 +72,9 @@ export default function ProtectedRoute({
                 {t("Access Denied")}
               </h2>
               <p className="text-muted-foreground">
-                {t(
-                  `This page is only available to ${requiredRoles
-                    .join(", ")
-                    .replace(/,([^,]*)$/, " and$1")} accounts.`,
-                )}
+                {t("This page is only available to {{roles}} accounts.", {
+                  roles: requiredRoles.join(", ").replace(/,([^,]*)$/, " and$1")
+                })}
               </p>
               <p className="text-sm text-muted-foreground">
                 {t("Your account type:")} <strong>{user.role}</strong>
@@ -158,13 +156,10 @@ export default function ProtectedRoute({
                 {t("Upgrade Required")}
               </h2>
               <p className="text-muted-foreground">
-                {t(
-                  `${
-                    featureName || "This feature"
-                  } is available on ${requiredPlan
-                    .join(", ")
-                    .replace(/,([^,]*)$/, " and$1")} plans.`,
-                )}
+                {t("{{featureName}} is available on {{plans}} plans.", {
+                  featureName: featureName || "This feature",
+                  plans: requiredPlan.join(", ").replace(/,([^,]*)$/, " and$1")
+                })}
               </p>
               <div className="bg-muted/50 rounded-lg space-y-2">
                 <p className="text-sm font-medium">
