@@ -14,8 +14,8 @@ const enFilePath = path.join(localesDir, "en", "translation.json");
 const bgFilePath = path.join(localesDir, "bg", "translation.json");
 const deFilePath = path.join(localesDir, "de", "translation.json");
 
-// Regex to find t("...") or t('...') patterns
-const translationRegex = /t\(['"`]([^'"`]+)['"`]\)/g;
+// Regex to find t("...") or t('...') or t(`...`) patterns, ensuring it matches exactly the t() function and not functions ending in t like set() or emit()
+const translationRegex = /(^|[^a-zA-Z0-9_])t\(\s*(['"`])((?:(?!\2)[^\\]|\\.)*)\2\s*[,)]/g;
 
 // Load existing translations
 function loadTranslations(filePath) {
@@ -85,7 +85,8 @@ function extractKeys() {
       let match;
 
       while ((match = translationRegex.exec(content)) !== null) {
-        keys.add(match[1]);
+        // match[1] is the prefix, match[2] is the quote used, match[3] is the string content
+        keys.add(match[3]);
       }
     } catch (error) {
       console.error(`Error reading file ${filePath}:`, error.message);
@@ -100,10 +101,12 @@ function updateTranslationFile(filePath, extractedKeys) {
   const translations = loadTranslations(filePath);
   let updated = false;
 
-  // Add missing keys with empty value
+  const isEnglish = filePath.includes(path.join("locales", "en"));
+
+  // Add missing keys with empty value (or key itself for English)
   for (const key of extractedKeys) {
     if (!(key in translations)) {
-      translations[key] = "";
+      translations[key] = isEnglish ? key : "";
       updated = true;
     }
   }
