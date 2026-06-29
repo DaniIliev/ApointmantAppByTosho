@@ -38,6 +38,7 @@ import { CustomTooltip } from "../customUIComponents/CustomTooltip";
 import { getStatusProps, StatusChip } from "../customUIComponents/StatusChip";
 import { dayTitles } from "@/app/schedule/utils";
 import { LabeledInput } from "../customUIComponents/LabeledInput";
+import { useAuthContext } from "@/context/AuthContext";
 
 const cn = (...classes: (string | boolean | undefined | null)[]): string =>
   classes.filter(Boolean).join(" ");
@@ -52,6 +53,7 @@ const AppointmentCard: React.FC<AppointmentCardProps> = ({
   onClick,
 }) => {
   const { t } = useTranslation();
+  const { user } = useAuthContext();
   const statusProps = getStatusProps(appointment.status as AppointmentStatus);
   return (
     <div
@@ -64,7 +66,7 @@ const AppointmentCard: React.FC<AppointmentCardProps> = ({
         <h3 className="font-semibold text-sm flex items-center space-x-1.5">
           <User className="h-3.5 w-3.5 text-gray-500 dark:text-gray-400" />
           <span className="truncate max-w-[150px]">
-            {appointment.clientName}
+            {user?.role === "personal" ? appointment.businessName : appointment.clientName}
           </span>
         </h3>
         <div className="flex-shrink-0">
@@ -107,6 +109,7 @@ interface GroupedAppointmentAccordionProps {
 const GroupedAppointmentAccordion: React.FC<
   GroupedAppointmentAccordionProps
 > = ({ group, onSelectAppointment, openDetailsModal }) => {
+  const { user } = useAuthContext();
   const [isExpanded, setIsExpanded] = React.useState(false);
   const mainApt = group.mainAppointment;
 
@@ -168,7 +171,7 @@ const GroupedAppointmentAccordion: React.FC<
               <div className="flex items-center space-x-2 overflow-hidden">
                 <User className="h-3.5 w-3.5 text-gray-400 shrink-0" />
                 <span className="text-sm truncate font-medium">
-                  {apt.clientName}
+                  {user?.role === "personal" ? apt.businessName : apt.clientName}
                 </span>
                 {apt.paymentStatus === "captured" && (
                   <CreditCard className="h-3 w-3 text-green-500 shrink-0" />
@@ -385,6 +388,7 @@ const MobileCalendar = ({
   openDetailsModal,
 }: MobileCalendarProps) => {
   const { t } = useTranslation();
+  const { user } = useAuthContext();
   const [selectedDate, setSelectedDate] = React.useState<Date>(new Date());
   const [searchQuery, setSearchQuery] = React.useState<string>("");
   const [isMonthlyView, setIsMonthlyView] = React.useState<boolean>(false);
@@ -602,9 +606,10 @@ const MobileCalendar = ({
             });
             const appointmentsForDate: Appointment[] =
               groupedAppointments[dateKey] || [];
-            const filteredAppointments = appointmentsForDate.filter((apt) =>
-              apt.clientName.toLowerCase().includes(searchQuery.toLowerCase()),
-            );
+            const filteredAppointments = appointmentsForDate.filter((apt) => {
+              const nameToSearch = user?.role === "personal" ? apt.businessName : apt.clientName;
+              return (nameToSearch || "").toLowerCase().includes(searchQuery.toLowerCase());
+            });
 
             return (
               <div key={dateKey}>

@@ -48,8 +48,8 @@ export default function AppointmentsTable({
 
   const columns: Column<any>[] = [
     {
-      accessorKey: "clientName",
-      header: t("Client Name"),
+      accessorKey: user?.role === "personal" ? "businessName" : "clientName",
+      header: user?.role === "personal" ? t("Business Name") : t("Client Name"),
       cell: ({ row }: CellProps<any>) => {
         const item = row.original;
         if (item.isGroup) {
@@ -64,9 +64,10 @@ export default function AppointmentsTable({
             </div>
           );
         }
+        const displayName = user?.role === "personal" ? item.businessName : item.clientName;
         return (
           <div className="flex items-center gap-2">
-            <h3 className="font-semibold text-foreground">{item.clientName}</h3>
+            <h3 className="font-semibold text-foreground">{displayName || t("Appointment")}</h3>
             {(item.paymentStatus === "captured" ||
               item.paymentStatus === "authorized" ||
               item.serviceName === "card") && (
@@ -213,11 +214,13 @@ export default function AppointmentsTable({
               tooltipText={t("View Details")}
               icon={<Eye />}
             />
-            <CustomTooltip
-              onClick={() => onOpenEditModal(row.original)}
-              tooltipText={t("Edit")}
-              icon={<Pencil />}
-            />
+            {user?.role !== "personal" && (
+              <CustomTooltip
+                onClick={() => onOpenEditModal(row.original)}
+                tooltipText={t("Edit")}
+                icon={<Pencil />}
+              />
+            )}
             {user && (user.role === "business" || user.role == "staff") && (
               <CustomTooltip
                 onClick={() => onDeleteAppointment(row.original._id)}
@@ -295,11 +298,13 @@ export default function AppointmentsTable({
                           tooltipText={t("View")}
                           icon={<Eye size={14} />}
                         />
-                        <CustomTooltip
-                          onClick={() => onOpenEditModal(participant)}
-                          tooltipText={t("Edit")}
-                          icon={<Pencil size={14} />}
-                        />
+                        {user?.role !== "personal" && (
+                          <CustomTooltip
+                            onClick={() => onOpenEditModal(participant)}
+                            tooltipText={t("Edit")}
+                            icon={<Pencil size={14} />}
+                          />
+                        )}
                         {user &&
                           (user.role === "business" ||
                             user.role == "staff") && (
@@ -375,11 +380,13 @@ export default function AppointmentsTable({
                     tooltipText={t("View")}
                     icon={<Eye size={16} />}
                   />
-                  <CustomTooltip
-                    onClick={() => onOpenEditModal(participant)}
-                    tooltipText={t("Edit")}
-                    icon={<Pencil size={16} />}
-                  />
+                  {user?.role !== "personal" && (
+                    <CustomTooltip
+                      onClick={() => onOpenEditModal(participant)}
+                      tooltipText={t("Edit")}
+                      icon={<Pencil size={16} />}
+                    />
+                  )}
                   {user &&
                     (user.role === "business" || user.role == "staff") && (
                       <CustomTooltip

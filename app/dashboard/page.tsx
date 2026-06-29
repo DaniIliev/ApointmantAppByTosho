@@ -1,5 +1,6 @@
 "use client";
 import { useEffect, useState, useCallback } from "react";
+import { useRouter } from "next/navigation";
 import {
   ArrowRight,
   BriefcaseBusiness,
@@ -57,6 +58,7 @@ import { useLocationContext } from "@/context/LocationContext";
 function DashboardPageContent() {
   const { t } = useTranslation();
   const { user } = useAuthContext();
+  const router = useRouter();
   const { selectedLocation } = useLocationContext();
   const [isLoading, setIsLoading] = useState(true);
 
@@ -93,6 +95,9 @@ function DashboardPageContent() {
   const [activeTab, setActiveTab] = useState("calendar");
 
   const fetchServices = useCallback(async () => {
+    if (user?.role === "personal") {
+      return;
+    }
     try {
       const services: AppointmentType[] = await callApi(
         `/api/service?businessId=${user?.businessId}`,
@@ -109,7 +114,7 @@ function DashboardPageContent() {
     } catch (error) {
       console.error("Failed to fetch services:", error);
     }
-  }, [user?.businessId]);
+  }, [user?.businessId, user?.role]);
 
   const getDashboardData = useCallback(async () => {
     const data = await callApi("/api/appointment/dashboard", "GET");
@@ -120,7 +125,10 @@ function DashboardPageContent() {
     const loadData = async () => {
       setIsLoading(true);
       try {
-        await Promise.all([getDashboardData(), fetchServices()]);
+        await Promise.all([
+          getDashboardData(),
+          ...(user?.role !== "personal" ? [fetchServices()] : []),
+        ]);
       } catch (error) {
         console.error("Error loading dashboard data:", error);
       } finally {
@@ -128,26 +136,28 @@ function DashboardPageContent() {
       }
     };
     loadData();
-  }, [fetchServices, getDashboardData, selectedLocation?._id]);
+  }, [fetchServices, getDashboardData, selectedLocation?._id, user?.role]);
 
   // Global auto-completion now handled by AutoCompletePastAppointments component
 
   useEffect(() => {
     setPageTitle(t("Dashboard"));
-    setExtraRightNavMenu(
-      <div className="flex items-center gap-2">
-        <CreateNewDashboardMenu
-          onOpenModal={() => setIsCreateChoiceModalOpen(true)}
-        />
-      </div>,
-    );
-    setIsRightNavVisible(true);
+    if (user?.role !== "personal") {
+      setExtraRightNavMenu(
+        <div className="flex items-center gap-2">
+          <CreateNewDashboardMenu
+            onOpenModal={() => setIsCreateChoiceModalOpen(true)}
+          />
+        </div>,
+      );
+      setIsRightNavVisible(true);
+    }
     return () => {
       setPageTitle(null);
       setExtraRightNavMenu(null);
       setIsRightNavVisible(false);
     };
-  }, [setPageTitle, setExtraRightNavMenu, setIsRightNavVisible, t]);
+  }, [setPageTitle, setExtraRightNavMenu, setIsRightNavVisible, t, user?.role]);
 
   const openViewModal = (appointment: Appointment) => {
     setSelectedAppointment(appointment);
@@ -193,6 +203,11 @@ function DashboardPageContent() {
         console.error("Failed to delete appointment:", error);
       }
     })();
+  };
+
+  const handleCancelAppointment = () => {
+    if (!selectedAppointment) return;
+    router.push(`/dashboard/appointments/${selectedAppointment._id}/cancel`);
   };
 
   const handleCreateAppointment = async (
@@ -356,6 +371,7 @@ function DashboardPageContent() {
           <ViewDetails
             handleEditAppointment={handleEditAppointment}
             handleDeleteAppointment={handleDeleteAppointment}
+            handleCancelAppointment={handleCancelAppointment}
             selectedAppointment={selectedAppointment}
           />
         )}
@@ -469,7 +485,7 @@ function DashboardPageContent() {
 
 export default function DashboardPage() {
   return (
-    <ProtectedRoute requiredRoles={["business", "staff", "manager"]}>
+    <ProtectedRoute requiredRoles={["business", "staff", "manager", "personal"]}>
       <DashboardPageContent />
     </ProtectedRoute>
   );

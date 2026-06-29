@@ -160,7 +160,7 @@ export const ROUTE_PERMISSIONS: RoutePermission[] = [
   // Business owner only routes
   {
     path: "/dashboard",
-    allowedRoles: ["business", "staff", "manager"],
+    allowedRoles: ["business", "staff", "manager", "personal"],
     requiresAuth: true,
   },
   {
@@ -185,7 +185,7 @@ export const ROUTE_PERMISSIONS: RoutePermission[] = [
   },
   {
     path: "/performance",
-    allowedRoles: ["business", "staff", "manager"],
+    allowedRoles: ["business", "staff", "manager", "personal"],
     requiresAuth: true,
     requiredFeature: "analytics",
   },
@@ -259,6 +259,7 @@ export function hasRouteAccess(
   }
   // Check plan requirement
   if (
+    userRole !== "personal" &&
     routePermission.requiredPlan &&
     userPlan &&
     !routePermission.requiredPlan.includes(userPlan)
@@ -267,7 +268,7 @@ export function hasRouteAccess(
   }
 
   // Check feature requirement
-  if (routePermission.requiredFeature && userPlan) {
+  if (userRole !== "personal" && routePermission.requiredFeature && userPlan) {
     const planLimits = PLAN_LIMITS[userPlan];
     if (!planLimits.features[routePermission.requiredFeature]) {
       return { allowed: false, reason: "feature_not_available" };

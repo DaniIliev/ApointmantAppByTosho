@@ -313,6 +313,13 @@ export default function LeftNav({ isOpen, onClose }: LeftNavProps) {
             icon: LayoutList,
           },
         ]
+      : user?.role === "personal"
+      ? [
+          { href: "/home", label: t("Home"), icon: House },
+          { href: "/dashboard", label: t("Dashboard"), icon: LayoutDashboard },
+          { href: "/performance", label: t("Performance"), icon: BarChart3 },
+          { href: "/chat", label: t("Messages"), icon: MessageCircle },
+        ]
       : [
           // { href: "/home", label: t("For Clients"), icon: Users },
           { href: "/for-business", label: t("For Business"), icon: Briefcase },

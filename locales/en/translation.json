@@ -1853,5 +1853,15 @@
   "Hi! I'd like to book an appointment for a haircut and color this Saturday.": "Hi! I'd like to book an appointment for a haircut and color this Saturday.",
   "I'll be 10 minutes late for my first appointment. Sorry!": "I'll be 10 minutes late for my first appointment. Sorry!",
   "This page is only available to {{roles}} accounts.": "This page is only available to {{roles}} accounts.",
-  "{{featureName}} is available on {{plans}} plans.": "{{featureName}} is available on {{plans}} plans."
+  "{{featureName}} is available on {{plans}} plans.": "{{featureName}} is available on {{plans}} plans.",
+  "Appointment": "Appointment",
+  "Staff Phone": "Staff Phone",
+  "View and manage your appointments": "View and manage your appointments",
+  "Chat with businesses": "Chat with businesses",
+  "Update your profile info": "Update your profile info",
+  "Appointments Dynamics": "Appointments Dynamics",
+  "Spent Momentum": "Spent Momentum",
+  "You can book new appointments through business pages.": "You can book new appointments through business pages.",
+  "No History Yet": "No History Yet",
+  "Once you book and complete appointments, your performance and spending charts will appear here.": "Once you book and complete appointments, your performance and spending charts will appear here."
 }

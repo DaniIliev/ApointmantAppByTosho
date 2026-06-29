@@ -19,6 +19,7 @@ import {
   MapPinHouse,
 } from "lucide-react";
 import { Appointment } from "@/Global/Types/types";
+import ProtectedRoute from "@/components/guards/ProtectedRoute";
 
 function CancelAppointmentPageContent() {
   const { t } = useTranslation();
@@ -109,7 +110,7 @@ function CancelAppointmentPageContent() {
   }
 
   return (
-    <div className="container mx-auto max-w-4xl px-4 py-8">
+    <div className="">
       {/* Appointment Details Card */}
       <div className="bg-card border border-border rounded-xl shadow-lg p-6 md:p-8 mb-6">
         <h2 className="text-2xl font-semibold mb-6 text-foreground">
@@ -198,6 +199,19 @@ function CancelAppointmentPageContent() {
             </div>
           </div>
 
+          {/* Staff Phone */}
+          {appointment.staff?.phone && (
+            <div className="flex items-start gap-3">
+              <Phone className="h-5 w-5 mt-0.5 text-primary flex-shrink-0" />
+              <div>
+                <p className="text-sm text-muted-foreground">{t("Staff Phone")}</p>
+                <p className="font-medium text-foreground">
+                  {appointment.staff.phone}
+                </p>
+              </div>
+            </div>
+          )}
+
           {/* Business */}
           <div className="flex items-start gap-3">
             <FileText className="h-5 w-5 mt-0.5 text-primary flex-shrink-0" />
@@ -236,8 +250,9 @@ function CancelAppointmentPageContent() {
             //   variant="destructive"
             onClick={handleCancelAppointment}
             disabled={isCancelling}
-            className="sm:w-auto w-full bg-red-700 text-text-primary hover:bg-red-600"
+            className="sm:w-auto w-full bg-red-500 text-text-primary hover:bg-red-600"
             color="red"
+            iconType="cancel"
           >
             {isCancelling ? t("Cancelling...") : t("Yes, Cancel Appointment")}
           </Button>
@@ -248,5 +263,9 @@ function CancelAppointmentPageContent() {
 }
 
 export default function CancelAppointmentPage() {
-  return <CancelAppointmentPageContent />;
+  return (
+    <ProtectedRoute requiredRoles={["business", "staff", "manager", "personal"]}>
+      <CancelAppointmentPageContent />
+    </ProtectedRoute>
+  );
 }

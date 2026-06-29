@@ -18,20 +18,31 @@ import { StatusChip } from "@/components/customUIComponents/StatusChip";
 interface ViewDetailsProps {
   handleEditAppointment?: () => void;
   handleDeleteAppointment?: () => void;
+  handleCancelAppointment?: () => void;
   selectedAppointment: Appointment;
 }
 
 const ViewDetails = ({
   handleEditAppointment,
   handleDeleteAppointment,
+  handleCancelAppointment,
   selectedAppointment,
 }: ViewDetailsProps) => {
   const { t } = useTranslation();
   const { user } = useAuthContext();
   const isWorkBlock = selectedAppointment.kind === "work_block";
-  const displayTitle = isWorkBlock
-    ? selectedAppointment.title || selectedAppointment.clientName
-    : selectedAppointment.clientName;
+  const displayTitle = user?.role === "personal"
+    ? selectedAppointment.businessName || t("Appointment")
+    : isWorkBlock
+      ? selectedAppointment.title || selectedAppointment.clientName
+      : selectedAppointment.clientName;
+  const contactEmail = user?.role === "personal"
+    ? (selectedAppointment as any).businessEmail || selectedAppointment.email
+    : selectedAppointment.email;
+  const contactPhone = user?.role === "personal"
+    ? (selectedAppointment as any).businessPhone || selectedAppointment.clientPhone
+    : selectedAppointment.clientPhone;
+
   return (
     <>
       <div className="flex items-center justify-between mb-3">
@@ -45,12 +56,12 @@ const ViewDetails = ({
             <>
               <div className="flex items-center gap-3">
                 <Mail className="h-5 w-5 text-primary" />
-                <span>{selectedAppointment.email}</span>
+                <span>{contactEmail}</span>
               </div>
 
               <div className="flex items-center gap-3">
                 <Phone className="h-5 w-5 text-primary" />
-                <span>{selectedAppointment.clientPhone}</span>
+                <span>{contactPhone}</span>
               </div>
             </>
           )}
@@ -147,9 +158,10 @@ const ViewDetails = ({
           </p>
         </div>
       )}
-      {handleEditAppointment && handleDeleteAppointment && !isWorkBlock && (
+      {((handleEditAppointment && handleDeleteAppointment && !isWorkBlock) ||
+        (selectedAppointment.status !== "cancelled" && handleCancelAppointment)) && (
         <div className="flex justify-center gap-3 pt-4 mt-4">
-          {user && (user.role === "business" || user.role == "staff") && (
+          {user && (user.role === "business" || user.role == "staff") && handleDeleteAppointment && (
             <Button
               variant="outline"
               onClick={handleDeleteAppointment}
@@ -159,9 +171,21 @@ const ViewDetails = ({
               {t("Delete")}
             </Button>
           )}
-          <Button onClick={handleEditAppointment} iconType="edit">
-            {t("Edit")}
-          </Button>
+          {selectedAppointment.status !== "cancelled" && handleCancelAppointment && (
+            <Button
+              variant="outline"
+              onClick={handleCancelAppointment}
+              iconType="delete"
+              className="border-red-500 text-red-500 hover:bg-red-500 hover:text-white"
+            >
+              {t("Cancel Appointment")}
+            </Button>
+          )}
+          {user?.role !== "personal" && handleEditAppointment && (
+            <Button onClick={handleEditAppointment} iconType="edit">
+              {t("Edit")}
+            </Button>
+          )}
         </div>
       )}
     </>
