@@ -1859,5 +1859,15 @@
   "Hi! I'd like to book an appointment for a haircut and color this Saturday.": "Здравейте! Искам да запиша час за подстригване и боядисване тази събота.",
   "I'll be 10 minutes late for my first appointment. Sorry!": "Ще закъснея с 10 минути за първия си час. Извинявайте!",
   "This page is only available to {{roles}} accounts.": "Тази страница е достъпна само за акаунти с права: {{roles}}.",
-  "{{featureName}} is available on {{plans}} plans.": "{{featureName}} е налична в планове: {{plans}}."
+  "{{featureName}} is available on {{plans}} plans.": "{{featureName}} е налична в планове: {{plans}}.",
+  "Appointment": "Час",
+  "Staff Phone": "Телефон на служителя",
+  "View and manage your appointments": "Вижте и управлявайте часовете си",
+  "Chat with businesses": "Говорете с бизнеси",
+  "Update your profile info": "Актуализирайте информацията в профила си",
+  "Appointments Dynamics": "Динамика на часовете",
+  "Spent Momentum": "Похарчени пари",
+  "You can book new appointments through business pages.": "Можете да записвате нови часове през бизнес страниците.",
+  "No History Yet": "Няма история",
+  "Once you book and complete appointments, your performance and spending charts will appear here.": "След като запишете и завършите часовете си, вашите графики за ефективност и разходи ще се появят тук."
 }

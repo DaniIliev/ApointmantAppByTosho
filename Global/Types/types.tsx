@@ -59,6 +59,7 @@ export interface Appointment {
     _id: string;
     firstName: string;
     lastName: string;
+    phone?: string;
   };
   location?: {
     _id: string;

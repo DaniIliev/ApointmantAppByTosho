@@ -13,6 +13,7 @@ import {
   groupAppointments,
   GroupedAppointment,
 } from "@/Global/Utils/groupingUtils";
+import { useAuthContext } from "@/context/AuthContext";
 import "./DesktopCalendar.css";
 
 interface DesktopCalendarProps {
@@ -52,6 +53,7 @@ export default function DesktopCalendar({
   onSelectAppointment,
 }: DesktopCalendarProps) {
   const { t } = useTranslation();
+  const { user } = useAuthContext();
   const [currentDate, setCurrentDate] = useState(new Date());
   const [calendarView, setCalendarView] = useState<"week" | "month">("week");
   const [searchTerm, setSearchTerm] = useState("");
@@ -73,7 +75,9 @@ export default function DesktopCalendar({
     if (!term) return groupAppointments(filteredByDate);
     const filteredTerm = filteredByDate.filter(
       (apt) =>
-        apt.clientName?.toLowerCase().includes(term) ||
+        (user?.role === "personal"
+          ? apt.businessName?.toLowerCase().includes(term)
+          : apt.clientName?.toLowerCase().includes(term)) ||
         apt.serviceName?.toLowerCase().includes(term) ||
         apt.status?.toLowerCase().includes(term),
     );
@@ -155,7 +159,9 @@ export default function DesktopCalendar({
 
         {/* Client */}
         {detailLevel >= 3 && !isGroup && (
-          <div className="desktop-calendar__apt-client">{mainApt.clientName}</div>
+          <div className="desktop-calendar__apt-client">
+            {user?.role === "personal" ? mainApt.businessName : mainApt.clientName}
+          </div>
         )}
 
         {/* Group badge */}

@@ -15,7 +15,6 @@ import {
   TrendingUp,
   UserRound,
   Wallet,
-  MessageCircle,
 } from "lucide-react";
 
 import ProtectedRoute from "@/components/guards/ProtectedRoute";
@@ -88,7 +87,6 @@ function HomePageContent() {
   const isTeamRole = staffAndBusinessRoles.includes(
     user?.role as (typeof staffAndBusinessRoles)[number],
   );
-  const shouldFetchData = isTeamRole || user?.role === "personal";
 
   useEffect(() => {
     setPageTitle(t("Home"));
@@ -106,7 +104,7 @@ function HomePageContent() {
     let mounted = true;
 
     const fetchHomeData = async () => {
-      if (!shouldFetchData) {
+      if (!isTeamRole) {
         if (mounted) {
           setAppointments([]);
           setIsLoading(false);
@@ -137,7 +135,7 @@ function HomePageContent() {
     return () => {
       mounted = false;
     };
-  }, [shouldFetchData]);
+  }, [isTeamRole]);
 
   const quickActions: QuickAction[] = useMemo(() => {
     if (isTeamRole) {
@@ -163,29 +161,6 @@ function HomePageContent() {
       ];
     }
 
-    if (user?.role === "personal") {
-      return [
-        {
-          label: t("Dashboard"),
-          description: t("View and manage your appointments"),
-          href: "/dashboard",
-          icon: <CalendarDays className="h-4 w-4" />,
-        },
-        {
-          label: t("Messages"),
-          description: t("Chat with businesses"),
-          href: "/chat",
-          icon: <MessageCircle className="h-4 w-4" />,
-        },
-        {
-          label: t("My Profile"),
-          description: t("Update your profile info"),
-          href: "/profile",
-          icon: <UserRound className="h-4 w-4" />,
-        },
-      ];
-    }
-
     return [
       {
         label: t("Explore Businesses"),
@@ -206,7 +181,7 @@ function HomePageContent() {
         icon: <TrendingUp className="h-4 w-4" />,
       },
     ];
-  }, [isTeamRole, user?.role, t]);
+  }, [isTeamRole]);
 
   const stats = useMemo(() => {
     const now = new Date();
@@ -459,7 +434,7 @@ function HomePageContent() {
             <div>
               <div className="flex items-start justify-between">
                 <CardTitle className="text-foreground text-sm font-semibold">
-                  {user?.role === "personal" ? t("Appointments Dynamics") : t("Booking Dynamics")}
+                  {t("Booking Dynamics")}
                 </CardTitle>
               </div>
               <CardDescription className="text-xs mt-1">
@@ -521,7 +496,7 @@ function HomePageContent() {
             <div>
               <div className="flex items-start justify-between">
                 <CardTitle className="text-foreground text-sm font-semibold">
-                  {user?.role === "personal" ? t("Spent Momentum") : t("Revenue Momentum")}
+                  {t("Revenue Momentum")}
                 </CardTitle>
               </div>
               <CardDescription className="text-xs mt-1">
@@ -644,7 +619,7 @@ function HomePageContent() {
                   >
                     <div>
                       <p className="flex items-center gap-2 font-semibold text-foreground">
-                        {user?.role === "personal" ? appointment.businessName : appointment.clientName}
+                        {appointment.clientName}
                         <StatusChip status={status} />
                       </p>
                       <p className="text-sm text-muted-foreground">
@@ -664,14 +639,10 @@ function HomePageContent() {
                   {t("Your schedule is clear")} 
                 </p>
                 <p className="text-sm text-muted-foreground">
-                  {user?.role === "personal"
-                    ? t("You can book new appointments through business pages.")
-                    : t("Add a new appointment from Dashboard to get started.")}
+                  {t("Add a new appointment from Dashboard to get started.")}
                 </p>
-                <Link href={user?.role === "personal" ? "/for-business" : "/dashboard"} className="mt-4 inline-block">
-                  <Button variant="outline">
-                    {user?.role === "personal" ? t("Explore Businesses") : t("Go to Dashboard")}
-                  </Button>
+                <Link href="/dashboard" className="mt-4 inline-block">
+                  <Button variant="outline">{t("Go to Dashboard")}</Button>
                 </Link>
               </div>
             )}

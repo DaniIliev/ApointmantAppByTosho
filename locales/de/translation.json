@@ -1828,5 +1828,15 @@
   "Hi! I'd like to book an appointment for a haircut and color this Saturday.": "Hallo! Ich möchte für diesen Samstag einen Termin zum Haareschneiden und Färben buchen.",
   "I'll be 10 minutes late for my first appointment. Sorry!": "Ich werde 10 Minuten zu spät zu meinem ersten Termin kommen. Entschuldigung!",
   "This page is only available to {{roles}} accounts.": "Diese Seite ist nur für {{roles}}-Konten verfügbar.",
-  "{{featureName}} is available on {{plans}} plans.": "{{featureName}} ist in {{plans}}-Plänen verfügbar."
+  "{{featureName}} is available on {{plans}} plans.": "{{featureName}} ist in {{plans}}-Plänen verfügbar.",
+  "Appointment": "Termin",
+  "Staff Phone": "Telefon des Personals",
+  "View and manage your appointments": "Termine einsehen und verwalten",
+  "Chat with businesses": "Mit Unternehmen chatten",
+  "Update your profile info": "Profilinformationen aktualisieren",
+  "Appointments Dynamics": "Termin-Dynamik",
+  "Spent Momentum": "Ausgegebene Dynamik",
+  "You can book new appointments through business pages.": "Sie können neue Termine über Geschäftsseiten buchen.",
+  "No History Yet": "Noch kein Verlauf",
+  "Once you book and complete appointments, your performance and spending charts will appear here.": "Sobald Sie Termine gebucht und abgeschlossen haben, erscheinen hier Ihre Leistungs- und Ausgabengrafiken."
 }

@@ -26,6 +26,7 @@ interface DashboardGridProps {
   ) => void;
   dateFrom?: string;
   dateTo?: string;
+  readOnly?: boolean;
 }
 
 export function DashboardGrid({
@@ -36,6 +37,7 @@ export function DashboardGrid({
   onLayoutChange,
   dateFrom,
   dateTo,
+  readOnly = false,
 }: DashboardGridProps) {
   const { t } = useTranslation();
   const [isMobile, setIsMobile] = React.useState(false);
@@ -236,11 +238,11 @@ export function DashboardGrid({
         compactType="vertical"
         preventCollision={false}
         useCSSTransforms={true}
-        isDraggable={true}
-        isResizable={true}
+        isDraggable={!readOnly}
+        isResizable={!readOnly}
         containerPadding={[containerPadding, containerPadding]}
         margin={[marginSize, marginSize]}
-        draggableHandle=".draggable-handle"
+        draggableHandle={readOnly ? undefined : ".draggable-handle"}
       >
         {items.map((item) =>
           item.type === "kpi" ? (
@@ -248,16 +250,20 @@ export function DashboardGrid({
               key={item.id}
               className="rounded-lg shadow-md hover:shadow-lg transition-shadow overflow-hidden flex flex-col relative z-10 border border-primary/20"
             >
-              <div className="absolute top-2 left-1/2 -translate-x-1/2 z-20 text-slate-300 hover:text-primary cursor-grab active:cursor-grabbing draggable-handle">
-                <GripHorizontal className="w-5 h-4" />
-              </div>
-              <div className="absolute top-2 right-2 z-20">
-                <CustomTooltip
-                  onClick={() => onRemoveItem(item.id)}
-                  tooltipText={t("Remove KPI")}
-                  icon={<Trash2 className="w-5 h-5 text-red-400" />}
-                />
-              </div>
+              {!readOnly && (
+                <div className="absolute top-2 left-1/2 -translate-x-1/2 z-20 text-slate-300 hover:text-primary cursor-grab active:cursor-grabbing draggable-handle">
+                  <GripHorizontal className="w-5 h-4" />
+                </div>
+              )}
+              {!readOnly && (
+                <div className="absolute top-2 right-2 z-20">
+                  <CustomTooltip
+                    onClick={() => onRemoveItem(item.id)}
+                    tooltipText={t("Remove KPI")}
+                    icon={<Trash2 className="w-5 h-5 text-red-400" />}
+                  />
+                </div>
+              )}
 
               <div className="flex-1 overflow-hidden flex items-center justify-center w-full h-full">
                 <div className="w-full h-full rounded-lg bg-white dark:bg-gray-900 border-primary/20 text-center flex flex-col items-center justify-center">
@@ -302,30 +308,34 @@ export function DashboardGrid({
                 }
               }}
             >
-              <div className="absolute top-2 left-1/2 -translate-x-1/2 z-30 text-slate-300 hover:text-primary cursor-grab active:cursor-grabbing draggable-handle">
-                <GripHorizontal className="w-5 h-4" />
-              </div>
+              {!readOnly && (
+                <div className="absolute top-2 left-1/2 -translate-x-1/2 z-30 text-slate-300 hover:text-primary cursor-grab active:cursor-grabbing draggable-handle">
+                  <GripHorizontal className="w-5 h-4" />
+                </div>
+              )}
               {/* Chart content with header overlay */}
               <div className="flex-1 p-3 bg-white dark:bg-slate-800 flex flex-col relative border-primary/20">
                 {/* Header overlay */}
-                <div className="absolute top-1.5 left-7 right-5 z-30 flex items-center justify-between">
-                  <h3 className="font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent text-sm font-semibold text-slate-900 truncate flex-1 draggable-handle cursor-grab active:cursor-grabbing">
+                <div className={`absolute top-1.5 right-5 z-30 flex items-center justify-between ${readOnly ? "left-3" : "left-7"}`}>
+                  <h3 className={`font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent text-sm font-semibold text-slate-900 truncate flex-1 ${!readOnly ? "draggable-handle cursor-grab active:cursor-grabbing" : ""}`}>
                     {item.title}
                   </h3>
-                  <div className="flex items-center gap-2 ml-2">
-                    <ChartActionsMenu
-                      itemId={item.id}
-                      isOpen={openMenu === item.id}
-                      onToggle={(id) =>
-                        setOpenMenu(openMenu === id ? null : id)
-                      }
-                      onEdit={handleEditChart}
-                      onDelete={handleDeleteChart}
-                      onToggleSlider={handleToggleSlider}
-                      showSlider={showSlider[item.id] || false}
-                      item={item as ChartConfig}
-                    />
-                  </div>
+                  {!readOnly && (
+                    <div className="flex items-center gap-2 ml-2">
+                      <ChartActionsMenu
+                        itemId={item.id}
+                        isOpen={openMenu === item.id}
+                        onToggle={(id) =>
+                          setOpenMenu(openMenu === id ? null : id)
+                        }
+                        onEdit={handleEditChart}
+                        onDelete={handleDeleteChart}
+                        onToggleSlider={handleToggleSlider}
+                        showSlider={showSlider[item.id] || false}
+                        item={item as ChartConfig}
+                      />
+                    </div>
+                  )}
                 </div>
 
                 {/* Chart */}
