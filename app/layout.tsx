@@ -27,14 +27,19 @@ export const viewport: Viewport = {
 };
 
 import { LocationProvider } from "@/context/LocationContext";
+import { headers } from "next/headers";
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const headersList = await headers();
+  const acceptLang = headersList.get("accept-language") || "";
+  const lang = acceptLang.toLowerCase().includes("bg") ? "bg" : "en";
+
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang={lang} suppressHydrationWarning>
       <head>
         <style>{`
 html {

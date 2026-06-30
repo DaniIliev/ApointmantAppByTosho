@@ -19,9 +19,8 @@ const resources = {
 
 // Determine initial language (persisted in localStorage if available)
 const initialLanguage =
-  typeof window !== "undefined" &&
-  (localStorage.getItem("appLocale") || navigator.language?.slice(0, 2))
-    ? localStorage.getItem("appLocale") || navigator.language?.slice(0, 2)
+  typeof window !== "undefined"
+    ? localStorage.getItem("appLocale") || (navigator.language?.slice(0, 2) === "bg" ? "bg" : "en")
     : "en";
 
 // Fallback to 'en' if detected language not part of resources
