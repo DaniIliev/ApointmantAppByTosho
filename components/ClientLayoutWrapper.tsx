@@ -53,8 +53,16 @@ export default function ClientLayoutWrapper({
   useEffect(() => {
     const stored =
       typeof window !== "undefined" ? localStorage.getItem("appLocale") : null;
-    if (stored && stored !== i18n.language) {
-      i18n.changeLanguage(stored);
+    if (stored) {
+      if (stored !== i18n.language) {
+        i18n.changeLanguage(stored);
+      }
+    } else {
+      const browserLang = navigator.language?.slice(0, 2);
+      const defaultLang = browserLang === "bg" ? "bg" : "en";
+      if (defaultLang !== i18n.language) {
+        i18n.changeLanguage(defaultLang);
+      }
     }
   }, []);
 
